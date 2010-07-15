@@ -87,6 +87,10 @@ import re
 import urlparse
 
 
+__author__ = 'Alec Thomas <alec@swapoff.org>'
+__version__ = '0.1'
+
+
 class Error(Exception):
     """Base validation exception."""
 
