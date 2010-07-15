@@ -100,8 +100,8 @@ class SchemaError(Error):
 
 
 class Invalid(Error):
-    """
-    """
+    """The data was invalid."""
+
     def __init__(self, message, path=None):
         Exception.__init__(self, message)
         self.path = path or []

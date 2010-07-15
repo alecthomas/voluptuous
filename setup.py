@@ -6,7 +6,7 @@ except ImportError:
 import sys
 sys.path.insert(0, '.')
 version = __import__('voluptuous').__version__
-long_description = open('README').read()
+long_description = open('README.rst').read()
 description = long_description.splitlines()[0].strip()
 
 
