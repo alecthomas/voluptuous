@@ -91,6 +91,17 @@ __author__ = 'Alec Thomas <alec@swapoff.org>'
 __version__ = '0.1'
 
 
+class Undefined(object):
+    def __nonzero__(self):
+        return False
+
+    def __repr__(self):
+        return '...'
+
+
+UNDEFINED = Undefined()
+
+
 class Error(Exception):
     """Base validation exception."""
 
@@ -100,15 +111,24 @@ class SchemaError(Error):
 
 
 class Invalid(Error):
-    """The data was invalid."""
+    """The data was invalid.
+
+    :attr msg: The error message.
+    :attr path: The path to the error, as a list of keys in the source data.
+    """
 
     def __init__(self, message, path=None):
         Exception.__init__(self, message)
         self.path = path or []
 
+    @property
+    def msg(self):
+        return self.args[0]
+
     def __str__(self):
-        return Exception.__str__(self) + (' near %r' % '/'.join(self.path)
-                                          if self.path else '')
+        path = ' @ data[%s]' % ']['.join(map(repr, self.path)) \
+                if self.path else ''
+        return Exception.__str__(self) + path
 
 
 class Schema(object):
@@ -120,15 +140,6 @@ class Schema(object):
     Nodes can be values, in which case a direct comparison is used, types,
     in which case an isinstance() check is performed, or callables, which will
     validate and optionally convert the value.
-
-    >>> validate = Schema({'one': {'two': 'three', 'four': 'five'}})
-    >>> try:
-    ...   validate({'one': {'four': 'six'}})
-    ... except Invalid, e:
-    ...   print e
-    ...   print e.path
-    not a valid value near 'one/four'
-    ['one', 'four']
     """
 
     def __init__(self, schema):
@@ -138,24 +149,18 @@ class Schema(object):
         return self.validate([], self.schema, data)
 
     def validate(self, path, schema, data):
-        if type(schema) is type:
+        type_ = type(schema)
+        if type_ is type:
             type_ = schema
-        else:
-            type_ = type(schema)
-
-        try:
-            if type_ is dict:
-                return self.validate_dict([], schema, data)
-            elif type_ is list:
-                return self.validate_list([], schema, data)
-            elif type_ in (int, long, str, unicode, float, complex, object) \
-                    or callable(schema):
-                return self.validate_scalar(schema, data)
-            raise SchemaError('unknown data type %r' % type_)
-        except AssertionError, e:
-            raise Invalid(str(e), path)
-        except Invalid, e:
-            raise Invalid(e.args[0], path + e.path)
+        if type_ is dict:
+            return self.validate_dict(path, schema, data)
+        elif type_ is list:
+            return self.validate_list(path, schema, data)
+        elif type_ in (int, long, str, unicode, float, complex, object) \
+                or callable(schema):
+            return self.validate_scalar(path, schema, data)
+        raise SchemaError('unsupported schema data type %r' %
+                          type(schema).__name__)
 
     def validate_dict(self, path, schema, data):
         """Validate a dictionary.
@@ -177,14 +182,14 @@ class Schema(object):
             >>> validate({'one': 'three'})
             Traceback (most recent call last):
             ...
-            Invalid: not a valid value near 'one'
+            Invalid: not a valid value for dictionary value @ data['one']
 
         An invalid key:
 
             >>> validate({'two': 'three'})
             Traceback (most recent call last):
             ...
-            Invalid: not a valid key
+            Invalid: not a valid value for dictionary key @ data['two']
 
         Validation function, in this case the "int" type:
 
@@ -202,7 +207,7 @@ class Schema(object):
             >>> validate({'10': 'twenty'})
             Traceback (most recent call last):
             ...
-            Invalid: expected int value near '10'
+            Invalid: not a valid value for dictionary key @ data['10']
 
         Wrap them in the coerce() function to achieve this:
 
@@ -213,39 +218,49 @@ class Schema(object):
 
         (This is to avoid unexpected surprises.)
         """
-        assert isinstance(data, dict), 'expected a dictionary'
+        if not isinstance(data, dict):
+            raise Invalid('expected a dictionary', path)
 
         # If the schema dictionary is empty we accept any data dictionary.
         if not schema:
             return data
 
-        key_schema = value_schema = None
-        for key in schema:
-            if type(key) is type or callable(key):
-                if key_schema is not None:
-                    raise SchemaError('only one key in a schema dictionary '
-                                      'may be a validator')
-                key_schema = key
-                value_schema = schema[key]
-
         out = {}
+        invalid = None
+        error = None
         for key, value in data.iteritems():
             key_path = path + [key]
-            if key in schema:
-                value = self.validate(key_path, schema[key], value)
+            for skey, svalue in schema.iteritems():
+                try:
+                    new_key = self.validate(key_path, skey, key)
+                except Invalid, e:
+                    if len(e.path) > len(key_path):
+                        raise
+                    if not error or len(e.path) > len(error.path):
+                        error = e
+                    invalid = e.msg + ' for dictionary key'
+                    continue
+                # Backtracking is not performed after a key is selected, so if
+                # the value is invalid we immediately throw an exception.
+                try:
+                    out[new_key] = self.validate(key_path, svalue, value)
+                    break
+                except Invalid, e:
+                    if len(e.path) > len(key_path):
+                        raise
+                    raise Invalid(e.msg + ' for dictionary value', e.path)
             else:
-                if key_schema is None:
-                    raise Invalid('not a valid key')
-                key = self.validate(key_path, key_schema, key)
-                value = self.validate(key_path, value_schema, value)
-            out[key] = value
+                if invalid:
+                    if len(error.path) > len(path) + 1:
+                        raise error
+                    else:
+                        raise Invalid(invalid, key_path)
         return out
 
     def validate_list(self, path, schema, data):
         """Validate a list.
 
-        A list is, despite the name, a *set* of valid values, and at most one
-        optional validator.  Ordering is not enforced by the schema.
+        A list is a sequence of valid values or validators tried in order.
 
         >>> validator = Schema(['one', 'two', int])
         >>> validator(['one'])
@@ -253,47 +268,106 @@ class Schema(object):
         >>> validator([3.5])
         Traceback (most recent call last):
         ...
-        Invalid: expected int value
+        Invalid: invalid list value @ data[0]
         >>> validator([1])
         [1]
         """
-        assert isinstance(data, list), 'expected a list'
+        if not isinstance(data, list):
+            raise Invalid('expected a list', path)
 
         # Empty list schema, allow any data list.
         if not schema:
             return data
 
-        value_schema = None
-        for value in schema:
-            if type(value) is type or callable(value):
-                if value_schema is not None:
-                    raise SchemaError('only one value in a schema list may be '
-                                      'a validator')
-                value_schema = value
-
-        schema = set(schema)
-
         out = []
+        invalid = None
+        index_path = UNDEFINED
         for i, value in enumerate(data):
-            if value not in schema:
-                value = self.validate(path, value_schema, value)
-            out.append(value)
+            index_path = path + [i]
+            for s in schema:
+                try:
+                    out.append(self.validate(index_path, s, value))
+                    break
+                except Invalid, e:
+                    if len(e.path) > len(index_path):
+                        raise
+                    invalid = e
+            else:
+                if len(invalid.path) > len(index_path):
+                    raise invalid
+                else:
+                    raise Invalid('invalid list value', index_path)
         return out
 
     @staticmethod
-    def validate_scalar(schema, data):
+    def validate_scalar(path, schema, data):
         """A scalar value.
 
         The schema can either be a value or a type.
+
+        >>> Schema.validate_scalar([], int, 1)
+        1
+        >>> Schema.validate_scalar([], float, '1')
+        Traceback (most recent call last):
+        ...
+        Invalid: expected float
+
+        Callables have
+        >>> Schema.validate_scalar([], lambda v: float(v), '1')
+        1.0
+
+        As a convenience, ValueError's are trapped:
+
+        >>> Schema.validate_scalar([], lambda v: float(v), 'a')
+        Traceback (most recent call last):
+        ...
+        Invalid: not a valid value
         """
         if type(schema) is type:
-            assert isinstance(data, schema), \
-                    'expected %s value' % schema.__name__
+            if not isinstance(data, schema):
+                raise Invalid('expected %s' % schema.__name__, path)
         elif callable(schema):
-            return schema(data)
+            try:
+                return schema(data)
+            except ValueError, e:
+                raise Invalid('not a valid value', path)
+            except Invalid, e:
+                raise Invalid(e.msg, path + e.path)
         else:
-            assert data == schema, 'not a valid value'
+            if data != schema:
+                raise Invalid('not a valid value', path)
         return data
+
+
+def msg(schema, msg):
+    """Report a message if a schema fails to validate.
+
+    >>> validate = Schema(
+    ...   msg(['one', 'two', int],
+    ...       'should be one of "one", "two" or an integer'))
+    >>> validate(['three'])
+    Traceback (most recent call last):
+    ...
+    Invalid: should be one of "one", "two" or an integer
+
+    Messages are only applied to invalid direct descendants of the schema:
+
+    >>> validate = Schema(msg([['one', 'two', int]], 'not okay!'))
+    >>> validate([['three']])
+    Traceback (most recent call last):
+    ...
+    Invalid: invalid list value @ data[0][0]
+    """
+    def f(v):
+        try:
+            return schema(v)
+        except Invalid, e:
+            if len(e.path) > 1:
+                raise e
+            else:
+                raise Invalid(msg)
+    schema = Schema(schema)
+    return f
 
 
 def coerce(type, msg=None):
@@ -306,7 +380,7 @@ def coerce(type, msg=None):
         try:
             return type(v)
         except ValueError:
-            raise Invalid(msg or ('expected %s type' % type.__name__))
+            raise Invalid(msg or ('expected %s' % type.__name__))
     return f
 
 
@@ -359,6 +433,14 @@ def boolean(msg=None):
 
     Accepted values are 1, true, yes, on, enable, and their negatives.
     Non-string values are cast to bool.
+
+    >>> validate = Schema(boolean())
+    >>> validate(True)
+    True
+    >>> validate('moo')
+    Traceback (most recent call last):
+    ...
+    Invalid: expected boolean
     """
     def f(v):
         try:
@@ -381,19 +463,23 @@ def any(*validators, **kwargs):
     :param msg: Message to deliver to user if validation fails.
     :returns: Return value of the first validator that passes.
 
-    >>> validate = Schema(any('true', 'false', coerce(bool)))
+    >>> validate = Schema(any('true', 'false', all(any(int, bool), coerce(bool))))
     >>> validate('true')
     'true'
     >>> validate(1)
     True
+    >>> validate('moo')
+    Traceback (most recent call last):
+    ...
+    Invalid: no valid value found
     """
     msg = kwargs.pop('msg', None)
 
     def f(v):
         for validator in validators:
             try:
-                return Schema.validate_scalar(validator, v)
-            except (Invalid, AssertionError):
+                return Schema.validate_scalar([], validator, v)
+            except Invalid:
                 pass
         else:
             raise Invalid(msg or 'no valid value found')
@@ -416,9 +502,9 @@ def all(*validators, **kwargs):
     def f(v):
         try:
             for validator in validators:
-                v = Schema.validate_scalar(validator, v)
-        except (AssertionError, Invalid), e:
-            raise Invalid(msg or str(e))
+                v = Schema.validate_scalar([], validator, v)
+        except Invalid, e:
+            raise Invalid(msg or e.msg)
         return v
     return f
 
@@ -444,7 +530,8 @@ def match(pattern, msg=None):
         pattern = re.compile(pattern)
 
     def f(v):
-        assert pattern.match(v), (msg or 'does not match regular expression')
+        if not pattern.match(v):
+            raise Invalid(msg or 'does not match regular expression')
         return v
     return f
 
