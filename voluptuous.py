@@ -563,6 +563,31 @@ def url(msg=None):
     return f
 
 
+def range(min=None, max=None, msg=None):
+    """Limit a value to a range.
+
+    Either min or max may be omitted.
+    """
+    def f(v):
+        if min is not None and v < min:
+            raise Invalid(msg or 'value is too small')
+        if max is not None and v > max:
+            raise Invalid(msg or 'value is too large')
+        return v
+    return f
+
+
+def length(min=None, max=None, msg=None):
+    """The length of a value must be in a certain range."""
+    def f(v):
+        if min is not None and len(v) < min:
+            raise Invalid(msg or 'length of value is too short')
+        if max is not None and len(v) > max:
+            raise Invalid(msg or 'length of value is too long')
+        return v
+    return f
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
