@@ -8,7 +8,6 @@
 #
 # Author: Alec Thomas <alec@swapoff.org>
 
-
 """Schema validation for Python data structures.
 
 Given eg. a nested data structure like this:
@@ -88,7 +87,7 @@ import urlparse
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.1'
+__version__ = '0.2'
 
 
 class Undefined(object):
@@ -463,7 +462,8 @@ def any(*validators, **kwargs):
     :param msg: Message to deliver to user if validation fails.
     :returns: Return value of the first validator that passes.
 
-    >>> validate = Schema(any('true', 'false', all(any(int, bool), coerce(bool))))
+    >>> validate = Schema(any('true', 'false',
+    ...                       all(any(int, bool), coerce(bool))))
     >>> validate('true')
     'true'
     >>> validate(1)
