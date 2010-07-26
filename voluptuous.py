@@ -142,6 +142,10 @@ class Schema(object):
     """
 
     def __init__(self, schema):
+        """Create a new Schema.
+
+        :param schema: Validation schema. See :module:`voluptuous` for details.
+        """
         self.schema = schema
 
     def __call__(self, data):
@@ -227,18 +231,22 @@ class Schema(object):
         out = {}
         invalid = None
         error = None
+        extra = None
         for key, value in data.iteritems():
             key_path = path + [key]
             for skey, svalue in schema.iteritems():
-                try:
-                    new_key = self.validate(key_path, skey, key)
-                except Invalid, e:
-                    if len(e.path) > len(key_path):
-                        raise
-                    if not error or len(e.path) > len(error.path):
-                        error = e
-                    invalid = e.msg + ' for dictionary key'
-                    continue
+                if skey is extra:
+                    new_key = key
+                else:
+                    try:
+                        new_key = self.validate(key_path, skey, key)
+                    except Invalid, e:
+                        if len(e.path) > len(key_path):
+                            raise
+                        if not error or len(e.path) > len(error.path):
+                            error = e
+                        invalid = e.msg + ' for dictionary key'
+                        continue
                 # Backtracking is not performed after a key is selected, so if
                 # the value is invalid we immediately throw an exception.
                 try:
@@ -338,8 +346,30 @@ class Schema(object):
         return data
 
 
+class marker(object):
+    """Mark nodes for special treatment."""
+
+    def __init__(self, schema):
+        self.schema = schema
+
+    def __call__(self, v):
+        return Schema.validate_scalar([], self.schema, v)
+
+
+class optional(marker):
+    """Mark a node in the schema as optional."""
+
+
+class required(marker):
+    """Mark a node in the schema as being required."""
+
+
+# Allow keys in the data that are not present in the schema.
+extra = marker(UNDEFINED)
+
+
 def msg(schema, msg):
-    """Report a message if a schema fails to validate.
+    """Report a user-friendly message if a schema fails to validate.
 
     >>> validate = Schema(
     ...   msg(['one', 'two', int],

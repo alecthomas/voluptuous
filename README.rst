@@ -1,15 +1,53 @@
-Voluptuous, *despite* the name, is a Python data validation library.
+Voluptuous is a Python data validation library
+==============================================
+Voluptuous, *despite* the name, is a Python data validation library. It is
+primarily intended for validating data coming into Python from JSON, YAML, etc.
 
-Voluptuous has two goals:
+It has three goals:
 
-1. Support complex data structures.
-2. Provide useful error messages.
+1. Simplicity.
+2. Support complex data structures.
+3. Provide useful error messages.
 
-Schemas are defined as simple Python nested data structures consisting of
-dictionaries, lists and scalars. Each node in the input schema is pattern
-matched against corresponding nodes in the input data.
+Show me an example
+------------------
+If we were trying to implement Twitter's `user search API
+<http://apiwiki.twitter.com/Twitter-REST-API-Method:-users-search>_` we might
+use a schema like this:
 
-Here's an example schema:
+  >>> from voluptuous import Schema, required, all, length, range
+  >>> schema = Schema({
+  ...   required('q'): all(str, length(min=1)),
+  ...   'per_page': all(int, range(max=20)),
+  ...   'page': int,
+  ... })
+
+This schema enforces the interface defined in Twitter's documentation.
+"per_page" is an integer no greater than 20. "page" is an integer.
+
+  >>> schema({'q': ''})
+  Traceback (most recent call last):
+  ...
+  Invalid: length of value is too short for dictionary value @ data['q']
+  
+
+Why Voluptuous over another validation library?
+-----------------------------------------------
+Most existing Python validation libraries are oriented towards validating HTML
+forms. Voluptuous can be used for this case, but is primarily intended for
+validating complex data structures, such as for REST API calls.
+
+Not all libraries are tied to form validation. Some, such as `Validino
+<http://code.google.com/p/validino/>_`, support arbitrary data structures, but
+have other issues.
+
+Defining schemas
+----------------
+Schemas are nested data structures consisting of dictionaries, lists and
+scalars. Each node in the input schema is pattern matched against corresponding
+nodes in the input data.
+
+Here is an example schema:
 
   >>> import voluptuous as V
   >>> settings = {
