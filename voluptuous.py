@@ -141,10 +141,14 @@ class Schema(object):
     validate and optionally convert the value.
     """
 
-    def __init__(self, schema):
+    def __init__(self, schema, allow_missing=True, allow_extra=True):
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
+        :param allow_missing: Allow keys in the schema to be missing in the
+                              data.
+        :param allow_extra: Allow keys in the data to be missing from the
+                            schema.
         """
         self.schema = schema
 
@@ -229,9 +233,9 @@ class Schema(object):
             return data
 
         out = {}
+        required_keys = set(key for key in schema if isinstance(key, required))
         invalid = None
         error = None
-        extra = None
         for key, value in data.iteritems():
             key_path = path + [key]
             for skey, svalue in schema.iteritems():
@@ -251,17 +255,27 @@ class Schema(object):
                 # the value is invalid we immediately throw an exception.
                 try:
                     out[new_key] = self.validate(key_path, svalue, value)
-                    break
                 except Invalid, e:
                     if len(e.path) > len(key_path):
                         raise
                     raise Invalid(e.msg + ' for dictionary value', e.path)
+
+                # Key and value okay, mark any required() fields as found.
+                required_keys.discard(skey)
+                break
             else:
                 if invalid:
                     if len(error.path) > len(path) + 1:
                         raise error
                     else:
                         raise Invalid(invalid, key_path)
+        if required_keys:
+            if len(required_keys) > 1:
+                message = 'required keys %s not provided' \
+                        % ', '.join(map(repr, map(str, required_keys)))
+            else:
+                message = 'required key %r not provided' % required_keys.pop()
+            raise Invalid(message, path)
         return out
 
     def validate_list(self, path, schema, data):
@@ -349,11 +363,23 @@ class Schema(object):
 class marker(object):
     """Mark nodes for special treatment."""
 
-    def __init__(self, schema):
+    def __init__(self, schema, msg=None):
         self.schema = schema
+        self.msg = msg
 
     def __call__(self, v):
-        return Schema.validate_scalar([], self.schema, v)
+        try:
+            return Schema.validate_scalar([], self.schema, v)
+        except Invalid, e:
+            if not self.msg or len(e.path) > 1:
+                raise
+            raise Invalid(self.msg)
+
+    def __str__(self):
+        return str(self.schema)
+
+    def __repr__(self):
+        return repr(self.schema)
 
 
 class optional(marker):
@@ -364,8 +390,9 @@ class required(marker):
     """Mark a node in the schema as being required."""
 
 
-# Allow keys in the data that are not present in the schema.
-extra = marker(UNDEFINED)
+def extra(_):
+    """Allow keys in the data that are not present in the schema."""
+    raise SchemaError('"extra" should never be called')
 
 
 def msg(schema, msg):
@@ -509,7 +536,9 @@ def any(*validators, **kwargs):
         for validator in validators:
             try:
                 return Schema.validate_scalar([], validator, v)
-            except Invalid:
+            except Invalid, e:
+                if len(e.path) > 1:
+                    raise
                 pass
         else:
             raise Invalid(msg or 'no valid value found')
@@ -597,12 +626,28 @@ def range(min=None, max=None, msg=None):
     """Limit a value to a range.
 
     Either min or max may be omitted.
+
+    :raises Invalid: If the value is outside the range and clamp=False.
     """
     def f(v):
         if min is not None and v < min:
-            raise Invalid(msg or 'value is too small')
+            raise Invalid(msg or 'value must be at least %s' % min)
         if max is not None and v > max:
-            raise Invalid(msg or 'value is too large')
+            raise Invalid(msg or 'value must be at most %s' % max)
+        return v
+    return f
+
+
+def clamp(min=None, max=None, msg=None):
+    """Clamp a value to a range.
+
+    Either min or max may be omitted.
+    """
+    def f(v):
+        if min is not None and v < min:
+            v = min
+        if max is not None and v > max:
+            v = max
         return v
     return f
 
@@ -611,9 +656,9 @@ def length(min=None, max=None, msg=None):
     """The length of a value must be in a certain range."""
     def f(v):
         if min is not None and len(v) < min:
-            raise Invalid(msg or 'length of value is too short')
+            raise Invalid(msg or 'length of value must be at least %s' % min)
         if max is not None and len(v) > max:
-            raise Invalid(msg or 'length of value is too long')
+            raise Invalid(msg or 'length of value must be at most %s' % max)
         return v
     return f
 

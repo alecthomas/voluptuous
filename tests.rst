@@ -43,7 +43,6 @@ Errors should be reported depth-first::
 
 Voluptuous supports validation when extra fields are present in the data::
 
-  >>> extra = None
   >>> schema = Schema({'one': 1, extra: object})
   >>> schema({'two': 'two', 'one': 2})
   {'two': 'two', 'one': 2}
@@ -52,4 +51,3 @@ Voluptuous supports validation when extra fields are present in the data::
   Traceback (most recent call last):
   ...
   Invalid: not a valid value for dictionary key @ data['two']
-
