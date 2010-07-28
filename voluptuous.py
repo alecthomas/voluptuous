@@ -141,18 +141,19 @@ class Schema(object):
     validate and optionally convert the value.
     """
 
-    def __init__(self, schema, allow_missing=True, allow_extra=True):
+    def __init__(self, schema, required=False, extra=False):
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
-        :param allow_missing: Allow keys in the schema to be missing in the
-                              data.
-        :param allow_extra: Allow keys in the data to be missing from the
-                            schema.
+        :param required: Keys defined in the schema must be in the data.
+        :param extra: Keys in the data need not have keys in the schema.
         """
         self.schema = schema
+        self.required = required
+        self.extra = extra
 
     def __call__(self, data):
+        """Validate data against this schema."""
         return self.validate([], self.schema, data)
 
     def validate(self, path, schema, data):
@@ -228,12 +229,12 @@ class Schema(object):
         if not isinstance(data, dict):
             raise Invalid('expected a dictionary', path)
 
-        # If the schema dictionary is empty we accept any data dictionary.
-        if not schema:
-            return data
-
         out = {}
-        required_keys = set(key for key in schema if isinstance(key, required))
+        required_keys = set(key for key in schema
+                            if
+                            (self.required and not isinstance(key, optional))
+                            or
+                            isinstance(key, required))
         invalid = None
         error = None
         for key, value in data.iteritems():
@@ -251,7 +252,7 @@ class Schema(object):
                             error = e
                         invalid = e.msg + ' for dictionary key'
                         continue
-                # Backtracking is not performed after a key is selected, so if
+                # Backtracking is not performed once a key is selected, so if
                 # the value is invalid we immediately throw an exception.
                 try:
                     out[new_key] = self.validate(key_path, svalue, value)
@@ -264,11 +265,16 @@ class Schema(object):
                 required_keys.discard(skey)
                 break
             else:
-                if invalid:
-                    if len(error.path) > len(path) + 1:
-                        raise error
+                if self.extra:
+                    out[key] = value
+                else:
+                    if invalid:
+                        if len(error.path) > len(path) + 1:
+                            raise error
+                        else:
+                            raise Invalid(invalid, key_path)
                     else:
-                        raise Invalid(invalid, key_path)
+                        raise Invalid('extra keys not allowed', key_path)
         if required_keys:
             if len(required_keys) > 1:
                 message = 'required keys %s not provided' \

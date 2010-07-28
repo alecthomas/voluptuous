@@ -173,18 +173,81 @@ This example also shows a common idiom where an optional human-readable
 message can be provided. This can vastly improve the usefulness of the
 resulting error messages.
 
-Optional/required dictionary keys
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-By default, all keys in a Schema must be present in the data. This behaviour
-isn't always desirable however, so it can be altered on a per-schema or per-key
-basis.
+.. _extra:
 
-/To mark all keys in a schema as optional./
+Extra dictionary keys
+~~~~~~~~~~~~~~~~~~~~~
+By default, extra keys found in the data that are not in the schema, will
+trigger exceptions::
+
+  >>> schema = Schema({})
+  >>> schema({1: 2})
+  Traceback (most recent call last):
+  ...
+  Invalid: extra keys not allowed @ data[1]
+
+This behaviour can be altered on a per-schema basis with ``Schema(..., extra=True)``::
+
+  >>> schema = Schema({}, extra=True)
+  >>> schema({1: 2})
+  {1: 2}
+
+It can also be overridden per-dictionary by using the catch-all marker token
+``extra`` as a key::
+
+  >>> from voluptuous import extra
+  >>> schema = Schema({1: {extra: object}})
+  >>> schema({1: {'foo': 'bar'}})
+  {1: {'foo': 'bar'}}
+
+
+Required dictionary keys
+~~~~~~~~~~~~~~~~~~~~~~~~
+By default, keys in the schema are not required to be in the data::
+
+  >>> schema = Schema({1: 2, 3: 4})
+  >>> schema({3: 4})
+  {3: 4}
+
+Similarly to the behaviour of extra_... keys, this can be overridden
+per-schema::
+
+  >>> schema = Schema({1: 2, 3: 4}, required=True)
+  >>> schema({3: 4})
+  Traceback (most recent call last):
+  ...
+  Invalid: required key 1 not provided
+
+And also per-key with the marker token ``required(key)``::
+
+  >>> schema = Schema({required(1): 2, 3: 4})
+  >>> schema({3: 4})
+  Traceback (most recent call last):
+  ...
+  Invalid: required key 1 not provided
+  >>> schema({1: 2})
+  {1: 2}
+
+If a schema has ``required=True``, keys may be individually marked as optional
+using the marker token ``optional(key)``::
+
+  >>> from voluptuous import optional
+  >>> schema = Schema({1: 2, optional(3): 4}, required=True)
+  >>> schema({})
+  Traceback (most recent call last):
+  ...
+  Invalid: required key 1 not provided
+  >>> schema({1: 2})
+  {1: 2}
 
 Error reporting
 ---------------
-Each ``Invalid`` exception has an associated ``path`` attribute. This is the
-path in the data structure to our currently validating value. This is used
+Validators must throw an ``Invalid`` exception if invalid data is passed to
+them. All other exceptions are treated as errors in the validator and will not
+be caught.
+
+Each ``Invalid`` exception has an associated ``path`` attribute representing
+the path in the data structure to our currently validating value. This is used
 during error reporting, but also during matching to determine whether an error
 should be reported to the user or if the next match should be attempted. This
 is determined by comparing the depth of the path where the check is, to the
