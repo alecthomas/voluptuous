@@ -8,7 +8,7 @@ etc.
 It has three goals:
 
 1. Simplicity.
-2. Support complex data structures.
+2. Support for complex data structures.
 3. Provide useful error messages.
 
 .. contents:: Table of Contents
@@ -89,17 +89,6 @@ and goes a little further for completeness.
   >>> schema({'q': '#topic', 'page': 1})
   {'q': '#topic', 'page': 1}
 
-Why Voluptuous over another validation library?
------------------------------------------------
-Most existing Python validation libraries are oriented towards validating HTML
-forms. Voluptuous can be used for this case, but is primarily intended for
-validating more complex data structures, such as those used in REST API calls.
-
-Not all libraries are tied to form validation. Some, such as `Validino
-<http://code.google.com/p/validino/>`_, support arbitrary data structures, but
-have other issues such as no longer being maintained, less than ideal error
-reporting, and so on.
-
 Defining schemas
 ----------------
 Schemas are nested data structures consisting of dictionaries, lists,
@@ -129,19 +118,6 @@ schema list is compared to each value in the input data::
   [1, 1, 1]
   >>> schema(['a', 1, 'string', 1, 'string'])
   ['a', 1, 'string', 1, 'string']
-
-Dictionaries
-~~~~~~~~~~~~
-Each key-value pair in a schema dictionary is validated against each key-value
-pair in the corresponding data dictionary::
-
-  >>> schema = Schema({1: 'one', 2: 'two'})
-  >>> schema({1: 'one'})
-  {1: 'one'}
-  >>> schema({3: 'three'})
-  Traceback (most recent call last):
-  ...
-  Invalid: not a valid value for dictionary key @ data[3]
 
 Validation functions
 ~~~~~~~~~~~~~~~~~~~~
@@ -175,10 +151,23 @@ resulting error messages.
 
 .. _extra:
 
+Dictionaries
+~~~~~~~~~~~~
+Each key-value pair in a schema dictionary is validated against each key-value
+pair in the corresponding data dictionary::
+
+  >>> schema = Schema({1: 'one', 2: 'two'})
+  >>> schema({1: 'one'})
+  {1: 'one'}
+  >>> schema({3: 'three'})
+  Traceback (most recent call last):
+  ...
+  Invalid: not a valid value for dictionary key @ data[3]
+
 Extra dictionary keys
-~~~~~~~~~~~~~~~~~~~~~
-By default, extra keys found in the data that are not in the schema, will
-trigger exceptions::
+`````````````````````
+By default any additional keys in the data, not in the schema will trigger
+exceptions::
 
   >>> schema = Schema({})
   >>> schema({1: 2})
@@ -200,17 +189,15 @@ It can also be overridden per-dictionary by using the catch-all marker token
   >>> schema({1: {'foo': 'bar'}})
   {1: {'foo': 'bar'}}
 
-
 Required dictionary keys
-~~~~~~~~~~~~~~~~~~~~~~~~
+````````````````````````
 By default, keys in the schema are not required to be in the data::
 
   >>> schema = Schema({1: 2, 3: 4})
   >>> schema({3: 4})
   {3: 4}
 
-Similarly to the behaviour of extra_... keys, this can be overridden
-per-schema::
+Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
 
   >>> schema = Schema({1: 2, 3: 4}, required=True)
   >>> schema({3: 4})
@@ -218,7 +205,7 @@ per-schema::
   ...
   Invalid: required key 1 not provided
 
-And also per-key with the marker token ``required(key)``::
+And per-key, with the marker token ``required(key)``::
 
   >>> schema = Schema({required(1): 2, 3: 4})
   >>> schema({3: 4})
@@ -239,6 +226,12 @@ using the marker token ``optional(key)``::
   Invalid: required key 1 not provided
   >>> schema({1: 2})
   {1: 2}
+  >>> schema({1: 2, 4: 5})
+  Traceback (most recent call last):
+  ...
+  Invalid: not a valid value for dictionary key @ data[4]
+  >>> schema({1: 2, 3: 4})
+  {1: 2, 3: 4}
 
 Error reporting
 ---------------
@@ -271,9 +264,40 @@ attempted::
   ...
   Invalid: invalid list value @ data[0][0]
 
-If we pass the data ``[6]``, the ``6`` is not a list type and so will not match
-the first element and recurse deeper. It will continue on to the second element,
-and succeed::
+If we pass the data ``[6]``, the ``6`` is not a list type and so will not
+recurse into the first element of the schema. Matching will continue on to the
+second element in the schema, and succeed::
 
   >>> schema([6])
   [6]
+
+Why use Voluptuous over another validation library?
+---------------------------------------------------
+**Validators are simple callables**
+  No need to subclass anything, just use a function.
+
+**Errors are simple exceptions.**
+  A validator can just ``raise Invalid(msg)`` and expect the user to get useful
+  messages.
+
+**Schemas are basic Python data structures.**
+  Should your data be a dictionary of integer keys to strings?  ``{int: str}``
+  does what you expect. List of integers, floats or strings? ``[int, float, str]``.
+
+**Designed from the ground up for validating more than just forms.**
+  Nested data structures are treated in the same way as any other type. Need a
+  list of dictionaries? ``[{}]``
+
+**Consistency.**
+  Types in the schema are checked as types. Values are compared as values.
+  Callables are called to validate. Simple.
+
+Other libraries and inspirations
+--------------------------------
+Voluptuous is heavily inspired by `Validino
+<http://code.google.com/p/validino/>`_, and to a lesser extent, `jsonvalidator
+<http://code.google.com/p/jsonvalidator/>`_ and `json_schema
+<http://blog.sendapatch.se/category/json_schema.html>`_.
+
+I greatly prefer the light-weight style promoted by these libraries to the
+complexity of libraries like FormEncode.
