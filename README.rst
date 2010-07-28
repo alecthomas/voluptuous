@@ -106,6 +106,19 @@ Literals in the schema are matched using normal equality checks::
   >>> schema('a string')
   'a string'
 
+Types
+~~~~~
+Types in the schema are matched by checking if the corresponding value is an
+instance of the type::
+
+  >>> schema = Schema(int)
+  >>> schema(1)
+  1
+  >>> schema('one')
+  Traceback (most recent call last):
+  ...
+  Invalid: expected int
+
 Lists
 ~~~~~
 Lists in the schema are treated as a set of valid values. Each element in the
@@ -121,7 +134,6 @@ schema list is compared to each value in the input data::
 
 Validation functions
 ~~~~~~~~~~~~~~~~~~~~
-
 Validators are simple callables that raise an ``Invalid`` exception when they
 encounter invalid data. The criteria for determining validity is entirely up to
 the implementation; it may check that a value is a valid username with
@@ -215,6 +227,8 @@ And per-key, with the marker token ``required(key)``::
   >>> schema({1: 2})
   {1: 2}
 
+Optional dictionary keys
+````````````````````````
 If a schema has ``required=True``, keys may be individually marked as optional
 using the marker token ``optional(key)``::
 
