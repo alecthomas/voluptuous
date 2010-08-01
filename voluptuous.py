@@ -83,11 +83,12 @@ Validate like so:
 """
 
 import re
+import types
 import urlparse
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 
 class Undefined(object):
@@ -164,8 +165,8 @@ class Schema(object):
             return self.validate_dict(path, schema, data)
         elif type_ is list:
             return self.validate_list(path, schema, data)
-        elif type_ in (int, long, str, unicode, float, complex, object) \
-                or callable(schema):
+        elif type_ in (int, long, str, unicode, float, complex, object,
+                       types.NoneType) or callable(schema):
             return self.validate_scalar(path, schema, data)
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
