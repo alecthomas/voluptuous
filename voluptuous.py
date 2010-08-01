@@ -87,7 +87,7 @@ import urlparse
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.3'
+__version__ = '0.3.1'
 
 
 class Undefined(object):
@@ -375,7 +375,7 @@ class marker(object):
 
     def __call__(self, v):
         try:
-            return Schema.validate_scalar([], self.schema, v)
+            return Schema(self.schema)(v)
         except Invalid, e:
             if not self.msg or len(e.path) > 1:
                 raise
@@ -541,7 +541,7 @@ def any(*validators, **kwargs):
     def f(v):
         for validator in validators:
             try:
-                return Schema.validate_scalar([], validator, v)
+                return Schema(validator)(v)
             except Invalid, e:
                 if len(e.path) > 1:
                     raise
@@ -567,7 +567,7 @@ def all(*validators, **kwargs):
     def f(v):
         try:
             for validator in validators:
-                v = Schema.validate_scalar([], validator, v)
+                v = Schema(validator)(v)
         except Invalid, e:
             raise Invalid(msg or e.msg)
         return v
