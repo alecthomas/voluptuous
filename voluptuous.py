@@ -83,12 +83,13 @@ Validate like so:
 """
 
 import re
+import string
 import types
 import urlparse
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 
 class Undefined(object):
@@ -668,6 +669,46 @@ def length(min=None, max=None, msg=None):
             raise Invalid(msg or 'length of value must be at most %s' % max)
         return v
     return f
+
+
+def lower(v):
+    """Transform a string to lower case.
+
+    >>> s = Schema(lower)
+    >>> s('HI')
+    'hi'
+    """
+    return str(v).lower()
+
+
+def upper(v):
+    """Transform a string to upper case.
+
+    >>> s = Schema(upper)
+    >>> s('hi')
+    'HI'
+    """
+    return str(v).upper()
+
+
+def capitalize(v):
+    """Capitalise a string.
+
+    >>> s = Schema(capitalize)
+    >>> s('hello world')
+    'Hello world'
+    """
+    return str(v).capitalize()
+
+
+def title(v):
+    """Title case a string.
+
+    >>> s = Schema(title)
+    >>> s('hello world')
+    'Hello World'
+    """
+    return str(v).title()
 
 
 if __name__ == '__main__':
