@@ -82,6 +82,7 @@ Validate like so:
                               'Users': {'snmp_community': 'monkey'}}}}
 """
 
+import os
 import re
 import string
 import types
@@ -627,6 +628,36 @@ def url(msg=None):
             return v
         except:
             raise Invalid(msg or 'expected a URL')
+    return f
+
+
+def isfile(msg=None):
+    """Verify the file exists."""
+    def f(v):
+        if os.path.isfile(v):
+            return v
+        else:
+            raise Invalid(msg or 'not a file')
+    return f
+
+
+def isdir(msg=None):
+    """Verify the directory exists."""
+    def f(v):
+        if os.path.isdir(v):
+            return v
+        else:
+            raise Invalid(msg or 'not a directory')
+    return f
+
+
+def path_exists(msg=None):
+    """Verify the path exists, regardless of its type."""
+    def f(v):
+        if os.path.exists(v):
+            return v
+        else:
+            raise Invalid(msg or 'path does not exist')
     return f
 
 
