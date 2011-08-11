@@ -51,3 +51,32 @@ Voluptuous supports validation when extra fields are present in the data::
   Traceback (most recent call last):
   ...
   Invalid: not a valid value for dictionary key @ data['two']
+
+
+dict and list should be available as type validators::
+
+  >>> Schema(dict)({'a': 1, 'b': 2})
+  {'a': 1, 'b': 2}
+  >>> Schema(list)([1,2,3])
+  [1, 2, 3]
+  
+
+validation should return instances of the right types when the types are
+subclasses of dict or list::
+
+  >>> class Dict(dict):
+  ...   pass
+  >>>
+  >>> d = Schema(dict)(Dict(a=1, b=2))
+  >>> d
+  {'a': 1, 'b': 2}
+  >>> isinstance(d, Dict)
+  True
+  >>> class List(list):
+  ...   pass    
+  >>>
+  >>> l = Schema(list)(List([1,2,3]))
+  >>> l
+  [1, 2, 3]
+  >>> isinstance(l, List)
+  True
