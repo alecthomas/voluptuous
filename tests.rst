@@ -70,7 +70,7 @@ subclasses of dict or list::
   >>> d = Schema(dict)(Dict(a=1, b=2))
   >>> d
   {'a': 1, 'b': 2}
-  >>> isinstance(d, Dict)
+  >>> type(d) is Dict
   True
   >>> class List(list):
   ...   pass    
@@ -78,5 +78,5 @@ subclasses of dict or list::
   >>> l = Schema(list)(List([1,2,3]))
   >>> l
   [1, 2, 3]
-  >>> isinstance(l, List)
+  >>> type(l) is List
   True

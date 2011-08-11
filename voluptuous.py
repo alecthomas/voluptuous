@@ -232,7 +232,7 @@ class Schema(object):
         if not isinstance(data, dict):
             raise Invalid('expected a dictionary', path)
 
-        out = type(schema)()
+        out = type(data)()
         required_keys = set(key for key in schema
                             if
                             (self.required and not isinstance(key, optional))
@@ -309,7 +309,7 @@ class Schema(object):
         if not schema:
             return data
 
-        out = type(schema)()
+        out = type(data)()
         invalid = None
         index_path = UNDEFINED
         for i, value in enumerate(data):
