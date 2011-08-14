@@ -160,15 +160,15 @@ class Schema(object):
         return self.validate([], self.schema, data)
 
     def validate(self, path, schema, data):
+        if isinstance(schema, dict):
+            return self.validate_dict(path, schema, data)
+        elif isinstance(schema, list):
+            return self.validate_list(path, schema, data)
         type_ = type(schema)
         if type_ is type:
             type_ = schema
-        if type_ is dict:
-            return self.validate_dict(path, schema, data)
-        elif type_ is list:
-            return self.validate_list(path, schema, data)
-        elif type_ in (int, long, str, unicode, float, complex, object,
-                       types.NoneType) or callable(schema):
+        if type_ in (int, long, str, unicode, float, complex, object,
+                     list, dict, types.NoneType) or callable(schema):
             return self.validate_scalar(path, schema, data)
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
@@ -232,7 +232,7 @@ class Schema(object):
         if not isinstance(data, dict):
             raise Invalid('expected a dictionary', path)
 
-        out = {}
+        out = type(data)()
         required_keys = set(key for key in schema
                             if
                             (self.required and not isinstance(key, optional))
@@ -309,7 +309,7 @@ class Schema(object):
         if not schema:
             return data
 
-        out = []
+        out = type(data)()
         invalid = None
         index_path = UNDEFINED
         for i, value in enumerate(data):
