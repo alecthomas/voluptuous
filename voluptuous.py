@@ -133,6 +133,25 @@ class Invalid(Error):
         return Exception.__str__(self) + path
 
 
+class InvalidList(Invalid):
+    def __init__(self, errors=None):
+        self.errors = errors[:] if errors else []
+
+    @property
+    def msg(self):
+        return self.errors[0].msg
+
+    @property
+    def path(self):
+        return self.errors[0].path
+
+    def add(self, error):
+        self.errors.append(error)
+
+    def __str__(self):
+        return str(self.errors[0])
+
+
 class Schema(object):
     """A validation schema.
 
@@ -160,16 +179,21 @@ class Schema(object):
         return self.validate([], self.schema, data)
 
     def validate(self, path, schema, data):
-        if isinstance(schema, dict):
-            return self.validate_dict(path, schema, data)
-        elif isinstance(schema, list):
-            return self.validate_list(path, schema, data)
-        type_ = type(schema)
-        if type_ is type:
-            type_ = schema
-        if type_ in (int, long, str, unicode, float, complex, object,
-                     list, dict, types.NoneType) or callable(schema):
-            return self.validate_scalar(path, schema, data)
+        try:
+            if isinstance(schema, dict):
+                return self.validate_dict(path, schema, data)
+            elif isinstance(schema, list):
+                return self.validate_list(path, schema, data)
+            type_ = type(schema)
+            if type_ is type:
+                type_ = schema
+            if type_ in (int, long, str, unicode, float, complex, object,
+                         list, dict, types.NoneType) or callable(schema):
+                return self.validate_scalar(path, schema, data)
+        except InvalidList:
+            raise
+        except Invalid, e:
+            raise InvalidList([e])
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
 
@@ -185,7 +209,7 @@ class Schema(object):
             >>> validate([])
             Traceback (most recent call last):
             ...
-            Invalid: expected a dictionary
+            InvalidList: expected a dictionary
 
         An invalid dictionary value:
 
@@ -193,14 +217,14 @@ class Schema(object):
             >>> validate({'one': 'three'})
             Traceback (most recent call last):
             ...
-            Invalid: not a valid value for dictionary value @ data['one']
+            InvalidList: not a valid value for dictionary value @ data['one']
 
         An invalid key:
 
             >>> validate({'two': 'three'})
             Traceback (most recent call last):
             ...
-            Invalid: not a valid value for dictionary key @ data['two']
+            InvalidList: not a valid value for dictionary key @ data['two']
 
         Validation function, in this case the "int" type:
 
@@ -218,7 +242,7 @@ class Schema(object):
             >>> validate({'10': 'twenty'})
             Traceback (most recent call last):
             ...
-            Invalid: not a valid value for dictionary key @ data['10']
+            InvalidList: not a valid value for dictionary key @ data['10']
 
         Wrap them in the coerce() function to achieve this:
 
@@ -240,6 +264,7 @@ class Schema(object):
                             isinstance(key, required))
         invalid = None
         error = None
+        errors = []
         for key, value in data.iteritems():
             key_path = path + [key]
             for skey, svalue in schema.iteritems():
@@ -261,8 +286,11 @@ class Schema(object):
                     out[new_key] = self.validate(key_path, svalue, value)
                 except Invalid, e:
                     if len(e.path) > len(key_path):
-                        raise
-                    raise Invalid(e.msg + ' for dictionary value', e.path)
+                        errors.append(e)
+                    else:
+                        errors.append(Invalid(e.msg + ' for dictionary value',
+                                e.path))
+                    break
 
                 # Key and value okay, mark any required() fields as found.
                 required_keys.discard(skey)
@@ -273,18 +301,21 @@ class Schema(object):
                 else:
                     if invalid:
                         if len(error.path) > len(path) + 1:
-                            raise error
+                            errors.append(error)
                         else:
-                            raise Invalid(invalid, key_path)
+                            errors.append(Invalid(invalid, key_path))
                     else:
-                        raise Invalid('extra keys not allowed', key_path)
+                        errors.append(Invalid('extra keys not allowed',
+                                key_path))
         if required_keys:
             if len(required_keys) > 1:
                 message = 'required keys %s not provided' \
                         % ', '.join(map(repr, map(str, required_keys)))
             else:
                 message = 'required key %r not provided' % required_keys.pop()
-            raise Invalid(message, path)
+            errors.append(Invalid(message, path))
+        if errors:
+            raise InvalidList(errors)
         return out
 
     def validate_list(self, path, schema, data):
@@ -298,7 +329,7 @@ class Schema(object):
         >>> validator([3.5])
         Traceback (most recent call last):
         ...
-        Invalid: invalid list value @ data[0]
+        InvalidList: invalid list value @ data[0]
         >>> validator([1])
         [1]
         """
@@ -311,9 +342,11 @@ class Schema(object):
 
         out = type(data)()
         invalid = None
+        errors = []
         index_path = UNDEFINED
         for i, value in enumerate(data):
             index_path = path + [i]
+            invalid = None
             for s in schema:
                 try:
                     out.append(self.validate(index_path, s, value))
@@ -323,10 +356,11 @@ class Schema(object):
                         raise
                     invalid = e
             else:
-                if len(invalid.path) > len(index_path):
-                    raise invalid
-                else:
-                    raise Invalid('invalid list value', index_path)
+                if len(invalid.path) <= len(index_path):
+                    invalid = Invalid('invalid list value', index_path)
+                errors.append(invalid)
+        if errors:
+            raise InvalidList(errors)
         return out
 
     @staticmethod
@@ -413,7 +447,7 @@ def msg(schema, msg):
     >>> validate(['three'])
     Traceback (most recent call last):
     ...
-    Invalid: should be one of "one", "two" or an integer
+    InvalidList: should be one of "one", "two" or an integer
 
     Messages are only applied to invalid direct descendants of the schema:
 
@@ -421,7 +455,7 @@ def msg(schema, msg):
     >>> validate([['three']])
     Traceback (most recent call last):
     ...
-    Invalid: invalid list value @ data[0][0]
+    InvalidList: invalid list value @ data[0][0]
     """
     def f(v):
         try:
@@ -460,13 +494,13 @@ def true(msg=None):
     >>> validate([])
     Traceback (most recent call last):
     ...
-    Invalid: value was not true
+    InvalidList: value was not true
     >>> validate([1])
     [1]
     >>> validate(False)
     Traceback (most recent call last):
     ...
-    Invalid: value was not true
+    InvalidList: value was not true
 
     ...and so on.
     """
@@ -505,7 +539,7 @@ def boolean(msg=None):
     >>> validate('moo')
     Traceback (most recent call last):
     ...
-    Invalid: expected boolean
+    InvalidList: expected boolean
     """
     def f(v):
         try:
@@ -537,7 +571,7 @@ def any(*validators, **kwargs):
     >>> validate('moo')
     Traceback (most recent call last):
     ...
-    Invalid: no valid value found
+    InvalidList: no valid value found
     """
     msg = kwargs.pop('msg', None)
 
@@ -586,7 +620,7 @@ def match(pattern, msg=None):
     >>> validate('123EF4')
     Traceback (most recent call last):
     ...
-    Invalid: does not match regular expression
+    InvalidList: does not match regular expression
 
     Pattern may also be a compiled regular expression:
 

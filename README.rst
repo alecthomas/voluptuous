@@ -51,21 +51,21 @@ and goes a little further for completeness.
   >>> schema({})
   Traceback (most recent call last):
   ...
-  Invalid: required key 'q' not provided
+  InvalidList: required key 'q' not provided
 
 ...must be a string::
 
   >>> schema({'q': 123})
   Traceback (most recent call last):
   ...
-  Invalid: expected str for dictionary value @ data['q']
+  InvalidList: expected str for dictionary value @ data['q']
 
 ...and must be at least one character in length::
 
   >>> schema({'q': ''})
   Traceback (most recent call last):
   ...
-  Invalid: length of value must be at least 1 for dictionary value @ data['q']
+  InvalidList: length of value must be at least 1 for dictionary value @ data['q']
   >>> schema({'q': '#topic'})
   {'q': '#topic'}
 
@@ -74,18 +74,18 @@ and goes a little further for completeness.
   >>> schema({'q': '#topic', 'per_page': 900})
   Traceback (most recent call last):
   ...
-  Invalid: value must be at most 20 for dictionary value @ data['per_page']
+  InvalidList: value must be at most 20 for dictionary value @ data['per_page']
   >>> schema({'q': '#topic', 'per_page': -10})
   Traceback (most recent call last):
   ...
-  Invalid: value must be at least 1 for dictionary value @ data['per_page']
+  InvalidList: value must be at least 1 for dictionary value @ data['per_page']
 
 "page" is an integer >= 0::
 
   >>> schema({'q': '#topic', 'page': 'one'})
   Traceback (most recent call last):
   ...
-  Invalid: expected int for dictionary value @ data['page']
+  InvalidList: expected int for dictionary value @ data['page']
   >>> schema({'q': '#topic', 'page': 1})
   {'q': '#topic', 'page': 1}
 
@@ -117,7 +117,7 @@ instance of the type::
   >>> schema('one')
   Traceback (most recent call last):
   ...
-  Invalid: expected int
+  InvalidList: expected int
 
 Lists
 ~~~~~
@@ -174,7 +174,7 @@ pair in the corresponding data dictionary::
   >>> schema({3: 'three'})
   Traceback (most recent call last):
   ...
-  Invalid: not a valid value for dictionary key @ data[3]
+  InvalidList: not a valid value for dictionary key @ data[3]
 
 Extra dictionary keys
 `````````````````````
@@ -185,7 +185,7 @@ exceptions::
   >>> schema({1: 2})
   Traceback (most recent call last):
   ...
-  Invalid: extra keys not allowed @ data[1]
+  InvalidList: extra keys not allowed @ data[1]
 
 This behaviour can be altered on a per-schema basis with ``Schema(..., extra=True)``::
 
@@ -215,7 +215,7 @@ Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
-  Invalid: required key 1 not provided
+  InvalidList: required key 1 not provided
 
 And per-key, with the marker token ``required(key)``::
 
@@ -223,7 +223,7 @@ And per-key, with the marker token ``required(key)``::
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
-  Invalid: required key 1 not provided
+  InvalidList: required key 1 not provided
   >>> schema({1: 2})
   {1: 2}
 
@@ -237,13 +237,13 @@ using the marker token ``optional(key)``::
   >>> schema({})
   Traceback (most recent call last):
   ...
-  Invalid: required key 1 not provided
+  InvalidList: required key 1 not provided
   >>> schema({1: 2})
   {1: 2}
   >>> schema({1: 2, 4: 5})
   Traceback (most recent call last):
   ...
-  Invalid: not a valid value for dictionary key @ data[4]
+  InvalidList: not a valid value for dictionary key @ data[4]
   >>> schema({1: 2, 3: 4})
   {1: 2, 3: 4}
 
@@ -276,7 +276,7 @@ attempted::
   >>> schema([[6]])
   Traceback (most recent call last):
   ...
-  Invalid: invalid list value @ data[0][0]
+  InvalidList: invalid list value @ data[0][0]
 
 If we pass the data ``[6]``, the ``6`` is not a list type and so will not
 recurse into the first element of the schema. Matching will continue on to the

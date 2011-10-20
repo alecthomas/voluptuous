@@ -13,22 +13,22 @@ It should show the exact index and container type, in this case a list value::
   >>> schema(['one', 'two'])
   Traceback (most recent call last):
   ...
-  Invalid: invalid list value @ data[1]
+  InvalidList: invalid list value @ data[1]
 
 It should also be accurate for nested values::
 
   >>> schema([{'two': 'nine'}])
   Traceback (most recent call last):
   ...
-  Invalid: not a valid value for dictionary value @ data[0]['two']
+  InvalidList: not a valid value for dictionary value @ data[0]['two']
   >>> schema([{'four': ['nine']}])
   Traceback (most recent call last):
   ...
-  Invalid: invalid list value @ data[0]['four'][0]
+  InvalidList: invalid list value @ data[0]['four'][0]
   >>> schema([{'six': {'seven': 'nine'}}])
   Traceback (most recent call last):
   ...
-  Invalid: not a valid value for dictionary value @ data[0]['six']['seven']
+  InvalidList: not a valid value for dictionary value @ data[0]['six']['seven']
 
 Errors should be reported depth-first::
 
@@ -50,7 +50,7 @@ Voluptuous supports validation when extra fields are present in the data::
   >>> schema({'two': 2})
   Traceback (most recent call last):
   ...
-  Invalid: not a valid value for dictionary key @ data['two']
+  InvalidList: not a valid value for dictionary key @ data['two']
 
 
 dict and list should be available as type validators::
@@ -61,7 +61,7 @@ dict and list should be available as type validators::
   [1, 2, 3]
   
 
-validation should return instances of the right types when the types are
+Validation should return instances of the right types when the types are
 subclasses of dict or list::
 
   >>> class Dict(dict):
@@ -80,3 +80,23 @@ subclasses of dict or list::
   [1, 2, 3]
   >>> type(l) is List
   True
+
+Multiple errors are reported::
+
+  >>> schema = Schema({'one': 1, 'two': 2})
+  >>> try:
+  ...   schema({'one': 2, 'two': 3, 'three': 4})
+  ... except InvalidList, e:
+  ...   errors = sorted(e.errors, key=lambda k: str(k))
+  ...   print [str(i) for i in errors]  # doctest: +NORMALIZE_WHITESPACE
+  ["not a valid value for dictionary key @ data['three']",
+   "not a valid value for dictionary value @ data['one']",
+   "not a valid value for dictionary value @ data['two']"]
+  >>> schema = Schema([[1], [2], [3]])
+  >>> try:
+  ...   schema([1, 2, 3])
+  ... except InvalidList, e:
+  ...   print [str(i) for i in e.errors]  # doctest: +NORMALIZE_WHITESPACE
+  ['invalid list value @ data[0]',
+   'invalid list value @ data[1]',
+   'invalid list value @ data[2]']
