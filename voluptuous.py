@@ -90,7 +90,7 @@ import urlparse
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.3.3'
+__version__ = '0.4'
 
 
 class Undefined(object):
