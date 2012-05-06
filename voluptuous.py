@@ -299,13 +299,8 @@ class Schema(object):
                 else:
                     errors.append(Invalid('extra keys not allowed',
                             key_path))
-        if required_keys:
-            if len(required_keys) > 1:
-                message = 'required keys %s not provided' \
-                        % ', '.join(map(repr, map(str, required_keys)))
-            else:
-                message = 'required key %r not provided' % required_keys.pop()
-            errors.append(Invalid(message, path))
+        for key in required_keys:
+            errors.append(Invalid('required key not provided', path + [key]))
         if errors:
             raise InvalidList(errors)
         return out

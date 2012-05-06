@@ -51,7 +51,7 @@ and goes a little further for completeness.
   >>> schema({})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 'q' not provided
+  InvalidList: required key not provided @ data['q']
 
 ...must be a string::
 
@@ -211,7 +211,7 @@ Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 1 not provided
+  InvalidList: required key not provided @ data[1]
 
 And per-key, with the marker token ``required(key)``::
 
@@ -219,7 +219,7 @@ And per-key, with the marker token ``required(key)``::
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 1 not provided
+  InvalidList: required key not provided @ data[1]
   >>> schema({1: 2})
   {1: 2}
 
@@ -233,7 +233,7 @@ using the marker token ``optional(key)``::
   >>> schema({})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 1 not provided
+  InvalidList: required key not provided @ data[1]
   >>> schema({1: 2})
   {1: 2}
   >>> schema({1: 2, 4: 5})
