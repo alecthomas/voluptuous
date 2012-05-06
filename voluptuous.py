@@ -224,7 +224,7 @@ class Schema(object):
             >>> validate({'two': 'three'})
             Traceback (most recent call last):
             ...
-            InvalidList: not a valid value for dictionary key @ data['two']
+            InvalidList: extra keys not allowed @ data['two']
 
         Validation function, in this case the "int" type:
 
@@ -242,7 +242,7 @@ class Schema(object):
             >>> validate({'10': 'twenty'})
             Traceback (most recent call last):
             ...
-            InvalidList: not a valid value for dictionary key @ data['10']
+            InvalidList: extra keys not allowed @ data['10']
 
         Wrap them in the coerce() function to achieve this:
 
@@ -262,7 +262,6 @@ class Schema(object):
                             (self.required and not isinstance(key, optional))
                             or
                             isinstance(key, required))
-        invalid = None
         error = None
         errors = []
         for key, value in data.iteritems():
@@ -278,7 +277,6 @@ class Schema(object):
                             raise
                         if not error or len(e.path) > len(error.path):
                             error = e
-                        invalid = e.msg + ' for dictionary key'
                         continue
                 # Backtracking is not performed once a key is selected, so if
                 # the value is invalid we immediately throw an exception.
@@ -299,21 +297,10 @@ class Schema(object):
                 if self.extra:
                     out[key] = value
                 else:
-                    if invalid:
-                        if len(error.path) > len(path) + 1:
-                            errors.append(error)
-                        else:
-                            errors.append(Invalid(invalid, key_path))
-                    else:
-                        errors.append(Invalid('extra keys not allowed',
-                                key_path))
-        if required_keys:
-            if len(required_keys) > 1:
-                message = 'required keys %s not provided' \
-                        % ', '.join(map(repr, map(str, required_keys)))
-            else:
-                message = 'required key %r not provided' % required_keys.pop()
-            errors.append(Invalid(message, path))
+                    errors.append(Invalid('extra keys not allowed',
+                            key_path))
+        for key in required_keys:
+            errors.append(Invalid('required key not provided', path + [key]))
         if errors:
             raise InvalidList(errors)
         return out

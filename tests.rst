@@ -50,7 +50,7 @@ Voluptuous supports validation when extra fields are present in the data::
   >>> schema({'two': 2})
   Traceback (most recent call last):
   ...
-  InvalidList: not a valid value for dictionary key @ data['two']
+  InvalidList: extra keys not allowed @ data['two']
 
 
 dict and list should be available as type validators::
@@ -89,7 +89,7 @@ Multiple errors are reported::
   ... except InvalidList, e:
   ...   errors = sorted(e.errors, key=lambda k: str(k))
   ...   print [str(i) for i in errors]  # doctest: +NORMALIZE_WHITESPACE
-  ["not a valid value for dictionary key @ data['three']",
+  ["extra keys not allowed @ data['three']",
    "not a valid value for dictionary value @ data['one']",
    "not a valid value for dictionary value @ data['two']"]
   >>> schema = Schema([[1], [2], [3]])

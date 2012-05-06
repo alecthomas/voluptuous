@@ -51,7 +51,7 @@ and goes a little further for completeness.
   >>> schema({})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 'q' not provided
+  InvalidList: required key not provided @ data['q']
 
 ...must be a string::
 
@@ -171,27 +171,23 @@ pair in the corresponding data dictionary::
   >>> schema = Schema({1: 'one', 2: 'two'})
   >>> schema({1: 'one'})
   {1: 'one'}
-  >>> schema({3: 'three'})
-  Traceback (most recent call last):
-  ...
-  InvalidList: not a valid value for dictionary key @ data[3]
 
 Extra dictionary keys
 `````````````````````
 By default any additional keys in the data, not in the schema will trigger
 exceptions::
 
-  >>> schema = Schema({})
-  >>> schema({1: 2})
+  >>> schema = Schema({2: 3})
+  >>> schema({1: 2, 2: 3})
   Traceback (most recent call last):
   ...
   InvalidList: extra keys not allowed @ data[1]
 
 This behaviour can be altered on a per-schema basis with ``Schema(..., extra=True)``::
 
-  >>> schema = Schema({}, extra=True)
-  >>> schema({1: 2})
-  {1: 2}
+  >>> schema = Schema({2: 3}, extra=True)
+  >>> schema({1: 2, 2: 3})
+  {1: 2, 2: 3}
 
 It can also be overridden per-dictionary by using the catch-all marker token
 ``extra`` as a key::
@@ -215,7 +211,7 @@ Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 1 not provided
+  InvalidList: required key not provided @ data[1]
 
 And per-key, with the marker token ``required(key)``::
 
@@ -223,7 +219,7 @@ And per-key, with the marker token ``required(key)``::
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 1 not provided
+  InvalidList: required key not provided @ data[1]
   >>> schema({1: 2})
   {1: 2}
 
@@ -237,13 +233,13 @@ using the marker token ``optional(key)``::
   >>> schema({})
   Traceback (most recent call last):
   ...
-  InvalidList: required key 1 not provided
+  InvalidList: required key not provided @ data[1]
   >>> schema({1: 2})
   {1: 2}
   >>> schema({1: 2, 4: 5})
   Traceback (most recent call last):
   ...
-  InvalidList: not a valid value for dictionary key @ data[4]
+  InvalidList: extra keys not allowed @ data[4]
   >>> schema({1: 2, 3: 4})
   {1: 2, 3: 4}
 
