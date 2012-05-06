@@ -561,11 +561,12 @@ def any(*validators, **kwargs):
     InvalidList: no valid value found
     """
     msg = kwargs.pop('msg', None)
+    schemas = [Schema(val) for val in validators]
 
     def f(v):
-        for validator in validators:
+        for schema in schemas:
             try:
-                return Schema(validator)(v)
+                return schema(v)
             except Invalid, e:
                 if len(e.path) > 1:
                     raise
@@ -587,11 +588,12 @@ def all(*validators, **kwargs):
     10
     """
     msg = kwargs.pop('msg', None)
+    schemas = [Schema(val) for val in validators]
 
     def f(v):
         try:
-            for validator in validators:
-                v = Schema(validator)(v)
+            for schema in schemas:
+                v = schema(v)
         except Invalid, e:
             raise Invalid(msg or e.msg)
         return v
