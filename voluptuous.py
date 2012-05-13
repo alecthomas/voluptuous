@@ -395,11 +395,12 @@ class marker(object):
 
     def __init__(self, schema, msg=None):
         self.schema = schema
+        self._schema = Schema(schema)
         self.msg = msg
 
     def __call__(self, v):
         try:
-            return Schema(self.schema)(v)
+            return self._schema(v)
         except Invalid, e:
             if not self.msg or len(e.path) > 1:
                 raise
