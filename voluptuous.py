@@ -445,6 +445,7 @@ def msg(schema, msg):
     ...
     InvalidList: invalid list value @ data[0][0]
     """
+    schema = Schema(schema)
     def f(v):
         try:
             return schema(v)
@@ -453,7 +454,6 @@ def msg(schema, msg):
                 raise e
             else:
                 raise Invalid(msg)
-    schema = Schema(schema)
     return f
 
 
