@@ -84,7 +84,6 @@ Validate like so:
 
 import os
 import re
-import string
 import types
 import urlparse
 
