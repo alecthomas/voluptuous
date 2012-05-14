@@ -84,7 +84,6 @@ Validate like so:
 
 import os
 import re
-import string
 import types
 import urlparse
 
@@ -395,11 +394,12 @@ class marker(object):
 
     def __init__(self, schema, msg=None):
         self.schema = schema
+        self._schema = Schema(schema)
         self.msg = msg
 
     def __call__(self, v):
         try:
-            return Schema(self.schema)(v)
+            return self._schema(v)
         except Invalid, e:
             if not self.msg or len(e.path) > 1:
                 raise
@@ -444,6 +444,7 @@ def msg(schema, msg):
     ...
     InvalidList: invalid list value @ data[0][0]
     """
+    schema = Schema(schema)
     def f(v):
         try:
             return schema(v)
@@ -452,7 +453,6 @@ def msg(schema, msg):
                 raise e
             else:
                 raise Invalid(msg)
-    schema = Schema(schema)
     return f
 
 
@@ -561,11 +561,12 @@ def any(*validators, **kwargs):
     InvalidList: no valid value found
     """
     msg = kwargs.pop('msg', None)
+    schemas = [Schema(val) for val in validators]
 
     def f(v):
-        for validator in validators:
+        for schema in schemas:
             try:
-                return Schema(validator)(v)
+                return schema(v)
             except Invalid, e:
                 if len(e.path) > 1:
                     raise
@@ -587,11 +588,12 @@ def all(*validators, **kwargs):
     10
     """
     msg = kwargs.pop('msg', None)
+    schemas = [Schema(val) for val in validators]
 
     def f(v):
         try:
-            for validator in validators:
-                v = Schema(validator)(v)
+            for schema in schemas:
+                v = schema(v)
         except Invalid, e:
             raise Invalid(msg or e.msg)
         return v
