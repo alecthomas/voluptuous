@@ -776,6 +776,20 @@ def title(v):
     return str(v).title()
 
 
+def default_to(default_value, msg=None):
+    """Sets a value to default_value if none provided.
+
+    >>> s = Schema(default_to(42))
+    >>> s(None)
+    42
+    """
+    def f(v):
+        if v is None:
+            v = default_value
+        return v
+    return f
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
