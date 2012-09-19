@@ -45,7 +45,7 @@ A schema like this:
     >>> settings = {
     ...   'snmp_community': str,
     ...   'retries': int,
-    ...   'snmp_version': all(coerce(str), any('3', '2c', '1')),
+    ...   'snmp_version': All(Coerce(str), Any('3', '2c', '1')),
     ... }
     >>> features = ['Ping', 'Uptime', 'Http']
     >>> schema = Schema({
@@ -243,10 +243,10 @@ class Schema(object):
             ...
             InvalidList: extra keys not allowed @ data['10']
 
-        Wrap them in the coerce() function to achieve this:
+        Wrap them in the Coerce() function to achieve this:
 
             >>> validate = Schema({'one': 'two', 'three': 'four',
-            ...                    coerce(int): str})
+            ...                    Coerce(int): str})
             >>> validate({'10': 'twenty'})
             {10: 'twenty'}
 
@@ -260,13 +260,13 @@ class Schema(object):
                             if
                             (self.required and not isinstance(key, optional))
                             or
-                            isinstance(key, required))
+                            isinstance(key, Required))
         error = None
         errors = []
         for key, value in data.iteritems():
             key_path = path + [key]
             for skey, svalue in schema.iteritems():
-                if skey is extra:
+                if skey is Extra:
                     new_key = key
                 else:
                     try:
@@ -389,7 +389,7 @@ class Schema(object):
         return data
 
 
-class marker(object):
+class Marker(object):
     """Mark nodes for special treatment."""
 
     def __init__(self, schema, msg=None):
@@ -412,24 +412,24 @@ class marker(object):
         return repr(self.schema)
 
 
-class optional(marker):
+class Optional(Marker):
     """Mark a node in the schema as optional."""
 
 
-class required(marker):
+class Required(Marker):
     """Mark a node in the schema as being required."""
 
 
-def extra(_):
+def Extra(_):
     """Allow keys in the data that are not present in the schema."""
     raise SchemaError('"extra" should never be called')
 
 
-def msg(schema, msg):
+def Msg(schema, msg):
     """Report a user-friendly message if a schema fails to validate.
 
     >>> validate = Schema(
-    ...   msg(['one', 'two', int],
+    ...   Msg(['one', 'two', int],
     ...       'should be one of "one", "two" or an integer'))
     >>> validate(['three'])
     Traceback (most recent call last):
@@ -438,7 +438,7 @@ def msg(schema, msg):
 
     Messages are only applied to invalid direct descendants of the schema:
 
-    >>> validate = Schema(msg([['one', 'two', int]], 'not okay!'))
+    >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!'))
     >>> validate([['three']])
     Traceback (most recent call last):
     ...
@@ -456,7 +456,7 @@ def msg(schema, msg):
     return f
 
 
-def coerce(type, msg=None):
+def Coerce(type, msg=None):
     """Coerce a value to a type.
 
     If the type constructor throws a ValueError, the value will be marked as
@@ -470,10 +470,10 @@ def coerce(type, msg=None):
     return f
 
 
-def true(msg=None):
+def IsTrue(msg=None):
     """Assert that a value is true, in the Python sense.
 
-    >>> validate = Schema(true())
+    >>> validate = Schema(IsTrue())
 
     "In the Python sense" means that implicitly false values, such as empty
     lists, dictionaries, etc. are treated as "false":
@@ -498,12 +498,12 @@ def true(msg=None):
     return f
 
 
-def false(msg=None):
+def IsFalse(msg=None):
     """Assert that a value is false, in the Python sense.
 
-    (see :func:`true` for more detail)
+    (see :func:`IsTrue` for more detail)
 
-    >>> validate = Schema(false())
+    >>> validate = Schema(IsFalse())
     >>> validate([])
     []
     """
@@ -514,13 +514,13 @@ def false(msg=None):
     return f
 
 
-def boolean(msg=None):
+def ToBoolean(msg=None):
     """Convert human-readable boolean values to a bool.
 
     Accepted values are 1, true, yes, on, enable, and their negatives.
     Non-string values are cast to bool.
 
-    >>> validate = Schema(boolean())
+    >>> validate = Schema(ToBoolean())
     >>> validate(True)
     True
     >>> validate('moo')
@@ -543,14 +543,14 @@ def boolean(msg=None):
     return f
 
 
-def any(*validators, **kwargs):
+def Any(*validators, **kwargs):
     """Use the first validated value.
 
     :param msg: Message to deliver to user if validation fails.
     :returns: Return value of the first validator that passes.
 
-    >>> validate = Schema(any('true', 'false',
-    ...                       all(any(int, bool), coerce(bool))))
+    >>> validate = Schema(Any('true', 'false',
+    ...                       All(Any(int, bool), Coerce(bool))))
     >>> validate('true')
     'true'
     >>> validate(1)
@@ -576,14 +576,14 @@ def any(*validators, **kwargs):
     return f
 
 
-def all(*validators, **kwargs):
+def All(*validators, **kwargs):
     """Value must pass all validators.
 
     The output of each validator is passed as input to the next.
 
     :param msg: Message to deliver to user if validation fails.
 
-    >>> validate = Schema(all('10', coerce(int)))
+    >>> validate = Schema(All('10', Coerce(int)))
     >>> validate('10')
     10
     """
@@ -600,10 +600,10 @@ def all(*validators, **kwargs):
     return f
 
 
-def match(pattern, msg=None):
+def Match(pattern, msg=None):
     """Value must match the regular expression.
 
-    >>> validate = Schema(match(r'^0x[A-F0-9]+$'))
+    >>> validate = Schema(Match(r'^0x[A-F0-9]+$'))
     >>> validate('0x123EF4')
     '0x123EF4'
     >>> validate('123EF4')
@@ -613,7 +613,7 @@ def match(pattern, msg=None):
 
     Pattern may also be a compiled regular expression:
 
-    >>> validate = Schema(match(re.compile(r'0x[A-F0-9]+', re.I)))
+    >>> validate = Schema(Match(re.compile(r'0x[A-F0-9]+', re.I)))
     >>> validate('0x123ef4')
     '0x123ef4'
     """
@@ -627,11 +627,11 @@ def match(pattern, msg=None):
     return f
 
 
-def sub(pattern, substitution, msg=None):
+def Sub(pattern, substitution, msg=None):
     """Regex substitution.
 
-    >>> validate = Schema(all(sub('you', 'I'),
-    ...                       sub('hello', 'goodbye')))
+    >>> validate = Schema(All(Sub('you', 'I'),
+    ...                       Sub('hello', 'goodbye')))
     >>> validate('you say hello')
     'I say goodbye'
     """
@@ -643,7 +643,7 @@ def sub(pattern, substitution, msg=None):
     return f
 
 
-def url(msg=None):
+def IsUrl(msg=None):
     """Verify that the value is a URL."""
     def f(v):
         try:
@@ -654,7 +654,7 @@ def url(msg=None):
     return f
 
 
-def isfile(msg=None):
+def IsFile(msg=None):
     """Verify the file exists."""
     def f(v):
         if os.path.isfile(v):
@@ -664,7 +664,7 @@ def isfile(msg=None):
     return f
 
 
-def isdir(msg=None):
+def IsDir(msg=None):
     """Verify the directory exists."""
     def f(v):
         if os.path.isdir(v):
@@ -674,7 +674,7 @@ def isdir(msg=None):
     return f
 
 
-def path_exists(msg=None):
+def PathExists(msg=None):
     """Verify the path exists, regardless of its type."""
     def f(v):
         if os.path.exists(v):
@@ -684,7 +684,7 @@ def path_exists(msg=None):
     return f
 
 
-def range(min=None, max=None, msg=None):
+def InRange(min=None, max=None, msg=None):
     """Limit a value to a range.
 
     Either min or max may be omitted.
@@ -700,7 +700,7 @@ def range(min=None, max=None, msg=None):
     return f
 
 
-def clamp(min=None, max=None, msg=None):
+def Clamp(min=None, max=None, msg=None):
     """Clamp a value to a range.
 
     Either min or max may be omitted.
@@ -714,7 +714,7 @@ def clamp(min=None, max=None, msg=None):
     return f
 
 
-def length(min=None, max=None, msg=None):
+def Length(min=None, max=None, msg=None):
     """The length of a value must be in a certain range."""
     def f(v):
         if min is not None and len(v) < min:
@@ -725,50 +725,50 @@ def length(min=None, max=None, msg=None):
     return f
 
 
-def lower(v):
+def ToLower(v):
     """Transform a string to lower case.
 
-    >>> s = Schema(lower)
+    >>> s = Schema(ToLower)
     >>> s('HI')
     'hi'
     """
     return str(v).lower()
 
 
-def upper(v):
+def ToUpper(v):
     """Transform a string to upper case.
 
-    >>> s = Schema(upper)
+    >>> s = Schema(ToUpper)
     >>> s('hi')
     'HI'
     """
     return str(v).upper()
 
 
-def capitalize(v):
+def Capitalize(v):
     """Capitalise a string.
 
-    >>> s = Schema(capitalize)
+    >>> s = Schema(Capitalize)
     >>> s('hello world')
     'Hello world'
     """
     return str(v).capitalize()
 
 
-def title(v):
+def Title(v):
     """Title case a string.
 
-    >>> s = Schema(title)
+    >>> s = Schema(Title)
     >>> s('hello world')
     'Hello World'
     """
     return str(v).title()
 
 
-def default_to(default_value, msg=None):
+def DefaultTo(default_value, msg=None):
     """Sets a value to default_value if none provided.
 
-    >>> s = Schema(default_to(42))
+    >>> s = Schema(DefaultTo(42))
     >>> s(None)
     42
     """
