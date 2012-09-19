@@ -643,7 +643,7 @@ def Sub(pattern, substitution, msg=None):
     return f
 
 
-def IsUrl(msg=None):
+def Url(msg=None):
     """Verify that the value is a URL."""
     def f(v):
         try:
