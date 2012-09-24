@@ -19,7 +19,7 @@ setup(
     long_description=long_description,
     license='BSD',
     platforms=['any'],
-    py_modules=['voluptuous'],
+    packages=['voluptuous'],
     author='Alec Thomas',
     author_email='alec@swapoff.org',
     install_requires = [

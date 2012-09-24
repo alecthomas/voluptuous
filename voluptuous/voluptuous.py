@@ -514,13 +514,13 @@ def IsFalse(msg=None):
     return f
 
 
-def ToBoolean(msg=None):
+def Boolean(msg=None):
     """Convert human-readable boolean values to a bool.
 
     Accepted values are 1, true, yes, on, enable, and their negatives.
     Non-string values are cast to bool.
 
-    >>> validate = Schema(ToBoolean())
+    >>> validate = Schema(Boolean())
     >>> validate(True)
     True
     >>> validate('moo')
