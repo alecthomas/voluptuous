@@ -593,10 +593,10 @@ def all(*validators, **kwargs):
     def f(v):
         try:
             for schema in schemas:
-                v = schema(v)
+                result = schema(v)
         except Invalid, e:
             raise Invalid(msg or e.msg)
-        return v
+        return result
     return f
 
 
