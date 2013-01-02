@@ -373,7 +373,7 @@ class Schema(object):
         ...
         Invalid: not a valid value
         """
-        if type(schema) is type:
+        if isinstance(schema, type):
             if not isinstance(data, schema):
                 raise Invalid('expected %s' % schema.__name__, path)
         elif callable(schema):
