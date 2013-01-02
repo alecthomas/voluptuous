@@ -100,3 +100,23 @@ Multiple errors are reported::
   ['invalid list value @ data[0]',
    'invalid list value @ data[1]',
    'invalid list value @ data[2]']
+
+Custom classes validate as schemas::
+
+    >>> class Thing(object):
+    ...     pass
+    >>> schema = Schema(Thing)
+    >>> t = schema(Thing())
+    >>> type(t) is Thing
+    True
+
+Classes with custom metaclasses should validate as schemas::
+
+    >>> class MyMeta(type):
+    ...     pass
+    >>> class Thing(object):
+    ...     __metaclass__ = MyMeta
+    >>> schema = Schema(Thing)
+    >>> t = schema(Thing())
+    >>> type(t) is Thing
+    True
