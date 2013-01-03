@@ -183,6 +183,8 @@ class Schema(object):
                 return self.validate_dict(path, schema, data)
             elif isinstance(schema, list):
                 return self.validate_list(path, schema, data)
+            elif isinstance(schema, tuple):
+                return self.validate_tuple(path, schema, data)
             type_ = type(schema)
             if type_ is type:
                 type_ = schema
@@ -304,10 +306,10 @@ class Schema(object):
             raise InvalidList(errors)
         return out
 
-    def validate_list(self, path, schema, data):
-        """Validate a list.
+    def _validate_sequence(self, path, schema, data, seq_type):
+        """Validate a sequence type.
 
-        A list is a sequence of valid values or validators tried in order.
+        This is a sequence of valid values or validators tried in order.
 
         >>> validator = Schema(['one', 'two', int])
         >>> validator(['one'])
@@ -319,14 +321,15 @@ class Schema(object):
         >>> validator([1])
         [1]
         """
-        if not isinstance(data, list):
-            raise Invalid('expected a list', path)
+        seq_type_name = seq_type.__name__
+        if not isinstance(data, seq_type):
+            raise Invalid('expected a %s' % seq_type_name, path)
 
-        # Empty list schema, allow any data list.
+        # Empty seq schema, allow any data.
         if not schema:
             return data
 
-        out = type(data)()
+        out = []
         invalid = None
         errors = []
         index_path = UNDEFINED
@@ -343,11 +346,45 @@ class Schema(object):
                     invalid = e
             else:
                 if len(invalid.path) <= len(index_path):
-                    invalid = Invalid('invalid list value', index_path)
+                    invalid = Invalid('invalid %s value' % seq_type_name, index_path)
                 errors.append(invalid)
         if errors:
             raise InvalidList(errors)
-        return out
+        return type(data)(out)
+
+    def validate_tuple(self, path, schema, data):
+        """Validate a tuple.
+
+        A tuple is a sequence of valid values or validators tried in order.
+
+        >>> validator = Schema(('one', 'two', int))
+        >>> validator(('one',))
+        ('one',)
+        >>> validator((3.5,))
+        Traceback (most recent call last):
+        ...
+        InvalidList: invalid tuple value @ data[0]
+        >>> validator((1,))
+        (1,)
+        """
+        return self._validate_sequence(path, schema, data, seq_type=tuple)
+
+    def validate_list(self, path, schema, data):
+        """Validate a list.
+
+        A list is a sequence of valid values or validators tried in order.
+
+        >>> validator = Schema(['one', 'two', int])
+        >>> validator(['one'])
+        ['one']
+        >>> validator([3.5])
+        Traceback (most recent call last):
+        ...
+        InvalidList: invalid list value @ data[0]
+        >>> validator([1])
+        [1]
+        """
+        return self._validate_sequence(path, schema, data, seq_type=list)
 
     @staticmethod
     def validate_scalar(path, schema, data):

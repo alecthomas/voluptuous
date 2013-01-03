@@ -53,12 +53,14 @@ Voluptuous supports validation when extra fields are present in the data::
   InvalidList: extra keys not allowed @ data['two']
 
 
-dict and list should be available as type validators::
+dict, list, and tuple should be available as type validators::
 
   >>> Schema(dict)({'a': 1, 'b': 2})
   {'a': 1, 'b': 2}
   >>> Schema(list)([1,2,3])
   [1, 2, 3]
+  >>> Schema(tuple)((1,2,3))
+  (1, 2, 3)
   
 
 Validation should return instances of the right types when the types are
