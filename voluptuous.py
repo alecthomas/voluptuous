@@ -218,7 +218,7 @@ class Schema(object):
             >>> validate({'one': 'three'})
             Traceback (most recent call last):
             ...
-            InvalidList: not a valid value for dictionary value @ data['one']
+            InvalidList: not a valid value @ data['one']
 
         An invalid key:
 
@@ -295,8 +295,7 @@ class Schema(object):
                     if len(e.path) > len(key_path):
                         errors.append(e)
                     else:
-                        errors.append(Invalid(e.msg + ' for dictionary value',
-                                e.path))
+                        errors.append(Invalid(e.msg, e.path))
                     break
 
                 # Key and value okay, mark any required() fields as found.
