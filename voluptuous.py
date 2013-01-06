@@ -218,7 +218,7 @@ class Schema(object):
             >>> validate({'one': 'three'})
             Traceback (most recent call last):
             ...
-            InvalidList: not a valid value for dictionary value @ data['one']
+            InvalidList: not a valid value @ data['one']
 
         An invalid key:
 
@@ -251,6 +251,14 @@ class Schema(object):
             ...                    coerce(int): str})
             >>> validate({'10': 'twenty'})
             {10: 'twenty'}
+
+        Custom message for required key
+
+            >>> validate = Schema({required('one', 'required'): 'two'})
+            >>> validate({})
+            Traceback (most recent call last):
+            ...
+            InvalidList: required @ data['one']
 
         (This is to avoid unexpected surprises.)
         """
@@ -287,8 +295,7 @@ class Schema(object):
                     if len(e.path) > len(key_path):
                         errors.append(e)
                     else:
-                        errors.append(Invalid(e.msg + ' for dictionary value',
-                                e.path))
+                        errors.append(Invalid(e.msg, e.path))
                     break
 
                 # Key and value okay, mark any required() fields as found.
@@ -301,7 +308,7 @@ class Schema(object):
                     errors.append(Invalid('extra keys not allowed',
                             key_path))
         for key in required_keys:
-            errors.append(Invalid('required key not provided', path + [key]))
+            errors.append(Invalid(key.msg or 'required key not provided', path + [key]))
         if errors:
             raise InvalidList(errors)
         return out
