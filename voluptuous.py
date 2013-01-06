@@ -132,7 +132,7 @@ class Invalid(Error):
         return Exception.__str__(self) + path
 
 
-class InvalidList(Invalid):
+class MultipleInvalid(Invalid):
     def __init__(self, errors=None):
         self.errors = errors[:] if errors else []
 
@@ -150,6 +150,8 @@ class InvalidList(Invalid):
     def __str__(self):
         return str(self.errors[0])
 
+# for backward compatibility
+InvalidList = MultipleInvalid
 
 class Schema(object):
     """A validation schema.
@@ -191,10 +193,10 @@ class Schema(object):
             if type_ in (int, long, str, unicode, float, complex, object,
                          list, dict, types.NoneType) or callable(schema):
                 return self.validate_scalar(path, schema, data)
-        except InvalidList:
+        except MultipleInvalid:
             raise
         except Invalid, e:
-            raise InvalidList([e])
+            raise MultipleInvalid([e])
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
 
@@ -210,7 +212,7 @@ class Schema(object):
             >>> validate([])
             Traceback (most recent call last):
             ...
-            InvalidList: expected a dictionary
+            MultipleInvalid: expected a dictionary
 
         An invalid dictionary value:
 
@@ -218,14 +220,14 @@ class Schema(object):
             >>> validate({'one': 'three'})
             Traceback (most recent call last):
             ...
-            InvalidList: not a valid value for dictionary value @ data['one']
+            MultipleInvalid: not a valid value for dictionary value @ data['one']
 
         An invalid key:
 
             >>> validate({'two': 'three'})
             Traceback (most recent call last):
             ...
-            InvalidList: extra keys not allowed @ data['two']
+            MultipleInvalid: extra keys not allowed @ data['two']
 
         Validation function, in this case the "int" type:
 
@@ -243,7 +245,7 @@ class Schema(object):
             >>> validate({'10': 'twenty'})
             Traceback (most recent call last):
             ...
-            InvalidList: extra keys not allowed @ data['10']
+            MultipleInvalid: extra keys not allowed @ data['10']
 
         Wrap them in the coerce() function to achieve this:
 
@@ -311,7 +313,7 @@ class Schema(object):
         for key in required_keys:
             errors.append(Invalid(key.msg or 'required key not provided', path + [key]))
         if errors:
-            raise InvalidList(errors)
+            raise MultipleInvalid(errors)
         return out
 
     def _validate_sequence(self, path, schema, data, seq_type):
@@ -325,7 +327,7 @@ class Schema(object):
         >>> validator([3.5])
         Traceback (most recent call last):
         ...
-        InvalidList: invalid list value @ data[0]
+        MultipleInvalid: invalid list value @ data[0]
         >>> validator([1])
         [1]
         """
@@ -357,7 +359,7 @@ class Schema(object):
                     invalid = Invalid('invalid %s value' % seq_type_name, index_path)
                 errors.append(invalid)
         if errors:
-            raise InvalidList(errors)
+            raise MultipleInvalid(errors)
         return type(data)(out)
 
     def validate_tuple(self, path, schema, data):
@@ -371,7 +373,7 @@ class Schema(object):
         >>> validator((3.5,))
         Traceback (most recent call last):
         ...
-        InvalidList: invalid tuple value @ data[0]
+        MultipleInvalid: invalid tuple value @ data[0]
         >>> validator((1,))
         (1,)
         """
@@ -388,7 +390,7 @@ class Schema(object):
         >>> validator([3.5])
         Traceback (most recent call last):
         ...
-        InvalidList: invalid list value @ data[0]
+        MultipleInvalid: invalid list value @ data[0]
         >>> validator([1])
         [1]
         """
@@ -479,7 +481,7 @@ def msg(schema, msg):
     >>> validate(['three'])
     Traceback (most recent call last):
     ...
-    InvalidList: should be one of "one", "two" or an integer
+    MultipleInvalid: should be one of "one", "two" or an integer
 
     Messages are only applied to invalid direct descendants of the schema:
 
@@ -487,7 +489,7 @@ def msg(schema, msg):
     >>> validate([['three']])
     Traceback (most recent call last):
     ...
-    InvalidList: invalid list value @ data[0][0]
+    MultipleInvalid: invalid list value @ data[0][0]
     """
     schema = Schema(schema)
     def f(v):
@@ -526,13 +528,13 @@ def true(msg=None):
     >>> validate([])
     Traceback (most recent call last):
     ...
-    InvalidList: value was not true
+    MultipleInvalid: value was not true
     >>> validate([1])
     [1]
     >>> validate(False)
     Traceback (most recent call last):
     ...
-    InvalidList: value was not true
+    MultipleInvalid: value was not true
 
     ...and so on.
     """
@@ -571,7 +573,7 @@ def boolean(msg=None):
     >>> validate('moo')
     Traceback (most recent call last):
     ...
-    InvalidList: expected boolean
+    MultipleInvalid: expected boolean
     """
     def f(v):
         try:
@@ -603,7 +605,7 @@ def any(*validators, **kwargs):
     >>> validate('moo')
     Traceback (most recent call last):
     ...
-    InvalidList: no valid value found
+    MultipleInvalid: no valid value found
     """
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val) for val in validators]
@@ -654,7 +656,7 @@ def match(pattern, msg=None):
     >>> validate('123EF4')
     Traceback (most recent call last):
     ...
-    InvalidList: does not match regular expression
+    MultipleInvalid: does not match regular expression
 
     Pattern may also be a compiled regular expression:
 
