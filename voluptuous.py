@@ -252,6 +252,14 @@ class Schema(object):
             >>> validate({'10': 'twenty'})
             {10: 'twenty'}
 
+        Custom message for required key
+
+            >>> validate = Schema({required('one', 'required'): 'two'})
+            >>> validate({})
+            Traceback (most recent call last):
+            ...
+            InvalidList: required @ data['one']
+
         (This is to avoid unexpected surprises.)
         """
         if not isinstance(data, dict):
@@ -301,7 +309,7 @@ class Schema(object):
                     errors.append(Invalid('extra keys not allowed',
                             key_path))
         for key in required_keys:
-            errors.append(Invalid('required key not provided', path + [key]))
+            errors.append(Invalid(key.msg or 'required key not provided', path + [key]))
         if errors:
             raise InvalidList(errors)
         return out
