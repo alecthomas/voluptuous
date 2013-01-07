@@ -260,7 +260,7 @@ class Schema(object):
             >>> validate({})
             Traceback (most recent call last):
             ...
-            InvalidList: required @ data['one']
+            MultipleInvalid: required @ data['one']
 
         (This is to avoid unexpected surprises.)
         """

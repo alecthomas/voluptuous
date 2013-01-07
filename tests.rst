@@ -13,22 +13,22 @@ It should show the exact index and container type, in this case a list value::
   >>> schema(['one', 'two'])
   Traceback (most recent call last):
   ...
-  InvalidList: invalid list value @ data[1]
+  MultipleInvalid: invalid list value @ data[1]
 
 It should also be accurate for nested values::
 
   >>> schema([{'two': 'nine'}])
   Traceback (most recent call last):
   ...
-  InvalidList: not a valid value for dictionary value @ data[0]['two']
+  MultipleInvalid: not a valid value for dictionary value @ data[0]['two']
   >>> schema([{'four': ['nine']}])
   Traceback (most recent call last):
   ...
-  InvalidList: invalid list value @ data[0]['four'][0]
+  MultipleInvalid: invalid list value @ data[0]['four'][0]
   >>> schema([{'six': {'seven': 'nine'}}])
   Traceback (most recent call last):
   ...
-  InvalidList: not a valid value for dictionary value @ data[0]['six']['seven']
+  MultipleInvalid: not a valid value for dictionary value @ data[0]['six']['seven']
 
 Errors should be reported depth-first::
 
@@ -50,7 +50,7 @@ Voluptuous supports validation when extra fields are present in the data::
   >>> schema({'two': 2})
   Traceback (most recent call last):
   ...
-  InvalidList: extra keys not allowed @ data['two']
+  MultipleInvalid: extra keys not allowed @ data['two']
 
 
 dict, list, and tuple should be available as type validators::
@@ -88,7 +88,7 @@ Multiple errors are reported::
   >>> schema = Schema({'one': 1, 'two': 2})
   >>> try:
   ...   schema({'one': 2, 'two': 3, 'three': 4})
-  ... except InvalidList, e:
+  ... except MultipleInvalid, e:
   ...   errors = sorted(e.errors, key=lambda k: str(k))
   ...   print [str(i) for i in errors]  # doctest: +NORMALIZE_WHITESPACE
   ["extra keys not allowed @ data['three']",
@@ -97,7 +97,7 @@ Multiple errors are reported::
   >>> schema = Schema([[1], [2], [3]])
   >>> try:
   ...   schema([1, 2, 3])
-  ... except InvalidList, e:
+  ... except MultipleInvalid, e:
   ...   print [str(i) for i in e.errors]  # doctest: +NORMALIZE_WHITESPACE
   ['invalid list value @ data[0]',
    'invalid list value @ data[1]',
