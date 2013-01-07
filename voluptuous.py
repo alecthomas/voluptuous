@@ -309,7 +309,8 @@ class Schema(object):
                     errors.append(Invalid('extra keys not allowed',
                             key_path))
         for key in required_keys:
-            errors.append(Invalid(key.msg or 'required key not provided', path + [key]))
+            msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
+            errors.append(Invalid(msg, path + [key]))
         if errors:
             raise InvalidList(errors)
         return out
