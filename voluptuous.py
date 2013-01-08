@@ -84,8 +84,13 @@ Validate like so:
 
 import os
 import re
-import types
-import urlparse
+import sys
+if sys.version > '3':
+    import urllib.parse as urlparse
+    long = int
+    unicode = str
+else:
+    import urlparse
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -119,7 +124,7 @@ class Invalid(Error):
     """
 
     def __init__(self, message, path=None):
-        Exception.__init__(self, message)
+        Error.__init__(self,  message)
         self.path = path or []
 
     @property
@@ -191,11 +196,11 @@ class Schema(object):
             if type_ is type:
                 type_ = schema
             if type_ in (int, long, str, unicode, float, complex, object,
-                         list, dict, types.NoneType) or callable(schema):
+                         list, dict, type(None)) or callable(schema):
                 return self.validate_scalar(path, schema, data)
         except MultipleInvalid:
             raise
-        except Invalid, e:
+        except Invalid as e:
             raise MultipleInvalid([e])
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
@@ -275,15 +280,15 @@ class Schema(object):
                             isinstance(key, required))
         error = None
         errors = []
-        for key, value in data.iteritems():
+        for key, value in data.items():
             key_path = path + [key]
-            for skey, svalue in schema.iteritems():
+            for skey, svalue in schema.items():
                 if skey is extra:
                     new_key = key
                 else:
                     try:
                         new_key = self.validate(key_path, skey, key)
-                    except Invalid, e:
+                    except Invalid as e:
                         if len(e.path) > len(key_path):
                             raise
                         if not error or len(e.path) > len(error.path):
@@ -293,7 +298,7 @@ class Schema(object):
                 # the value is invalid we immediately throw an exception.
                 try:
                     out[new_key] = self.validate(key_path, svalue, value)
-                except Invalid, e:
+                except Invalid as e:
                     if len(e.path) > len(key_path):
                         errors.append(e)
                     else:
@@ -351,7 +356,7 @@ class Schema(object):
                 try:
                     out.append(self.validate(index_path, s, value))
                     break
-                except Invalid, e:
+                except Invalid as e:
                     if len(e.path) > len(index_path):
                         raise
                     invalid = e
@@ -427,9 +432,9 @@ class Schema(object):
         elif callable(schema):
             try:
                 return schema(data)
-            except ValueError, e:
+            except ValueError as e:
                 raise Invalid('not a valid value', path)
-            except Invalid, e:
+            except Invalid as e:
                 raise Invalid(e.msg, path + e.path)
         else:
             if data != schema:
@@ -448,7 +453,7 @@ class marker(object):
     def __call__(self, v):
         try:
             return self._schema(v)
-        except Invalid, e:
+        except Invalid as e:
             if not self.msg or len(e.path) > 1:
                 raise
             raise Invalid(self.msg)
@@ -496,7 +501,7 @@ def msg(schema, msg):
     def f(v):
         try:
             return schema(v)
-        except Invalid, e:
+        except Invalid as e:
             if len(e.path) > 1:
                 raise e
             else:
@@ -615,7 +620,7 @@ def any(*validators, **kwargs):
         for schema in schemas:
             try:
                 return schema(v)
-            except Invalid, e:
+            except Invalid as e:
                 if len(e.path) > 1:
                     raise
                 pass
@@ -642,7 +647,7 @@ def all(*validators, **kwargs):
         try:
             for schema in schemas:
                 v = schema(v)
-        except Invalid, e:
+        except Invalid as e:
             raise Invalid(msg or e.msg)
         return v
     return f

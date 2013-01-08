@@ -35,9 +35,9 @@ Errors should be reported depth-first::
   >>> validate = Schema({'one': {'two': 'three', 'four': 'five'}})
   >>> try:
   ...   validate({'one': {'four': 'six'}})
-  ... except Invalid, e:
-  ...   print e
-  ...   print e.path
+  ... except Invalid as e:
+  ...   print(e)
+  ...   print(e.path)
   not a valid value for dictionary value @ data['one']['four']
   ['one', 'four']
 
@@ -61,7 +61,7 @@ dict, list, and tuple should be available as type validators::
   [1, 2, 3]
   >>> Schema(tuple)((1,2,3))
   (1, 2, 3)
-  
+
 
 Validation should return instances of the right types when the types are
 subclasses of dict or list::
@@ -75,7 +75,7 @@ subclasses of dict or list::
   >>> type(d) is Dict
   True
   >>> class List(list):
-  ...   pass    
+  ...   pass
   >>>
   >>> l = Schema(list)(List([1,2,3]))
   >>> l
@@ -88,17 +88,17 @@ Multiple errors are reported::
   >>> schema = Schema({'one': 1, 'two': 2})
   >>> try:
   ...   schema({'one': 2, 'two': 3, 'three': 4})
-  ... except MultipleInvalid, e:
+  ... except MultipleInvalid as e:
   ...   errors = sorted(e.errors, key=lambda k: str(k))
-  ...   print [str(i) for i in errors]  # doctest: +NORMALIZE_WHITESPACE
+  ...   print([str(i) for i in errors])  # doctest: +NORMALIZE_WHITESPACE
   ["extra keys not allowed @ data['three']",
    "not a valid value for dictionary value @ data['one']",
    "not a valid value for dictionary value @ data['two']"]
   >>> schema = Schema([[1], [2], [3]])
   >>> try:
   ...   schema([1, 2, 3])
-  ... except MultipleInvalid, e:
-  ...   print [str(i) for i in e.errors]  # doctest: +NORMALIZE_WHITESPACE
+  ... except MultipleInvalid as e:
+  ...   print([str(i) for i in e.errors])  # doctest: +NORMALIZE_WHITESPACE
   ['invalid list value @ data[0]',
    'invalid list value @ data[1]',
    'invalid list value @ data[2]']
