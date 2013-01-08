@@ -1,6 +1,9 @@
 Voluptuous is a Python data validation library
 ==============================================
 
+.. image:: https://secure.travis-ci.org/alecthomas/voluptuous.png?branch=master
+  :target: https://travis-ci.org/alecthomas/voluptuous
+
 Voluptuous, *despite* the name, is a Python data validation library. It is
 primarily intended for validating data coming into Python as JSON, YAML,
 etc.
