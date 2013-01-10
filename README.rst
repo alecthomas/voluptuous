@@ -39,9 +39,9 @@ express the constraints of the API. According to the API, ``per_page`` should
 be restricted to at most 20, for example. To describe the semantics of the API
 more accurately, our schema will need to be more thoroughly defined::
 
-  >>> from voluptuous import required, all, length, range
+  >>> from voluptuous import Required, all, length, range
   >>> schema = Schema({
-  ...   required('q'): all(str, length(min=1)),
+  ...   Required('q'): all(str, length(min=1)),
   ...   'per_page': all(int, range(min=1, max=20)),
   ...   'page': all(int, range(min=0)),
   ... })
@@ -195,8 +195,8 @@ This behaviour can be altered on a per-schema basis with ``Schema(..., extra=Tru
 It can also be overridden per-dictionary by using the catch-all marker token
 ``extra`` as a key::
 
-  >>> from voluptuous import extra
-  >>> schema = Schema({1: {extra: object}})
+  >>> from voluptuous import Extra
+  >>> schema = Schema({1: {Extra: object}})
   >>> schema({1: {'foo': 'bar'}})
   {1: {'foo': 'bar'}}
 
@@ -218,7 +218,7 @@ Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
 
 And per-key, with the marker token ``required(key)``::
 
-  >>> schema = Schema({required(1): 2, 3: 4})
+  >>> schema = Schema({Required(1): 2, 3: 4})
   >>> schema({3: 4})
   Traceback (most recent call last):
   ...
@@ -231,8 +231,8 @@ Optional dictionary keys
 If a schema has ``required=True``, keys may be individually marked as optional
 using the marker token ``optional(key)``::
 
-  >>> from voluptuous import optional
-  >>> schema = Schema({1: 2, optional(3): 4}, required=True)
+  >>> from voluptuous import Optional
+  >>> schema = Schema({1: 2, Optional(3): 4}, required=True)
   >>> schema({})
   Traceback (most recent call last):
   ...
