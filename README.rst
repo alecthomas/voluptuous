@@ -39,11 +39,11 @@ express the constraints of the API. According to the API, ``per_page`` should
 be restricted to at most 20, for example. To describe the semantics of the API
 more accurately, our schema will need to be more thoroughly defined::
 
-  >>> from voluptuous import Required, all, length, range
+  >>> from voluptuous import Required, All, Length, Range
   >>> schema = Schema({
-  ...   Required('q'): all(str, length(min=1)),
-  ...   'per_page': all(int, range(min=1, max=20)),
-  ...   'page': all(int, range(min=0)),
+  ...   Required('q'): All(str, Length(min=1)),
+  ...   'per_page': All(int, Range(min=1, max=20)),
+  ...   'page': All(int, Range(min=0)),
   ... })
 
 This schema fully enforces the interface defined in Twitter's documentation,
@@ -143,11 +143,11 @@ the implementation; it may check that a value is a valid username with
 ``pwd.getpwnam()``, it may check that a value is of a specific type, and so on.
 
 In addition to simply determining if a value is valid, validators may mutate
-the value into a valid form. An example of this is the ``coerce(type)``
+the value into a valid form. An example of this is the ``Coerce(type)``
 function, which returns a function that coerces its argument to the given
 type::
 
-  def coerce(type, msg=None):
+  def Coerce(type, msg=None):
       """Coerce a value to a type.
 
       If the type constructor throws a ValueError, the value will be marked as
@@ -216,7 +216,7 @@ Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
   ...
   MultipleInvalid: required key not provided @ data[1]
 
-And per-key, with the marker token ``required(key)``::
+And per-key, with the marker token ``Required(key)``::
 
   >>> schema = Schema({Required(1): 2, 3: 4})
   >>> schema({3: 4})
@@ -229,7 +229,7 @@ And per-key, with the marker token ``required(key)``::
 Optional dictionary keys
 ````````````````````````
 If a schema has ``required=True``, keys may be individually marked as optional
-using the marker token ``optional(key)``::
+using the marker token ``Optional(key)``::
 
   >>> from voluptuous import Optional
   >>> schema = Schema({1: 2, Optional(3): 4}, required=True)

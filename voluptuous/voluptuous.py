@@ -475,6 +475,8 @@ def Extra(_):
     raise SchemaError('"Extra" should never be called')
 
 
+# As extra() is never called there's no way to catch references to the
+# deprecated object, so we just leave an alias here instead.
 extra = Extra
 
 
