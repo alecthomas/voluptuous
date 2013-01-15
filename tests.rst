@@ -43,7 +43,7 @@ Errors should be reported depth-first::
 
 Voluptuous supports validation when extra fields are present in the data::
 
-  >>> schema = Schema({'one': 1, extra: object})
+  >>> schema = Schema({'one': 1, Extra: object})
   >>> schema({'two': 'two', 'one': 2})
   {'two': 'two', 'one': 2}
   >>> schema = Schema({'one': 1})
