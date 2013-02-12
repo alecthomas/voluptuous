@@ -651,7 +651,7 @@ def All(*validators, **kwargs):
             for schema in schemas:
                 v = schema(v)
         except Invalid as e:
-            raise Invalid(msg or e.msg)
+            raise e if msg is None else Invalid(msg)
         return v
     return f
 
