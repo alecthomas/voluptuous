@@ -122,3 +122,16 @@ Classes with custom metaclasses should validate as schemas::
     >>> t = schema(Thing())
     >>> type(t) is Thing
     True
+
+Schemas built with All() should give the same error as the original validator (Issue #26):
+
+    >>> schema = Schema({
+    ...   Required('items'): All([{
+    ...     Required('foo'): str
+    ...   }])
+    ... })
+
+    >>> schema({'items': [{}]})
+    Traceback (most recent call last):
+    ...
+    MultipleInvalid: required key not provided @ data['items'][0]['foo']
