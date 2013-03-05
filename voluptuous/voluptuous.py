@@ -167,16 +167,18 @@ class Schema(object):
     validate and optionally convert the value.
     """
 
-    def __init__(self, schema, required=False, extra=False):
+    def __init__(self, schema, required=False, extra=False, coerce=False):
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
         :param required: Keys defined in the schema must be in the data.
         :param extra: Keys in the data need not have keys in the schema.
+        :param coerce: Whether to coerce values by default.
         """
         self.schema = schema
         self.required = required
         self.extra = extra
+        self._coerce = coerce
 
     def __call__(self, data):
         """Validate data against this schema."""
@@ -195,7 +197,7 @@ class Schema(object):
                 type_ = schema
             if type_ in (int, long, str, unicode, float, complex, object,
                          list, dict, type(None)) or callable(schema):
-                return self.validate_scalar(path, schema, data)
+                return self.validate_scalar(path, schema, data, self._coerce)
         except MultipleInvalid:
             raise
         except Invalid as e:
@@ -400,7 +402,7 @@ class Schema(object):
         return self._validate_sequence(path, schema, data, seq_type=list)
 
     @staticmethod
-    def validate_scalar(path, schema, data):
+    def validate_scalar(path, schema, data, coerce=False):
         """A scalar value.
 
         The schema can either be a value or a type.
@@ -422,11 +424,16 @@ class Schema(object):
         Traceback (most recent call last):
         ...
         Invalid: not a valid value
+
+        >>> Schema.validate_scalar([], int, '10', coerce=True)
+        10
         """
         if isinstance(schema, type):
-            if not isinstance(data, schema):
+            if isinstance(data, schema):
+                return data
+            elif not coerce:
                 raise Invalid('expected %s' % schema.__name__, path)
-        elif callable(schema):
+        if callable(schema):
             try:
                 return schema(data)
             except ValueError as e:

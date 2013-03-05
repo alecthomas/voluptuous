@@ -123,7 +123,7 @@ Classes with custom metaclasses should validate as schemas::
     >>> type(t) is Thing
     True
 
-Schemas built with All() should give the same error as the original validator (Issue #26):
+Schemas built with All() should give the same error as the original validator (Issue #26)::
 
     >>> schema = Schema({
     ...   Required('items'): All([{
@@ -135,3 +135,9 @@ Schemas built with All() should give the same error as the original validator (I
     Traceback (most recent call last):
     ...
     MultipleInvalid: required key not provided @ data['items'][0]['foo']
+
+Schemas can coerce values by default::
+
+  >>> schema = Schema({'key': int}, coerce=True)
+  >>> schema({'key': '10'})
+  {'key': 10}
