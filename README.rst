@@ -142,6 +142,22 @@ encounter invalid data. The criteria for determining validity is entirely up to
 the implementation; it may check that a value is a valid username with
 ``pwd.getpwnam()``, it may check that a value is of a specific type, and so on.
 
+The simplest kind of validator is a Python function that raises `ValueError`
+when its argument is invalid. Conveniently, many builtin Python functions have
+this property. Here's an example of a date validator::
+
+  >>> from datetime import datetime
+  >>> def Date(fmt='%Y-%m-%d'):
+  ...   return lambda v: datetime.strptime(v, fmt)
+
+  >>> schema = Schema(Date())
+  >>> schema('2013-03-03')
+  datetime.datetime(2013, 3, 3, 0, 0)
+  >>> schema('2013-03')
+  Traceback (most recent call last):
+  ...
+  MultipleInvalid: not a valid value
+
 In addition to simply determining if a value is valid, validators may mutate
 the value into a valid form. An example of this is the ``Coerce(type)``
 function, which returns a function that coerces its argument to the given

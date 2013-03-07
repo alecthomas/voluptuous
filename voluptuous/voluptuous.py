@@ -82,6 +82,7 @@ Validate like so:
                               'Users': {'snmp_community': 'monkey'}}}}
 """
 
+from functools import wraps
 import os
 import re
 import sys
@@ -508,6 +509,7 @@ def Msg(schema, msg):
     """
     schema = Schema(schema)
 
+    @wraps(Msg)
     def f(v):
         try:
             return schema(v)
@@ -519,12 +521,73 @@ def Msg(schema, msg):
     return f
 
 
+def message(default=None):
+    """Convenience decorator to allow functions to provide a message.
+
+    Set a default message:
+
+        >>> @message('not an integer')
+        ... def isint(v):
+        ...   return int(v)
+
+        >>> validate = Schema(isint())
+        >>> validate('a')
+        Traceback (most recent call last):
+        ...
+        MultipleInvalid: not an integer
+
+    The message can be overridden on a per validator basis:
+
+        >>> validate = Schema(isint('bad'))
+        >>> validate('a')
+        Traceback (most recent call last):
+        ...
+        MultipleInvalid: bad
+    """
+    def decorator(f):
+        @wraps(f)
+        def check(msg=None):
+            @wraps(f)
+            def wrapper(*args, **kwargs):
+                try:
+                    return f(*args, **kwargs)
+                except ValueError:
+                    raise Invalid(msg or default or 'invalid value')
+            return wrapper
+        return check
+    return decorator
+
+
+def truth(f):
+    """Convenience decorator to convert truth functions into validators.
+
+        >>> @truth
+        ... def isdir(v):
+        ...   return os.path.isdir(v)
+        >>> validate = Schema(isdir)
+        >>> validate('/')
+        '/'
+        >>> validate('/notavaliddir')
+        Traceback (most recent call last):
+        ...
+        MultipleInvalid: not a valid value
+    """
+    @wraps(f)
+    def check(v):
+        t = f(v)
+        if not t:
+            raise ValueError
+        return v
+    return check
+
+
 def Coerce(type, msg=None):
     """Coerce a value to a type.
 
     If the type constructor throws a ValueError, the value will be marked as
     Invalid.
     """
+    @wraps(Coerce)
     def f(v):
         try:
             return type(v)
@@ -533,7 +596,9 @@ def Coerce(type, msg=None):
     return f
 
 
-def IsTrue(msg=None):
+@message('value was not true')
+@truth
+def IsTrue(v):
     """Assert that a value is true, in the Python sense.
 
     >>> validate = Schema(IsTrue())
@@ -554,14 +619,11 @@ def IsTrue(msg=None):
 
     ...and so on.
     """
-    def f(v):
-        if v:
-            return v
-        raise Invalid(msg or 'value was not true')
-    return f
+    return v
 
 
-def IsFalse(msg=None):
+@message('value was not false')
+def IsFalse(v):
     """Assert that a value is false, in the Python sense.
 
     (see :func:`IsTrue` for more detail)
@@ -570,14 +632,13 @@ def IsFalse(msg=None):
     >>> validate([])
     []
     """
-    def f(v):
-        if not v:
-            return v
-        raise Invalid(msg or 'value was not false')
-    return f
+    if v:
+        raise ValueError
+    return v
 
 
-def Boolean(msg=None):
+@message('expected boolean')
+def Boolean(v):
     """Convert human-readable boolean values to a bool.
 
     Accepted values are 1, true, yes, on, enable, and their negatives.
@@ -591,19 +652,14 @@ def Boolean(msg=None):
     ...
     MultipleInvalid: expected boolean
     """
-    def f(v):
-        try:
-            if isinstance(v, basestring):
-                v = v.lower()
-                if v in ('1', 'true', 'yes', 'on', 'enable'):
-                    return True
-                if v in ('0', 'false', 'no', 'off', 'disable'):
-                    return False
-                raise Invalid(msg or 'expected boolean')
-            return bool(v)
-        except ValueError:
-            raise Invalid(msg or 'expected boolean')
-    return f
+    if isinstance(v, basestring):
+        v = v.lower()
+        if v in ('1', 'true', 'yes', 'on', 'enable'):
+            return True
+        if v in ('0', 'false', 'no', 'off', 'disable'):
+            return False
+        raise ValueError
+    return bool(v)
 
 
 def Any(*validators, **kwargs):
@@ -626,6 +682,7 @@ def Any(*validators, **kwargs):
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val) for val in validators]
 
+    @wraps(Any)
     def f(v):
         for schema in schemas:
             try:
@@ -706,45 +763,39 @@ def Replace(pattern, substitution, msg=None):
     return f
 
 
-def Url(msg=None):
+@message('expected a URL')
+def Url(v):
     """Verify that the value is a URL."""
-    def f(v):
-        try:
-            urlparse.urlparse(v)
-            return v
-        except:
-            raise Invalid(msg or 'expected a URL')
-    return f
+    try:
+        urlparse.urlparse(v)
+        return v
+    except:
+        raise ValueError
 
 
-def IsFile(msg=None):
+@message('not a file')
+@truth
+def IsFile(v):
     """Verify the file exists."""
-    def f(v):
-        if os.path.isfile(v):
-            return v
-        else:
-            raise Invalid(msg or 'not a file')
-    return f
+    return os.path.isfile(v)
 
 
-def IsDir(msg=None):
-    """Verify the directory exists."""
-    def f(v):
-        if os.path.isdir(v):
-            return v
-        else:
-            raise Invalid(msg or 'not a directory')
-    return f
+@message('not a directory')
+@truth
+def IsDir(v):
+    """Verify the directory exists.
+
+    >>> IsDir()('/')
+    '/'
+    """
+    return os.path.isdir(v)
 
 
-def PathExists(msg=None):
+@message('path does not exist')
+@truth
+def PathExists(v):
     """Verify the path exists, regardless of its type."""
-    def f(v):
-        if os.path.exists(v):
-            return v
-        else:
-            raise Invalid(msg or 'path does not exist')
-    return f
+    return os.path.exists(v)
 
 
 def Range(min=None, max=None, msg=None):
@@ -754,6 +805,7 @@ def Range(min=None, max=None, msg=None):
 
     :raises Invalid: If the value is outside the range.
     """
+    @wraps(Range)
     def f(v):
         if min is not None and v < min:
             raise Invalid(msg or 'value must be at least %s' % min)
@@ -768,6 +820,7 @@ def Clamp(min=None, max=None, msg=None):
 
     Either min or max may be omitted.
     """
+    @wraps(Clamp)
     def f(v):
         if min is not None and v < min:
             v = min
@@ -779,6 +832,7 @@ def Clamp(min=None, max=None, msg=None):
 
 def Length(min=None, max=None, msg=None):
     """The length of a value must be in a certain range."""
+    @wraps(Length)
     def f(v):
         if min is not None and len(v) < min:
             raise Invalid(msg or 'length of value must be at least %s' % min)
@@ -835,6 +889,7 @@ def DefaultTo(default_value, msg=None):
     >>> s(None)
     42
     """
+    @wraps(DefaultTo)
     def f(v):
         if v is None:
             v = default_value
