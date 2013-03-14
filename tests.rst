@@ -135,9 +135,3 @@ Schemas built with All() should give the same error as the original validator (I
     Traceback (most recent call last):
     ...
     MultipleInvalid: required key not provided @ data['items'][0]['foo']
-
-Schemas can coerce values by default::
-
-  >>> schema = Schema({'key': int}, coerce=True)
-  >>> schema({'key': '10'})
-  {'key': 10}

@@ -95,7 +95,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.6.1'
+__version__ = '0.7.0'
 
 
 class Undefined(object):
@@ -168,45 +168,47 @@ class Schema(object):
     validate and optionally convert the value.
     """
 
-    def __init__(self, schema, required=False, extra=False, coerce=False):
+    def __init__(self, schema, required=False, extra=False):
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
         :param required: Keys defined in the schema must be in the data.
         :param extra: Keys in the data need not have keys in the schema.
-        :param coerce: Whether to coerce values by default.
         """
         self.schema = schema
         self.required = required
         self.extra = extra
-        self._coerce = coerce
+        self._compiled = self._compile(schema)
 
     def __call__(self, data):
         """Validate data against this schema."""
-        return self.validate([], self.schema, data)
-
-    def validate(self, path, schema, data):
         try:
-            if isinstance(schema, dict):
-                return self.validate_dict(path, schema, data)
-            elif isinstance(schema, list):
-                return self.validate_list(path, schema, data)
-            elif isinstance(schema, tuple):
-                return self.validate_tuple(path, schema, data)
-            type_ = type(schema)
-            if type_ is type:
-                type_ = schema
-            if type_ in (int, long, str, unicode, float, complex, object,
-                         list, dict, type(None)) or callable(schema):
-                return self.validate_scalar(path, schema, data, self._coerce)
+            return self._compiled([], data)
         except MultipleInvalid:
             raise
         except Invalid as e:
             raise MultipleInvalid([e])
+        # return self.validate([], self.schema, data)
+
+    def _compile(self, schema):
+        if schema is Extra:
+            return lambda _, v: v
+        if isinstance(schema, dict):
+            return self._compile_dict(schema)
+        elif isinstance(schema, list):
+            return self._compile_list(schema)
+        elif isinstance(schema, tuple):
+            return self._compile_tuple(schema)
+        type_ = type(schema)
+        if type_ is type:
+            type_ = schema
+        if type_ in (int, long, str, unicode, float, complex, object,
+                     list, dict, type(None)) or callable(schema):
+            return _compile_scalar(schema)
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
 
-    def validate_dict(self, path, schema, data):
+    def _compile_dict(self, schema):
         """Validate a dictionary.
 
         A dictionary schema can contain a set of values, or at most one
@@ -270,59 +272,66 @@ class Schema(object):
 
         (This is to avoid unexpected surprises.)
         """
-        if not isinstance(data, dict):
-            raise Invalid('expected a dictionary', path)
+        default_required_keys = set(key for key in schema
+                                    if
+                                    (self.required and not isinstance(key, Optional))
+                                    or
+                                    isinstance(key, Required))
 
-        out = type(data)()
-        required_keys = set(key for key in schema
-                            if
-                            (self.required and not isinstance(key, Optional))
-                            or
-                            isinstance(key, Required))
-        error = None
-        errors = []
-        for key, value in data.items():
-            key_path = path + [key]
-            for skey, svalue in schema.items():
-                if skey is Extra:
-                    new_key = key
-                else:
+        _compiled_schema = {}
+        for skey, svalue in schema.iteritems():
+            new_key = self._compile(skey)
+            new_value = self._compile(svalue)
+            _compiled_schema[skey] = (new_key, new_value)
+
+        def validate_dict(path, data):
+            if not isinstance(data, dict):
+                raise Invalid('expected a dictionary', path)
+
+            required_keys = default_required_keys.copy()
+            out = type(data)()
+            error = None
+            errors = []
+            for key, value in data.iteritems():
+                key_path = path + [key]
+                for skey, (ckey, cvalue) in _compiled_schema.iteritems():
                     try:
-                        new_key = self.validate(key_path, skey, key)
+                        new_key = ckey(key_path, key)
                     except Invalid as e:
                         if len(e.path) > len(key_path):
                             raise
                         if not error or len(e.path) > len(error.path):
                             error = e
                         continue
-                # Backtracking is not performed once a key is selected, so if
-                # the value is invalid we immediately throw an exception.
-                try:
-                    out[new_key] = self.validate(key_path, svalue, value)
-                except Invalid as e:
-                    if len(e.path) > len(key_path):
-                        errors.append(e)
-                    else:
-                        errors.append(Invalid(e.msg + ' for dictionary value',
-                                e.path))
+                    # Backtracking is not performed once a key is selected, so if
+                    # the value is invalid we immediately throw an exception.
+                    try:
+                        out[new_key] = cvalue(key_path, value)
+                    except Invalid as e:
+                        if len(e.path) > len(key_path):
+                            errors.append(e)
+                        else:
+                            errors.append(Invalid(e.msg + ' for dictionary value', e.path))
+                        break
+
+                    # Key and value okay, mark any Required() fields as found.
+                    required_keys.discard(skey)
                     break
-
-                # Key and value okay, mark any Required() fields as found.
-                required_keys.discard(skey)
-                break
-            else:
-                if self.extra:
-                    out[key] = value
                 else:
-                    errors.append(Invalid('extra keys not allowed', key_path))
-        for key in required_keys:
-            msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-            errors.append(Invalid(msg, path + [key]))
-        if errors:
-            raise MultipleInvalid(errors)
-        return out
+                    if self.extra:
+                        out[key] = value
+                    else:
+                        errors.append(Invalid('extra keys not allowed', key_path))
+            for key in required_keys:
+                msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
+                errors.append(Invalid(msg, path + [key]))
+            if errors:
+                raise MultipleInvalid(errors)
+            return out
 
-    def _validate_sequence(self, path, schema, data, seq_type):
+        return validate_dict
+
+    def _compile_sequence(self, schema, seq_type):
         """Validate a sequence type.
 
         This is a sequence of valid values or validators tried in order.
@@ -337,38 +346,42 @@ class Schema(object):
         >>> validator([1])
         [1]
         """
+        _compiled = [self._compile(s) for s in schema]
         seq_type_name = seq_type.__name__
-        if not isinstance(data, seq_type):
-            raise Invalid('expected a %s' % seq_type_name, path)
 
-        # Empty seq schema, allow any data.
-        if not schema:
-            return data
+        def validate_sequence(path, data):
+            if not isinstance(data, seq_type):
+                raise Invalid('expected a %s' % seq_type_name, path)
 
-        out = []
-        invalid = None
-        errors = []
-        index_path = UNDEFINED
-        for i, value in enumerate(data):
-            index_path = path + [i]
+            # Empty seq schema, allow any data.
+            if not schema:
+                return data
+
+            out = []
             invalid = None
-            for s in schema:
-                try:
-                    out.append(self.validate(index_path, s, value))
-                    break
-                except Invalid as e:
-                    if len(e.path) > len(index_path):
-                        raise
-                    invalid = e
-            else:
-                if len(invalid.path) <= len(index_path):
-                    invalid = Invalid('invalid %s value' % seq_type_name, index_path)
-                errors.append(invalid)
-        if errors:
-            raise MultipleInvalid(errors)
-        return type(data)(out)
+            errors = []
+            index_path = UNDEFINED
+            for i, value in enumerate(data):
+                index_path = path + [i]
+                invalid = None
+                for validate in _compiled:
+                    try:
+                        out.append(validate(index_path, value))
+                        break
+                    except Invalid as e:
+                        if len(e.path) > len(index_path):
+                            raise
+                        invalid = e
+                else:
+                    if len(invalid.path) <= len(index_path):
+                        invalid = Invalid('invalid %s value' % seq_type_name, index_path)
+                    errors.append(invalid)
+            if errors:
+                raise MultipleInvalid(errors)
+            return type(data)(out)
+        return validate_sequence
 
-    def validate_tuple(self, path, schema, data):
+    def _compile_tuple(self, schema):
         """Validate a tuple.
 
         A tuple is a sequence of valid values or validators tried in order.
@@ -383,9 +396,9 @@ class Schema(object):
         >>> validator((1,))
         (1,)
         """
-        return self._validate_sequence(path, schema, data, seq_type=tuple)
+        return self._compile_sequence(schema, tuple)
 
-    def validate_list(self, path, schema, data):
+    def _compile_list(self, schema):
         """Validate a list.
 
         A list is a sequence of valid values or validators tried in order.
@@ -400,51 +413,56 @@ class Schema(object):
         >>> validator([1])
         [1]
         """
-        return self._validate_sequence(path, schema, data, seq_type=list)
+        return self._compile_sequence(schema, list)
 
-    @staticmethod
-    def validate_scalar(path, schema, data, coerce=False):
-        """A scalar value.
 
-        The schema can either be a value or a type.
+def _compile_scalar(schema):
+    """A scalar value.
 
-        >>> Schema.validate_scalar([], int, 1)
-        1
-        >>> Schema.validate_scalar([], float, '1')
-        Traceback (most recent call last):
-        ...
-        Invalid: expected float
+    The schema can either be a value or a type.
 
-        Callables have
-        >>> Schema.validate_scalar([], lambda v: float(v), '1')
-        1.0
+    >>> _compile_scalar(int)([], 1)
+    1
+    >>> _compile_scalar(float)([], '1')
+    Traceback (most recent call last):
+    ...
+    Invalid: expected float
 
-        As a convenience, ValueError's are trapped:
+    Callables have
+    >>> _compile_scalar(lambda v: float(v))([], '1')
+    1.0
 
-        >>> Schema.validate_scalar([], lambda v: float(v), 'a')
-        Traceback (most recent call last):
-        ...
-        Invalid: not a valid value
+    As a convenience, ValueError's are trapped:
 
-        >>> Schema.validate_scalar([], int, '10', coerce=True)
-        10
-        """
-        if isinstance(schema, type):
+    >>> _compile_scalar(lambda v: float(v))([], 'a')
+    Traceback (most recent call last):
+    ...
+    Invalid: not a valid value
+    """
+    if isinstance(schema, type):
+        def validate_instance(path, data):
             if isinstance(data, schema):
                 return data
-            elif not coerce:
+            else:
                 raise Invalid('expected %s' % schema.__name__, path)
-        if callable(schema):
+        return validate_instance
+
+    if callable(schema):
+        def validate_callable(path, data):
             try:
                 return schema(data)
             except ValueError as e:
                 raise Invalid('not a valid value', path)
             except Invalid as e:
                 raise Invalid(e.msg, path + e.path)
-        else:
-            if data != schema:
-                raise Invalid('not a valid value', path)
+        return validate_callable
+
+    def validate_value(path, data):
+        if data != schema:
+            raise Invalid('not a valid value', path)
         return data
+
+    return validate_value
 
 
 class Marker(object):
@@ -731,7 +749,7 @@ def Match(pattern, msg=None):
     ...
     MultipleInvalid: does not match regular expression
 
-    Pattern may also be a compiled regular expression:
+    Pattern may also be a _compiled regular expression:
 
     >>> validate = Schema(Match(re.compile(r'0x[A-F0-9]+', re.I)))
     >>> validate('0x123ef4')
