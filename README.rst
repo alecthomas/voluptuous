@@ -274,7 +274,7 @@ attribute-value pair in the corresponding object::
   ...     def __repr__(self):
   ...         return '<Structure(q={0.q!r})>'.format(self)
   ...
-  >>> schema = Schema(Object(Structure, {'q': 'one'}))
+  >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
   >>> schema(Structure(q='one'))
   <Structure(q='one')>
 
