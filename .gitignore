@@ -1,0 +1,13 @@
+*.gem
+*.swp
+*.pyc
+*#*
+build
+dist
+.svn/*
+.DS_Store
+*.so
+.Python
+*.egg-info
+.coverage
+.tox
