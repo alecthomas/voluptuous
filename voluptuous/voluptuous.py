@@ -193,6 +193,8 @@ class Schema(object):
     def _compile(self, schema):
         if schema is Extra:
             return lambda _, v: v
+        if isinstance(schema, Object):
+            return self._compile_object(schema)
         if isinstance(schema, dict):
             return self._compile_dict(schema)
         elif isinstance(schema, list):
@@ -207,6 +209,86 @@ class Schema(object):
             return _compile_scalar(schema)
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
+
+    def _compile_object(self, schema):
+        """Validate an object.
+
+        Has the same behavior as dictionary validator but work with object
+        attributes.
+
+        For example:
+
+            >>> class Structure(object):
+            ...     def __init__(self, one=None, three=None):
+            ...         self.one = one
+            ...         self.three = three
+            ...
+            >>> validate = Schema(Object(Structure, {'one': 'two', 'three': 'four'}))
+            >>> validate(Structure(one='three'))
+            Traceback (most recent call last):
+            ...
+            MultipleInvalid: not a valid value for object value @ data['one']
+
+        """
+        default_required_keys = set(
+            key for key in schema
+                if (self.required and not isinstance(key, Optional))
+                    or isinstance(key, Required))
+
+        _compiled_schema = {}
+        for skey, svalue in schema.iteritems():
+            new_key = self._compile(skey)
+            new_value = self._compile(svalue)
+            _compiled_schema[skey] = (new_key, new_value)
+
+        def validate_object(path, data):
+            if schema.cls is not None and not isinstance(data, schema.cls):
+                raise Invalid('expected a {0!r}'.format(schema.cls), path)
+
+            required_keys = default_required_keys.copy()
+            out = type(data)()
+            error = None
+            errors = []
+            for key, value in _iterate_object(data):
+                if value is None:
+                    continue
+                key_path = path + [key]
+                for skey, (ckey, cvalue) in _compiled_schema.iteritems():
+                    try:
+                        new_key = ckey(key_path, key)
+                    except Invalid as e:
+                        if len(e.path) > len(key_path):
+                            raise
+                        if not error or len(e.path) > len(error.path):
+                            error = e
+                        continue
+                    # Backtracking is not performed once a key is selected, so if
+                    # the value is invalid we immediately throw an exception.
+                    try:
+                        setattr(out, new_key, cvalue(key_path, value))
+                    except Invalid as e:
+                        if len(e.path) > len(key_path):
+                            errors.append(e)
+                        else:
+                            errors.append(Invalid(e.msg + ' for object value', e.path))
+                        break
+
+                    # Key and value okay, mark any Required() fields as found.
+                    required_keys.discard(skey)
+                    break
+                else:
+                    if self.extra:
+                        setattr(out, key, value)
+                    else:
+                        errors.append(Invalid('extra keys not allowed', key_path))
+            for key in required_keys:
+                msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
+                errors.append(Invalid(msg, path + [key]))
+            if errors:
+                raise MultipleInvalid(errors)
+            return out
+
+        return validate_object
 
     def _compile_dict(self, schema):
         """Validate a dictionary.
@@ -463,6 +545,37 @@ def _compile_scalar(schema):
         return data
 
     return validate_value
+
+
+def _iterate_object(obj):
+    """Return iterator over object attributes. Respect objects with
+    defined __slots__.
+
+    """
+    try:
+        d = vars(obj)
+    except TypeError:
+        pass
+    else:
+        for item in d.iteritems():
+            yield item
+    try:
+        slots = obj.__slots__
+    except AttributeError:
+        pass
+    else:
+        for key in slots:
+            if key != '__dict__':
+                yield (key, getattr(obj, key))
+    raise StopIteration()
+
+
+class Object(dict):
+    """Indicate that we should work with attributes, not keys."""
+
+    def __init__(self, cls, schema):
+        self.cls = cls
+        super(Object, self).__init__(schema)
 
 
 class Marker(object):
