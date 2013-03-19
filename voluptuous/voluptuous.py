@@ -83,6 +83,7 @@ Validate like so:
 """
 
 from functools import wraps
+from itertools import ifilter
 import os
 import re
 import sys
@@ -193,6 +194,8 @@ class Schema(object):
     def _compile(self, schema):
         if schema is Extra:
             return lambda _, v: v
+        if isinstance(schema, Object):
+            return self._compile_object(schema)
         if isinstance(schema, dict):
             return self._compile_dict(schema)
         elif isinstance(schema, list):
@@ -207,6 +210,98 @@ class Schema(object):
             return _compile_scalar(schema)
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
+
+    def _compile_mapping(self, schema, invalid_msg=None):
+        """Create validator for given mapping."""
+        invalid_msg = ' ' + (invalid_msg or 'for mapping value')
+        default_required_keys = set(key for key in schema
+                                    if
+                                    (self.required and not isinstance(key, Optional))
+                                    or
+                                    isinstance(key, Required))
+
+        _compiled_schema = {}
+        for skey, svalue in schema.iteritems():
+            new_key = self._compile(skey)
+            new_value = self._compile(svalue)
+            _compiled_schema[skey] = (new_key, new_value)
+
+        def validate_mapping(path, iterable, out):
+            required_keys = default_required_keys.copy()
+            error = None
+            errors = []
+            for key, value in iterable:
+                key_path = path + [key]
+                for skey, (ckey, cvalue) in _compiled_schema.iteritems():
+                    try:
+                        new_key = ckey(key_path, key)
+                    except Invalid as e:
+                        if len(e.path) > len(key_path):
+                            raise
+                        if not error or len(e.path) > len(error.path):
+                            error = e
+                        continue
+                    # Backtracking is not performed once a key is selected, so if
+                    # the value is invalid we immediately throw an exception.
+                    try:
+                        out[new_key] = cvalue(key_path, value)
+                    except Invalid as e:
+                        if len(e.path) > len(key_path):
+                            errors.append(e)
+                        else:
+                            errors.append(Invalid(e.msg + invalid_msg, e.path))
+                        break
+
+                    # Key and value okay, mark any Required() fields as found.
+                    required_keys.discard(skey)
+                    break
+                else:
+                    if self.extra:
+                        out[key] = value
+                    else:
+                        errors.append(Invalid('extra keys not allowed', key_path))
+            for key in required_keys:
+                msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
+                errors.append(Invalid(msg, path + [key]))
+            if errors:
+                raise MultipleInvalid(errors)
+            return out
+
+        return validate_mapping
+
+    def _compile_object(self, schema):
+        """Validate an object.
+
+        Has the same behavior as dictionary validator but work with object
+        attributes.
+
+        For example:
+
+            >>> class Structure(object):
+            ...     def __init__(self, one=None, three=None):
+            ...         self.one = one
+            ...         self.three = three
+            ...
+            >>> validate = Schema(Object({'one': 'two', 'three': 'four'}, cls=Structure))
+            >>> validate(Structure(one='three'))
+            Traceback (most recent call last):
+            ...
+            MultipleInvalid: not a valid value for object value @ data['one']
+
+        """
+        base_validate = self._compile_mapping(schema,
+            invalid_msg='for object value')
+
+        def validate_object(path, data):
+            if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
+                raise Invalid('expected a {0!r}'.format(schema.cls), path)
+
+            iterable = _iterate_object(data)
+            iterable = ifilter(lambda item: item[1] is not None, iterable)
+            out = base_validate(path, iterable, {})
+            return type(data)(**out)
+
+        return validate_object
 
     def _compile_dict(self, schema):
         """Validate a dictionary.
@@ -272,62 +367,15 @@ class Schema(object):
 
         (This is to avoid unexpected surprises.)
         """
-        default_required_keys = set(key for key in schema
-                                    if
-                                    (self.required and not isinstance(key, Optional))
-                                    or
-                                    isinstance(key, Required))
-
-        _compiled_schema = {}
-        for skey, svalue in schema.iteritems():
-            new_key = self._compile(skey)
-            new_value = self._compile(svalue)
-            _compiled_schema[skey] = (new_key, new_value)
+        base_validate = self._compile_mapping(schema,
+            invalid_msg='for dictionary value')
 
         def validate_dict(path, data):
             if not isinstance(data, dict):
                 raise Invalid('expected a dictionary', path)
 
-            required_keys = default_required_keys.copy()
             out = type(data)()
-            error = None
-            errors = []
-            for key, value in data.iteritems():
-                key_path = path + [key]
-                for skey, (ckey, cvalue) in _compiled_schema.iteritems():
-                    try:
-                        new_key = ckey(key_path, key)
-                    except Invalid as e:
-                        if len(e.path) > len(key_path):
-                            raise
-                        if not error or len(e.path) > len(error.path):
-                            error = e
-                        continue
-                    # Backtracking is not performed once a key is selected, so if
-                    # the value is invalid we immediately throw an exception.
-                    try:
-                        out[new_key] = cvalue(key_path, value)
-                    except Invalid as e:
-                        if len(e.path) > len(key_path):
-                            errors.append(e)
-                        else:
-                            errors.append(Invalid(e.msg + ' for dictionary value', e.path))
-                        break
-
-                    # Key and value okay, mark any Required() fields as found.
-                    required_keys.discard(skey)
-                    break
-                else:
-                    if self.extra:
-                        out[key] = value
-                    else:
-                        errors.append(Invalid('extra keys not allowed', key_path))
-            for key in required_keys:
-                msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-                errors.append(Invalid(msg, path + [key]))
-            if errors:
-                raise MultipleInvalid(errors)
-            return out
+            return base_validate(path, data.iteritems(), out)
 
         return validate_dict
 
@@ -463,6 +511,37 @@ def _compile_scalar(schema):
         return data
 
     return validate_value
+
+
+def _iterate_object(obj):
+    """Return iterator over object attributes. Respect objects with
+    defined __slots__.
+
+    """
+    try:
+        d = vars(obj)
+    except TypeError:
+        pass
+    else:
+        for item in d.iteritems():
+            yield item
+    try:
+        slots = obj.__slots__
+    except AttributeError:
+        pass
+    else:
+        for key in slots:
+            if key != '__dict__':
+                yield (key, getattr(obj, key))
+    raise StopIteration()
+
+
+class Object(dict):
+    """Indicate that we should work with attributes, not keys."""
+
+    def __init__(self, schema, cls=UNDEFINED):
+        self.cls = cls
+        super(Object, self).__init__(schema)
 
 
 class Marker(object):

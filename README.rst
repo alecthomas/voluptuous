@@ -262,6 +262,22 @@ using the marker token ``Optional(key)``::
   >>> schema({1: 2, 3: 4})
   {1: 2, 3: 4}
 
+Objects
+~~~~~~~
+Each key-value pair in a schema dictionary is validated against each
+attribute-value pair in the corresponding object::
+
+  >>> from voluptuous import Object
+  >>> class Structure(object):
+  ...     def __init__(self, q=None):
+  ...         self.q = q
+  ...     def __repr__(self):
+  ...         return '<Structure(q={0.q!r})>'.format(self)
+  ...
+  >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
+  >>> schema(Structure(q='one'))
+  <Structure(q='one')>
+
 Error reporting
 ---------------
 Validators must throw an ``Invalid`` exception if invalid data is passed to
