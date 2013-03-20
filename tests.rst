@@ -145,8 +145,8 @@ Validator should return same instance of the same type for object::
     ...         return '{0.__name__}(q={1.q!r})'.format(type(self), self)
     ...
     >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
-    >>> type(schema(Structure(q='one')))
-    <class 'Structure'>
+    >>> type(schema(Structure(q='one'))) is Structure
+    True
 
 Object validator should treat `cls` argument as optional. In this case it shouldn't
 check object type::
@@ -163,7 +163,7 @@ check object type::
 If `cls` argument passed to object validator we should check object type::
 
     >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
-    >>> schema(NamedTuple(q='one'))
+    >>> schema(NamedTuple(q='one'))  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     MultipleInvalid: expected a <class 'Structure'>
