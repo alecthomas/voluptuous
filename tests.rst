@@ -44,8 +44,8 @@ Errors should be reported depth-first::
 Voluptuous supports validation when extra fields are present in the data::
 
   >>> schema = Schema({'one': 1, Extra: object})
-  >>> schema({'two': 'two', 'one': 2})
-  {'two': 'two', 'one': 2}
+  >>> schema({'two': 'two', 'one': 1})
+  {'two': 'two', 'one': 1}
   >>> schema = Schema({'one': 1})
   >>> schema({'two': 2})
   Traceback (most recent call last):
@@ -135,3 +135,70 @@ Schemas built with All() should give the same error as the original validator (I
     Traceback (most recent call last):
     ...
     MultipleInvalid: required key not provided @ data['items'][0]['foo']
+
+Validator should return same instance of the same type for object::
+
+    >>> class Structure(object):
+    ...     def __init__(self, q=None):
+    ...         self.q = q
+    ...     def __repr__(self):
+    ...         return '{0.__name__}(q={1.q!r})'.format(type(self), self)
+    ...
+    >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
+    >>> type(schema(Structure(q='one'))) is Structure
+    True
+
+Object validator should treat `cls` argument as optional. In this case it shouldn't
+check object type::
+
+    >>> from collections import namedtuple
+    >>> NamedTuple = namedtuple('NamedTuple', ('q',))
+    >>> schema = Schema(Object({'q': 'one'}))
+    >>> named = NamedTuple(q='one')
+    >>> schema(named) == named
+    True
+    >>> schema(named) 
+    NamedTuple(q='one')
+
+If `cls` argument passed to object validator we should check object type::
+
+    >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
+    >>> schema(NamedTuple(q='one'))  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    ...
+    MultipleInvalid: expected a <class 'Structure'>
+    >>> schema = Schema(Object({'q': 'one'}, cls=NamedTuple))
+    >>> schema(NamedTuple(q='one'))
+    NamedTuple(q='one')
+
+Ensure that objects with `__slots__` supported properly::
+
+    >>> class SlotsStructure(Structure):
+    ...     __slots__ = ['q']
+    ...
+    >>> schema = Schema(Object({'q': 'one'}))
+    >>> schema(SlotsStructure(q='one'))
+    SlotsStructure(q='one')
+    >>> class DictStructure(object):
+    ...     __slots__ = ['q', '__dict__']
+    ...     def __init__(self, q=None, page=None):
+    ...         self.q = q
+    ...         self.page = page
+    ...     def __repr__(self):
+    ...         return '{0.__name__}(q={1.q!r}, page={1.page!r})'.format(type(self), self)
+    ...
+    >>> structure = DictStructure(q='one')
+    >>> structure.page = 1
+    >>> schema(structure)
+    Traceback (most recent call last):
+    ...
+    MultipleInvalid: extra keys not allowed @ data['page']
+    >>> schema = Schema(Object({'q': 'one', Extra: object}))
+    >>> schema(structure)
+    DictStructure(q='one', page=1)
+
+Ensure that objects can be used with other validators::
+
+    >>> schema = Schema({'meta': Object({'q': 'one'})})
+    >>> schema({'meta': Structure(q='one')})
+    {'meta': Structure(q='one')}
