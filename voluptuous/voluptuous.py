@@ -96,7 +96,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.7.0'
+__version__ = '0.7.1'
 
 
 class Undefined(object):
