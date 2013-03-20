@@ -154,10 +154,10 @@ check object type::
     >>> from collections import namedtuple
     >>> NamedTuple = namedtuple('NamedTuple', ('q',))
     >>> schema = Schema(Object({'q': 'one'}))
-    >>> structure = NamedTuple(q='one')
-    >>> schema(structure) == structure
+    >>> named = NamedTuple(q='one')
+    >>> schema(named) == named
     True
-    >>> schema(structure) 
+    >>> schema(named) 
     NamedTuple(q='one')
 
 If `cls` argument passed to object validator we should check object type::

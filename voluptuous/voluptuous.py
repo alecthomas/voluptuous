@@ -295,7 +295,6 @@ class Schema(object):
         def validate_object(path, data):
             if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
                 raise Invalid('expected a {0!r}'.format(schema.cls), path)
-
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
             out = base_validate(path, iterable, {})
@@ -518,13 +517,15 @@ def _iterate_object(obj):
     defined __slots__.
 
     """
+    d = {}
     try:
         d = vars(obj)
     except TypeError:
-        pass
-    else:
-        for item in d.iteritems():
-            yield item
+        # maybe we have named tuple here?
+        if hasattr(obj, '_asdict'):
+            d = obj._asdict()
+    for item in d.iteritems():
+        yield item
     try:
         slots = obj.__slots__
     except AttributeError:
