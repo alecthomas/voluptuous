@@ -760,6 +760,16 @@ def Boolean(v):
     return bool(v)
 
 
+def Equals(value, msg=None):
+    """Assert that a value is equal to another."""
+    @wraps(Equals)
+    def f(v):
+        if value != v:
+            raise Invalid(msg or 'must be equal to {0}'.format(value))
+        return v
+    return f
+
+
 def Any(*validators, **kwargs):
     """Use the first validated value.
 
