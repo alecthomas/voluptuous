@@ -846,8 +846,8 @@ def Match(pattern, msg=None):
     def f(v):
         try:
             match = pattern.match(v)
-        except TypeError as ex:
-            raise Invalid(ex.message)
+        except TypeError:
+            raise Invalid("expected string or buffer")
         if not match:
             raise Invalid(msg or 'does not match regular expression')
         return v
