@@ -819,7 +819,7 @@ def All(*validators, **kwargs):
 
 
 def Match(pattern, msg=None):
-    """Value must match the regular expression.
+    """Value must be a string that matches the regular expression.
 
     >>> validate = Schema(Match(r'^0x[A-F0-9]+$'))
     >>> validate('0x123EF4')
@@ -828,6 +828,11 @@ def Match(pattern, msg=None):
     Traceback (most recent call last):
     ...
     MultipleInvalid: does not match regular expression
+
+    >>> validate(123)
+    Traceback (most recent call last):
+    ...
+    MultipleInvalid: expected string or buffer
 
     Pattern may also be a _compiled regular expression:
 
@@ -839,7 +844,11 @@ def Match(pattern, msg=None):
         pattern = re.compile(pattern)
 
     def f(v):
-        if not pattern.match(v):
+        try:
+            match = pattern.match(v)
+        except TypeError:
+            raise Invalid("expected string or buffer")
+        if not match:
             raise Invalid(msg or 'does not match regular expression')
         return v
     return f
