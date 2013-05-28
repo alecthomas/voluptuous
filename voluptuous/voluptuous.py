@@ -83,7 +83,6 @@ Validate like so:
 """
 
 from functools import wraps
-from itertools import ifilter
 import os
 import re
 import sys
@@ -91,8 +90,13 @@ if sys.version > '3':
     import urllib.parse as urlparse
     long = int
     unicode = str
+    basestring = str
+    ifilter = filter
+    iteritems = dict.items
 else:
+    from itertools import ifilter
     import urlparse
+    iteritems = dict.iteritems
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -221,7 +225,7 @@ class Schema(object):
                                     isinstance(key, Required))
 
         _compiled_schema = {}
-        for skey, svalue in schema.iteritems():
+        for skey, svalue in iteritems(schema):
             new_key = self._compile(skey)
             new_value = self._compile(svalue)
             _compiled_schema[skey] = (new_key, new_value)
@@ -232,7 +236,7 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
-                for skey, (ckey, cvalue) in _compiled_schema.iteritems():
+                for skey, (ckey, cvalue) in iteritems(_compiled_schema):
                     try:
                         new_key = ckey(key_path, key)
                     except Invalid as e:
@@ -374,7 +378,7 @@ class Schema(object):
                 raise Invalid('expected a dictionary', path)
 
             out = type(data)()
-            return base_validate(path, data.iteritems(), out)
+            return base_validate(path, iteritems(data), out)
 
         return validate_dict
 
@@ -524,7 +528,7 @@ def _iterate_object(obj):
         # maybe we have named tuple here?
         if hasattr(obj, '_asdict'):
             d = obj._asdict()
-    for item in d.iteritems():
+    for item in iteritems(d):
         yield item
     try:
         slots = obj.__slots__
