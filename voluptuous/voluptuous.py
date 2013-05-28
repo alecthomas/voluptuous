@@ -75,15 +75,16 @@ Validate like so:
     ...       'Users': {'snmp_community': 'monkey'},
     ...     },
     ...   },
-    ... })  # doctest: +NORMALIZE_WHITESPACE
-    {'set': {'snmp_version': '2c', 'snmp_community': 'public'},
-     'targets': {'exclude': ['Ping'],
-                 'features': {'Uptime': {'retries': 3},
-                              'Users': {'snmp_community': 'monkey'}}}}
+    ... }) == {
+    ...   'set': {'snmp_version': '2c', 'snmp_community': 'public'},
+    ...   'targets': {
+    ...     'exclude': ['Ping'],
+    ...     'features': {'Uptime': {'retries': 3},
+    ...                  'Users': {'snmp_community': 'monkey'}}}}
+    True
 """
 
 from functools import wraps
-from itertools import ifilter
 import os
 import re
 import sys
@@ -91,8 +92,13 @@ if sys.version > '3':
     import urllib.parse as urlparse
     long = int
     unicode = str
+    basestring = str
+    ifilter = filter
+    iteritems = dict.items
 else:
+    from itertools import ifilter
     import urlparse
+    iteritems = dict.iteritems
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -221,7 +227,7 @@ class Schema(object):
                                     isinstance(key, Required))
 
         _compiled_schema = {}
-        for skey, svalue in schema.iteritems():
+        for skey, svalue in iteritems(schema):
             new_key = self._compile(skey)
             new_value = self._compile(svalue)
             _compiled_schema[skey] = (new_key, new_value)
@@ -232,7 +238,7 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
-                for skey, (ckey, cvalue) in _compiled_schema.iteritems():
+                for skey, (ckey, cvalue) in iteritems(_compiled_schema):
                     try:
                         new_key = ckey(key_path, key)
                     except Invalid as e:
@@ -283,10 +289,13 @@ class Schema(object):
             ...         self.three = three
             ...
             >>> validate = Schema(Object({'one': 'two', 'three': 'four'}, cls=Structure))
-            >>> validate(Structure(one='three'))
-            Traceback (most recent call last):
-            ...
-            MultipleInvalid: not a valid value for object value @ data['one']
+            >>> try:
+            ...   validate(Structure(one='three'))
+            ...   raise AssertionError('MultipleInvalid not raised')
+            ... except MultipleInvalid as e:
+            ...   exc = e
+            >>> str(exc) == "not a valid value for object value @ data['one']"
+            True
 
         """
         base_validate = self._compile_mapping(schema,
@@ -311,25 +320,35 @@ class Schema(object):
         A dictionary schema will only validate a dictionary:
 
             >>> validate = Schema({})
-            >>> validate([])
-            Traceback (most recent call last):
-            ...
-            MultipleInvalid: expected a dictionary
+            >>> try:
+            ...   validate([])
+            ...   raise AssertionError('MultipleInvalid not raised')
+            ... except MultipleInvalid as e:
+            ...   exc = e
+            >>> str(exc) == "expected a dictionary"
+            True
 
         An invalid dictionary value:
 
             >>> validate = Schema({'one': 'two', 'three': 'four'})
-            >>> validate({'one': 'three'})
-            Traceback (most recent call last):
-            ...
-            MultipleInvalid: not a valid value for dictionary value @ data['one']
+            >>> try:
+            ...   validate({'one': 'three'})
+            ...   raise AssertionError('MultipleInvalid not raised')
+            ... except MultipleInvalid as e:
+            ...   exc = e
+            >>> str(exc) == "not a valid value for dictionary value @ data['one']"
+            True
 
         An invalid key:
 
-            >>> validate({'two': 'three'})
-            Traceback (most recent call last):
-            ...
-            MultipleInvalid: extra keys not allowed @ data['two']
+            >>> try:
+            ...   validate({'two': 'three'})
+            ...   raise AssertionError('MultipleInvalid not raised')
+            ... except MultipleInvalid as e:
+            ...   exc = e
+            >>> str(exc) == "extra keys not allowed @ data['two']"
+            True
+
 
         Validation function, in this case the "int" type:
 
@@ -344,10 +363,13 @@ class Schema(object):
         purely to validate that the corresponding value is of that type. It
         will not Coerce the value:
 
-            >>> validate({'10': 'twenty'})
-            Traceback (most recent call last):
-            ...
-            MultipleInvalid: extra keys not allowed @ data['10']
+            >>> try:
+            ...   validate({'10': 'twenty'})
+            ...   raise AssertionError('MultipleInvalid not raised')
+            ... except MultipleInvalid as e:
+            ...   exc = e
+            >>> str(exc) == "extra keys not allowed @ data['10']"
+            True
 
         Wrap them in the Coerce() function to achieve this:
 
@@ -359,10 +381,13 @@ class Schema(object):
         Custom message for required key
 
             >>> validate = Schema({Required('one', 'required'): 'two'})
-            >>> validate({})
-            Traceback (most recent call last):
-            ...
-            MultipleInvalid: required @ data['one']
+            >>> try:
+            ...   validate({})
+            ...   raise AssertionError('MultipleInvalid not raised')
+            ... except MultipleInvalid as e:
+            ...   exc = e
+            >>> str(exc) == "required @ data['one']"
+            True
 
         (This is to avoid unexpected surprises.)
         """
@@ -374,7 +399,7 @@ class Schema(object):
                 raise Invalid('expected a dictionary', path)
 
             out = type(data)()
-            return base_validate(path, data.iteritems(), out)
+            return base_validate(path, iteritems(data), out)
 
         return validate_dict
 
@@ -386,10 +411,13 @@ class Schema(object):
         >>> validator = Schema(['one', 'two', int])
         >>> validator(['one'])
         ['one']
-        >>> validator([3.5])
-        Traceback (most recent call last):
-        ...
-        MultipleInvalid: invalid list value @ data[0]
+        >>> try:
+        ...   validator([3.5])
+        ...   raise AssertionError('MultipleInvalid not raised')
+        ... except MultipleInvalid as e:
+        ...   exc = e
+        >>> str(exc) == 'invalid list value @ data[0]'
+        True
         >>> validator([1])
         [1]
         """
@@ -436,10 +464,13 @@ class Schema(object):
         >>> validator = Schema(('one', 'two', int))
         >>> validator(('one',))
         ('one',)
-        >>> validator((3.5,))
-        Traceback (most recent call last):
-        ...
-        MultipleInvalid: invalid tuple value @ data[0]
+        >>> try:
+        ...   validator((3.5,))
+        ...   raise AssertionError('MultipleInvalid not raised')
+        ... except MultipleInvalid as e:
+        ...   exc = e
+        >>> str(exc) == 'invalid tuple value @ data[0]'
+        True
         >>> validator((1,))
         (1,)
         """
@@ -453,10 +484,13 @@ class Schema(object):
         >>> validator = Schema(['one', 'two', int])
         >>> validator(['one'])
         ['one']
-        >>> validator([3.5])
-        Traceback (most recent call last):
-        ...
-        MultipleInvalid: invalid list value @ data[0]
+        >>> try:
+        ...   validator([3.5])
+        ...   raise AssertionError('MultipleInvalid not raised')
+        ... except MultipleInvalid as e:
+        ...   exc = e
+        >>> str(exc) == 'invalid list value @ data[0]'
+        True
         >>> validator([1])
         [1]
         """
@@ -470,10 +504,13 @@ def _compile_scalar(schema):
 
     >>> _compile_scalar(int)([], 1)
     1
-    >>> _compile_scalar(float)([], '1')
-    Traceback (most recent call last):
-    ...
-    Invalid: expected float
+    >>> try:
+    ...   _compile_scalar(float)([], '1')
+    ...   raise AssertionError('Invalid not raised')
+    ... except Invalid as e:
+    ...   exc = e
+    >>> str(exc) == 'expected float'
+    True
 
     Callables have
     >>> _compile_scalar(lambda v: float(v))([], '1')
@@ -481,10 +518,13 @@ def _compile_scalar(schema):
 
     As a convenience, ValueError's are trapped:
 
-    >>> _compile_scalar(lambda v: float(v))([], 'a')
-    Traceback (most recent call last):
-    ...
-    Invalid: not a valid value
+    >>> try:
+    ...   _compile_scalar(lambda v: float(v))([], 'a')
+    ...   raise AssertionError('Invalid not raised')
+    ... except Invalid as e:
+    ...   exc = e
+    >>> str(exc) == 'not a valid value'
+    True
     """
     if isinstance(schema, type):
         def validate_instance(path, data):
@@ -524,7 +564,7 @@ def _iterate_object(obj):
         # maybe we have named tuple here?
         if hasattr(obj, '_asdict'):
             d = obj._asdict()
-    for item in d.iteritems():
+    for item in iteritems(d):
         yield item
     try:
         slots = obj.__slots__
@@ -592,18 +632,24 @@ def Msg(schema, msg):
     >>> validate = Schema(
     ...   Msg(['one', 'two', int],
     ...       'should be one of "one", "two" or an integer'))
-    >>> validate(['three'])
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: should be one of "one", "two" or an integer
+    >>> try:
+    ...   validate(['three'])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == 'should be one of "one", "two" or an integer'
+    True
 
     Messages are only applied to invalid direct descendants of the schema:
 
     >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!'))
-    >>> validate([['three']])
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: invalid list value @ data[0][0]
+    >>> try:
+    ...   validate([['three']])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == 'invalid list value @ data[0][0]'
+    True
     """
     schema = Schema(schema)
 
@@ -629,18 +675,24 @@ def message(default=None):
         ...   return int(v)
 
         >>> validate = Schema(isint())
-        >>> validate('a')
-        Traceback (most recent call last):
-        ...
-        MultipleInvalid: not an integer
+        >>> try:
+        ...   validate('a')
+        ...   raise AssertionError('MultipleInvalid not raised')
+        ... except MultipleInvalid as e:
+        ...   exc = e
+        >>> str(exc) == 'not an integer'
+        True
 
     The message can be overridden on a per validator basis:
 
         >>> validate = Schema(isint('bad'))
-        >>> validate('a')
-        Traceback (most recent call last):
-        ...
-        MultipleInvalid: bad
+        >>> try:
+        ...   validate('a')
+        ...   raise AssertionError('MultipleInvalid not raised')
+        ... except MultipleInvalid as e:
+        ...   exc = e
+        >>> str(exc) == 'bad'
+        True
     """
     def decorator(f):
         @wraps(f)
@@ -665,10 +717,13 @@ def truth(f):
         >>> validate = Schema(isdir)
         >>> validate('/')
         '/'
-        >>> validate('/notavaliddir')
-        Traceback (most recent call last):
-        ...
-        MultipleInvalid: not a valid value
+        >>> try:
+        ...   validate('/notavaliddir')
+        ...   raise AssertionError('MultipleInvalid not raised')
+        ... except MultipleInvalid as e:
+        ...   exc = e
+        >>> str(exc) == 'not a valid value'
+        True
     """
     @wraps(f)
     def check(v):
@@ -704,16 +759,22 @@ def IsTrue(v):
     "In the Python sense" means that implicitly false values, such as empty
     lists, dictionaries, etc. are treated as "false":
 
-    >>> validate([])
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: value was not true
+    >>> try:
+    ...   validate([])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "value was not true"
+    True
     >>> validate([1])
     [1]
-    >>> validate(False)
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: value was not true
+    >>> try:
+    ...   validate(False)
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "value was not true"
+    True
 
     ...and so on.
     """
@@ -745,10 +806,13 @@ def Boolean(v):
     >>> validate = Schema(Boolean())
     >>> validate(True)
     True
-    >>> validate('moo')
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: expected boolean
+    >>> try:
+    ...   validate('moo')
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "expected boolean"
+    True
     """
     if isinstance(v, basestring):
         v = v.lower()
@@ -772,10 +836,14 @@ def Any(*validators, **kwargs):
     'true'
     >>> validate(1)
     True
-    >>> validate('moo')
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: no valid value found
+    >>> try:
+    ...   validate('moo')
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "no valid value found"
+    True
+
     """
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val) for val in validators]
@@ -824,10 +892,13 @@ def Match(pattern, msg=None):
     >>> validate = Schema(Match(r'^0x[A-F0-9]+$'))
     >>> validate('0x123EF4')
     '0x123EF4'
-    >>> validate('123EF4')
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: does not match regular expression
+    >>> try:
+    ...   validate('123EF4')
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "does not match regular expression"
+    True
 
     >>> validate(123)
     Traceback (most recent call last):

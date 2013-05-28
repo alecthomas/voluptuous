@@ -10,25 +10,39 @@ Error reporting should be accurate::
 
 It should show the exact index and container type, in this case a list value::
 
-  >>> schema(['one', 'two'])
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: invalid list value @ data[1]
+  >>> try:
+  ...   schema(['one', 'two'])
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == 'invalid list value @ data[1]'
+  True
 
 It should also be accurate for nested values::
 
-  >>> schema([{'two': 'nine'}])
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: not a valid value for dictionary value @ data[0]['two']
-  >>> schema([{'four': ['nine']}])
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: invalid list value @ data[0]['four'][0]
-  >>> schema([{'six': {'seven': 'nine'}}])
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: not a valid value for dictionary value @ data[0]['six']['seven']
+  >>> try:
+  ...   schema([{'two': 'nine'}])
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "not a valid value for dictionary value @ data[0]['two']"
+  True
+
+  >>> try:
+  ...   schema([{'four': ['nine']}])
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "invalid list value @ data[0]['four'][0]"
+  True
+
+  >>> try:
+  ...   schema([{'six': {'seven': 'nine'}}])
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "not a valid value for dictionary value @ data[0]['six']['seven']"
+  True
 
 Errors should be reported depth-first::
 
@@ -44,19 +58,21 @@ Errors should be reported depth-first::
 Voluptuous supports validation when extra fields are present in the data::
 
   >>> schema = Schema({'one': 1, Extra: object})
-  >>> schema({'two': 'two', 'one': 1})
-  {'two': 'two', 'one': 1}
+  >>> schema({'two': 'two', 'one': 1}) == {'two': 'two', 'one': 1}
+  True
   >>> schema = Schema({'one': 1})
-  >>> schema({'two': 2})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: extra keys not allowed @ data['two']
-
+  >>> try:
+  ...   schema({'two': 2})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "extra keys not allowed @ data['two']"
+  True
 
 dict, list, and tuple should be available as type validators::
 
-  >>> Schema(dict)({'a': 1, 'b': 2})
-  {'a': 1, 'b': 2}
+  >>> Schema(dict)({'a': 1, 'b': 2}) == {'a': 1, 'b': 2}
+  True
   >>> Schema(list)([1,2,3])
   [1, 2, 3]
   >>> Schema(tuple)((1,2,3))
@@ -70,8 +86,8 @@ subclasses of dict or list::
   ...   pass
   >>>
   >>> d = Schema(dict)(Dict(a=1, b=2))
-  >>> d
-  {'a': 1, 'b': 2}
+  >>> d == {'a': 1, 'b': 2}
+  True
   >>> type(d) is Dict
   True
   >>> class List(list):
@@ -131,10 +147,14 @@ Schemas built with All() should give the same error as the original validator (I
     ...   }])
     ... })
 
-    >>> schema({'items': [{}]})
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: required key not provided @ data['items'][0]['foo']
+    >>> try:
+    ...   schema({'items': [{}]})
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "required key not provided @ data['items'][0]['foo']"
+    True
+
 
 Validator should return same instance of the same type for object::
 
@@ -157,7 +177,7 @@ check object type::
     >>> named = NamedTuple(q='one')
     >>> schema(named) == named
     True
-    >>> schema(named) 
+    >>> schema(named)
     NamedTuple(q='one')
 
 If `cls` argument passed to object validator we should check object type::
@@ -189,10 +209,14 @@ Ensure that objects with `__slots__` supported properly::
     ...
     >>> structure = DictStructure(q='one')
     >>> structure.page = 1
-    >>> schema(structure)
-    Traceback (most recent call last):
-    ...
-    MultipleInvalid: extra keys not allowed @ data['page']
+    >>> try:
+    ...   schema(structure)
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == "extra keys not allowed @ data['page']"
+    True
+
     >>> schema = Schema(Object({'q': 'one', Extra: object}))
     >>> schema(structure)
     DictStructure(q='one', page=1)
