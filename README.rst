@@ -51,44 +51,63 @@ and goes a little further for completeness.
 
 "q" is required::
 
-  >>> schema({})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: required key not provided @ data['q']
+  >>> from voluptuous import MultipleInvalid
+  >>> try:
+  ...   schema({})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "required key not provided @ data['q']"
+  True
 
 ...must be a string::
 
-  >>> schema({'q': 123})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: expected str for dictionary value @ data['q']
+  >>> try:
+  ...   schema({'q': 123})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "expected str for dictionary value @ data['q']"
+  True
 
 ...and must be at least one character in length::
 
-  >>> schema({'q': ''})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: length of value must be at least 1 for dictionary value @ data['q']
+  >>> try:
+  ...   schema({'q': ''})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "length of value must be at least 1 for dictionary value @ data['q']"
+  True
   >>> schema({'q': '#topic'})
   {'q': '#topic'}
 
 "per_page" is a positive integer no greater than 20::
 
-  >>> schema({'q': '#topic', 'per_page': 900})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: value must be at most 20 for dictionary value @ data['per_page']
-  >>> schema({'q': '#topic', 'per_page': -10})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: value must be at least 1 for dictionary value @ data['per_page']
+  >>> try:
+  ...   schema({'q': '#topic', 'per_page': 900})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "value must be at most 20 for dictionary value @ data['per_page']"
+  True
+  >>> try:
+  ...   schema({'q': '#topic', 'per_page': -10})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "value must be at least 1 for dictionary value @ data['per_page']"
+  True
 
 "page" is an integer >= 0::
 
-  >>> schema({'q': '#topic', 'page': 'one'})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: expected int for dictionary value @ data['page']
+  >>> try:
+  ...   schema({'q': '#topic', 'per_page': 'one'})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "expected int for dictionary value @ data['per_page']"
+  True
   >>> schema({'q': '#topic', 'page': 1})
   {'q': '#topic', 'page': 1}
 
@@ -117,10 +136,14 @@ instance of the type::
   >>> schema = Schema(int)
   >>> schema(1)
   1
-  >>> schema('one')
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: expected int
+  >>> try:
+  ...   schema('one')
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "expected int"
+  True
+
 
 Lists
 ~~~~~
@@ -153,10 +176,13 @@ this property. Here's an example of a date validator::
   >>> schema = Schema(Date())
   >>> schema('2013-03-03')
   datetime.datetime(2013, 3, 3, 0, 0)
-  >>> schema('2013-03')
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: not a valid value
+  >>> try:
+  ...   schema('2013-03')
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "not a valid value"
+  True
 
 In addition to simply determining if a value is valid, validators may mutate
 the value into a valid form. An example of this is the ``Coerce(type)``
@@ -197,10 +223,13 @@ By default any additional keys in the data, not in the schema will trigger
 exceptions::
 
   >>> schema = Schema({2: 3})
-  >>> schema({1: 2, 2: 3})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: extra keys not allowed @ data[1]
+  >>> try:
+  ...   schema({1: 2, 2: 3})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "extra keys not allowed @ data[1]"
+  True
 
 This behaviour can be altered on a per-schema basis with ``Schema(..., extra=True)``::
 
@@ -227,18 +256,24 @@ By default, keys in the schema are not required to be in the data::
 Similarly to how extra_ keys work, this behaviour can be overridden per-schema::
 
   >>> schema = Schema({1: 2, 3: 4}, required=True)
-  >>> schema({3: 4})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: required key not provided @ data[1]
+  >>> try:
+  ...   schema({3: 4})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "required key not provided @ data[1]"
+  True
 
 And per-key, with the marker token ``Required(key)``::
 
   >>> schema = Schema({Required(1): 2, 3: 4})
-  >>> schema({3: 4})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: required key not provided @ data[1]
+  >>> try:
+  ...   schema({3: 4})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "required key not provided @ data[1]"
+  True
   >>> schema({1: 2})
   {1: 2}
 
@@ -249,16 +284,23 @@ using the marker token ``Optional(key)``::
 
   >>> from voluptuous import Optional
   >>> schema = Schema({1: 2, Optional(3): 4}, required=True)
-  >>> schema({})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: required key not provided @ data[1]
+  >>> try:
+  ...   schema({})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "required key not provided @ data[1]"
+  True
   >>> schema({1: 2})
   {1: 2}
-  >>> schema({1: 2, 4: 5})
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: extra keys not allowed @ data[4]
+  >>> try:
+  ...   schema({1: 2, 4: 5})
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "extra keys not allowed @ data[4]"
+  True
+
   >>> schema({1: 2, 3: 4})
   {1: 2, 3: 4}
 
@@ -304,10 +346,13 @@ but the literal ``6`` will not match any of the elements of that list. This
 error will be reported back to the user immediately. No backtracking is
 attempted::
 
-  >>> schema([[6]])
-  Traceback (most recent call last):
-  ...
-  MultipleInvalid: invalid list value @ data[0][0]
+  >>> try:
+  ...   schema([[6]])
+  ...   raise AssertionError('MultipleInvalid not raised')
+  ... except MultipleInvalid as e:
+  ...   exc = e
+  >>> str(exc) == "invalid list value @ data[0][0]"
+  True
 
 If we pass the data ``[6]``, the ``6`` is not a list type and so will not
 recurse into the first element of the schema. Matching will continue on to the
