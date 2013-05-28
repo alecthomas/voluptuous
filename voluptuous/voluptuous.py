@@ -668,14 +668,29 @@ def truth(f):
 def Coerce(type, msg=None):
     """Coerce a value to a type.
 
-    If the type constructor throws a ValueError, the value will be marked as
-    Invalid.
+    If the type constructor throws a ValueError or TypeError, the value
+    will be marked as Invalid.
+
+
+    Default behavior:
+
+        >>> validate = Schema(Coerce(int))
+        >>> with raises(MultipleInvalid, 'expected int'):
+        ...   validate(None)
+        >>> with raises(MultipleInvalid, 'expected int'):
+        ...   validate('foo')
+
+    With custom message:
+
+        >>> validate = Schema(Coerce(int, "moo"))
+        >>> with raises(MultipleInvalid, 'moo'):
+        ...   validate('foo')
     """
     @wraps(Coerce)
     def f(v):
         try:
             return type(v)
-        except ValueError:
+        except (ValueError, TypeError):
             raise Invalid(msg or ('expected %s' % type.__name__))
     return f
 
