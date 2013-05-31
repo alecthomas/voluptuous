@@ -260,13 +260,21 @@ class Schema(object):
                         continue
                     # Backtracking is not performed once a key is selected, so if
                     # the value is invalid we immediately throw an exception.
+                    exception_errors = []
                     try:
                         out[new_key] = cvalue(key_path, value)
+                    except MultipleInvalid as e:
+                        exception_errors.extend(e.errors)
                     except Invalid as e:
-                        if len(e.path) > len(key_path):
-                            errors.append(e)
-                        else:
-                            errors.append(Invalid(e.msg + invalid_msg, e.path))
+                        exception_errors.append(e)
+
+                    if exception_errors:
+                        for err in exception_errors:
+                            if len(err.path) > len(key_path):
+                                errors.append(err)
+                            else:
+                                errors.append(
+                                    Invalid(err.msg + invalid_msg, err.path))
                         break
 
                     # Key and value okay, mark any Required() fields as found.
