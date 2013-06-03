@@ -132,7 +132,7 @@ Multiple errors for nested fields in dicts and objects:
  ...     SomeObj = namedtuple('SomeObj', ('strfield', 'intfield'))
  ...     validate({'anobject': SomeObj(strfield=123, intfield='one')})
  ... except MultipleInvalid as e:
- ...     print sorted(str(i) for i in e.errors) # doctest: +NORMALIZE_WHITESPACE
+ ...     print(sorted(str(i) for i in e.errors)) # doctest: +NORMALIZE_WHITESPACE
  ["expected int for object value @ data['anobject']['intfield']",
   "expected str for object value @ data['anobject']['strfield']"]
 

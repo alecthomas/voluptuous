@@ -396,7 +396,7 @@ class Schema(object):
         ...         }
         ...     })
         ... except MultipleInvalid as e:
-        ...     print sorted(str(i) for i in e.errors) # doctest: +NORMALIZE_WHITESPACE
+        ...     print(sorted(str(i) for i in e.errors)) # doctest: +NORMALIZE_WHITESPACE
         ["expected int for dictionary value @ data['adict']['intfield']",
          "expected str for dictionary value @ data['adict']['strfield']"]
 
