@@ -379,6 +379,27 @@ class Schema(object):
             ...   validate({})
 
         (This is to avoid unexpected surprises.)
+
+        Multiple errors for nested field in a dict:
+
+        >>> validate = Schema({
+        ...     'adict': {
+        ...         'strfield': str,
+        ...         'intfield': int
+        ...     }
+        ... })
+        >>> try:
+        ...     validate({
+        ...         'adict': {
+        ...             'strfield': 123,
+        ...             'intfield': 'one'
+        ...         }
+        ...     })
+        ... except MultipleInvalid as e:
+        ...     print sorted(str(i) for i in e.errors) # doctest: +NORMALIZE_WHITESPACE
+        ["expected int for dictionary value @ data['adict']['intfield']",
+         "expected str for dictionary value @ data['adict']['strfield']"]
+
         """
         base_validate = self._compile_mapping(schema,
             invalid_msg='for dictionary value')

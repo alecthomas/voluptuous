@@ -119,6 +119,23 @@ Multiple errors are reported::
    'invalid list value @ data[1]',
    'invalid list value @ data[2]']
 
+Multiple errors for nested fields in dicts and objects:
+
+ >>> from collections import namedtuple
+ >>> validate = Schema({
+ ...     'anobject': Object({
+ ...         'strfield': str,
+ ...         'intfield': int
+ ...     })
+ ... })
+ >>> try:
+ ...     SomeObj = namedtuple('SomeObj', ('strfield', 'intfield'))
+ ...     validate({'anobject': SomeObj(strfield=123, intfield='one')})
+ ... except MultipleInvalid as e:
+ ...     print sorted(str(i) for i in e.errors) # doctest: +NORMALIZE_WHITESPACE
+ ["expected int for object value @ data['anobject']['intfield']",
+  "expected str for object value @ data['anobject']['strfield']"]
+
 Custom classes validate as schemas::
 
     >>> class Thing(object):
