@@ -25,24 +25,24 @@ It should also be accurate for nested values::
   ...   raise AssertionError('MultipleInvalid not raised')
   ... except MultipleInvalid as e:
   ...   exc = e
-  >>> str(exc) == "not a valid value for dictionary value @ data[0]['two']"
-  True
+  >>> str(exc)
+  "not a valid value for dictionary value @ data[0]['two']"
 
   >>> try:
   ...   schema([{'four': ['nine']}])
   ...   raise AssertionError('MultipleInvalid not raised')
   ... except MultipleInvalid as e:
   ...   exc = e
-  >>> str(exc) == "invalid list value @ data[0]['four'][0]"
-  True
+  >>> str(exc)
+  "invalid list value @ data[0]['four'][0]"
 
   >>> try:
   ...   schema([{'six': {'seven': 'nine'}}])
   ...   raise AssertionError('MultipleInvalid not raised')
   ... except MultipleInvalid as e:
   ...   exc = e
-  >>> str(exc) == "not a valid value for dictionary value @ data[0]['six']['seven']"
-  True
+  >>> str(exc)
+  "not a valid value for dictionary value @ data[0]['six']['seven']"
 
 Errors should be reported depth-first::
 
@@ -66,8 +66,8 @@ Voluptuous supports validation when extra fields are present in the data::
   ...   raise AssertionError('MultipleInvalid not raised')
   ... except MultipleInvalid as e:
   ...   exc = e
-  >>> str(exc) == "extra keys not allowed @ data['two']"
-  True
+  >>> str(exc)
+  "extra keys not allowed @ data['two']"
 
 dict, list, and tuple should be available as type validators::
 
@@ -169,8 +169,8 @@ Schemas built with All() should give the same error as the original validator (I
     ...   raise AssertionError('MultipleInvalid not raised')
     ... except MultipleInvalid as e:
     ...   exc = e
-    >>> str(exc) == "required key not provided @ data['items'][0]['foo']"
-    True
+    >>> str(exc)
+    "required key not provided @ data['items'][0]['foo']"
 
 
 Validator should return same instance of the same type for object::
@@ -231,8 +231,8 @@ Ensure that objects with `__slots__` supported properly::
     ...   raise AssertionError('MultipleInvalid not raised')
     ... except MultipleInvalid as e:
     ...   exc = e
-    >>> str(exc) == "extra keys not allowed @ data['page']"
-    True
+    >>> str(exc)
+    "extra keys not allowed @ data['page']"
 
     >>> schema = Schema(Object({'q': 'one', Extra: object}))
     >>> schema(structure)

@@ -104,7 +104,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.7.2'
+__version__ = '0.8.0'
 
 
 @contextmanager
@@ -159,6 +159,9 @@ class Invalid(Error):
 class MultipleInvalid(Invalid):
     def __init__(self, errors=None):
         self.errors = errors[:] if errors else []
+
+    def __repr__(self):
+        return 'MultipleInvalid(%r)' % self.errors
 
     @property
     def msg(self):
