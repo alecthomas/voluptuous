@@ -104,7 +104,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 
 @contextmanager
@@ -113,7 +113,7 @@ def raises(exc, msg=None):
         yield
     except exc as e:
         if msg is not None:
-            assert str(e) == msg
+            assert str(e) == msg, '%r != %r' % (str(e), msg)
 
 
 class Undefined(object):
@@ -791,6 +791,7 @@ def Any(*validators, **kwargs):
     """Use the first validated value.
 
     :param msg: Message to deliver to user if validation fails.
+    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
     :returns: Return value of the first validator that passes.
 
     >>> validate = Schema(Any('true', 'false',
@@ -799,23 +800,25 @@ def Any(*validators, **kwargs):
     'true'
     >>> validate(1)
     True
-    >>> with raises(MultipleInvalid, "no valid value found"):
+    >>> with raises(MultipleInvalid, "expected bool"):
     ...   validate('moo')
 
     """
     msg = kwargs.pop('msg', None)
-    schemas = [Schema(val) for val in validators]
+    schemas = [Schema(val, **kwargs) for val in validators]
 
     @wraps(Any)
     def f(v):
+        error = None
         for schema in schemas:
             try:
                 return schema(v)
             except Invalid as e:
-                if len(e.path) > 1:
-                    raise
-                pass
+                if error is None or len(e.path) > len(error.path):
+                    error = e
         else:
+            if error:
+                raise error
             raise Invalid(msg or 'no valid value found')
     return f
 
@@ -826,13 +829,14 @@ def All(*validators, **kwargs):
     The output of each validator is passed as input to the next.
 
     :param msg: Message to deliver to user if validation fails.
+    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
 
     >>> validate = Schema(All('10', Coerce(int)))
     >>> validate('10')
     10
     """
     msg = kwargs.pop('msg', None)
-    schemas = [Schema(val) for val in validators]
+    schemas = [Schema(val, **kwargs) for val in validators]
 
     def f(v):
         try:
