@@ -19,7 +19,7 @@ It has three goals:
 Show me an example
 ------------------
 Twitter's `user search API
-<http://apiwiki.twitter.com/Twitter-REST-API-Method:-users-search>`_ accepts
+<https://dev.twitter.com/docs/api/1/get/users/search>`_ accepts
 query URLs like::
 
   $ curl 'http://api.twitter.com/1/users/search.json?q=python&per_page=20&page=1
@@ -33,16 +33,17 @@ To validate this we might use a schema like::
   ...   'page': int,
   ... })
 
-This schema very succinctly and roughly describes the data required by the API,
-and will work fine. But it has a few problems. Firstly, it doesn't fully
+This schema very succinctly and roughly describes the data required by the
+API, and will work fine. But it has a few problems. Firstly, it doesn't fully
 express the constraints of the API. According to the API, ``per_page`` should
-be restricted to at most 20, for example. To describe the semantics of the API
-more accurately, our schema will need to be more thoroughly defined::
+be restricted to at most 20, defaulting to 5, for example. To describe the
+semantics of the API more accurately, our schema will need to be more
+thoroughly defined::
 
   >>> from voluptuous import Required, All, Length, Range
   >>> schema = Schema({
   ...   Required('q'): All(str, Length(min=1)),
-  ...   'per_page': All(int, Range(min=1, max=20)),
+  ...   Required('per_page', default=5): All(int, Range(min=1, max=20)),
   ...   'page': All(int, Range(min=0)),
   ... })
 
@@ -80,7 +81,7 @@ and goes a little further for completeness.
   >>> str(exc) == "length of value must be at least 1 for dictionary value @ data['q']"
   True
   >>> schema({'q': '#topic'})
-  {'q': '#topic'}
+  {'q': '#topic', 'per_page': 5}
 
 "per_page" is a positive integer no greater than 20::
 
@@ -106,9 +107,9 @@ and goes a little further for completeness.
   ...   raise AssertionError('MultipleInvalid not raised')
   ... except MultipleInvalid as e:
   ...   exc = e
-  >>> str(exc) == "expected int for dictionary value @ data['per_page']"
-  True
-  >>> schema({'q': '#topic', 'page': 1}) == {'q': '#topic', 'page': 1}
+  >>> str(exc)
+  "expected int for dictionary value @ data['per_page']"
+  >>> schema({'q': '#topic', 'page': 1}) == {'q': '#topic', 'page': 1, 'per_page': 5}
   True
 
 Defining schemas
