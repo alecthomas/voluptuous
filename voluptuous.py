@@ -289,8 +289,11 @@ class Schema(object):
                     else:
                         errors.append(Invalid('extra keys not allowed', key_path))
             for key in required_keys:
-                msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-                errors.append(Invalid(msg, path + [key]))
+                if getattr(key, 'default', UNDEFINED) is not UNDEFINED:
+                    out[key.schema] = key.default
+                else:
+                    msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
+                    errors.append(Invalid(msg, path + [key]))
             if errors:
                 raise MultipleInvalid(errors)
             return out
@@ -601,7 +604,19 @@ class Optional(Marker):
 
 
 class Required(Marker):
-    """Mark a node in the schema as being required."""
+    """Mark a node in the schema as being required, and optionally provide a default value.
+
+    >>> schema = Schema({Required('key'): str})
+    >>> with raises(MultipleInvalid, "required key not provided @ data['key']"):
+    ...   schema({})
+
+    >>> schema = Schema({Required('key', default='value'): str})
+    >>> schema({})
+    {'key': 'value'}
+    """
+    def __init__(self, schema, msg=None, default=UNDEFINED):
+        super(Required, self).__init__(schema, msg=msg)
+        self.default = default
 
 
 def Extra(_):
@@ -800,7 +815,7 @@ def Any(*validators, **kwargs):
     'true'
     >>> validate(1)
     True
-    >>> with raises(MultipleInvalid, "expected bool"):
+    >>> with raises(MultipleInvalid, "not a valid value"):
     ...   validate('moo')
 
     """
