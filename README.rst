@@ -80,8 +80,7 @@ and goes a little further for completeness.
   ...   exc = e
   >>> str(exc) == "length of value must be at least 1 for dictionary value @ data['q']"
   True
-  >>> schema({'q': '#topic'})
-  {'q': '#topic', 'per_page': 5}
+  >>> schema({'q': '#topic'}) == {'q': '#topic', 'per_page': 5}
 
 "per_page" is a positive integer no greater than 20::
 
