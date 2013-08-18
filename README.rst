@@ -16,6 +16,10 @@ It has three goals:
 
 .. contents:: Table of Contents
 
+Contact
+-------
+Voluptuous now has a mailing list! Send a mail to [voluptuous@librelist.com](mailto:voluptuous@librelist.com) to subscribe. Instructions will follow.
+
 Show me an example
 ------------------
 Twitter's `user search API
