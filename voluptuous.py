@@ -953,6 +953,16 @@ def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
     Either min or max can be excluded from the range of accepted values.
 
     :raises Invalid: If the value is outside the range.
+
+    >>> s = Schema(Range(min=1, max=10, min_included=False))
+    >>> s(5)
+    5
+    >>> s(10)
+    10
+    >>> with raises(MultipleInvalid, 'value must be at most 10'):
+    ...   s(20)
+    >>> with raises(MultipleInvalid, 'value must be higher than 1'):
+    ...   s(1)
     """
     @wraps(Range)
     def f(v):
