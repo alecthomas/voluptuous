@@ -946,19 +946,28 @@ def PathExists(v):
     return os.path.exists(v)
 
 
-def Range(min=None, max=None, msg=None):
+def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
     """Limit a value to a range.
 
     Either min or max may be omitted.
+    Either min or max can be excluded from the range of accepted values.
 
     :raises Invalid: If the value is outside the range.
     """
     @wraps(Range)
     def f(v):
-        if min is not None and v < min:
-            raise Invalid(msg or 'value must be at least %s' % min)
-        if max is not None and v > max:
-            raise Invalid(msg or 'value must be at most %s' % max)
+        if min_included:
+            if min is not None and v < min:
+                raise Invalid(msg or 'value must be at least %s' % min)
+        else:
+            if min is not None and v <= min:
+                raise Invalid(msg or 'value must be higher than %s' %  min)
+        if max_included:
+            if max is not None and v > max:
+                raise Invalid(msg or 'value must be at most %s' % max)
+        else:
+            if max is not None and v >= max:
+                raise Invalid(msg or 'value must be lower than %s' % max)
         return v
     return f
 
