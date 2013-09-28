@@ -89,6 +89,7 @@ import os
 import re
 import sys
 from contextlib import contextmanager
+from collections import OrderedDict
 
 if sys.version > '3':
     import urllib.parse as urlparse
@@ -96,11 +97,26 @@ if sys.version > '3':
     unicode = str
     basestring = str
     ifilter = filter
-    iteritems = dict.items
 else:
     from itertools import ifilter
     import urlparse
-    iteritems = dict.iteritems
+
+def iteritems(dict):
+    try:
+        _d = OrderedDict(sorted(dict.items(), key=lambda t: t[0]))
+    except TypeError:
+        _unordered = []
+        for key, value in dict.copy().items():
+            if not isinstance(key, basestring):
+                _unordered.append((key, value))
+                dict.pop(key)
+        _d = OrderedDict(sorted(dict.items(), key=lambda t: t[0]))
+        for key, value in _unordered:
+            _d[key] = value
+    if sys.version > '3':
+        return _d.items()
+    else:
+        return _d.iteritems()
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -240,11 +256,11 @@ class Schema(object):
                                     or
                                     isinstance(key, Required))
 
-        _compiled_schema = {}
+        _compiled_schema = []
         for skey, svalue in iteritems(schema):
             new_key = self._compile(skey)
             new_value = self._compile(svalue)
-            _compiled_schema[skey] = (new_key, new_value)
+            _compiled_schema.append((skey, (new_key, new_value)))
 
         def validate_mapping(path, iterable, out):
             required_keys = default_required_keys.copy()
@@ -252,7 +268,7 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
-                for skey, (ckey, cvalue) in iteritems(_compiled_schema):
+                for skey, (ckey, cvalue) in _compiled_schema:
                     try:
                         new_key = ckey(key_path, key)
                     except Invalid as e:
