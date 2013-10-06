@@ -234,11 +234,17 @@ class Schema(object):
     def _compile_mapping(self, schema, invalid_msg=None):
         """Create validator for given mapping."""
         invalid_msg = ' ' + (invalid_msg or 'for mapping value')
-        default_required_keys = set(key for key in schema
+
+        # Keys that may be required
+        all_required_keys = set(key for key in schema
                                     if
                                     (self.required and not isinstance(key, Optional))
                                     or
                                     isinstance(key, Required))
+        
+        # Keys that may have defaults
+        all_default_keys = set(key for key in schema
+                            if isinstance(key, Required) or isinstance(key, Optional))
 
         _compiled_schema = {}
         for skey, svalue in iteritems(schema):
@@ -247,11 +253,16 @@ class Schema(object):
             _compiled_schema[skey] = (new_key, new_value)
 
         def validate_mapping(path, iterable, out):
-            required_keys = default_required_keys.copy()
+            required_keys = all_required_keys.copy()
+            # keeps track of all default keys that haven't been filled
+            default_keys = all_default_keys.copy()            
             error = None
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
+                
+                # compare each given key/value against all compiled key/values
+                # schema key, (compiled key, compiled value)
                 for skey, (ckey, cvalue) in iteritems(_compiled_schema):
                     try:
                         new_key = ckey(key_path, key)
@@ -282,20 +293,31 @@ class Schema(object):
 
                     # Key and value okay, mark any Required() fields as found.
                     required_keys.discard(skey)
+
+                    # No need for a default if it was filled
+                    default_keys.discard(skey)
+
                     break
                 else:
                     if self.extra:
                         out[key] = value
                     else:
                         errors.append(Invalid('extra keys not allowed', key_path))
-            for key in required_keys:
-                if getattr(key, 'default', UNDEFINED) is not UNDEFINED:
+            
+            # set defaults for any that can have defaults
+            for key in default_keys:
+                if key.default != UNDEFINED: # if the user provides a default with the node
                     out[key.schema] = key.default
-                else:
-                    msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-                    errors.append(Invalid(msg, path + [key]))
+                    if key in required_keys: 
+                        required_keys.discard(key)
+                        
+            # for any required keys left that weren't found and don't have defaults:
+            for key in required_keys:
+                msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
+                errors.append(Invalid(msg, path + [key]))
             if errors:
                 raise MultipleInvalid(errors)
+
             return out
 
         return validate_mapping
@@ -600,7 +622,27 @@ class Marker(object):
 
 
 class Optional(Marker):
-    """Mark a node in the schema as optional."""
+    """Mark a node in the schema as optional, and optionally provide a default
+    
+    >>> schema = Schema({Optional('key'): str})
+    >>> schema({})
+    {}
+    >>> schema = Schema({Optional('key', default='value'): str})
+    >>> schema({})
+    {'key': 'value'}
+    
+    If 'required' flag is set for an entire schema, optional keys aren't required
+    
+    >>> schema = Schema({
+    ...    Optional('key'): str,
+    ...    'key2': str
+    ... }, required=True)
+    >>> schema({'key2':'value'})
+    {'key2': 'value'}
+    """
+    def __init__(self, schema, msg=None, default=UNDEFINED):
+        super(Optional, self).__init__(schema, msg=msg)
+        self.default = default
 
 
 class Required(Marker):
