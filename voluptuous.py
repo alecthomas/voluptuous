@@ -89,7 +89,6 @@ import os
 import re
 import sys
 from contextlib import contextmanager
-from collections import OrderedDict
 
 if sys.version > '3':
     import urllib.parse as urlparse
