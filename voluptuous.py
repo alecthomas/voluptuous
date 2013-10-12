@@ -101,22 +101,12 @@ else:
     from itertools import ifilter
     import urlparse
 
-def iteritems(dict):
-    try:
-        _d = OrderedDict(sorted(dict.items(), key=lambda t: t[0]))
-    except TypeError:
-        _unordered = []
-        for key, value in dict.copy().items():
-            if not isinstance(key, basestring):
-                _unordered.append((key, value))
-                dict.pop(key)
-        _d = OrderedDict(sorted(dict.items(), key=lambda t: t[0]))
-        for key, value in _unordered:
-            _d[key] = value
-    if sys.version > '3':
-        return _d.items()
+
+def iteritems(dictinst):
+    if hasattr(dictinst, 'iteritems'):
+        return dictinst.iteritems()
     else:
-        return _d.iteritems()
+        return dictinst.items()
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
