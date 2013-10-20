@@ -140,11 +140,15 @@ class Invalid(Error):
 
     :attr msg: The error message.
     :attr path: The path to the error, as a list of keys in the source data.
+    :attr error_message: The actual error message that was raised, as a
+        string.
+
     """
 
-    def __init__(self, message, path=None):
+    def __init__(self, message, path=None, error_message=None):
         Error.__init__(self,  message)
         self.path = path or []
+        self.error_message = error_message
 
     @property
     def msg(self):
@@ -170,6 +174,10 @@ class MultipleInvalid(Invalid):
     @property
     def path(self):
         return self.errors[0].path
+
+    @property
+    def error_message(self):
+        return self.errors[0].error_message
 
     def add(self, error):
         self.errors.append(error)
@@ -277,7 +285,9 @@ class Schema(object):
                                 errors.append(err)
                             else:
                                 errors.append(
-                                    Invalid(err.msg + invalid_msg, err.path))
+                                    Invalid(err.msg + invalid_msg,
+                                            err.path,
+                                            err.msg))
                         break
 
                     # Key and value okay, mark any Required() fields as found.
