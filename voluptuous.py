@@ -148,7 +148,7 @@ class Invalid(Error):
     def __init__(self, message, path=None, error_message=None):
         Error.__init__(self,  message)
         self.path = path or []
-        self.error_message = error_message
+        self.error_message = error_message or message
 
     @property
     def msg(self):
@@ -532,7 +532,8 @@ def _compile_scalar(schema):
             if isinstance(data, schema):
                 return data
             else:
-                raise Invalid('expected %s' % schema.__name__, path)
+                msg = 'expected %s' % schema.__name__
+                raise Invalid(msg, path)
         return validate_instance
 
     if callable(schema):
@@ -542,7 +543,7 @@ def _compile_scalar(schema):
             except ValueError as e:
                 raise Invalid('not a valid value', path)
             except Invalid as e:
-                raise Invalid(e.msg, path + e.path)
+                raise Invalid(e.msg, path + e.path, e.error_message)
         return validate_callable
 
     def validate_value(path, data):
