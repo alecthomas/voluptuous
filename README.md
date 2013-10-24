@@ -67,7 +67,7 @@ documentation, and goes a little further for completeness.
 "q" is required:
 
 ```pycon
->>> from voluptuous import MultipleInvalid
+>>> from voluptuous import MultipleInvalid, Invalid
 >>> try:
 ...   schema({})
 ...   raise AssertionError('MultipleInvalid not raised')
@@ -406,12 +406,41 @@ to them. All other exceptions are treated as errors in the validator and
 will not be caught.
 
 Each `Invalid` exception has an associated `path` attribute representing
-the path in the data structure to our currently validating value. This
-is used during error reporting, but also during matching to determine
-whether an error should be reported to the user or if the next match
-should be attempted. This is determined by comparing the depth of the
-path where the check is, to the depth of the path where the error
-occurred. If the error is more than one level deeper, it is reported.
+the path in the data structure to our currently validating value, as well
+as an `error_message` attribute that contains the message of the original
+exception. This is especially useful when you want to catch `Invalid`
+exceptions and give some feedback to the user, for instance in the context of
+an HTTP API.
+
+
+```pycon
+>>> def validate_email(email):
+...     """Validate email."""
+...     if not "@" in email:
+...         raise Invalid("This email is invalid.")
+...     return email
+>>> schema = Schema({"email": validate_email})
+>>> exc = None
+>>> try:
+...     schema({"email": "whatever"})
+... except MultipleInvalid as e:
+...     exc = e
+>>> str(exc)
+"This email is invalid. for dictionary value @ data['email']"
+>>> exc.path
+['email']
+>>> exc.msg
+'This email is invalid. for dictionary value'
+>>> exc.error_message
+'This email is invalid.'
+
+```
+
+The `path` attribute is used during error reporting, but also during matching
+to determine whether an error should be reported to the user or if the next
+match should be attempted. This is determined by comparing the depth of the
+path where the check is, to the depth of the path where the error occurred. If
+the error is more than one level deeper, it is reported.
 
 The upshot of this is that *matching is depth-first and fail-fast*.
 
