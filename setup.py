@@ -32,4 +32,4 @@ setup(
     install_requires=[
         'setuptools >= 0.6b1',
     ],
-    )
+)

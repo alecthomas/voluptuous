@@ -146,7 +146,7 @@ class Invalid(Error):
     """
 
     def __init__(self, message, path=None, error_message=None):
-        Error.__init__(self,  message)
+        Error.__init__(self, message)
         self.path = path or []
         self.error_message = error_message or message
 
@@ -328,11 +328,12 @@ class Schema(object):
             ...   validate(Structure(one='three'))
 
         """
-        base_validate = self._compile_mapping(schema,
-            invalid_msg='for object value')
+        base_validate = self._compile_mapping(
+            schema, invalid_msg='for object value')
 
         def validate_object(path, data):
-            if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
+            if (schema.cls is not UNDEFINED
+                    and not isinstance(data, schema.cls)):
                 raise Invalid('expected a {0!r}'.format(schema.cls), path)
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
@@ -417,8 +418,8 @@ class Schema(object):
          "expected str for dictionary value @ data['adict']['strfield']"]
 
         """
-        base_validate = self._compile_mapping(schema,
-            invalid_msg='for dictionary value')
+        base_validate = self._compile_mapping(
+            schema, invalid_msg='for dictionary value')
 
         def validate_dict(path, data):
             if not isinstance(data, dict):
@@ -982,7 +983,7 @@ def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
                 raise Invalid(msg or 'value must be at least %s' % min)
         else:
             if min is not None and v <= min:
-                raise Invalid(msg or 'value must be higher than %s' %  min)
+                raise Invalid(msg or 'value must be higher than %s' % min)
         if max_included:
             if max is not None and v > max:
                 raise Invalid(msg or 'value must be at most %s' % max)
