@@ -242,11 +242,16 @@ class Schema(object):
     def _compile_mapping(self, schema, invalid_msg=None):
         """Create validator for given mapping."""
         invalid_msg = ' ' + (invalid_msg or 'for mapping value')
-        default_required_keys = set(key for key in schema
-                                    if
-                                    (self.required and not isinstance(key, Optional))
-                                    or
-                                    isinstance(key, Required))
+
+        default_required_keys = set()
+        default_nullable_keys = set()
+
+        for key in schema:
+            if ((self.required and not isinstance(key, Optional)) or
+                isinstance(key, Required)):
+                default_required_keys.add(key)
+            elif isinstance(key, Nullable):
+                default_nullable_keys.add(key)
 
         _compiled_schema = {}
         for skey, svalue in iteritems(schema):
@@ -256,6 +261,7 @@ class Schema(object):
 
         def validate_mapping(path, iterable, out):
             required_keys = default_required_keys.copy()
+            nullable_keys = default_nullable_keys.copy()
             error = None
             errors = []
             for key, value in iterable:
@@ -277,7 +283,10 @@ class Schema(object):
                     except MultipleInvalid as e:
                         exception_errors.extend(e.errors)
                     except Invalid as e:
-                        exception_errors.append(e)
+                        if skey in nullable_keys and value is None:
+                            out[new_key] = None
+                        else:
+                            exception_errors.append(e)
 
                     if exception_errors:
                         for err in exception_errors:
@@ -300,7 +309,10 @@ class Schema(object):
                         errors.append(Invalid('extra keys not allowed', key_path))
             for key in required_keys:
                 if getattr(key, 'default', UNDEFINED) is not UNDEFINED:
-                    out[key.schema] = key.default
+                    if callable(key.default):
+                        out[key.schema] = key.default()
+                    else:
+                        out[key.schema] = key.default
                 else:
                     msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
                     errors.append(Invalid(msg, path + [key]))
@@ -628,6 +640,12 @@ class Required(Marker):
     def __init__(self, schema, msg=None, default=UNDEFINED):
         super(Required, self).__init__(schema, msg=msg)
         self.default = default
+
+
+class Nullable(Marker):
+    """Mark a node in the schema as nullable (a value of `None` is acceptable
+        even if it would otherwise fail validation).
+    """
 
 
 def Extra(_):
@@ -1058,6 +1076,31 @@ def Title(v):
     'Hello World'
     """
     return str(v).title()
+
+
+def IgnoreCase(expected, out=None, msg=None):
+    """Validate whether a string value is equal to an expected string value
+    while ignoring case.
+
+    :param expected:    The string to expect.
+    :keyword out:       The transform to apply to the value before returning it.
+        Default is to return the value unchanged.
+    """
+    expected = expected.lower()
+    msg = msg or 'expected string "{0}" does not match value'.format(expected)
+
+    @wraps(IgnoreCase)
+    def f(value):
+        try:
+            v = value.lower()
+        except:
+            raise Invalid('IgnoreCase expected a string to compare')
+        if v != expected:
+            raise Invalid(msg)
+        if callable(out):
+            return out(v)
+        return v
+    return f
 
 
 def DefaultTo(default_value, msg=None):
