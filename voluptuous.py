@@ -1020,6 +1020,14 @@ def Length(min=None, max=None, msg=None):
     return f
 
 
+def Choice(choices, msg=None):
+    """ The value must be in choices """
+    def f(v):
+        if v not in choices:
+            raise Invalid(msg or 'not a valid choice')
+    return f
+
+
 def Lower(v):
     """Transform a string to lower case.
 
