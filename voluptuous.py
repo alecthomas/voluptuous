@@ -829,6 +829,13 @@ def Any(*validators, **kwargs):
     >>> with raises(MultipleInvalid, "not a valid value"):
     ...   validate('moo')
 
+    msg argument is used
+
+    >>> validate = Schema(Any(1, 2, 3, msg="Expected 1 2 or 3"))
+    >>> validate(1)
+    1
+    >>> with raises(MultipleInvalid, "Expected 1 2 or 3"):
+    ...   validate(4)
     """
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val, **kwargs) for val in validators]
@@ -844,7 +851,7 @@ def Any(*validators, **kwargs):
                     error = e
         else:
             if error:
-                raise error
+                raise error if msg is None else Invalid(msg)
             raise Invalid(msg or 'no valid value found')
     return f
 
