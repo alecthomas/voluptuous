@@ -96,11 +96,16 @@ if sys.version > '3':
     unicode = str
     basestring = str
     ifilter = filter
-    iteritems = dict.items
 else:
     from itertools import ifilter
     import urlparse
-    iteritems = dict.iteritems
+
+
+def iteritems(dictinst):
+    if hasattr(dictinst, 'iteritems'):
+        return dictinst.iteritems()
+    else:
+        return dictinst.items()
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -248,11 +253,11 @@ class Schema(object):
                                     or
                                     isinstance(key, Required))
 
-        _compiled_schema = {}
+        _compiled_schema = []
         for skey, svalue in iteritems(schema):
             new_key = self._compile(skey)
             new_value = self._compile(svalue)
-            _compiled_schema[skey] = (new_key, new_value)
+            _compiled_schema.append((skey, (new_key, new_value)))
 
         def validate_mapping(path, iterable, out):
             required_keys = default_required_keys.copy()
@@ -260,7 +265,7 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
-                for skey, (ckey, cvalue) in iteritems(_compiled_schema):
+                for skey, (ckey, cvalue) in _compiled_schema:
                     try:
                         new_key = ckey(key_path, key)
                     except Invalid as e:
