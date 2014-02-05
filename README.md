@@ -279,7 +279,7 @@ trigger exceptions:
 ...   raise AssertionError('MultipleInvalid not raised')
 ... except MultipleInvalid as e:
 ...   exc = e
->>> str(exc) == "extra keys not allowed @ data[1]"
+>>> str(exc) == "extra keys '1' not allowed @ data[1]"
 True
 
 ```
@@ -369,7 +369,7 @@ True
 ...   raise AssertionError('MultipleInvalid not raised')
 ... except MultipleInvalid as e:
 ...   exc = e
->>> str(exc) == "extra keys not allowed @ data[4]"
+>>> str(exc) == "extra keys '4' not allowed @ data[4]"
 True
 
 ```

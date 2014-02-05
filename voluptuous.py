@@ -297,7 +297,8 @@ class Schema(object):
                     if self.extra:
                         out[key] = value
                     else:
-                        errors.append(Invalid('extra keys not allowed', key_path))
+                        errors.append(Invalid('extra keys \'%s\' not allowed' %
+                                              key, key_path))
             for key in required_keys:
                 if getattr(key, 'default', UNDEFINED) is not UNDEFINED:
                     out[key.schema] = key.default
@@ -361,7 +362,7 @@ class Schema(object):
 
         An invalid key:
 
-            >>> with raises(MultipleInvalid, "extra keys not allowed @ data['two']"):
+            >>> with raises(MultipleInvalid, "extra keys 'two' not allowed @ data['two']"):
             ...   validate({'two': 'three'})
 
 
@@ -378,7 +379,7 @@ class Schema(object):
         purely to validate that the corresponding value is of that type. It
         will not Coerce the value:
 
-            >>> with raises(MultipleInvalid, "extra keys not allowed @ data['10']"):
+            >>> with raises(MultipleInvalid, "extra keys '10' not allowed @ data['10']"):
             ...   validate({'10': 'twenty'})
 
         Wrap them in the Coerce() function to achieve this:

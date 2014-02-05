@@ -69,7 +69,7 @@ data:
     ... except MultipleInvalid as e:
     ...   exc = e
     >>> str(exc)
-    "extra keys not allowed @ data['two']"
+    "extra keys 'two' not allowed @ data['two']"
 
 dict, list, and tuple should be available as type validators:
 
@@ -108,7 +108,7 @@ Multiple errors are reported:
     ... except MultipleInvalid as e:
     ...   errors = sorted(e.errors, key=lambda k: str(k))
     ...   print([str(i) for i in errors])  # doctest: +NORMALIZE_WHITESPACE
-    ["extra keys not allowed @ data['three']",
+    ["extra keys 'three' not allowed @ data['three']",
      "not a valid value for dictionary value @ data['one']",
      "not a valid value for dictionary value @ data['two']"]
     >>> schema = Schema([[1], [2], [3]])
@@ -228,7 +228,7 @@ Ensure that objects with \_\_slots\_\_ supported properly:
     ... except MultipleInvalid as e:
     ...   exc = e
     >>> str(exc)
-    "extra keys not allowed @ data['page']"
+    "extra keys 'page' not allowed @ data['page']"
 
     >>> schema = Schema(Object({'q': 'one', Extra: object}))
     >>> schema(structure)
