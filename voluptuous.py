@@ -288,6 +288,11 @@ class Schema(object):
                                     Invalid(err.msg + invalid_msg,
                                             err.path,
                                             err.msg))
+                        # If there is a validation error for a required
+                        # key, this means that the key was provided.
+                        # Discard the required key so it does not
+                        # create an additional, noisy exception.
+                        required_keys.discard(skey)
                         break
 
                     # Key and value okay, mark any Required() fields as found.
@@ -298,6 +303,7 @@ class Schema(object):
                         out[key] = value
                     else:
                         errors.append(Invalid('extra keys not allowed', key_path))
+
             for key in required_keys:
                 if getattr(key, 'default', UNDEFINED) is not UNDEFINED:
                     out[key.schema] = key.default

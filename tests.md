@@ -120,6 +120,17 @@ Multiple errors are reported:
      'invalid list value @ data[1]',
      'invalid list value @ data[2]']
 
+Required fields in dictionary which are invalid should not have required :
+
+    >>> from voluptuous import *
+    >>> schema = Schema({'one': {'two': 3}}, required=True)
+    >>> try:
+    ...   schema({'one': {'two': 2}})
+    ... except MultipleInvalid as e:
+    ...   errors = e.errors
+    >>> 'required' in ' '.join([x.msg for x in errors])
+    False
+
 Multiple errors for nested fields in dicts and objects:
 
 > \>\>\> from collections import namedtuple \>\>\> validate = Schema({
