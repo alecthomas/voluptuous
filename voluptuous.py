@@ -260,7 +260,8 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
-                for skey, (ckey, cvalue) in iteritems(_compiled_schema):
+                candidates = _iterate_mapping_candidates(_compiled_schema)
+                for skey, (ckey, cvalue) in candidates:
                     try:
                         new_key = ckey(key_path, key)
                     except Invalid as e:
@@ -558,6 +559,17 @@ def _compile_scalar(schema):
         return data
 
     return validate_value
+
+
+def _iterate_mapping_candidates(schema):
+    """Iterate over schema in a meaningful order."""
+    # We want Extra to match last, because it's a catch-all.
+
+    # Without this, Extra might appear first in the iterator, and fail
+    # to validate a key even though it's a Required that has its own
+    # validation, generating a false positive.
+    return sorted(iteritems(schema),
+                  key=lambda v: v[0] == Extra)
 
 
 def _iterate_object(obj):
