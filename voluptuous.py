@@ -1033,6 +1033,16 @@ def Length(min=None, max=None, msg=None):
     return f
 
 
+def In(container, msg=None):
+    """Validate that a value is in a collection."""
+    @wraps(In)
+    def validator(value):
+        if not value in container:
+            raise Invalid(msg or 'value is not allowed')
+        return value
+    return validator
+
+
 def Lower(v):
     """Transform a string to lower case.
 
