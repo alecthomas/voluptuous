@@ -478,6 +478,13 @@ to the second element in the schema, and succeed:
 
 ```
 
+## Running tests.
+
+Voluptuous is using nosetests:
+
+    $ nosetests
+
+
 ## Why use Voluptuous over another validation library?
 
 **Validators are simple callables**
