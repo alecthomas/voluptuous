@@ -84,11 +84,12 @@ Validate like so:
     True
 """
 
-from functools import wraps
 import os
 import re
 import sys
 from contextlib import contextmanager
+from functools import wraps
+
 
 if sys.version > '3':
     import urllib.parse as urlparse
@@ -104,7 +105,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.8.4'
+__version__ = '0.8.5'
 
 
 @contextmanager
