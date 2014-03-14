@@ -1112,6 +1112,33 @@ def DefaultTo(default_value, msg=None):
     return f
 
 
+def ExactSequence(validators, **kwargs):
+    """Matches each element in a sequence against the corresponding element in
+    the validators.
+
+    :param msg: Message to deliver to user if validation fails.
+    :param kwargs: All other keyword arguments are passed to the sub-Schema
+        constructors.
+
+    >>> from voluptuous import *
+    >>> validate = Schema(ExactSequence([str, int, list, list]))
+    >>> validate(['hourly_report', 10, [], []])
+    ['hourly_report', 10, [], []]
+    """
+    msg = kwargs.pop('msg', None)
+    schemas = [Schema(val, **kwargs) for val in validators]
+
+    def f(v):
+        if not isinstance(v, (list, tuple)):
+            raise Invalid(msg)
+        try:
+            for i, schema in enumerate(schemas):
+                v[i] = schema(v[i])
+        except Invalid as e:
+            raise e if msg is None else Invalid(msg)
+        return v
+    return f
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
