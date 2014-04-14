@@ -447,7 +447,7 @@ class Schema(object):
                     if exclusive.schema in data:
                         if exists:
                             msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
-                                "two or more values in the same group of exclusion '{}'".format(label)
+                                "two or more values in the same group of exclusion '%s'" % label
                             errors.append(Invalid(msg, path))
                             break
                         exists = True
