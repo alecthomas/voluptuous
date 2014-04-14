@@ -447,7 +447,7 @@ class Schema(object):
                     if exclusive.schema in data:
                         if exists:
                             msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
-                                "two or more values ​​in the same group of exclusion '{}'".format(label)
+                                "two or more values in the same group of exclusion '{}'".format(label)
                             errors.append(Invalid(msg, path))
                             break
                         exists = True
@@ -666,7 +666,7 @@ class Exclusive(Optional):
 
     Keys inside a same group of exclusion cannot be together, it only makes sense for dictionaries:
 
-    >>> with raises(MultipleInvalid, "two or more values ​​in the same group of exclusion 'angles'"):
+    >>> with raises(MultipleInvalid, "two or more values in the same group of exclusion 'angles'"):
     ...   schema({'alpha': 30, 'beta': 45})
 
     For example, API can provides multiple types of authentication, but only one works in the same time:
