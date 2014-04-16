@@ -429,9 +429,30 @@ class Schema(object):
         base_validate = self._compile_mapping(
             schema, invalid_msg='for dictionary value')
 
+        groups_of_exclusion = {}
+        for node in schema:
+            if isinstance(node, Exclusive):
+                if node.group_of_exclusion not in groups_of_exclusion.keys():
+                    groups_of_exclusion[node.group_of_exclusion] = []
+                groups_of_exclusion[node.group_of_exclusion].append(node)
+
         def validate_dict(path, data):
             if not isinstance(data, dict):
                 raise Invalid('expected a dictionary', path)
+
+            errors = []
+            for label, group in groups_of_exclusion.items():
+                exists = False
+                for exclusive in group:
+                    if exclusive.schema in data:
+                        if exists:
+                            msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
+                                "two or more values in the same group of exclusion '%s'" % label
+                            errors.append(Invalid(msg, path))
+                            break
+                        exists = True
+            if errors:
+                raise MultipleInvalid(errors)
 
             out = type(data)()
             return base_validate(path, iteritems(data), out)
@@ -632,6 +653,46 @@ class Marker(object):
 
 class Optional(Marker):
     """Mark a node in the schema as optional."""
+
+
+class Exclusive(Optional):
+    """Mark a node in the schema as exclusive.
+
+    Exclusive keys inherited from Optional:
+
+    >>> schema = Schema({Exclusive('alpha', 'angles'): int, Exclusive('beta', 'angles'): int})
+    >>> schema({'alpha': 30})
+    {'alpha': 30}
+
+    Keys inside a same group of exclusion cannot be together, it only makes sense for dictionaries:
+
+    >>> with raises(MultipleInvalid, "two or more values in the same group of exclusion 'angles'"):
+    ...   schema({'alpha': 30, 'beta': 45})
+
+    For example, API can provides multiple types of authentication, but only one works in the same time:
+
+    >>> msg = 'Please, use only one type of authentication at the same time.'
+    >>> schema = Schema({
+    ... Exclusive('classic', 'auth', msg=msg):{
+    ...     Required('email'): basestring,
+    ...     Required('password'): basestring
+    ...     },
+    ... Exclusive('internal', 'auth', msg=msg):{
+    ...     Required('secret_key'): basestring
+    ...     },
+    ... Exclusive('social', 'auth', msg=msg):{
+    ...     Required('social_network'): basestring,
+    ...     Required('token'): basestring
+    ...     }
+    ... })
+
+    >>> with raises(MultipleInvalid, "Please, use only one type of authentication at the same time."):
+    ...     schema({'classic': {'email': 'foo@example.com', 'password': 'bar'},
+    ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
+    """
+    def __init__(self, schema, group_of_exclusion, msg=None):
+        super(Exclusive, self).__init__(schema, msg=msg)
+        self.group_of_exclusion = group_of_exclusion
 
 
 class Required(Marker):
