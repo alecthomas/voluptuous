@@ -1,7 +1,6 @@
-[![Stories in Ready](https://badge.waffle.io/alecthomas/voluptuous.png?label=ready&title=Ready)](https://waffle.io/alecthomas/voluptuous)
 # Voluptuous is a Python data validation library
 
-[![Build Status](https://travis-ci.org/alecthomas/voluptuous.png)](https://travis-ci.org/alecthomas/voluptuous)
+[![Build Status](https://travis-ci.org/alecthomas/voluptuous.png)](https://travis-ci.org/alecthomas/voluptuous) [![Stories in Ready](https://badge.waffle.io/alecthomas/voluptuous.png?label=ready&title=Ready)](https://waffle.io/alecthomas/voluptuous)
 
 Voluptuous, *despite* the name, is a Python data validation library. It
 is primarily intended for validating data coming into Python as JSON,
