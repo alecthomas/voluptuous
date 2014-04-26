@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/alecthomas/voluptuous.png?label=ready&title=Ready)](https://waffle.io/alecthomas/voluptuous)
 # Voluptuous is a Python data validation library
 
 [![Build Status](https://travis-ci.org/alecthomas/voluptuous.png)](https://travis-ci.org/alecthomas/voluptuous)
