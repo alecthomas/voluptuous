@@ -146,10 +146,11 @@ class Invalid(Error):
 
     """
 
-    def __init__(self, message, path=None, error_message=None):
+    def __init__(self, message, path=None, error_message=None, error_type=None):
         Error.__init__(self, message)
         self.path = path or []
         self.error_message = error_message or message
+        self.error_type = error_type
 
     @property
     def msg(self):
@@ -158,7 +159,10 @@ class Invalid(Error):
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) \
             if self.path else ''
-        return Exception.__str__(self) + path
+        output = Exception.__str__(self)
+        if self.error_type:
+            output += ' for ' + self.error_type
+        return output + path
 
 
 class MultipleInvalid(Invalid):
@@ -242,7 +246,7 @@ class Schema(object):
 
     def _compile_mapping(self, schema, invalid_msg=None):
         """Create validator for given mapping."""
-        invalid_msg = ' ' + (invalid_msg or 'for mapping value')
+        invalid_msg = invalid_msg or 'mapping value'
         default_required_keys = set(key for key in schema
                                     if
                                     (self.required and not isinstance(key, Optional))
@@ -286,10 +290,8 @@ class Schema(object):
                             if len(err.path) > len(key_path):
                                 errors.append(err)
                             else:
-                                errors.append(
-                                    Invalid(err.msg + invalid_msg,
-                                            err.path,
-                                            err.msg))
+                                err.error_type = invalid_msg
+                                errors.append(err)
                         # If there is a validation error for a required
                         # key, this means that the key was provided.
                         # Discard the required key so it does not
@@ -337,7 +339,7 @@ class Schema(object):
 
         """
         base_validate = self._compile_mapping(
-            schema, invalid_msg='for object value')
+            schema, invalid_msg='object value')
 
         def validate_object(path, data):
             if (schema.cls is not UNDEFINED
@@ -427,7 +429,7 @@ class Schema(object):
 
         """
         base_validate = self._compile_mapping(
-            schema, invalid_msg='for dictionary value')
+            schema, invalid_msg='dictionary value')
 
         groups_of_exclusion = {}
         for node in schema:
@@ -572,8 +574,13 @@ def _compile_scalar(schema):
                 return schema(data)
             except ValueError as e:
                 raise Invalid('not a valid value', path)
+            except MultipleInvalid as e:
+                for error in e.errors:
+                    error.path = path + error.path
+                raise
             except Invalid as e:
-                raise Invalid(e.msg, path + e.path, e.error_message)
+                e.path = path + e.path
+                raise
         return validate_callable
 
     def validate_value(path, data):

@@ -250,3 +250,19 @@ Ensure that objects can be used with other validators:
     >>> schema = Schema({'meta': Object({'q': 'one'})})
     >>> schema({'meta': Structure(q='one')})
     {'meta': Structure(q='one')}
+
+Ensure that subclasses of Invalid of are raised as is.
+
+    >>> class SpecialInvalid(Invalid):
+    ...   pass
+    ...
+    >>> def custom_validator(value):
+    ...   raise SpecialInvalid('boom')
+    ...
+    >>> schema = Schema({'thing': custom_validator})
+    >>> try:
+    ...   schema({'thing': 'not an int'})
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> exc.errors[0].__class__.__name__
+    'SpecialInvalid'

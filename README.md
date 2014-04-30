@@ -430,7 +430,7 @@ an HTTP API.
 >>> exc.path
 ['email']
 >>> exc.msg
-'This email is invalid. for dictionary value'
+'This email is invalid.'
 >>> exc.error_message
 'This email is invalid.'
 
