@@ -432,11 +432,14 @@ class Schema(object):
             schema, invalid_msg='dictionary value')
 
         groups_of_exclusion = {}
+        groups_of_inclusion = {}
         for node in schema:
             if isinstance(node, Exclusive):
-                if node.group_of_exclusion not in groups_of_exclusion.keys():
-                    groups_of_exclusion[node.group_of_exclusion] = []
-                groups_of_exclusion[node.group_of_exclusion].append(node)
+                g = groups_of_exclusion.setdefault(node.group_of_exclusion, [])
+                g.append(node)
+            elif isinstance(node, Inclusive):
+                g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
+                g.append(node)
 
         def validate_dict(path, data):
             if not isinstance(data, dict):
@@ -453,6 +456,24 @@ class Schema(object):
                             errors.append(Invalid(msg, path))
                             break
                         exists = True
+
+            if errors:
+                raise MultipleInvalid(errors)
+
+            for label, group in groups_of_inclusion.items():
+                included = [node.schema in data for node in group]
+                if any(included) and not all(included):
+                    msg = None
+                    for g in group:
+                        if hasattr(g, 'msg') and g.msg:
+                            msg = g.msg
+                            break
+                    if msg is None:
+                        msg = ("some but not all values in the same group of "
+                               "inclusion '%s'") % label
+                    errors.append(Invalid(msg, path))
+                    break
+
             if errors:
                 raise MultipleInvalid(errors)
 
@@ -700,6 +721,53 @@ class Exclusive(Optional):
     def __init__(self, schema, group_of_exclusion, msg=None):
         super(Exclusive, self).__init__(schema, msg=msg)
         self.group_of_exclusion = group_of_exclusion
+
+
+class Inclusive(Optional):
+    """ Mark a node in the schema as inclusive.
+
+    Exclusive keys inherited from Optional:
+
+    >>> schema = Schema({
+    ...     Inclusive('filename', 'file'): str,
+    ...     Inclusive('mimetype', 'file'): str
+    ... })
+    >>> data = {'filename': 'dog.jpg', 'mimetype': 'image/jpeg'}
+    >>> data == schema(data)
+    True
+
+    Keys inside a same group of inclusive must exist together, it only makes sense for dictionaries:
+
+    >>> with raises(MultipleInvalid, "some but not all values in the same group of inclusion 'file'"):
+    ...     schema({'filename': 'dog.jpg'})
+
+    If none of the keys in the group are present, it is accepted:
+
+    >>> schema({})
+    {}
+
+    For example, API can return 'height' and 'width' together, but not separately.
+
+    >>> msg = 'Height and width must exist together'
+    >>> schema = Schema({
+    ...     Inclusive('height', 'size', msg=msg): int,
+    ...     Inclusive('width', 'size', msg=msg): int
+    ... })
+
+    >>> with raises(MultipleInvalid, msg):
+    ...     schema({'height': 100})
+
+    >>> with raises(MultipleInvalid, msg):
+    ...     schema({'width': 100})
+
+    >>> data = {'height': 100, 'width': 100}
+    >>> data == schema(data)
+    True
+    """
+
+    def __init__(self, schema, group_of_inclusion, msg=None):
+        super(Inclusive, self).__init__(schema, msg=msg)
+        self.group_of_inclusion = group_of_inclusion
 
 
 class Required(Marker):
