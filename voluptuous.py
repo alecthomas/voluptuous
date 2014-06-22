@@ -1087,7 +1087,14 @@ def Replace(pattern, substitution, msg=None):
 
 @message('expected a URL')
 def Url(v):
-    """Verify that the value is a URL."""
+    """Verify that the value is a URL.
+
+    >>> s = Schema(Url())
+    >>> with raises(MultipleInvalid, 'expected a URL'):
+    ...   s(1)
+    >>> s('http://w3.org')
+    'http://w3.org'
+    """
     try:
         urlparse.urlparse(v)
         return v
@@ -1187,7 +1194,7 @@ def In(container, msg=None):
     """Validate that a value is in a collection."""
     @wraps(In)
     def validator(value):
-        if not value in container:
+        if value not in container:
             raise Invalid(msg or 'value is not allowed')
         return value
     return validator
