@@ -1,7 +1,7 @@
 from nose.tools import assert_equal
 
 import voluptuous
-from voluptuous import Schema, Required, Extra, Invalid, In
+from voluptuous import Schema, Required, Extra, Invalid, In, All
 
 
 def test_required():
@@ -40,3 +40,47 @@ def test_in():
     """Verify that In works."""
     schema = Schema({"color": In(frozenset(["blue", "red", "yellow"]))})
     schema({"color": "blue"})
+
+
+def test_bool_literal():
+    """ Verify that True and False can be used in schemas, and bool works """
+    tests = {
+        True: {
+            'valid': [True, 1],
+            'invalid': [False],
+            'error': ['not a valid value'],
+        },
+        False: {
+            'valid': [False, 0],
+            'invalid': [True],
+            'error': ['not a valid value'],
+        },
+        bool: {
+            'valid': [True, False],
+            'invalid': [1, 0, '', 'true'],
+            'error': ['expected bool'],
+        },
+        All(True, bool): {
+            'valid': [True],
+            'invalid': [False, 1],
+            'error': ['not a valid value', 'expected bool'],
+        },
+        All(False, bool): {
+            'valid': [False],
+            'invalid': [True, 0],
+            'error': ['not a valid value', 'expected bool'],
+        },
+    }
+
+    for s, data in tests.items():
+        schema = Schema(s)
+        for v in data['valid']:
+            schema(v)
+        for i, v in enumerate(data['invalid']):
+            try:
+                schema(v)
+            except Invalid as e:
+                assert_equal(str(e), data['error'][i % len(data['error'])])
+            else:
+                err = "Schema({})({}) Did not raise Invalid"
+                assert False, err.format(s, v)
