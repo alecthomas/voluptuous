@@ -1112,11 +1112,11 @@ def Is(literal):
     >>> s(True)
     True
     """
-    def _is(v):
+    def f(v):
         if v is not literal:
             raise Invalid('is not {}'.format(literal))
         return v
-    return _is
+    return f
 
 
 @message('not a file')
