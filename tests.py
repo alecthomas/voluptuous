@@ -1,4 +1,4 @@
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 
 import voluptuous
 from voluptuous import Schema, Required, Extra, Invalid, In, Remove
@@ -77,3 +77,13 @@ def test_remove():
     schema = Schema([1.0, Remove(float), int])
     out_ = schema([1, 2, 1.0, 2.0, 3.0, 4])
     assert_equal(out_, [1, 2, 1.0, 4])
+
+
+def test_dupe_keys():
+    """Verify that constructing a schema with duplicate keys raises an error"""
+    assert_raises(voluptuous.SchemaError, Schema,
+                  {Required("id"): str, Required("id"): int})
+    assert_raises(voluptuous.SchemaError, Schema,
+                  {Required("id"): str, "id": str})
+    assert_raises(voluptuous.SchemaError, Schema,
+                  {voluptuous.Optional("id"): str, Required("id"): int})
