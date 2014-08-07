@@ -910,7 +910,7 @@ def Extra(_):
 extra = Extra
 
 
-def Msg(schema, msg):
+def Msg(schema, msg, cls=None):
     """Report a user-friendly message if a schema fails to validate.
 
     >>> validate = Schema(
@@ -935,7 +935,7 @@ def Msg(schema, msg):
             if len(e.path) > 1:
                 raise e
             else:
-                raise Invalid(msg)
+                raise (cls or e.__class__)(msg)
     return f
 
 
