@@ -924,6 +924,11 @@ def Msg(schema, msg, cls=None):
     >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!'))
     >>> with raises(MultipleInvalid, 'invalid list value @ data[0][0]'):
     ...   validate([['three']])
+    >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!', cls=KeyError))
+    >>> with raises(KeyError, 'invalid list value @ data[0][0]'):
+    ...   validate([['three']])
+    >>> with raises(MultipleInvalid, 'invalid list value @ data[0][0]'):
+    ...   validate([['three']])
     """
     schema = Schema(schema)
 
