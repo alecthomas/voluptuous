@@ -127,6 +127,11 @@ class Undefined(object):
 
 UNDEFINED = Undefined()
 
+# options for extra keys
+PREVENT_EXTRA = 0  # any extra key not in schema will raise an error
+ALLOW_EXTRA = 1    # extra keys not in schema will be included in output
+REMOVE_EXTRA = 2   # extra keys not in schema will be excluded from output
+
 
 class Error(Exception):
     """Base validation exception."""
@@ -202,16 +207,24 @@ class Schema(object):
     validate and optionally convert the value.
     """
 
-    def __init__(self, schema, required=False, extra=False):
+    def __init__(self, schema, required=False, extra=PREVENT_EXTRA):
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
         :param required: Keys defined in the schema must be in the data.
-        :param extra: Keys in the data need not have keys in the schema.
+        :param extra: Specify how extra keys in the data are treated:
+            - :const:`~voluptuous.PREVENT_EXTRA`: to disallow any undefined
+              extra keys (raise ``Invalid``).
+            - :const:`~voluptuous.ALLOW_EXTRA`: to include underfined extra
+              keys in the output.
+            - :const:`~voluptuous.REMOVE_EXTRA`: to exclude undefined extra keys
+              from the output.
+            - Any value other than the above defaults to
+              :const:`~voluptuous.PREVENT_EXTRA`
         """
         self.schema = schema
         self.required = required
-        self.extra = extra
+        self.extra = int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
 
     def __call__(self, data):
@@ -250,7 +263,7 @@ class Schema(object):
 
         # Keys that may be required
         all_required_keys = set(key for key in schema
-                                if (self.required and not isinstance(key, Optional))
+                                if (self.required and not isinstance(key, (Optional, Remove)))
                                 or isinstance(key, Required))
 
         # Keys that may have defaults
@@ -287,14 +300,23 @@ class Schema(object):
                     # Backtracking is not performed once a key is selected, so if
                     # the value is invalid we immediately throw an exception.
                     exception_errors = []
+                    # check if the key is marked for removal
+                    is_remove = new_key is Remove
                     try:
-                        out[new_key] = cvalue(key_path, value)
+                        cval = cvalue(key_path, value)
+                        # include if it's not marked for removal
+                        if not is_remove:
+                            out[new_key] = cval
                     except MultipleInvalid as e:
                         exception_errors.extend(e.errors)
                     except Invalid as e:
                         exception_errors.append(e)
 
                     if exception_errors:
+                        if is_remove:
+                            # since it didn't satisfy the remove schema, treat
+                            # it as extra
+                            continue
                         for err in exception_errors:
                             if len(err.path) > len(key_path):
                                 errors.append(err)
@@ -316,10 +338,11 @@ class Schema(object):
 
                     break
                 else:
-                    if self.extra:
+                    if self.extra == ALLOW_EXTRA:
                         out[key] = value
-                    else:
+                    elif self.extra != REMOVE_EXTRA:
                         errors.append(Invalid('extra keys not allowed', key_path))
+                    # else REMOVE_EXTRA: ignore the key so it's removed from output
 
             # set defaults for any that can have defaults
             for key in default_keys:
@@ -534,7 +557,9 @@ class Schema(object):
                 invalid = None
                 for validate in _compiled:
                     try:
-                        out.append(validate(index_path, value))
+                        cval = validate(index_path, value)
+                        if cval is not Remove:  # do not include Remove values
+                            out.append(cval)
                         break
                     except Invalid as e:
                         if len(e.path) > len(index_path):
@@ -633,13 +658,17 @@ def _compile_scalar(schema):
 
 def _iterate_mapping_candidates(schema):
     """Iterate over schema in a meaningful order."""
-    # We want Extra to match last, because it's a catch-all.
-
-    # Without this, Extra might appear first in the iterator, and fail
-    # to validate a key even though it's a Required that has its own
+    # We want Extra to match last, because it's a catch-all. Next come the
+    # Remove markers (to avoid matching other candidates that are supposed to be
+    # included).
+    def sort_item(item_):
+        key_ = item_[0]
+        # priority (ascening): Extra, Remove, rest
+        return 2 if key_ == Extra else isinstance(key_, Remove)
+    # Without this, Extra (or Remove) might appear first in the iterator, and
+    # fail to validate a key even though it's a Required that has its own
     # validation, generating a false positive.
-    return sorted(iteritems(schema),
-                  key=lambda v: v[0] == Extra)
+    return sorted(iteritems(schema), key=sort_item)
 
 
 def _iterate_object(obj):
@@ -823,6 +852,25 @@ class Required(Marker):
     def __init__(self, schema, msg=None, default=UNDEFINED):
         super(Required, self).__init__(schema, msg=msg)
         self.default = default
+
+
+class Remove(Marker):
+    """Mark a node in the schema to be removed and excluded from the validated
+    output. Keys that fail validation will not raise ``Invalid``. Instead, these
+    keys will be treated as extras.
+
+    >>> schema = Schema({str: int, Remove(int): str})
+    >>> with raises(MultipleInvalid, "extra keys not allowed @ data[1]"):
+    ...    schema({'keep': 1, 1: 1.0})
+    >>> schema({1: 'red', 'red': 1, 2: 'green'})
+    {'red': 1}
+    >>> schema = Schema([int, Remove(float), Extra])
+    >>> schema([1, 2, 3, 4.0, 5, 6.0, '7'])
+    [1, 2, 3, 5, '7']
+    """
+    def __call__(self, v):
+        super(Remove, self).__call__(v)
+        return self.__class__
 
 
 def Extra(_):

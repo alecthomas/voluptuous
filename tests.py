@@ -1,7 +1,7 @@
 from nose.tools import assert_equal
 
 import voluptuous
-from voluptuous import Schema, Required, Extra, Invalid, In
+from voluptuous import Schema, Required, Extra, Invalid, In, Remove
 
 
 def test_required():
@@ -40,3 +40,9 @@ def test_in():
     """Verify that In works."""
     schema = Schema({"color": In(frozenset(["blue", "red", "yellow"]))})
     schema({"color": "blue"})
+
+
+def test_remove():
+    """Verify that Remove works."""
+    schema = Schema({"weight": int, Remove("color"): str})
+    schema({"weight": 10, "color": "red"})
