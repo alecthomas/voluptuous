@@ -191,6 +191,81 @@ class MultipleInvalid(Invalid):
         return str(self.errors[0])
 
 
+class RequiredFieldInvalid(Invalid):
+    # required field was missing
+    pass
+
+
+class ObjectInvalid(Invalid):
+    # the value we found was not an object
+    pass
+
+
+class DictInvalid(Invalid):
+    # the value found was not a dict
+    pass
+
+
+class ExclusiveInvalid(Invalid):
+    # more than one value found in exclusion group
+    pass
+
+
+class InclusiveInvalid(Invalid):
+    # not all values found in inclusion group
+    pass
+
+
+class SequenceItemInvalid(Invalid):
+    # one of the values found in a sequence was invalid
+    pass
+
+
+class SequenceTypeInvalid(Invalid):
+    # the type found is not a sequence type
+    pass
+
+
+class TypeInvalid(Invalid):
+    # value was not of required type
+    pass
+
+
+class ValueInvalid(Invalid):
+    # value was found invalid by evaluation function
+    pass
+
+
+class ScalarInvalid(Invalid):
+    # scalars did not match
+    pass
+
+
+class CoerceInvalid(Invalid):
+    # impossible to coerce message to type
+    pass
+
+
+class AnyInvalid(Invalid):
+    # value did not pass any validator
+    pass
+
+
+class AllInvalid(Invalid):
+    # value did not pass all validators
+    pass
+
+
+class MatchInvalid(Invalid):
+    # value does not match the given regular expression
+    pass
+
+
+class RangeInvalid(Invalid):
+    # value is not in given range
+    pass
+
+
 class Schema(object):
     """A validation schema.
 
@@ -331,7 +406,7 @@ class Schema(object):
             # for any required keys left that weren't found and don't have defaults:
             for key in required_keys:
                 msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-                errors.append(Invalid(msg, path + [key]))
+                errors.append(RequiredFieldInvalid(msg, path + [key]))
             if errors:
                 raise MultipleInvalid(errors)
 
@@ -363,7 +438,7 @@ class Schema(object):
         def validate_object(path, data):
             if (schema.cls is not UNDEFINED
                     and not isinstance(data, schema.cls)):
-                raise Invalid('expected a {0!r}'.format(schema.cls), path)
+                raise ObjectInvalid('expected a {0!r}'.format(schema.cls), path)
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
             out = base_validate(path, iterable, {})
@@ -462,7 +537,7 @@ class Schema(object):
 
         def validate_dict(path, data):
             if not isinstance(data, dict):
-                raise Invalid('expected a dictionary', path)
+                raise DictInvalid('expected a dictionary', path)
 
             errors = []
             for label, group in groups_of_exclusion.items():
@@ -472,7 +547,7 @@ class Schema(object):
                         if exists:
                             msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
                                 "two or more values in the same group of exclusion '%s'" % label
-                            errors.append(Invalid(msg, path))
+                            errors.append(ExclusiveInvalid(msg, path))
                             break
                         exists = True
 
@@ -490,7 +565,7 @@ class Schema(object):
                     if msg is None:
                         msg = ("some but not all values in the same group of "
                                "inclusion '%s'") % label
-                    errors.append(Invalid(msg, path))
+                    errors.append(InclusiveInvalid(msg, path))
                     break
 
             if errors:
@@ -519,7 +594,7 @@ class Schema(object):
 
         def validate_sequence(path, data):
             if not isinstance(data, seq_type):
-                raise Invalid('expected a %s' % seq_type_name, path)
+                raise SequenceTypeInvalid('expected a %s' % seq_type_name, path)
 
             # Empty seq schema, allow any data.
             if not schema:
@@ -542,7 +617,7 @@ class Schema(object):
                         invalid = e
                 else:
                     if len(invalid.path) <= len(index_path):
-                        invalid = Invalid('invalid %s value' % seq_type_name, index_path)
+                        invalid = SequenceItemInvalid('invalid %s value' % seq_type_name, index_path)
                     errors.append(invalid)
             if errors:
                 raise MultipleInvalid(errors)
@@ -605,7 +680,7 @@ def _compile_scalar(schema):
                 return data
             else:
                 msg = 'expected %s' % schema.__name__
-                raise Invalid(msg, path)
+                raise TypeInvalid(msg, path)
         return validate_instance
 
     if callable(schema):
@@ -613,7 +688,7 @@ def _compile_scalar(schema):
             try:
                 return schema(data)
             except ValueError as e:
-                raise Invalid('not a valid value', path)
+                raise ValueInvalid('not a valid value', path)
             except MultipleInvalid as e:
                 for error in e.errors:
                     error.path = path + error.path
@@ -625,7 +700,7 @@ def _compile_scalar(schema):
 
     def validate_value(path, data):
         if data != schema:
-            raise Invalid('not a valid value', path)
+            raise ScalarInvalid('not a valid value', path)
         return data
 
     return validate_value
@@ -891,7 +966,7 @@ def message(default=None):
                 try:
                     return f(*args, **kwargs)
                 except ValueError:
-                    raise Invalid(msg or default or 'invalid value')
+                    raise ValueInvalid(msg or default or 'invalid value')
             return wrapper
         return check
     return decorator
@@ -944,7 +1019,7 @@ def Coerce(type, msg=None):
         try:
             return type(v)
         except (ValueError, TypeError):
-            raise Invalid(msg or ('expected %s' % type.__name__))
+            raise CoerceInvalid(msg or ('expected %s' % type.__name__))
     return f
 
 
@@ -1046,8 +1121,8 @@ def Any(*validators, **kwargs):
                     error = e
         else:
             if error:
-                raise error if msg is None else Invalid(msg)
-            raise Invalid(msg or 'no valid value found')
+                raise error if msg is None else AnyInvalid(msg)
+            raise AnyInvalid(msg or 'no valid value found')
     return f
 
 
@@ -1071,7 +1146,7 @@ def All(*validators, **kwargs):
             for schema in schemas:
                 v = schema(v)
         except Invalid as e:
-            raise e if msg is None else Invalid(msg)
+            raise e if msg is None else AllInvalid(msg)
         return v
     return f
 
@@ -1101,9 +1176,9 @@ def Match(pattern, msg=None):
         try:
             match = pattern.match(v)
         except TypeError:
-            raise Invalid("expected string or buffer")
+            raise MatchInvalid("expected string or buffer")
         if not match:
-            raise Invalid(msg or 'does not match regular expression')
+            raise MatchInvalid(msg or 'does not match regular expression')
         return v
     return f
 
@@ -1188,16 +1263,16 @@ def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
     def f(v):
         if min_included:
             if min is not None and v < min:
-                raise Invalid(msg or 'value must be at least %s' % min)
+                raise RangeInvalid(msg or 'value must be at least %s' % min)
         else:
             if min is not None and v <= min:
-                raise Invalid(msg or 'value must be higher than %s' % min)
+                raise RangeInvalid(msg or 'value must be higher than %s' % min)
         if max_included:
             if max is not None and v > max:
-                raise Invalid(msg or 'value must be at most %s' % max)
+                raise RangeInvalid(msg or 'value must be at most %s' % max)
         else:
             if max is not None and v >= max:
-                raise Invalid(msg or 'value must be lower than %s' % max)
+                raise RangeInvalid(msg or 'value must be lower than %s' % max)
         return v
     return f
 
@@ -1217,16 +1292,24 @@ def Clamp(min=None, max=None, msg=None):
     return f
 
 
+class LengthInvalid(Invalid):
+    pass
+
+
 def Length(min=None, max=None, msg=None):
     """The length of a value must be in a certain range."""
     @wraps(Length)
     def f(v):
         if min is not None and len(v) < min:
-            raise Invalid(msg or 'length of value must be at least %s' % min)
+            raise LengthInvalid(msg or 'length of value must be at least %s' % min)
         if max is not None and len(v) > max:
-            raise Invalid(msg or 'length of value must be at most %s' % max)
+            raise LengthInvalid(msg or 'length of value must be at most %s' % max)
         return v
     return f
+
+
+class InInvalid(Invalid):
+    pass
 
 
 def In(container, msg=None):
@@ -1234,7 +1317,7 @@ def In(container, msg=None):
     @wraps(In)
     def validator(value):
         if value not in container:
-            raise Invalid(msg or 'value is not allowed')
+            raise InInvalid(msg or 'value is not allowed')
         return value
     return validator
 
@@ -1294,6 +1377,10 @@ def DefaultTo(default_value, msg=None):
     return f
 
 
+class ExactSequenceInvalid(Invalid):
+    pass
+
+
 def ExactSequence(validators, **kwargs):
     """Matches each element in a sequence against the corresponding element in
     the validators.
@@ -1312,12 +1399,12 @@ def ExactSequence(validators, **kwargs):
 
     def f(v):
         if not isinstance(v, (list, tuple)):
-            raise Invalid(msg)
+            raise ExactSequenceInvalid(msg)
         try:
             for i, schema in enumerate(schemas):
                 v[i] = schema(v[i])
         except Invalid as e:
-            raise e if msg is None else Invalid(msg)
+            raise e if msg is None else ExactSequenceInvalid(msg)
         return v
     return f
 
