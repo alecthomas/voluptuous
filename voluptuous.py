@@ -192,77 +192,77 @@ class MultipleInvalid(Invalid):
 
 
 class RequiredFieldInvalid(Invalid):
-    # required field was missing
+    """Required field was missing."""
     pass
 
 
 class ObjectInvalid(Invalid):
-    # the value we found was not an object
+    """The value we found was not an object."""
     pass
 
 
 class DictInvalid(Invalid):
-    # the value found was not a dict
+    """The value found was not a dict."""
     pass
 
 
 class ExclusiveInvalid(Invalid):
-    # more than one value found in exclusion group
+    """More than one value found in exclusion group."""
     pass
 
 
 class InclusiveInvalid(Invalid):
-    # not all values found in inclusion group
+    """Not all values found in inclusion group."""
     pass
 
 
 class SequenceItemInvalid(Invalid):
-    # one of the values found in a sequence was invalid
+    """One of the values found in a sequence was invalid."""
     pass
 
 
 class SequenceTypeInvalid(Invalid):
-    # the type found is not a sequence type
+    """The type found is not a sequence type."""
     pass
 
 
 class TypeInvalid(Invalid):
-    # value was not of required type
+    """The value was not of required type."""
     pass
 
 
 class ValueInvalid(Invalid):
-    # value was found invalid by evaluation function
+    """The value was found invalid by evaluation function."""
     pass
 
 
 class ScalarInvalid(Invalid):
-    # scalars did not match
+    """Scalars did not match."""
     pass
 
 
 class CoerceInvalid(Invalid):
-    # impossible to coerce message to type
+    """Impossible to coerce value to type."""
     pass
 
 
 class AnyInvalid(Invalid):
-    # value did not pass any validator
+    """The value did not pass any validator."""
     pass
 
 
 class AllInvalid(Invalid):
-    # value did not pass all validators
+    """The value did not pass all validators."""
     pass
 
 
 class MatchInvalid(Invalid):
-    # value does not match the given regular expression
+    """The value does not match the given regular expression."""
     pass
 
 
 class RangeInvalid(Invalid):
-    # value is not in given range
+    """The value is not in given range."""
     pass
 
 
