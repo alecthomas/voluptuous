@@ -1054,6 +1054,8 @@ def IsFalse(v):
     >>> validate = Schema(IsFalse())
     >>> validate([])
     []
+    >>> with raises(Invalid, "value was not false"):
+    ...   validate(True)
     """
     if v:
         raise ValueError
@@ -1070,6 +1072,10 @@ def Boolean(v):
     >>> validate = Schema(Boolean())
     >>> validate(True)
     True
+    >>> validate("1")
+    True
+    >>> validate("0")
+    False
     >>> with raises(MultipleInvalid, "expected boolean"):
     ...   validate('moo')
     """
@@ -1219,7 +1225,13 @@ def Url(v):
 @message('not a file')
 @truth
 def IsFile(v):
-    """Verify the file exists."""
+    """Verify the file exists.
+
+    >>> os.path.basename(IsFile()(__file__))
+    'voluptuous.py'
+    >>> with raises(Invalid, 'not a file'):
+    ...   IsFile()("random_filename_goes_here.py")
+    """
     return os.path.isfile(v)
 
 
@@ -1237,7 +1249,13 @@ def IsDir(v):
 @message('path does not exist')
 @truth
 def PathExists(v):
-    """Verify the path exists, regardless of its type."""
+    """Verify the path exists, regardless of its type.
+
+    >>> os.path.basename(PathExists()(__file__))
+    'voluptuous.py'
+    >>> with raises(Invalid, 'path does not exist'):
+    ...   PathExists()("random_filename_goes_here.py")
+    """
     return os.path.exists(v)
 
 
@@ -1258,6 +1276,8 @@ def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
     ...   s(20)
     >>> with raises(MultipleInvalid, 'value must be higher than 1'):
     ...   s(1)
+    >>> with raises(MultipleInvalid, 'value must be lower than 10'):
+    ...   Schema(Range(max=10, max_included=False))(20)
     """
     @wraps(Range)
     def f(v):
@@ -1281,6 +1301,14 @@ def Clamp(min=None, max=None, msg=None):
     """Clamp a value to a range.
 
     Either min or max may be omitted.
+    >>> s = Schema(Clamp(min=0, max=1))
+    >>> s(0.5)
+    0.5
+    >>> s(5)
+    1
+    >>> s(-1)
+    0
+
     """
     @wraps(Clamp)
     def f(v):
