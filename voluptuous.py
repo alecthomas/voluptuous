@@ -195,6 +195,116 @@ class MultipleInvalid(Invalid):
         return str(self.errors[0])
 
 
+class RequiredFieldInvalid(Invalid):
+    """Required field was missing."""
+    pass
+
+
+class ObjectInvalid(Invalid):
+    """The value we found was not an object."""
+    pass
+
+
+class DictInvalid(Invalid):
+    """The value found was not a dict."""
+    pass
+
+
+class ExclusiveInvalid(Invalid):
+    """More than one value found in exclusion group."""
+    pass
+
+
+class InclusiveInvalid(Invalid):
+    """Not all values found in inclusion group."""
+    pass
+
+
+class SequenceItemInvalid(Invalid):
+    """One of the values found in a sequence was invalid."""
+    pass
+
+
+class SequenceTypeInvalid(Invalid):
+    """The type found is not a sequence type."""
+    pass
+
+
+class TypeInvalid(Invalid):
+    """The value was not of required type."""
+    pass
+
+
+class ValueInvalid(Invalid):
+    """The value was found invalid by evaluation function."""
+    pass
+
+
+class ScalarInvalid(Invalid):
+    """Scalars did not match."""
+    pass
+
+
+class CoerceInvalid(Invalid):
+    """Impossible to coerce value to type."""
+    pass
+
+
+class AnyInvalid(Invalid):
+    """The value did not pass any validator."""
+    pass
+
+
+class AllInvalid(Invalid):
+    """The value did not pass all validators."""
+    pass
+
+
+class MatchInvalid(Invalid):
+    """The value does not match the given regular expression."""
+    pass
+
+
+class RangeInvalid(Invalid):
+    """The value is not in given range."""
+    pass
+
+
+class TrueInvalid(Invalid):
+    """The value is not True."""
+    pass
+
+
+class FalseInvalid(Invalid):
+    """The value is not False."""
+    pass
+
+
+class BooleanInvalid(Invalid):
+    """The value is not a boolean."""
+    pass
+
+
+class UrlInvalid(Invalid):
+    """The value is not a url."""
+    pass
+
+
+class FileInvalid(Invalid):
+    """The value is not a file."""
+    pass
+
+
+class DirInvalid(Invalid):
+    """The value is not a directory."""
+    pass
+
+
+class PathInvalid(Invalid):
+    """The value is not a path."""
+    pass
+
+
 class Schema(object):
     """A validation schema.
 
@@ -358,7 +468,7 @@ class Schema(object):
             # for any required keys left that weren't found and don't have defaults:
             for key in required_keys:
                 msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-                errors.append(Invalid(msg, path + [key]))
+                errors.append(RequiredFieldInvalid(msg, path + [key]))
             if errors:
                 raise MultipleInvalid(errors)
 
@@ -390,7 +500,7 @@ class Schema(object):
         def validate_object(path, data):
             if (schema.cls is not UNDEFINED
                     and not isinstance(data, schema.cls)):
-                raise Invalid('expected a {0!r}'.format(schema.cls), path)
+                raise ObjectInvalid('expected a {0!r}'.format(schema.cls), path)
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
             out = base_validate(path, iterable, {})
@@ -489,7 +599,7 @@ class Schema(object):
 
         def validate_dict(path, data):
             if not isinstance(data, dict):
-                raise Invalid('expected a dictionary', path)
+                raise DictInvalid('expected a dictionary', path)
 
             errors = []
             for label, group in groups_of_exclusion.items():
@@ -499,7 +609,7 @@ class Schema(object):
                         if exists:
                             msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
                                 "two or more values in the same group of exclusion '%s'" % label
-                            errors.append(Invalid(msg, path))
+                            errors.append(ExclusiveInvalid(msg, path))
                             break
                         exists = True
 
@@ -517,7 +627,7 @@ class Schema(object):
                     if msg is None:
                         msg = ("some but not all values in the same group of "
                                "inclusion '%s'") % label
-                    errors.append(Invalid(msg, path))
+                    errors.append(InclusiveInvalid(msg, path))
                     break
 
             if errors:
@@ -546,7 +656,7 @@ class Schema(object):
 
         def validate_sequence(path, data):
             if not isinstance(data, seq_type):
-                raise Invalid('expected a %s' % seq_type_name, path)
+                raise SequenceTypeInvalid('expected a %s' % seq_type_name, path)
 
             # Empty seq schema, allow any data.
             if not schema:
@@ -571,7 +681,7 @@ class Schema(object):
                         invalid = e
                 else:
                     if len(invalid.path) <= len(index_path):
-                        invalid = Invalid('invalid %s value' % seq_type_name, index_path)
+                        invalid = SequenceItemInvalid('invalid %s value' % seq_type_name, index_path)
                     errors.append(invalid)
             if errors:
                 raise MultipleInvalid(errors)
@@ -634,7 +744,7 @@ def _compile_scalar(schema):
                 return data
             else:
                 msg = 'expected %s' % schema.__name__
-                raise Invalid(msg, path)
+                raise TypeInvalid(msg, path)
         return validate_instance
 
     if callable(schema):
@@ -642,7 +752,7 @@ def _compile_scalar(schema):
             try:
                 return schema(data)
             except ValueError as e:
-                raise Invalid('not a valid value', path)
+                raise ValueInvalid('not a valid value', path)
             except MultipleInvalid as e:
                 for error in e.errors:
                     error.path = path + error.path
@@ -654,7 +764,7 @@ def _compile_scalar(schema):
 
     def validate_value(path, data):
         if data != schema:
-            raise Invalid('not a valid value', path)
+            raise ScalarInvalid('not a valid value', path)
         return data
 
     return validate_value
@@ -918,7 +1028,7 @@ def Extra(_):
 extra = Extra
 
 
-def Msg(schema, msg):
+def Msg(schema, msg, cls=None):
     """Report a user-friendly message if a schema fails to validate.
 
     >>> validate = Schema(
@@ -932,8 +1042,25 @@ def Msg(schema, msg):
     >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!'))
     >>> with raises(MultipleInvalid, 'invalid list value @ data[0][0]'):
     ...   validate([['three']])
+
+    The type which is thrown can be overridden but needs to be a subclass of Invalid
+
+    >>> with raises(SchemaError, 'Msg can only use subclases of Invalid as custom class'):
+    ...   validate = Schema(Msg([int], 'should be int', cls=KeyError))
+
+    If you do use a subclass of Invalid, that error will be thrown (wrapped in a MultipleInvalid)
+
+    >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!', cls=RangeInvalid))
+    >>> try:
+    ...  validate(['three'])
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], RangeInvalid)
     """
+
     schema = Schema(schema)
+
+    if cls and not issubclass(cls, Invalid):
+        raise SchemaError("Msg can only use subclases of Invalid as custom class")
 
     @wraps(Msg)
     def f(v):
@@ -943,11 +1070,11 @@ def Msg(schema, msg):
             if len(e.path) > 1:
                 raise e
             else:
-                raise Invalid(msg)
+                raise (cls or Invalid)(msg)
     return f
 
 
-def message(default=None):
+def message(default=None, cls=None):
     """Convenience decorator to allow functions to provide a message.
 
     Set a default message:
@@ -965,16 +1092,28 @@ def message(default=None):
         >>> validate = Schema(isint('bad'))
         >>> with raises(MultipleInvalid, 'bad'):
         ...   validate('a')
+
+    The class thrown too:
+
+        >>> class IntegerInvalid(Invalid): pass
+        >>> validate = Schema(isint('bad', clsoverride=IntegerInvalid))
+        >>> try:
+        ...  validate('a')
+        ... except MultipleInvalid as e:
+        ...   assert isinstance(e.errors[0], IntegerInvalid)
     """
+    if cls and not issubclass(cls, Invalid):
+        raise SchemaError("message can only use subclases of Invalid as custom class")
+
     def decorator(f):
         @wraps(f)
-        def check(msg=None):
+        def check(msg=None, clsoverride=None):
             @wraps(f)
             def wrapper(*args, **kwargs):
                 try:
                     return f(*args, **kwargs)
                 except ValueError:
-                    raise Invalid(msg or default or 'invalid value')
+                    raise (clsoverride or cls or ValueInvalid)(msg or default or 'invalid value')
             return wrapper
         return check
     return decorator
@@ -1027,11 +1166,11 @@ def Coerce(type, msg=None):
         try:
             return type(v)
         except (ValueError, TypeError):
-            raise Invalid(msg or ('expected %s' % type.__name__))
+            raise CoerceInvalid(msg or ('expected %s' % type.__name__))
     return f
 
 
-@message('value was not true')
+@message('value was not true', cls=TrueInvalid)
 @truth
 def IsTrue(v):
     """Assert that a value is true, in the Python sense.
@@ -1049,11 +1188,16 @@ def IsTrue(v):
     ...   validate(False)
 
     ...and so on.
+
+    >>> try:
+    ...  validate([])
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], TrueInvalid)
     """
     return v
 
 
-@message('value was not false')
+@message('value was not false', cls=FalseInvalid)
 def IsFalse(v):
     """Assert that a value is false, in the Python sense.
 
@@ -1062,13 +1206,20 @@ def IsFalse(v):
     >>> validate = Schema(IsFalse())
     >>> validate([])
     []
+    >>> with raises(MultipleInvalid, "value was not false"):
+    ...   validate(True)
+
+    >>> try:
+    ...  validate(True)
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], FalseInvalid)
     """
     if v:
         raise ValueError
     return v
 
 
-@message('expected boolean')
+@message('expected boolean', cls=BooleanInvalid)
 def Boolean(v):
     """Convert human-readable boolean values to a bool.
 
@@ -1078,8 +1229,16 @@ def Boolean(v):
     >>> validate = Schema(Boolean())
     >>> validate(True)
     True
+    >>> validate("1")
+    True
+    >>> validate("0")
+    False
     >>> with raises(MultipleInvalid, "expected boolean"):
     ...   validate('moo')
+    >>> try:
+    ...  validate('moo')
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], BooleanInvalid)
     """
     if isinstance(v, basestring):
         v = v.lower()
@@ -1129,8 +1288,8 @@ def Any(*validators, **kwargs):
                     error = e
         else:
             if error:
-                raise error if msg is None else Invalid(msg)
-            raise Invalid(msg or 'no valid value found')
+                raise error if msg is None else AnyInvalid(msg)
+            raise AnyInvalid(msg or 'no valid value found')
     return f
 
 
@@ -1154,7 +1313,7 @@ def All(*validators, **kwargs):
             for schema in schemas:
                 v = schema(v)
         except Invalid as e:
-            raise e if msg is None else Invalid(msg)
+            raise e if msg is None else AllInvalid(msg)
         return v
     return f
 
@@ -1184,9 +1343,9 @@ def Match(pattern, msg=None):
         try:
             match = pattern.match(v)
         except TypeError:
-            raise Invalid("expected string or buffer")
+            raise MatchInvalid("expected string or buffer")
         if not match:
-            raise Invalid(msg or 'does not match regular expression')
+            raise MatchInvalid(msg or 'does not match regular expression')
         return v
     return f
 
@@ -1207,7 +1366,7 @@ def Replace(pattern, substitution, msg=None):
     return f
 
 
-@message('expected a URL')
+@message('expected a URL', cls=UrlInvalid)
 def Url(v):
     """Verify that the value is a URL.
 
@@ -1224,14 +1383,20 @@ def Url(v):
         raise ValueError
 
 
-@message('not a file')
+@message('not a file', cls=FileInvalid)
 @truth
 def IsFile(v):
-    """Verify the file exists."""
+    """Verify the file exists.
+
+    >>> os.path.basename(IsFile()(__file__))
+    'voluptuous.py'
+    >>> with raises(FileInvalid, 'not a file'):
+    ...   IsFile()("random_filename_goes_here.py")
+    """
     return os.path.isfile(v)
 
 
-@message('not a directory')
+@message('not a directory', cls=DirInvalid)
 @truth
 def IsDir(v):
     """Verify the directory exists.
@@ -1242,10 +1407,16 @@ def IsDir(v):
     return os.path.isdir(v)
 
 
-@message('path does not exist')
+@message('path does not exist', cls=PathInvalid)
 @truth
 def PathExists(v):
-    """Verify the path exists, regardless of its type."""
+    """Verify the path exists, regardless of its type.
+
+    >>> os.path.basename(PathExists()(__file__))
+    'voluptuous.py'
+    >>> with raises(Invalid, 'path does not exist'):
+    ...   PathExists()("random_filename_goes_here.py")
+    """
     return os.path.exists(v)
 
 
@@ -1266,21 +1437,23 @@ def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
     ...   s(20)
     >>> with raises(MultipleInvalid, 'value must be higher than 1'):
     ...   s(1)
+    >>> with raises(MultipleInvalid, 'value must be lower than 10'):
+    ...   Schema(Range(max=10, max_included=False))(20)
     """
     @wraps(Range)
     def f(v):
         if min_included:
             if min is not None and v < min:
-                raise Invalid(msg or 'value must be at least %s' % min)
+                raise RangeInvalid(msg or 'value must be at least %s' % min)
         else:
             if min is not None and v <= min:
-                raise Invalid(msg or 'value must be higher than %s' % min)
+                raise RangeInvalid(msg or 'value must be higher than %s' % min)
         if max_included:
             if max is not None and v > max:
-                raise Invalid(msg or 'value must be at most %s' % max)
+                raise RangeInvalid(msg or 'value must be at most %s' % max)
         else:
             if max is not None and v >= max:
-                raise Invalid(msg or 'value must be lower than %s' % max)
+                raise RangeInvalid(msg or 'value must be lower than %s' % max)
         return v
     return f
 
@@ -1289,6 +1462,14 @@ def Clamp(min=None, max=None, msg=None):
     """Clamp a value to a range.
 
     Either min or max may be omitted.
+    >>> s = Schema(Clamp(min=0, max=1))
+    >>> s(0.5)
+    0.5
+    >>> s(5)
+    1
+    >>> s(-1)
+    0
+
     """
     @wraps(Clamp)
     def f(v):
@@ -1300,16 +1481,24 @@ def Clamp(min=None, max=None, msg=None):
     return f
 
 
+class LengthInvalid(Invalid):
+    pass
+
+
 def Length(min=None, max=None, msg=None):
     """The length of a value must be in a certain range."""
     @wraps(Length)
     def f(v):
         if min is not None and len(v) < min:
-            raise Invalid(msg or 'length of value must be at least %s' % min)
+            raise LengthInvalid(msg or 'length of value must be at least %s' % min)
         if max is not None and len(v) > max:
-            raise Invalid(msg or 'length of value must be at most %s' % max)
+            raise LengthInvalid(msg or 'length of value must be at most %s' % max)
         return v
     return f
+
+
+class InInvalid(Invalid):
+    pass
 
 
 def In(container, msg=None):
@@ -1317,7 +1506,7 @@ def In(container, msg=None):
     @wraps(In)
     def validator(value):
         if value not in container:
-            raise Invalid(msg or 'value is not allowed')
+            raise InInvalid(msg or 'value is not allowed')
         return value
     return validator
 
@@ -1377,6 +1566,10 @@ def DefaultTo(default_value, msg=None):
     return f
 
 
+class ExactSequenceInvalid(Invalid):
+    pass
+
+
 def ExactSequence(validators, **kwargs):
     """Matches each element in a sequence against the corresponding element in
     the validators.
@@ -1395,12 +1588,12 @@ def ExactSequence(validators, **kwargs):
 
     def f(v):
         if not isinstance(v, (list, tuple)):
-            raise Invalid(msg)
+            raise ExactSequenceInvalid(msg)
         try:
             for i, schema in enumerate(schemas):
                 v[i] = schema(v[i])
         except Invalid as e:
-            raise e if msg is None else Invalid(msg)
+            raise e if msg is None else ExactSequenceInvalid(msg)
         return v
     return f
 
