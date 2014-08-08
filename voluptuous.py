@@ -266,6 +266,41 @@ class RangeInvalid(Invalid):
     pass
 
 
+class TrueInvalid(Invalid):
+    """The value is not True."""
+    pass
+
+
+class FalseInvalid(Invalid):
+    """The value is not False."""
+    pass
+
+
+class BooleanInvalid(Invalid):
+    """The value is not a boolean."""
+    pass
+
+
+class UrlInvalid(Invalid):
+    """The value is not a url."""
+    pass
+
+
+class FileInvalid(Invalid):
+    """The value is not a file."""
+    pass
+
+
+class DirInvalid(Invalid):
+    """The value is not a directory."""
+    pass
+
+
+class PathInvalid(Invalid):
+    """The value is not a path."""
+    pass
+
+
 class Schema(object):
     """A validation schema.
 
@@ -924,13 +959,25 @@ def Msg(schema, msg, cls=None):
     >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!'))
     >>> with raises(MultipleInvalid, 'invalid list value @ data[0][0]'):
     ...   validate([['three']])
-    >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!', cls=KeyError))
-    >>> with raises(KeyError, 'invalid list value @ data[0][0]'):
-    ...   validate([['three']])
-    >>> with raises(MultipleInvalid, 'invalid list value @ data[0][0]'):
-    ...   validate([['three']])
+
+    The type which is thrown can be overridden but needs to be a subclass of Invalid
+
+    >>> with raises(SchemaError, 'Msg can only use subclases of Invalid as custom class'):
+    ...   validate = Schema(Msg([int], 'should be int', cls=KeyError))
+
+    If you do use a subclass of Invalid, that error will be thrown (wrapped in a MultipleInvalid)
+
+    >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!', cls=RangeInvalid))
+    >>> try:
+    ...  validate(['three'])
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], RangeInvalid)
     """
+
     schema = Schema(schema)
+
+    if cls and not issubclass(cls, Invalid):
+        raise SchemaError("Msg can only use subclases of Invalid as custom class")
 
     @wraps(Msg)
     def f(v):
@@ -940,11 +987,11 @@ def Msg(schema, msg, cls=None):
             if len(e.path) > 1:
                 raise e
             else:
-                raise (cls or e.__class__)(msg)
+                raise (cls or Invalid)(msg)
     return f
 
 
-def message(default=None):
+def message(default=None, cls=None):
     """Convenience decorator to allow functions to provide a message.
 
     Set a default message:
@@ -962,16 +1009,28 @@ def message(default=None):
         >>> validate = Schema(isint('bad'))
         >>> with raises(MultipleInvalid, 'bad'):
         ...   validate('a')
+
+    The class thrown too:
+
+        >>> class IntegerInvalid(Invalid): pass
+        >>> validate = Schema(isint('bad', clsoverride=IntegerInvalid))
+        >>> try:
+        ...  validate('a')
+        ... except MultipleInvalid as e:
+        ...   assert isinstance(e.errors[0], IntegerInvalid)
     """
+    if cls and not issubclass(cls, Invalid):
+        raise SchemaError("message can only use subclases of Invalid as custom class")
+
     def decorator(f):
         @wraps(f)
-        def check(msg=None):
+        def check(msg=None, clsoverride=None):
             @wraps(f)
             def wrapper(*args, **kwargs):
                 try:
                     return f(*args, **kwargs)
                 except ValueError:
-                    raise ValueInvalid(msg or default or 'invalid value')
+                    raise (clsoverride or cls or ValueInvalid)(msg or default or 'invalid value')
             return wrapper
         return check
     return decorator
@@ -1028,7 +1087,7 @@ def Coerce(type, msg=None):
     return f
 
 
-@message('value was not true')
+@message('value was not true', cls=TrueInvalid)
 @truth
 def IsTrue(v):
     """Assert that a value is true, in the Python sense.
@@ -1046,11 +1105,16 @@ def IsTrue(v):
     ...   validate(False)
 
     ...and so on.
+
+    >>> try:
+    ...  validate([])
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], TrueInvalid)
     """
     return v
 
 
-@message('value was not false')
+@message('value was not false', cls=FalseInvalid)
 def IsFalse(v):
     """Assert that a value is false, in the Python sense.
 
@@ -1059,15 +1123,20 @@ def IsFalse(v):
     >>> validate = Schema(IsFalse())
     >>> validate([])
     []
-    >>> with raises(Invalid, "value was not false"):
+    >>> with raises(MultipleInvalid, "value was not false"):
     ...   validate(True)
+
+    >>> try:
+    ...  validate(True)
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], FalseInvalid)
     """
     if v:
         raise ValueError
     return v
 
 
-@message('expected boolean')
+@message('expected boolean', cls=BooleanInvalid)
 def Boolean(v):
     """Convert human-readable boolean values to a bool.
 
@@ -1083,6 +1152,10 @@ def Boolean(v):
     False
     >>> with raises(MultipleInvalid, "expected boolean"):
     ...   validate('moo')
+    >>> try:
+    ...  validate('moo')
+    ... except MultipleInvalid as e:
+    ...   assert isinstance(e.errors[0], BooleanInvalid)
     """
     if isinstance(v, basestring):
         v = v.lower()
@@ -1210,7 +1283,7 @@ def Replace(pattern, substitution, msg=None):
     return f
 
 
-@message('expected a URL')
+@message('expected a URL', cls=UrlInvalid)
 def Url(v):
     """Verify that the value is a URL.
 
@@ -1227,20 +1300,20 @@ def Url(v):
         raise ValueError
 
 
-@message('not a file')
+@message('not a file', cls=FileInvalid)
 @truth
 def IsFile(v):
     """Verify the file exists.
 
     >>> os.path.basename(IsFile()(__file__))
     'voluptuous.py'
-    >>> with raises(Invalid, 'not a file'):
+    >>> with raises(FileInvalid, 'not a file'):
     ...   IsFile()("random_filename_goes_here.py")
     """
     return os.path.isfile(v)
 
 
-@message('not a directory')
+@message('not a directory', cls=DirInvalid)
 @truth
 def IsDir(v):
     """Verify the directory exists.
@@ -1251,7 +1324,7 @@ def IsDir(v):
     return os.path.isdir(v)
 
 
-@message('path does not exist')
+@message('path does not exist', cls=PathInvalid)
 @truth
 def PathExists(v):
     """Verify the path exists, regardless of its type.
