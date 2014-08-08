@@ -239,7 +239,7 @@ class Schema(object):
         if type_ is type:
             type_ = schema
         if type_ in (int, long, str, unicode, float, complex, object,
-                     list, dict, type(None)) or callable(schema):
+                     list, dict, type(None), bool) or callable(schema):
             return _compile_scalar(schema)
         raise SchemaError('unsupported schema data type %r' %
                           type(schema).__name__)
@@ -1139,6 +1139,23 @@ def Url(v):
         return v
     except:
         raise ValueError
+
+
+def Is(literal):
+    """Verify that the value is a literal.  That is,
+    the expression "value is literal" must be true.
+
+    >>> s = Schema(Is(True))
+    >>> with raises(MultipleInvalid, 'is not True'):
+    ...     s(False)
+    >>> s(True)
+    True
+    """
+    def f(v):
+        if v is not literal:
+            raise Invalid('is not {}'.format(literal))
+        return v
+    return f
 
 
 @message('not a file')
