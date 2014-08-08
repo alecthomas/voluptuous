@@ -83,7 +83,6 @@ Validate like so:
     ...                  'Users': {'snmp_community': 'monkey'}}}}
     True
 """
-
 import os
 import re
 import sys
@@ -285,6 +284,7 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key_path = path + [key]
+                remove_key = False
                 candidates = _iterate_mapping_candidates(_compiled_schema)
                 # compare each given key/value against all compiled key/values
                 # schema key, (compiled key, compiled value)
@@ -307,15 +307,16 @@ class Schema(object):
                         # include if it's not marked for removal
                         if not is_remove:
                             out[new_key] = cval
+                        else:
+                            remove_key = True
+                            continue
                     except MultipleInvalid as e:
                         exception_errors.extend(e.errors)
                     except Invalid as e:
                         exception_errors.append(e)
 
                     if exception_errors:
-                        if is_remove:
-                            # since it didn't satisfy the remove schema, treat
-                            # it as extra
+                        if is_remove or remove_key:
                             continue
                         for err in exception_errors:
                             if len(err.path) > len(key_path):
@@ -338,7 +339,10 @@ class Schema(object):
 
                     break
                 else:
-                    if self.extra == ALLOW_EXTRA:
+                    if remove_key:
+                        # remove key
+                        continue
+                    elif self.extra == ALLOW_EXTRA:
                         out[key] = value
                     elif self.extra != REMOVE_EXTRA:
                         errors.append(Invalid('extra keys not allowed', key_path))
@@ -656,19 +660,50 @@ def _compile_scalar(schema):
     return validate_value
 
 
+def _compile_itemsort():
+    '''return sort function of mappings'''
+    def is_extra(key_):
+        return key_ is Extra
+
+    def is_remove(key_):
+        return isinstance(key_, Remove)
+
+    def is_scalar(key_):
+        return isinstance(key_, (int, long, str, unicode, float, complex, list,
+                                 dict, type(None)))
+
+    def is_other(key_):
+        return True
+
+    # priority list for map sorting (in order of checking)
+    # We want Extra to match last, because it's a catch-all. On the other hand,
+    # Remove markers should match first (since invalid values will not
+    # raise an Error, instead the validator will check if other schemas match
+    # the same value).
+    priority = [(0, is_remove),  # Remove hightest priority
+                (3, is_extra),   # Extra lowest priority
+                (1, is_scalar),  # scalars come next after Remove
+                (2, is_other)]   # everything else comes after scalars
+
+    def item_priority(item_):
+        key_ = item_[0]
+        for i, check_ in priority:
+            if check_(key_):
+                return i
+        # default priority highest - should never reach this point
+        return 0
+
+    return item_priority
+
+_sort_item = _compile_itemsort()
+
+
 def _iterate_mapping_candidates(schema):
     """Iterate over schema in a meaningful order."""
-    # We want Extra to match last, because it's a catch-all. Next come the
-    # Remove markers (to avoid matching other candidates that are supposed to be
-    # included).
-    def sort_item(item_):
-        key_ = item_[0]
-        # priority (ascening): Extra, Remove, rest
-        return 2 if key_ == Extra else isinstance(key_, Remove)
-    # Without this, Extra (or Remove) might appear first in the iterator, and
-    # fail to validate a key even though it's a Required that has its own
-    # validation, generating a false positive.
-    return sorted(iteritems(schema), key=sort_item)
+    # Without this, Extra might appear first in the iterator, and fail to
+    # validate a key even though it's a Required that has its own validation,
+    # generating a false positive.
+    return sorted(iteritems(schema), key=_sort_item)
 
 
 def _iterate_object(obj):
