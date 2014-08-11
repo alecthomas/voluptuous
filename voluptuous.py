@@ -517,6 +517,8 @@ class Schema(object):
         A dictionary schema can contain a set of values, or at most one
         validator function/type.
 
+        A dictionary schema will only validate a dictionary:
+
             >>> validate = Schema({})
             >>> with raises(MultipleInvalid, 'expected a dictionary'):
             ...   validate([])
