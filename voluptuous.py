@@ -776,6 +776,9 @@ def _compile_itemsort():
     def is_extra(key_):
         return key_ is Extra
 
+    def is_remove(key_):
+        return isinstance(key_, Remove)
+
     def is_marker(key_):
         return isinstance(key_, Marker)
 
@@ -790,10 +793,12 @@ def _compile_itemsort():
     # Remove markers should match first (since invalid values will not
     # raise an Error, instead the validator will check if other schemas match
     # the same value).
-    priority = [(1, is_marker),    # Markers hightest priority after values
-                (4, is_extra),     # Extra lowest priority
-                (3, is_type),      # types/classes lowest before Extra
-                (2, is_callable)]  # callables after markers
+    priority = [(1, is_remove),    # Remove highest priority after values
+                (2, is_marker),    # then other Markers
+                (4, is_type),      # types/classes lowest before Extra
+                (3, is_callable),  # callables after markers
+                (5, is_extra)]     # Extra lowest priority
+
 
     def item_priority(item_):
         key_ = item_[0]
