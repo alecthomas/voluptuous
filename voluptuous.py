@@ -86,6 +86,7 @@ Validate like so:
 import os
 import re
 import sys
+import inspect
 from contextlib import contextmanager
 from functools import wraps
 
@@ -386,6 +387,8 @@ class Schema(object):
             new_value = self._compile(svalue)
             _compiled_schema[skey] = (new_key, new_value)
 
+        candidates = list(_iterate_mapping_candidates(_compiled_schema))
+
         def validate_mapping(path, iterable, out):
             required_keys = all_required_keys.copy()
             # keeps track of all default keys that haven't been filled
@@ -395,7 +398,7 @@ class Schema(object):
             for key, value in iterable:
                 key_path = path + [key]
                 remove_key = False
-                candidates = _iterate_mapping_candidates(_compiled_schema)
+
                 # compare each given key/value against all compiled key/values
                 # schema key, (compiled key, compiled value)
                 for skey, (ckey, cvalue) in candidates:
@@ -513,8 +516,6 @@ class Schema(object):
 
         A dictionary schema can contain a set of values, or at most one
         validator function/type.
-
-        A dictionary schema will only validate a dictionary:
 
             >>> validate = Schema({})
             >>> with raises(MultipleInvalid, 'expected a dictionary'):
@@ -775,32 +776,31 @@ def _compile_itemsort():
     def is_extra(key_):
         return key_ is Extra
 
-    def is_remove(key_):
-        return isinstance(key_, Remove)
+    def is_marker(key_):
+        return isinstance(key_, Marker)
 
-    def is_scalar(key_):
-        return isinstance(key_, (int, long, str, unicode, float, complex, list,
-                                 dict, type(None)))
+    def is_type(key_):
+        return inspect.isclass(key_)
 
-    def is_other(key_):
-        return True
+    def is_callable(key_):
+        return callable(key_)
 
     # priority list for map sorting (in order of checking)
     # We want Extra to match last, because it's a catch-all. On the other hand,
     # Remove markers should match first (since invalid values will not
     # raise an Error, instead the validator will check if other schemas match
     # the same value).
-    priority = [(0, is_remove),  # Remove hightest priority
-                (3, is_extra),   # Extra lowest priority
-                (1, is_scalar),  # scalars come next after Remove
-                (2, is_other)]   # everything else comes after scalars
+    priority = [(1, is_marker),    # Markers hightest priority after values
+                (4, is_extra),     # Extra lowest priority
+                (3, is_type),      # types/classes lowest before Extra
+                (2, is_callable)]  # callables after markers
 
     def item_priority(item_):
         key_ = item_[0]
         for i, check_ in priority:
             if check_(key_):
                 return i
-        # default priority highest - should never reach this point
+        # values have hightest priorities
         return 0
 
     return item_priority
