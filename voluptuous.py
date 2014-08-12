@@ -390,7 +390,8 @@ class Schema(object):
         candidates = list(_iterate_mapping_candidates(_compiled_schema))
 
         keys_list = [k for k in _compiled_schema.keys()]
-        keys_set = set([k.schema if isinstance(k, Marker) else k
+        keys_set = set([k.schema if isinstance(k, Marker)
+                        and not isinstance(k, Remove) else k
                         for k in _compiled_schema.keys()])
         if len(keys_list) != len(keys_set):
             raise SchemaError('Duplicate markers')
