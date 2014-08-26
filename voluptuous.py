@@ -373,8 +373,9 @@ class Schema(object):
 
         # Keys that may be required
         all_required_keys = set(key for key in schema
-                                if (self.required and not isinstance(key, (Optional, Remove)))
-                                or isinstance(key, Required))
+                                if key is not Extra
+                                and ((self.required and not isinstance(key, (Optional, Remove)))
+                                     or isinstance(key, Required)))
 
         # Keys that may have defaults
         all_default_keys = set(key for key in schema
@@ -800,7 +801,6 @@ def _compile_itemsort():
                 (4, is_type),      # types/classes lowest before Extra
                 (3, is_callable),  # callables after markers
                 (5, is_extra)]     # Extra lowest priority
-
 
     def item_priority(item_):
         key_ = item_[0]
@@ -1395,8 +1395,8 @@ def Url(v):
 def IsFile(v):
     """Verify the file exists.
 
-    >>> os.path.basename(IsFile()(__file__))
-    'voluptuous.py'
+    >>> os.path.basename(IsFile()(__file__)).startswith('voluptuous.py')
+    True
     >>> with raises(FileInvalid, 'not a file'):
     ...   IsFile()("random_filename_goes_here.py")
     """
@@ -1419,8 +1419,8 @@ def IsDir(v):
 def PathExists(v):
     """Verify the path exists, regardless of its type.
 
-    >>> os.path.basename(PathExists()(__file__))
-    'voluptuous.py'
+    >>> os.path.basename(PathExists()(__file__)).startswith('voluptuous.py')
+    True
     >>> with raises(Invalid, 'path does not exist'):
     ...   PathExists()("random_filename_goes_here.py")
     """

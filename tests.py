@@ -1,4 +1,4 @@
-from nose.tools import assert_equal
+from nose.tools import assert_equal, raises
 
 import voluptuous
 from voluptuous import Schema, Required, Extra, Invalid, In, Remove
@@ -77,3 +77,8 @@ def test_remove():
     schema = Schema([1.0, Remove(float), int])
     out_ = schema([1, 2, 1.0, 2.0, 3.0, 4])
     assert_equal(out_, [1, 2, 1.0, 4])
+
+
+def test_extra_empty_errors():
+    schema = Schema({'a': {Extra: object}}, required=True)
+    schema({'a': {}})
