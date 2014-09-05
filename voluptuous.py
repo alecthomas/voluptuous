@@ -105,7 +105,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.8.5'
+__version__ = '0.8.6'
 
 
 @contextmanager
@@ -198,112 +198,90 @@ class MultipleInvalid(Invalid):
 
 class RequiredFieldInvalid(Invalid):
     """Required field was missing."""
-    pass
 
 
 class ObjectInvalid(Invalid):
     """The value we found was not an object."""
-    pass
 
 
 class DictInvalid(Invalid):
     """The value found was not a dict."""
-    pass
 
 
 class ExclusiveInvalid(Invalid):
     """More than one value found in exclusion group."""
-    pass
 
 
 class InclusiveInvalid(Invalid):
     """Not all values found in inclusion group."""
-    pass
 
 
 class SequenceItemInvalid(Invalid):
     """One of the values found in a sequence was invalid."""
-    pass
 
 
 class SequenceTypeInvalid(Invalid):
     """The type found is not a sequence type."""
-    pass
 
 
 class TypeInvalid(Invalid):
     """The value was not of required type."""
-    pass
 
 
 class ValueInvalid(Invalid):
     """The value was found invalid by evaluation function."""
-    pass
 
 
 class ScalarInvalid(Invalid):
     """Scalars did not match."""
-    pass
 
 
 class CoerceInvalid(Invalid):
     """Impossible to coerce value to type."""
-    pass
 
 
 class AnyInvalid(Invalid):
     """The value did not pass any validator."""
-    pass
 
 
 class AllInvalid(Invalid):
     """The value did not pass all validators."""
-    pass
 
 
 class MatchInvalid(Invalid):
     """The value does not match the given regular expression."""
-    pass
 
 
 class RangeInvalid(Invalid):
     """The value is not in given range."""
-    pass
 
 
 class TrueInvalid(Invalid):
     """The value is not True."""
-    pass
 
 
 class FalseInvalid(Invalid):
     """The value is not False."""
-    pass
 
 
 class BooleanInvalid(Invalid):
     """The value is not a boolean."""
-    pass
 
 
 class UrlInvalid(Invalid):
     """The value is not a url."""
-    pass
 
 
 class FileInvalid(Invalid):
     """The value is not a file."""
-    pass
 
 
 class DirInvalid(Invalid):
     """The value is not a directory."""
-    pass
 
 
 class PathInvalid(Invalid):
     """The value is not a path."""
-    pass
 
 
 class Schema(object):
