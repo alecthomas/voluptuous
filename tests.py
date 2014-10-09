@@ -89,10 +89,12 @@ def test_any():
     schema = Schema({
         "response": {
             "status": In(frozenset(["ERROR", "SUCCESS"])),
-            "err_extra": Any([{
-                "key": "ERR_EXTRA2",
-                "message": "error 2"
-            }])
+            "err_extra": Any([
+                Schema({
+                    "key": "ERR_EXTRA2",
+                    "message": "error 2"
+                })
+            ])
         }
     })
     schema({
