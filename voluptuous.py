@@ -91,7 +91,7 @@ from contextlib import contextmanager
 from functools import wraps
 
 
-if sys.version_info >= 3:
+if sys.version_info >= (3,):
     import urllib.parse as urlparse
     long = int
     unicode = str
