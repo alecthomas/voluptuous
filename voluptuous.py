@@ -10,7 +10,7 @@
 
 """Schema validation for Python data structures.
 
-Given eg. a nested data structure like this:
+Given eg. a nested data structure like this::
 
     {
         'exclude': ['Users', 'Uptime'],
