@@ -303,7 +303,7 @@ class Schema(object):
         :param extra: Specify how extra keys in the data are treated:
             - :const:`~voluptuous.PREVENT_EXTRA`: to disallow any undefined
               extra keys (raise ``Invalid``).
-            - :const:`~voluptuous.ALLOW_EXTRA`: to include underfined extra
+            - :const:`~voluptuous.ALLOW_EXTRA`: to include undefined extra
               keys in the output.
             - :const:`~voluptuous.REMOVE_EXTRA`: to exclude undefined extra keys
               from the output.
