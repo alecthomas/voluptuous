@@ -1,7 +1,9 @@
 from nose.tools import assert_equal, raises
 
 import voluptuous
-from voluptuous import Schema, Required, Extra, Invalid, In, Remove, Any
+from voluptuous import (
+    Schema, Required, Extra, Invalid, In, Remove, Any, Literal
+)
 
 
 def test_required():
@@ -84,19 +86,22 @@ def test_extra_empty_errors():
     schema({'a': {}})
 
 
-def test_any():
-    """ test with Any function """
+def test_literal():
+    """ test with Literal """
+
     schema = Schema({
         "response": {
             "status": In(frozenset(["ERROR", "SUCCESS"])),
-            "err_extra": Any([
-                Schema({
-                    "key": "ERR_EXTRA2",
-                    "message": "error 2"
-                })
-            ])
+            "err_extra": [Literal({
+                "key": "ERR_EXTRA1",
+                "message": "error 1"
+            }), Literal({
+                "key": "ERR_EXTRA2",
+                "message": "error 2"
+            })]
         }
     })
+
     schema({
         "response": {
             "status": "ERROR",

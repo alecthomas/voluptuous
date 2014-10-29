@@ -283,6 +283,9 @@ class DirInvalid(Invalid):
 class PathInvalid(Invalid):
     """The value is not a path."""
 
+class LiteralInvalid(Invalid):
+    """The value is not a path."""
+
 
 class Schema(object):
     """A validation schema.
@@ -1581,6 +1584,18 @@ def ExactSequence(validators, **kwargs):
             raise e if msg is None else ExactSequenceInvalid(msg)
         return v
     return f
+
+
+class Literal(object):
+    def __init__(self, lit):
+        self.lit = lit
+
+    def __call__(self, value, msg=None):
+        if self.lit == value:
+            raise LiteralInvalid(
+                msg or '%s not match for %s' % (value, self.lit)
+            )
+
 
 if __name__ == '__main__':
     import doctest
