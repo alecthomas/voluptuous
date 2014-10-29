@@ -91,7 +91,7 @@ from contextlib import contextmanager
 from functools import wraps
 
 
-if sys.version > '3':
+if sys.version_info >= (3,):
     import urllib.parse as urlparse
     long = int
     unicode = str
@@ -283,8 +283,9 @@ class DirInvalid(Invalid):
 class PathInvalid(Invalid):
     """The value is not a path."""
 
+
 class LiteralInvalid(Invalid):
-    """The value is not a path."""
+    """The litteral values do not match."""
 
 
 class Schema(object):
@@ -306,7 +307,7 @@ class Schema(object):
         :param extra: Specify how extra keys in the data are treated:
             - :const:`~voluptuous.PREVENT_EXTRA`: to disallow any undefined
               extra keys (raise ``Invalid``).
-            - :const:`~voluptuous.ALLOW_EXTRA`: to include underfined extra
+            - :const:`~voluptuous.ALLOW_EXTRA`: to include undefined extra
               keys in the output.
             - :const:`~voluptuous.REMOVE_EXTRA`: to exclude undefined extra keys
               from the output.
@@ -1591,10 +1592,18 @@ class Literal(object):
         self.lit = lit
 
     def __call__(self, value, msg=None):
-        if self.lit == value:
+        if self.lit != value:
             raise LiteralInvalid(
                 msg or '%s not match for %s' % (value, self.lit)
             )
+        else:
+            return self.lit
+    
+    def __str__(self):
+        return str(self.lit)
+    
+    def __repr__(self):
+        return repr(self.lit)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,8 @@ from nose.tools import assert_equal, raises
 
 import voluptuous
 from voluptuous import (
-    Schema, Required, Extra, Invalid, In, Remove, Any, Literal
+    Schema, Required, Extra, Invalid, In, Remove, Literal,
+    MultipleInvalid, LiteralInvalid
 )
 
 
@@ -89,28 +90,24 @@ def test_extra_empty_errors():
 def test_literal():
     """ test with Literal """
 
-    schema = Schema({
-        "response": {
-            "status": In(frozenset(["ERROR", "SUCCESS"])),
-            "err_extra": [Literal({
-                "key": "ERR_EXTRA1",
-                "message": "error 1"
-            }), Literal({
-                "key": "ERR_EXTRA2",
-                "message": "error 2"
-            })]
-        }
-    })
-
-    schema({
-        "response": {
-            "status": "ERROR",
-            "err_extra": [{
-                "key": "ERR_EXTRA1",
-                "message": "error 1"
-            }, {
-                "key": "ERR_EXTRA2",
-                "message": "error 2"
-            }]
-        }
-    })
+    schema = Schema([Literal({"a": 1}), Literal({"b": 1})])
+    schema([{"a": 1}])
+    schema([{"b": 1}])
+    schema([{"a": 1}, {"b": 1}])
+    
+    try:
+        schema([{"c": 1}])
+    except Invalid as e:
+        assert_equal(str(e), 'invalid list value @ data[0]')
+    else:
+        assert False, "Did not raise Invalid"
+    
+    schema = Schema(Literal({"a": 1}))
+    try:
+        schema({"b": 1})
+    except MultipleInvalid, e:
+        assert_equal(str(e), "{'b': 1} not match for {'a': 1}")
+        assert_equal(len(e.errors), 1)
+        assert_equal(type(e.errors[0]), LiteralInvalid)
+    else:
+        assert False, "Did not raise Invalid"
