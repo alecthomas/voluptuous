@@ -127,6 +127,13 @@ class Undefined(object):
 
 UNDEFINED = Undefined()
 
+
+def default_factory(value):
+    if value is UNDEFINED or callable(value):
+        return value
+    return lambda: value
+
+
 # options for extra keys
 PREVENT_EXTRA = 0  # any extra key not in schema will raise an error
 ALLOW_EXTRA = 1    # extra keys not in schema will be included in output
@@ -447,7 +454,7 @@ class Schema(object):
             # set defaults for any that can have defaults
             for key in default_keys:
                 if key.default != UNDEFINED:  # if the user provides a default with the node
-                    out[key.schema] = key.default
+                    out[key.schema] = key.default()
                     if key in required_keys:
                         required_keys.discard(key)
 
@@ -870,6 +877,9 @@ class Optional(Marker):
     >>> schema = Schema({Optional('key', default='value'): str})
     >>> schema({})
     {'key': 'value'}
+    >>> schema = Schema({Optional('key', default=list): list})
+    >>> schema({})
+    {'key': []}
 
     If 'required' flag is set for an entire schema, optional keys aren't required
 
@@ -882,7 +892,7 @@ class Optional(Marker):
     """
     def __init__(self, schema, msg=None, default=UNDEFINED):
         super(Optional, self).__init__(schema, msg=msg)
-        self.default = default
+        self.default = default_factory(default)
 
 
 class Exclusive(Optional):
@@ -982,10 +992,13 @@ class Required(Marker):
     >>> schema = Schema({Required('key', default='value'): str})
     >>> schema({})
     {'key': 'value'}
+    >>> schema = Schema({Required('key', default=list): list})
+    >>> schema({})
+    {'key': []}
     """
     def __init__(self, schema, msg=None, default=UNDEFINED):
         super(Required, self).__init__(schema, msg=msg)
-        self.default = default
+        self.default = default_factory(default)
 
 
 class Remove(Marker):
@@ -1546,11 +1559,16 @@ def DefaultTo(default_value, msg=None):
     >>> s = Schema(DefaultTo(42))
     >>> s(None)
     42
+    >>> s = Schema(DefaultTo(list))
+    >>> s(None)
+    []
     """
+    default_value = default_factory(default_value)
+
     @wraps(DefaultTo)
     def f(v):
         if v is None:
-            v = default_value
+            v = default_value()
         return v
     return f
 
