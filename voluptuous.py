@@ -83,6 +83,7 @@ Validate like so:
     ...                  'Users': {'snmp_community': 'monkey'}}}}
     True
 """
+import datetime
 import os
 import re
 import sys
@@ -1495,6 +1496,23 @@ def Length(min=None, max=None, msg=None):
             raise LengthInvalid(msg or 'length of value must be at least %s' % min)
         if max is not None and len(v) > max:
             raise LengthInvalid(msg or 'length of value must be at most %s' % max)
+        return v
+    return f
+
+
+class DatetimeInvalid(Invalid):
+    """The value is not a formatted datetime string."""
+
+
+def Datetime(format=None, msg=None):
+    """Validate that the value matches the datetime format."""
+    @wraps(Datetime)
+    def f(v):
+        check_format = format or '%Y-%m-%dT%H:%M:%S.%fZ'
+        try:
+            datetime.datetime.strptime(v, check_format)
+        except (TypeError, ValueError):
+            raise DatetimeInvalid(msg or 'value does not match expected format %s' % check_format)
         return v
     return f
 
