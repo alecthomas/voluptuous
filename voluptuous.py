@@ -106,7 +106,7 @@ else:
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
-__version__ = '0.8.6'
+__version__ = '0.8.7'
 
 
 @contextmanager
