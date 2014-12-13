@@ -1,4 +1,4 @@
-from nose.tools import assert_equal, raises
+from nose.tools import assert_equal
 
 import voluptuous
 from voluptuous import (
