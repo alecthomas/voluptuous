@@ -627,7 +627,7 @@ class Schema(object):
             if errors:
                 raise MultipleInvalid(errors)
 
-            out = type(data)()
+            out = {}
             return base_validate(path, iteritems(data), out)
 
         return validate_dict
