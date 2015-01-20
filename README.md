@@ -284,13 +284,26 @@ True
 
 ```
 
-This behaviour can be altered on a per-schema basis with
-`Schema(..., extra=True)`:
+This behaviour can be altered on a per-schema basis. To allow
+additional keys use
+`Schema(..., extra=ALLOW_EXTRA)`:
 
 ```pycon
->>> schema = Schema({2: 3}, extra=True)
+>>> from voluptuous import ALLOW_EXTRA
+>>> schema = Schema({2: 3}, extra=ALLOW_EXTRA)
 >>> schema({1: 2, 2: 3})
 {1: 2, 2: 3}
+
+```
+
+To remove additional keys use
+`Schema(..., extra=REMOVE_EXTRA)`:
+
+```pycon
+>>> from voluptuous import REMOVE_EXTRA
+>>> schema = Schema({2: 3}, extra=REMOVE_EXTRA)
+>>> schema({1: 2, 2: 3})
+{2: 3}
 
 ```
 
