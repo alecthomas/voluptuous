@@ -293,7 +293,7 @@ class PathInvalid(Invalid):
 
 
 class LiteralInvalid(Invalid):
-    """The litteral values do not match."""
+    """The literal values do not match."""
 
 
 class Schema(object):
