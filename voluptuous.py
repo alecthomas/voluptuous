@@ -1,3 +1,4 @@
+
 # encoding: utf-8
 #
 # Copyright (C) 2010-2013 Alec Thomas <alec@swapoff.org>
@@ -1296,6 +1297,10 @@ def Any(*validators, **kwargs):
     return f
 
 
+# Convenience alias
+Or = Any
+
+
 def All(*validators, **kwargs):
     """Value must pass all validators.
 
@@ -1319,6 +1324,10 @@ def All(*validators, **kwargs):
             raise e if msg is None else AllInvalid(msg)
         return v
     return f
+
+
+# Convenience alias
+And = All
 
 
 def Match(pattern, msg=None):
