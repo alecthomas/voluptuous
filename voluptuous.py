@@ -1651,6 +1651,69 @@ class Literal(object):
         return repr(self.lit)
 
 
+def Unique(msg=None):
+    """Ensure an iterable does not contain duplicate items.
+
+    Only iterables convertable to a set are supported (native types and
+    objects with correct __eq__).
+
+    JSON does not support set, so they need to be presented as arrays.
+    Unique allows ensuring that such array does not contain dupes.
+
+    >>> s = Schema(Unique())
+    >>> s([])
+    []
+    >>> s([1, 2])
+    [1, 2]
+    >>> with raises(Invalid, 'contains duplicate items: [1]'):
+    ...   s([1, 1, 2])
+    >>> with raises(Invalid, "contains duplicate items: ['one']"):
+    ...   s(['one', 'two', 'one'])
+    >>> with raises(Invalid, "contains unhashable elements: unhashable type: 'set'"):
+    ...   s([{1, 2}, {3, 4}])
+    >>> s('abc')
+    'abc'
+    >>> with raises(Invalid, "contains duplicate items: ['a', 'b']"):
+    ...   s('aabbc')
+    """
+    @wraps(Unique)
+    def f(v):
+        try:
+            set_v = set(v)
+        except TypeError as e:
+            raise TypeInvalid(msg or 'contains unhashable elements: {}'.format(e))
+
+        if len(set_v) != len(v):
+            seen = set()
+            dupes = list(set(x for x in v if x in seen or seen.add(x)))
+            raise Invalid(msg or 'contains duplicate items: {}'.format(dupes))
+
+        return v
+    return f
+
+
+def Set(msg=None):
+    """Convert a list into a set.
+
+    >>> s = Schema(Set())
+    >>> s([])
+    set([])
+    >>> s([1, 2])
+    set([1, 2])
+    >>> with raises(Invalid, "cannot be presented as set: unhashable type: 'set'"):
+    ...   s([{1, 2}, {3, 4}])
+    """
+    @wraps(Set)
+    def f(v):
+        try:
+            set_v = set(v)
+        except Exception as e:
+            raise TypeInvalid(msg or 'cannot be presented as set: {}'.format(e))
+
+        return set_v
+    return f
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
