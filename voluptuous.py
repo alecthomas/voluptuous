@@ -111,12 +111,14 @@ __version__ = '0.8.7'
 
 
 @contextmanager
-def raises(exc, msg=None):
+def raises(exc, msg=None, regex=None):
     try:
         yield
     except exc as e:
         if msg is not None:
             assert str(e) == msg, '%r != %r' % (str(e), msg)
+        if regex is not None:
+            assert re.search(regex, str(e)), '%r does not match %r' % (str(e), regex)
 
 
 class Undefined(object):
@@ -1669,11 +1671,11 @@ def Unique(msg=None):
     ...   s([1, 1, 2])
     >>> with raises(Invalid, "contains duplicate items: ['one']"):
     ...   s(['one', 'two', 'one'])
-    >>> with raises(Invalid, "contains unhashable elements: unhashable type: 'set'"):
-    ...   s([{1, 2}, {3, 4}])
+    >>> with raises(Invalid, regex="^contains unhashable elements: "):
+    ...   s([set([1, 2]), set([3, 4])])
     >>> s('abc')
     'abc'
-    >>> with raises(Invalid, "contains duplicate items: ['a', 'b']"):
+    >>> with raises(Invalid, regex="^contains duplicate items: "):
     ...   s('aabbc')
     """
     @wraps(Unique)
@@ -1681,12 +1683,12 @@ def Unique(msg=None):
         try:
             set_v = set(v)
         except TypeError as e:
-            raise TypeInvalid(msg or 'contains unhashable elements: {}'.format(e))
+            raise TypeInvalid(msg or 'contains unhashable elements: {0}'.format(e))
 
         if len(set_v) != len(v):
             seen = set()
             dupes = list(set(x for x in v if x in seen or seen.add(x)))
-            raise Invalid(msg or 'contains duplicate items: {}'.format(dupes))
+            raise Invalid(msg or 'contains duplicate items: {0}'.format(dupes))
 
         return v
     return f
@@ -1696,19 +1698,19 @@ def Set(msg=None):
     """Convert a list into a set.
 
     >>> s = Schema(Set())
-    >>> s([])
-    set([])
-    >>> s([1, 2])
-    set([1, 2])
-    >>> with raises(Invalid, "cannot be presented as set: unhashable type: 'set'"):
-    ...   s([{1, 2}, {3, 4}])
+    >>> s([]) == set([])
+    True
+    >>> s([1, 2]) == set([1, 2])
+    True
+    >>> with raises(Invalid, regex="^cannot be presented as set: "):
+    ...   s([set([1, 2]), set([3, 4])])
     """
     @wraps(Set)
     def f(v):
         try:
             set_v = set(v)
         except Exception as e:
-            raise TypeInvalid(msg or 'cannot be presented as set: {}'.format(e))
+            raise TypeInvalid(msg or 'cannot be presented as set: {0}'.format(e))
 
         return set_v
     return f
