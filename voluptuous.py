@@ -111,12 +111,14 @@ __version__ = '0.8.7'
 
 
 @contextmanager
-def raises(exc, msg=None):
+def raises(exc, msg=None, regex=None):
     try:
         yield
     except exc as e:
         if msg is not None:
             assert str(e) == msg, '%r != %r' % (str(e), msg)
+        if regex is not None:
+            assert re.search(regex, str(e)), '%r does not match %r' % (str(e), regex)
 
 
 class Undefined(object):
@@ -1649,6 +1651,69 @@ class Literal(object):
 
     def __repr__(self):
         return repr(self.lit)
+
+
+def Unique(msg=None):
+    """Ensure an iterable does not contain duplicate items.
+
+    Only iterables convertable to a set are supported (native types and
+    objects with correct __eq__).
+
+    JSON does not support set, so they need to be presented as arrays.
+    Unique allows ensuring that such array does not contain dupes.
+
+    >>> s = Schema(Unique())
+    >>> s([])
+    []
+    >>> s([1, 2])
+    [1, 2]
+    >>> with raises(Invalid, 'contains duplicate items: [1]'):
+    ...   s([1, 1, 2])
+    >>> with raises(Invalid, "contains duplicate items: ['one']"):
+    ...   s(['one', 'two', 'one'])
+    >>> with raises(Invalid, regex="^contains unhashable elements: "):
+    ...   s([set([1, 2]), set([3, 4])])
+    >>> s('abc')
+    'abc'
+    >>> with raises(Invalid, regex="^contains duplicate items: "):
+    ...   s('aabbc')
+    """
+    @wraps(Unique)
+    def f(v):
+        try:
+            set_v = set(v)
+        except TypeError as e:
+            raise TypeInvalid(msg or 'contains unhashable elements: {0}'.format(e))
+
+        if len(set_v) != len(v):
+            seen = set()
+            dupes = list(set(x for x in v if x in seen or seen.add(x)))
+            raise Invalid(msg or 'contains duplicate items: {0}'.format(dupes))
+
+        return v
+    return f
+
+
+def Set(msg=None):
+    """Convert a list into a set.
+
+    >>> s = Schema(Set())
+    >>> s([]) == set([])
+    True
+    >>> s([1, 2]) == set([1, 2])
+    True
+    >>> with raises(Invalid, regex="^cannot be presented as set: "):
+    ...   s([set([1, 2]), set([3, 4])])
+    """
+    @wraps(Set)
+    def f(v):
+        try:
+            set_v = set(v)
+        except Exception as e:
+            raise TypeInvalid(msg or 'cannot be presented as set: {0}'.format(e))
+
+        return set_v
+    return f
 
 
 if __name__ == '__main__':
