@@ -1536,7 +1536,11 @@ def In(container, msg=None):
     """Validate that a value is in a collection."""
     @wraps(In)
     def validator(value):
-        if value not in container:
+        try:
+            check = value not in container
+        except TypeError:
+            check = True
+        if check:
             raise InInvalid(msg or 'value is not allowed')
         return value
     return validator
