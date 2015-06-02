@@ -1622,6 +1622,8 @@ def ExactSequence(validators, **kwargs):
     >>> validate = Schema(ExactSequence([str, int, list, list]))
     >>> validate(['hourly_report', 10, [], []])
     ['hourly_report', 10, [], []]
+    >>> validate(('hourly_report', 10, [], []))
+    ('hourly_report', 10, [], [])
     """
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val, **kwargs) for val in validators]
@@ -1630,8 +1632,7 @@ def ExactSequence(validators, **kwargs):
         if not isinstance(v, (list, tuple)):
             raise ExactSequenceInvalid(msg)
         try:
-            for i, schema in enumerate(schemas):
-                v[i] = schema(v[i])
+            v = type(v)(schema(x) for x, schema in zip(v, schemas))
         except Invalid as e:
             raise e if msg is None else ExactSequenceInvalid(msg)
         return v
