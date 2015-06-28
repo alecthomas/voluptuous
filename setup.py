@@ -25,8 +25,8 @@ description = long_description.splitlines()[0].strip()
 
 setup(
     name='voluptuous',
-    url='http://github.com/alecthomas/voluptuous',
-    download_url='http://pypi.python.org/pypi/voluptuous',
+    url='https://github.com/alecthomas/voluptuous',
+    download_url='https://pypi.python.org/pypi/voluptuous',
     version=version,
     description=description,
     long_description=long_description,
