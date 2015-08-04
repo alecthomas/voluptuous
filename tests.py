@@ -3,7 +3,7 @@ from nose.tools import assert_equal
 import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
-    MultipleInvalid, LiteralInvalid
+    Url, MultipleInvalid, LiteralInvalid
 )
 
 
@@ -111,3 +111,47 @@ def test_literal():
         assert_equal(type(e.errors[0]), LiteralInvalid)
     else:
         assert False, "Did not raise Invalid"
+
+
+def test_url_validation():
+    """ test with valid URL """
+    schema = Schema({"url": Url()})
+    out_ = schema({"url": "http://example.com/"})
+
+    assert 'http://example.com/', out_.get("url")
+
+
+def test_url_validation_with_none():
+    """ test with invalid None url"""
+    schema = Schema({"url": Url()})
+    try:
+        schema({"url": None})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for None url"
+
+
+def test_url_validation_with_empty_string():
+    """ test with empty string URL """
+    schema = Schema({"url": Url()})
+    try:
+        schema({"url": ''})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for empty string url"
+
+
+def test_url_validation_without_host():
+    """ test with empty host URL """
+    schema = Schema({"url": Url()})
+    try:
+        schema({"url": 'http://'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for empty string url"
