@@ -1391,7 +1391,9 @@ def Url(v):
     'http://w3.org'
     """
     try:
-        urlparse.urlparse(v)
+        parsed = urlparse.urlparse(v)
+        if not parsed.scheme or not parsed.netloc:
+          raise UrlInvalid("must have a URL scheme and host")
         return v
     except:
         raise ValueError
