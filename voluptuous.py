@@ -85,10 +85,11 @@ Validate like so:
     True
 """
 import datetime
+import inspect
 import os
 import re
 import sys
-import inspect
+
 from contextlib import contextmanager
 from functools import wraps
 
@@ -1586,6 +1587,16 @@ def Title(v):
     'Hello World'
     """
     return str(v).title()
+
+
+def Strip(v):
+    """Strip whitespace from a string.
+
+    >>> s = Schema(Strip)
+    >>> s('  hello world  ')
+    'hello world'
+    """
+    return str(v).strip()
 
 
 def DefaultTo(default_value, msg=None):
