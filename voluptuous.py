@@ -1619,6 +1619,23 @@ def DefaultTo(default_value, msg=None):
     return f
 
 
+def SetTo(value):
+    """Set a value, ignoring any previous value.
+
+    >>> s = Schema(Any(int, SetTo(42)))
+    >>> s(2)
+    2
+    >>> s("foo")
+    42
+    """
+    value = default_factory(value)
+
+    @wraps(SetTo)
+    def f(v):
+        return value()
+    return f
+
+
 class ExactSequenceInvalid(Invalid):
     pass
 
