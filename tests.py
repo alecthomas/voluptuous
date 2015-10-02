@@ -1,3 +1,4 @@
+import copy
 from nose.tools import assert_equal
 
 import voluptuous
@@ -155,3 +156,20 @@ def test_url_validation_without_host():
                      "expected a URL for dictionary value @ data['url']")
     else:
         assert False, "Did not raise Invalid for empty string url"
+
+
+def test_copy_dict_undefined():
+    """ test with a copied dictionary """
+    fields = {
+        Required("foo"): int
+    }
+    copied_fields = copy.deepcopy(fields)
+
+    schema = Schema(copied_fields)
+
+    # This used to raise a `TypeError` because the instance of `Undefined`
+    # was a copy, so object comparison would not work correctly.
+    try:
+        schema({"foo": "bar"})
+    except Exception as e:
+        assert isinstance(e, MultipleInvalid)
