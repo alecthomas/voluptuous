@@ -458,7 +458,7 @@ class Schema(object):
 
             # set defaults for any that can have defaults
             for key in default_keys:
-                if key.default != UNDEFINED:  # if the user provides a default with the node
+                if not isinstance(key.default, Undefined):  # if the user provides a default with the node
                     out[key.schema] = key.default()
                     if key in required_keys:
                         required_keys.discard(key)
