@@ -872,6 +872,9 @@ class Marker(object):
     def __repr__(self):
         return repr(self.schema)
 
+    def __lt__(self, other):
+        return self.schema < other.schema
+
 
 class Optional(Marker):
     """Mark a node in the schema as optional, and optionally provide a default
