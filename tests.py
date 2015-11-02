@@ -173,3 +173,13 @@ def test_copy_dict_undefined():
         schema({"foo": "bar"})
     except Exception as e:
         assert isinstance(e, MultipleInvalid)
+
+
+def test_sorting():
+    """ Expect alphabetic sorting """
+    foo = Required('foo')
+    bar = Required('bar')
+    items = [foo, bar]
+    expected = [bar, foo]
+    result = sorted(items)
+    assert result == expected
