@@ -412,6 +412,20 @@ attribute-value pair in the corresponding object:
 
 ```
 
+### Allow None values
+
+To allow value to be None as well, use Any:
+
+```pycon
+>>> from voluptuous import Any
+
+>>> schema = Schema(Any(None, int))
+>>> schema(None)
+>>> schema(5)
+5
+
+```
+
 ## Error reporting
 
 Validators must throw an `Invalid` exception if invalid data is passed
