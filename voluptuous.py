@@ -723,10 +723,14 @@ class Schema(object):
         resulting `Schema` inherits the `required` and `extra` parameters of
         this, unless overridden.
 
+        Both schemas must be dictionary-based.
+
         :param schema: dictionary to extend this `Schema` with
         :param required: if set, overrides `required` of this `Schema`
         :param extra: if set, overrides `extra` of this `Schema`
         """
+
+        assert type(self.schema) == dict and type(schema) == dict, 'Both schemas must be dictionary-based'
 
         result = self.schema.copy()
         result.update(schema)
