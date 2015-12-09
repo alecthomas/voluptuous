@@ -716,6 +716,29 @@ class Schema(object):
         """
         return self._compile_sequence(schema, list)
 
+    def extend(self, schema, required=None, extra=None):
+        """Create a new `Schema` by merging this and the provided `schema`.
+
+        Neither this `Schema` nor the provided `schema` are modified. The
+        resulting `Schema` inherits the `required` and `extra` parameters of
+        this, unless overridden.
+
+        Both schemas must be dictionary-based.
+
+        :param schema: dictionary to extend this `Schema` with
+        :param required: if set, overrides `required` of this `Schema`
+        :param extra: if set, overrides `extra` of this `Schema`
+        """
+
+        assert type(self.schema) == dict and type(schema) == dict, 'Both schemas must be dictionary-based'
+
+        result = self.schema.copy()
+        result.update(schema)
+
+        result_required = (required if required is not None else self.required)
+        result_extra = (extra if extra is not None else self.extra)
+        return Schema(result, required=result_required, extra=result_extra)
+
 
 def _compile_scalar(schema):
     """A scalar value.

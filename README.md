@@ -393,6 +393,23 @@ True
 
 ```
 
+### Extending an existing Schema
+
+Often it comes handy to have a base `Schema` that is extended with more
+requirements. In that case you can use `Schema.extend` to create a new
+`Schema`:
+
+```pycon
+>>> from voluptuous import Schema
+>>> person = Schema({'name': str})
+>>> person_with_age = person.extend({'age': int})
+>>> sorted(list(person_with_age.schema.keys()))
+['age', 'name']
+
+```
+
+The original `Schema` remains unchanged.
+
 ### Objects
 
 Each key-value pair in a schema dictionary is validated against each

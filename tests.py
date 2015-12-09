@@ -183,3 +183,29 @@ def test_sorting():
     expected = [bar, foo]
     result = sorted(items)
     assert result == expected
+
+
+def test_schema_extend():
+    """Verify that Schema.extend copies schema keys from both."""
+
+    base = Schema({'a': int}, required=True)
+    extension = {'b': str}
+    extended = base.extend(extension)
+
+    assert base.schema == {'a': int}
+    assert extension == {'b': str}
+    assert extended.schema == {'a': int, 'b': str}
+    assert extended.required == base.required
+    assert extended.extra == base.extra
+
+
+def test_schema_extend_overrides():
+    """Verify that Schema.extend can override required/extra parameters."""
+
+    base = Schema({'a': int}, required=True)
+    extended = base.extend({'b': str}, required=False, extra=voluptuous.ALLOW_EXTRA)
+
+    assert base.required == True
+    assert base.extra == voluptuous.PREVENT_EXTRA
+    assert extended.required == False
+    assert extended.extra == voluptuous.ALLOW_EXTRA
