@@ -209,3 +209,22 @@ def test_schema_extend_overrides():
     assert base.extra == voluptuous.PREVENT_EXTRA
     assert extended.required == False
     assert extended.extra == voluptuous.ALLOW_EXTRA
+
+
+def test_schema_default_parameters():
+    """Schema default parameters can be changed"""
+
+    schema = Schema(1)
+    assert schema.required == False
+    assert schema.extra == voluptuous.PREVENT_EXTRA
+
+    Schema.DEFAULT_REQUIRED = True
+    Schema.DEFAULT_EXTRA = voluptuous.REMOVE_EXTRA
+
+    schema = Schema(1)
+    assert schema.required == True
+    assert schema.extra == voluptuous.REMOVE_EXTRA
+
+    # Restore defaults for other tests
+    Schema.DEFAULT_REQUIRED = False
+    Schema.DEFAULT_EXTRA = voluptuous.PREVENT_EXTRA
