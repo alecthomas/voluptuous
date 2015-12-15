@@ -100,11 +100,11 @@ if sys.version_info >= (3,):
     unicode = str
     basestring = str
     ifilter = filter
-    iteritems = dict.items
+    iteritems_attr = 'items'
 else:
     from itertools import ifilter
     import urlparse
-    iteritems = dict.iteritems
+    iteritems_attr = 'iteritems'
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -137,6 +137,11 @@ def default_factory(value):
     if value is UNDEFINED or callable(value):
         return value
     return lambda: value
+
+
+def iteritems(mapping):
+  """Return iteritems for Mappings."""
+  return getattr(mapping, iteritems_attr)()
 
 
 # options for extra keys
