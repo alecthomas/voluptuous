@@ -84,12 +84,12 @@ Validate like so:
     ...                  'Users': {'snmp_community': 'monkey'}}}}
     True
 """
+import collections
 import datetime
 import inspect
 import os
 import re
 import sys
-
 from contextlib import contextmanager
 from functools import wraps
 
@@ -100,11 +100,11 @@ if sys.version_info >= (3,):
     unicode = str
     basestring = str
     ifilter = filter
-    iteritems_attr = 'items'
+    iteritems = lambda d: d.items()
 else:
     from itertools import ifilter
     import urlparse
-    iteritems_attr = 'iteritems'
+    iteritems = lambda d: d.iteritems()
 
 
 __author__ = 'Alec Thomas <alec@swapoff.org>'
@@ -137,11 +137,6 @@ def default_factory(value):
     if value is UNDEFINED or callable(value):
         return value
     return lambda: value
-
-
-def iteritems(mapping):
-  """Return iteritems for Mappings."""
-  return getattr(mapping, iteritems_attr)()
 
 
 # options for extra keys
@@ -351,7 +346,7 @@ class Schema(object):
             return lambda _, v: v
         if isinstance(schema, Object):
             return self._compile_object(schema)
-        if isinstance(schema, dict):
+        if isinstance(schema, collections.Mapping):
             return self._compile_dict(schema)
         elif isinstance(schema, list):
             return self._compile_list(schema)

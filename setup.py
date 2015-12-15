@@ -15,7 +15,7 @@ try:
     with open('README.rst', 'w') as f:
         f.write(long_description)
     atexit.register(lambda: os.unlink('README.rst'))
-except ImportError:
+except (ImportError, OSError):
     print('WARNING: Could not locate pandoc, using Markdown long_description.')
     with open('README.md') as f:
         long_description = f.read()
