@@ -1,5 +1,5 @@
 import copy
-from nose.tools import assert_equal
+from nose.tools import assert_equal, with_setup
 
 import voluptuous
 from voluptuous import (
@@ -211,6 +211,12 @@ def test_schema_extend_overrides():
     assert extended.extra == voluptuous.ALLOW_EXTRA
 
 
+def restore_schema_defaults():
+    Schema.DEFAULT_REQUIRED = False
+    Schema.DEFAULT_EXTRA = voluptuous.PREVENT_EXTRA
+
+
+@with_setup(teardown=restore_schema_defaults)
 def test_schema_default_parameters():
     """Schema default parameters can be changed"""
 
@@ -224,7 +230,3 @@ def test_schema_default_parameters():
     schema = Schema(1)
     assert schema.required == True
     assert schema.extra == voluptuous.REMOVE_EXTRA
-
-    # Restore defaults for other tests
-    Schema.DEFAULT_REQUIRED = False
-    Schema.DEFAULT_EXTRA = voluptuous.PREVENT_EXTRA
