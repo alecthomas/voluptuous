@@ -429,6 +429,33 @@ attribute-value pair in the corresponding object:
 
 ```
 
+### Exact Sequence
+
+To validate an exact sequence of items, the `ExactSequence` validator is
+provided.
+
+```pycon
+>>> from voluptuous import ExactSequence
+>>> schema = Schema(ExactSequence(['one', 'two', int]))
+>>> schema(['one', 'two', 3])
+['one', 'two', 3]
+>>> try:
+...   schema([1, 2, 3])
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == 'not a valid value'
+True
+>>> try:
+...   schema([3, 'two', 'one'])
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == 'not a valid value'
+True
+
+```
+
 ### Any Sequence
 
 The `AnySequence` validator is provided for validating an array of items that
