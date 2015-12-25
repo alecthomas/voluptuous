@@ -429,6 +429,37 @@ attribute-value pair in the corresponding object:
 
 ```
 
+### Any Sequence
+
+The `AnySequence` validator is provided for validating an array of items that
+may have any order. An optional kwarg, `extra`, which defaults to
+`voluptuous.PREVENT_EXTRA` can be used to modify the type of validation done.
+- `PREVENT_EXTRA`: output and schema will have equal length
+- `ALLOW_EXTRA`: output and schema may have unequal length
+- `REMOVE_EXTRA`: remove items from output after all schema validated
+
+```pycon
+>>> from voluptuous import AnySequence
+>>> from voluptuous import PREVENT_EXTRA, ALLOW_EXTRA, REMOVE_EXTRA
+>>> schema = Schema(AnySequence([int, 'two', 'one']))
+>>> try:
+...   schema([3, 'two', 'one', 'zero'])
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == 'input and schema lengths unequal'
+True
+>>> schema = Schema(AnySequence(['one', 'two', int], extra=ALLOW_EXTRA))
+>>> schema([3, 'two', 'one'])
+['one', 'two', 3]
+>>> schema([3, 'two', 'one', 'two'])
+['one', 'two', 'two', 3]
+>>> schema = Schema(AnySequence([int, 'two', 'one'], extra=REMOVE_EXTRA))
+>>> schema([3, 'two', 'one', 'zero'])
+[3, 'two', 'one']
+
+```
+
 ### Allow None values
 
 To allow value to be None as well, use Any:

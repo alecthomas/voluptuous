@@ -1695,6 +1695,102 @@ def ExactSequence(validators, **kwargs):
     return f
 
 
+class AnySequenceInvalid(Invalid):
+    pass
+
+
+def AnySequence(validators, **kwargs):
+    """Matches each element in a sequence against any element in the
+    validators.
+
+    :param msg: Message to deliver to user if validation fails.
+    :param extra: Handle items not in schema.
+        - ``PREVENT_EXTRA``: (default) input and schema must have equal length
+        - ``ALLOW_EXTRA``: input and schema may have unequal length
+        - ``REMOVE_EXTRA``: remove items from input after all schema validated
+    :param kwargs: All other keyword arguments are passed to the sub-Schema
+        constructors.
+
+    >>> from voluptuous import *
+    >>> validate = Schema(AnySequence([str, int, list]))  # PREVENT_EXTRA
+    >>> validate([[], 'cheese', -1])
+    ['cheese', -1, []]
+    >>> validate(([], 'cheese', -1))
+    ('cheese', -1, [])
+    >>> try:
+    ...   validate(['cheese', -1])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == 'input and schema lengths unequal'
+    True
+    >>> try:
+    ...   validate(['cheese', -1, [], []])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == 'input and schema lengths unequal'
+    True
+    >>> validate = Schema(AnySequence([list, list]))
+    >>> try:
+    ...   validate([{}, ()])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == 'expected list'
+    True
+    >>> validate = Schema(AnySequence([str, int, list, list], extra=ALLOW_EXTRA))
+    >>> validate([[], 'cheese', -1, []])
+    ['cheese', -1, [], []]
+    >>> validate([[], -1, 'cheese', [], [], 2])
+    ['cheese', -1, 2, [], [], []]
+    >>> try:
+    ...   validate([[], -1, []])
+    ...   raise AssertionError('MultipleInvalid not raised')
+    ... except MultipleInvalid as e:
+    ...   exc = e
+    >>> str(exc) == 'not all schemas used by input'
+    True
+    >>> validate = Schema(AnySequence([str, int, list], extra=REMOVE_EXTRA))
+    >>> validate([[], 'cheese', -1, [], [], 2])
+    ['cheese', -1, []]
+    """
+    msg = kwargs.pop('msg', None)
+    extra = kwargs.pop('extra', PREVENT_EXTRA)
+    schemas = [Schema(val, **kwargs) for val in validators]
+
+    def f(v):
+        if not isinstance(v, (list, tuple)):
+            raise AnySequenceInvalid('input not a list or tuple')
+        if extra == PREVENT_EXTRA and len(v) != len(schemas):
+            raise AnySequenceInvalid('input and schema lengths unequal')
+        found = len(schemas)*[False]
+
+        def find():
+            for x in v:
+                if all(found) and extra == REMOVE_EXTRA:
+                    break
+                for i, schema in enumerate(schemas):
+                    if found[i]:
+                        if all(found) and extra == ALLOW_EXTRA:
+                            pass
+                        else:
+                            continue
+                    try:
+                        yield (schema(x), i)
+                        found[i] = True
+                        break
+                    except Invalid as e:
+                        exc = e
+                else:
+                    raise exc if msg is None else AnySequenceInvalid(msg)
+        v = type(v)([x[0] for x in sorted(find(), key=lambda y: y[1])])
+        if not all(found):
+            raise AnySequenceInvalid('not all schemas used by input')
+        return v
+    return f
+
+
 class Literal(object):
     def __init__(self, lit):
         self.lit = lit
