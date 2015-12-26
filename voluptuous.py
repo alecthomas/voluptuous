@@ -1,4 +1,3 @@
-
 # encoding: utf-8
 #
 # Copyright (C) 2010-2013 Alec Thomas <alec@swapoff.org>
@@ -355,7 +354,7 @@ class Schema(object):
         type_ = type(schema)
         if type_ is type:
             type_ = schema
-        if type_ in (int, long, str, unicode, float, complex, object,
+        if type_ in (bool, int, long, str, unicode, float, complex, object,
                      list, dict, type(None)) or callable(schema):
             return _compile_scalar(schema)
         raise SchemaError('unsupported schema data type %r' %
