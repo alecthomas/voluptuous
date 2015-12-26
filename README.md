@@ -393,6 +393,28 @@ True
 
 ```
 
+#### Overriding Schema defaults for required and extra
+
+If all your schema dictionaries use the same non-default required/extra
+options, you can change the default globally for all future Schema instances:
+
+```pycon
+>>> from voluptuous import Schema, PREVENT_EXTRA, REMOVE_EXTRA
+>>> Schema.DEFAULT_REQUIRED = True
+>>> Schema.DEFAULT_EXTRA = REMOVE_EXTRA
+>>> s = Schema({'needed': 1})
+>>> s.required
+True
+>>> s({'needed': 1, 'removed': 2})
+{'needed': 1}
+>>> Schema.DEFAULT_REQUIRED = False
+>>> Schema.DEFAULT_EXTRA = PREVENT_EXTRA
+>>> Schema({'foo': 1}).required
+False
+
+
+```
+
 ### Extending an existing Schema
 
 Often it comes handy to have a base `Schema` that is extended with more

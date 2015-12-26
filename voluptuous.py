@@ -309,8 +309,10 @@ class Schema(object):
     in which case an isinstance() check is performed, or callables, which will
     validate and optionally convert the value.
     """
+    DEFAULT_REQUIRED = False
+    DEFAULT_EXTRA = PREVENT_EXTRA
 
-    def __init__(self, schema, required=False, extra=PREVENT_EXTRA):
+    def __init__(self, schema, required=None, extra=None):
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
@@ -326,8 +328,8 @@ class Schema(object):
               :const:`~voluptuous.PREVENT_EXTRA`
         """
         self.schema = schema
-        self.required = required
-        self.extra = int(extra)  # ensure the value is an integer
+        self.required = self.DEFAULT_REQUIRED if required is None else required
+        self.extra = self.DEFAULT_EXTRA if extra is None else int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
 
     def __call__(self, data):
