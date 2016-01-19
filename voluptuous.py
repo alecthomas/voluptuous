@@ -299,6 +299,14 @@ class LiteralInvalid(Invalid):
     """The literal values do not match."""
 
 
+class VirtualPathComponent(str):
+    def __str__(self):
+        return '<' + self + '>'
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class Schema(object):
     """A validation schema.
 
@@ -606,7 +614,8 @@ class Schema(object):
                         if exists:
                             msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
                                 "two or more values in the same group of exclusion '%s'" % label
-                            errors.append(ExclusiveInvalid(msg, path))
+                            next_path = path + [VirtualPathComponent(label)]
+                            errors.append(ExclusiveInvalid(msg, next_path))
                             break
                         exists = True
 
@@ -624,7 +633,8 @@ class Schema(object):
                     if msg is None:
                         msg = ("some but not all values in the same group of "
                                "inclusion '%s'") % label
-                    errors.append(InclusiveInvalid(msg, path))
+                    next_path = path + [VirtualPathComponent(label)]
+                    errors.append(InclusiveInvalid(msg, next_path))
                     break
 
             if errors:
@@ -936,7 +946,7 @@ class Exclusive(Optional):
 
     Keys inside a same group of exclusion cannot be together, it only makes sense for dictionaries:
 
-    >>> with raises(MultipleInvalid, "two or more values in the same group of exclusion 'angles'"):
+    >>> with raises(MultipleInvalid, "two or more values in the same group of exclusion 'angles' @ data[<angles>]"):
     ...   schema({'alpha': 30, 'beta': 45})
 
     For example, API can provides multiple types of authentication, but only one works in the same time:
@@ -956,7 +966,7 @@ class Exclusive(Optional):
     ...     }
     ... })
 
-    >>> with raises(MultipleInvalid, "Please, use only one type of authentication at the same time."):
+    >>> with raises(MultipleInvalid, "Please, use only one type of authentication at the same time. @ data[<auth>]"):
     ...     schema({'classic': {'email': 'foo@example.com', 'password': 'bar'},
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
     """
@@ -980,7 +990,7 @@ class Inclusive(Optional):
 
     Keys inside a same group of inclusive must exist together, it only makes sense for dictionaries:
 
-    >>> with raises(MultipleInvalid, "some but not all values in the same group of inclusion 'file'"):
+    >>> with raises(MultipleInvalid, "some but not all values in the same group of inclusion 'file' @ data[<file>]"):
     ...     schema({'filename': 'dog.jpg'})
 
     If none of the keys in the group are present, it is accepted:
@@ -990,16 +1000,16 @@ class Inclusive(Optional):
 
     For example, API can return 'height' and 'width' together, but not separately.
 
-    >>> msg = 'Height and width must exist together'
+    >>> msg = "Height and width must exist together"
     >>> schema = Schema({
     ...     Inclusive('height', 'size', msg=msg): int,
     ...     Inclusive('width', 'size', msg=msg): int
     ... })
 
-    >>> with raises(MultipleInvalid, msg):
+    >>> with raises(MultipleInvalid, msg + " @ data[<size>]"):
     ...     schema({'height': 100})
 
-    >>> with raises(MultipleInvalid, msg):
+    >>> with raises(MultipleInvalid, msg + " @ data[<size>]"):
     ...     schema({'width': 100})
 
     >>> data = {'height': 100, 'width': 100}
