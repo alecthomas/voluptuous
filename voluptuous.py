@@ -1584,6 +1584,24 @@ def In(container, msg=None):
     return validator
 
 
+class NotInInvalid(Invalid):
+    pass
+
+
+def NotIn(container, msg=None):
+    """Validate that a value is not in a collection."""
+    @wraps(NotIn)
+    def validator(value):
+        try:
+            check = value in container
+        except TypeError:
+            check = True
+        if check:
+            raise NotInInvalid(msg or 'value is not allowed')
+        return value
+    return validator
+
+
 def Lower(v):
     """Transform a string to lower case.
 
