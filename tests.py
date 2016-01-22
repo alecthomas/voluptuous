@@ -4,7 +4,7 @@ from nose.tools import assert_equal
 import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
-    Url, MultipleInvalid, LiteralInvalid
+    Url, MultipleInvalid, LiteralInvalid, NotIn
 )
 
 
@@ -44,6 +44,18 @@ def test_in():
     """Verify that In works."""
     schema = Schema({"color": In(frozenset(["blue", "red", "yellow"]))})
     schema({"color": "blue"})
+
+
+def test_not_in():
+    """Verify that NotIn works."""
+    schema = Schema({"color": NotIn(frozenset(["blue", "red", "yellow"]))})
+    schema({"color": "orange"})
+    try:
+        schema({"color": "blue"})
+    except Invalid as e:
+        assert_equal(str(e), "value is not allowed for dictionary value @ data['color']")
+    else:
+        assert False, "Did not raise NotInInvalid"
 
 
 def test_remove():
