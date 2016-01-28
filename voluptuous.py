@@ -1354,6 +1354,7 @@ def All(*validators, **kwargs):
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val, **kwargs) for val in validators]
 
+    @wraps(All)
     def f(v):
         try:
             for schema in schemas:
@@ -1389,6 +1390,7 @@ def Match(pattern, msg=None):
     if isinstance(pattern, basestring):
         pattern = re.compile(pattern)
 
+    @wraps(Match)
     def f(v):
         try:
             match = pattern.match(v)
@@ -1411,6 +1413,7 @@ def Replace(pattern, substitution, msg=None):
     if isinstance(pattern, basestring):
         pattern = re.compile(pattern)
 
+    @wraps(Replace)
     def f(v):
         return pattern.sub(substitution, v)
     return f
@@ -1711,6 +1714,7 @@ def ExactSequence(validators, **kwargs):
     msg = kwargs.pop('msg', None)
     schemas = [Schema(val, **kwargs) for val in validators]
 
+    @wraps(ExactSequence)
     def f(v):
         if not isinstance(v, (list, tuple)):
             raise ExactSequenceInvalid(msg)
