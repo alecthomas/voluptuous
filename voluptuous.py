@@ -318,6 +318,12 @@ class Schema(object):
     validate and optionally convert the value.
     """
 
+    _extra_to_name = {
+        REMOVE_EXTRA: 'REMOVE_EXTRA',
+        ALLOW_EXTRA: 'ALLOW_EXTRA',
+        PREVENT_EXTRA: 'PREVENT_EXTRA',
+    }
+
     def __init__(self, schema, required=False, extra=PREVENT_EXTRA):
         """Create a new Schema.
 
@@ -337,6 +343,11 @@ class Schema(object):
         self.required = required
         self.extra = int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
+
+    def __repr__(self):
+        return "<Schema(%s, extra=%s, required=%s) object at 0x%x>" % (
+            self.schema, self._extra_to_name.get(self.extra, '??'),
+            self.required, id(self))
 
     def __call__(self, data):
         """Validate data against this schema."""
@@ -1059,6 +1070,9 @@ class Remove(Marker):
         super(Remove, self).__call__(v)
         return self.__class__
 
+    def __repr__(self):
+        return "Remove(%r)" % (self.schema,)
+
 
 def Extra(_):
     """Allow keys in the data that are not present in the schema."""
@@ -1069,8 +1083,7 @@ def Extra(_):
 # deprecated object, so we just leave an alias here instead.
 extra = Extra
 
-
-def Msg(schema, msg, cls=None):
+class Msg(object):
     """Report a user-friendly message if a schema fails to validate.
 
     >>> validate = Schema(
@@ -1099,21 +1112,26 @@ def Msg(schema, msg, cls=None):
     ...   assert isinstance(e.errors[0], RangeInvalid)
     """
 
-    schema = Schema(schema)
+    def __init__(self, schema, msg, cls=None):
+        if cls and not issubclass(cls, Invalid):
+            raise SchemaError("Msg can only use subclases of"
+                              " Invalid as custom class")
+        self._schema = schema
+        self.schema = Schema(schema)
+        self.msg = msg
+        self.cls = cls
 
-    if cls and not issubclass(cls, Invalid):
-        raise SchemaError("Msg can only use subclases of Invalid as custom class")
-
-    @wraps(Msg)
-    def f(v):
+    def __call__(self, v):
         try:
-            return schema(v)
+            return self.schema(v)
         except Invalid as e:
             if len(e.path) > 1:
                 raise e
             else:
-                raise (cls or Invalid)(msg)
-    return f
+                raise (self.cls or Invalid)(self.msg)
+
+    def __repr__(self):
+        return 'Msg(%s, %s, cls=%s)' % (self._schema, self.msg, self.cls)
 
 
 def message(default=None, cls=None):
@@ -1182,12 +1200,11 @@ def truth(f):
     return check
 
 
-def Coerce(type, msg=None):
+class Coerce(object):
     """Coerce a value to a type.
 
     If the type constructor throws a ValueError or TypeError, the value
     will be marked as Invalid.
-
 
     Default behavior:
 
@@ -1203,13 +1220,21 @@ def Coerce(type, msg=None):
         >>> with raises(MultipleInvalid, 'moo'):
         ...   validate('foo')
     """
-    @wraps(Coerce)
-    def f(v):
+
+    def __init__(self, type, msg=None):
+        self.type = type
+        self.msg = msg
+        self.type_name = type.__name__
+
+    def __call__(self, v):
         try:
-            return type(v)
+            return self.type(v)
         except (ValueError, TypeError):
-            raise CoerceInvalid(msg or ('expected %s' % type.__name__))
-    return f
+            msg = self.msg or ('expected %s' % self.type_name)
+            raise CoerceInvalid(msg)
+
+    def __repr__(self):
+        return 'Coerce(%s)' % (self.type_name)
 
 
 @message('value was not true', cls=TrueInvalid)
@@ -1292,7 +1317,7 @@ def Boolean(v):
     return bool(v)
 
 
-def Any(*validators, **kwargs):
+class Any(object):
     """Use the first validated value.
 
     :param msg: Message to deliver to user if validation fails.
@@ -1316,13 +1341,15 @@ def Any(*validators, **kwargs):
     >>> with raises(MultipleInvalid, "Expected 1 2 or 3"):
     ...   validate(4)
     """
-    msg = kwargs.pop('msg', None)
-    schemas = [Schema(val, **kwargs) for val in validators]
 
-    @wraps(Any)
-    def f(v):
+    def __init__(self, *validators, **kwargs):
+        self.validators = validators
+        self.msg = kwargs.pop('msg', None)
+        self._schemas = [Schema(val, **kwargs) for val in validators]
+
+    def __call__(self, v):
         error = None
-        for schema in schemas:
+        for schema in self._schemas:
             try:
                 return schema(v)
             except Invalid as e:
@@ -1330,16 +1357,18 @@ def Any(*validators, **kwargs):
                     error = e
         else:
             if error:
-                raise error if msg is None else AnyInvalid(msg)
-            raise AnyInvalid(msg or 'no valid value found')
-    return f
+                raise error if self.msg is None else AnyInvalid(self.msg)
+            raise AnyInvalid(self.msg or 'no valid value found')
+
+    def __repr__(self):
+        return 'Any([%s])' % (", ".join(repr(v) for v in self.validators))
 
 
 # Convenience alias
 Or = Any
 
 
-def All(*validators, **kwargs):
+class All(object):
     """Value must pass all validators.
 
     The output of each validator is passed as input to the next.
@@ -1351,25 +1380,29 @@ def All(*validators, **kwargs):
     >>> validate('10')
     10
     """
-    msg = kwargs.pop('msg', None)
-    schemas = [Schema(val, **kwargs) for val in validators]
 
-    @wraps(All)
-    def f(v):
+    def __init__(self, *validators, **kwargs):
+        self.validators = validators
+        self.msg = kwargs.pop('msg', None)
+        self._schemas = [Schema(val, **kwargs) for val in validators]
+
+    def __call__(self, v):
         try:
-            for schema in schemas:
+            for schema in self._schemas:
                 v = schema(v)
         except Invalid as e:
-            raise e if msg is None else AllInvalid(msg)
+            raise e if self.msg is None else AllInvalid(self.msg)
         return v
-    return f
+
+    def __repr__(self):
+        return 'All([%s])' % (", ".join(repr(v) for v in self.validators))
 
 
 # Convenience alias
 And = All
 
 
-def Match(pattern, msg=None):
+class Match(object):
     """Value must be a string that matches the regular expression.
 
     >>> validate = Schema(Match(r'^0x[A-F0-9]+$'))
@@ -1387,22 +1420,27 @@ def Match(pattern, msg=None):
     >>> validate('0x123ef4')
     '0x123ef4'
     """
-    if isinstance(pattern, basestring):
-        pattern = re.compile(pattern)
 
-    @wraps(Match)
-    def f(v):
+    def __init__(self, pattern, msg=None):
+        if isinstance(pattern, basestring):
+            pattern = re.compile(pattern)
+        self.pattern = pattern
+        self.msg = msg
+
+    def __call__(self, v):
         try:
-            match = pattern.match(v)
+            match = self.pattern.match(v)
         except TypeError:
             raise MatchInvalid("expected string or buffer")
         if not match:
-            raise MatchInvalid(msg or 'does not match regular expression')
+            raise MatchInvalid(self.msg or 'does not match regular expression')
         return v
-    return f
+
+    def __repr__(self):
+        return 'Match(%s)' % (self.pattern.pattern)
 
 
-def Replace(pattern, substitution, msg=None):
+class Replace(object):
     """Regex substitution.
 
     >>> validate = Schema(All(Replace('you', 'I'),
@@ -1410,13 +1448,20 @@ def Replace(pattern, substitution, msg=None):
     >>> validate('you say hello')
     'I say goodbye'
     """
-    if isinstance(pattern, basestring):
-        pattern = re.compile(pattern)
 
-    @wraps(Replace)
-    def f(v):
-        return pattern.sub(substitution, v)
-    return f
+    def __init__(self, pattern, substitution, msg=None):
+        if isinstance(pattern, basestring):
+            pattern = re.compile(pattern)
+        self.pattern = pattern
+        self.substitution = substitution
+        self.msg = msg
+
+    def __call__(self, v):
+        return self.pattern.sub(self.substitution, v)
+
+    def __repr__(self):
+        return 'Replace(%s, %s)' % (self.pattern.pattern,
+                                    self.substitution)
 
 
 @message('expected a URL', cls=UrlInvalid)
@@ -1432,7 +1477,7 @@ def Url(v):
     try:
         parsed = urlparse.urlparse(v)
         if not parsed.scheme or not parsed.netloc:
-          raise UrlInvalid("must have a URL scheme and host")
+            raise UrlInvalid("must have a URL scheme and host")
         return v
     except:
         raise ValueError
@@ -1475,7 +1520,7 @@ def PathExists(v):
     return os.path.exists(v)
 
 
-def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
+class Range(object):
     """Limit a value to a range.
 
     Either min or max may be omitted.
@@ -1495,25 +1540,42 @@ def Range(min=None, max=None, min_included=True, max_included=True, msg=None):
     >>> with raises(MultipleInvalid, 'value must be lower than 10'):
     ...   Schema(Range(max=10, max_included=False))(20)
     """
-    @wraps(Range)
-    def f(v):
-        if min_included:
-            if min is not None and v < min:
-                raise RangeInvalid(msg or 'value must be at least %s' % min)
+
+    def __init__(self, min=None, max=None, min_included=True,
+                 max_included=True, msg=None):
+        self.min = min
+        self.max = max
+        self.min_included = min_included
+        self.max_included = max_included
+        self.msg = msg
+
+    def __call__(self, v):
+        if self.min_included:
+            if self.min is not None and v < self.min:
+                raise RangeInvalid(
+                    self.msg or 'value must be at least %s' % self.min)
         else:
-            if min is not None and v <= min:
-                raise RangeInvalid(msg or 'value must be higher than %s' % min)
-        if max_included:
-            if max is not None and v > max:
-                raise RangeInvalid(msg or 'value must be at most %s' % max)
+            if self.min is not None and v <= self.min:
+                raise RangeInvalid(
+                    self.msg or 'value must be higher than %s' % self.min)
+        if self.max_included:
+            if self.max is not None and v > self.max:
+                raise RangeInvalid(
+                    self.msg or 'value must be at most %s' % self.max)
         else:
-            if max is not None and v >= max:
-                raise RangeInvalid(msg or 'value must be lower than %s' % max)
+            if self.max is not None and v >= self.max:
+                raise RangeInvalid(
+                    self.msg or 'value must be lower than %s' % self.max)
         return v
-    return f
+
+    def __repr__(self):
+        return ('Range(min=%s, max=%s, min_included=%s,'
+                ' max_included=%s)' (self.min, self.max,
+                                     self.min_included,
+                                     self.max_included))
 
 
-def Clamp(min=None, max=None, msg=None):
+class Clamp(object):
     """Clamp a value to a range.
 
     Either min or max may be omitted.
@@ -1524,85 +1586,121 @@ def Clamp(min=None, max=None, msg=None):
     1
     >>> s(-1)
     0
-
     """
-    @wraps(Clamp)
-    def f(v):
-        if min is not None and v < min:
-            v = min
-        if max is not None and v > max:
-            v = max
+
+    def __init__(self, min=None, max=None, msg=None):
+        self.min = min
+        self.max = max
+        self.msg = msg
+
+    def __call__(self, v):
+        if self.min is not None and v < self.min:
+            v = self.min
+        if self.max is not None and v > self.max:
+            v = self.max
         return v
-    return f
+
+    def __repr__(self):
+        return 'Clamp(min=%s, max=%s)' % (self.min, self.max)
 
 
 class LengthInvalid(Invalid):
     pass
 
 
-def Length(min=None, max=None, msg=None):
+class Length(object):
     """The length of a value must be in a certain range."""
-    @wraps(Length)
-    def f(v):
-        if min is not None and len(v) < min:
-            raise LengthInvalid(msg or 'length of value must be at least %s' % min)
-        if max is not None and len(v) > max:
-            raise LengthInvalid(msg or 'length of value must be at most %s' % max)
+
+    def __init__(self, min=None, max=None, msg=None):
+        self.min = min
+        self.max = max
+        self.msg = msg
+
+    def __call__(self, v):
+        if self.min is not None and len(v) < self.min:
+            raise LengthInvalid(
+                self.msg or 'length of value must be at least %s' % self.min)
+        if self.max is not None and len(v) > self.max:
+            raise LengthInvalid(
+                self.msg or 'length of value must be at most %s' % self.max)
         return v
-    return f
+
+    def __repr__(self):
+        return 'Length(min=%s, max=%s)' % (self.min, self.max)
 
 
 class DatetimeInvalid(Invalid):
     """The value is not a formatted datetime string."""
 
 
-def Datetime(format=None, msg=None):
+class Datetime(object):
     """Validate that the value matches the datetime format."""
-    @wraps(Datetime)
-    def f(v):
-        check_format = format or '%Y-%m-%dT%H:%M:%S.%fZ'
+
+    DEFAULT_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+
+    def __init__(self, format=None, msg=None):
+        self.format = format or self.DEFAULT_FORMAT
+        self.msg = msg
+
+    def __call__(self, v):
         try:
-            datetime.datetime.strptime(v, check_format)
+            datetime.datetime.strptime(v, self.format)
         except (TypeError, ValueError):
-            raise DatetimeInvalid(msg or 'value does not match expected format %s' % check_format)
+            raise DatetimeInvalid(
+                self.msg or 'value does not match'
+                            ' expected format %s' % self.format)
         return v
-    return f
+
+    def __repr__(self):
+        return 'Datetime(format=%s)' % self.format
 
 
 class InInvalid(Invalid):
     pass
 
 
-def In(container, msg=None):
+class In(object):
     """Validate that a value is in a collection."""
-    @wraps(In)
-    def validator(value):
+
+    def __init__(self, container, msg=None):
+        self.container = container
+        self.msg = msg
+
+    def __call__(self, v):
         try:
-            check = value not in container
+            check = v not in self.container
         except TypeError:
             check = True
         if check:
-            raise InInvalid(msg or 'value is not allowed')
-        return value
-    return validator
+            raise InInvalid(self.msg or 'value is not allowed')
+        return v
+
+    def __repr__(self):
+        return 'In(%s)' % (self.container,)
 
 
 class NotInInvalid(Invalid):
     pass
 
 
-def NotIn(container, msg=None):
+class NotIn(object):
     """Validate that a value is not in a collection."""
-    @wraps(NotIn)
-    def validator(value):
+
+    def __init__(self, container, msg=None):
+        self.container = container
+        self.msg = msg
+
+    def __call__(self, v):
         try:
-            check = value in container
+            check = v in self.container
         except TypeError:
             check = True
         if check:
-            raise NotInInvalid(msg or 'value is not allowed')
-        return value
-    return validator
+            raise NotInInvalid(self.msg or 'value is not allowed')
+        return v
+
+    def __repr__(self):
+        return 'NotIn(%s)' % (self.container,)
 
 
 def Lower(v):
@@ -1655,7 +1753,7 @@ def Strip(v):
     return str(v).strip()
 
 
-def DefaultTo(default_value, msg=None):
+class DefaultTo(object):
     """Sets a value to default_value if none provided.
 
     >>> s = Schema(DefaultTo(42))
@@ -1665,17 +1763,21 @@ def DefaultTo(default_value, msg=None):
     >>> s(None)
     []
     """
-    default_value = default_factory(default_value)
 
-    @wraps(DefaultTo)
-    def f(v):
+    def __init__(self, default_value, msg=None):
+        self.default_value = default_factory(default_value)
+        self.msg = msg
+
+    def __call__(self, v):
         if v is None:
-            v = default_value()
+            v = self.default_value()
         return v
-    return f
+
+    def __repr__(self):
+        return 'DefaultTo(%s)' % (self.default_value(),)
 
 
-def SetTo(value):
+class SetTo(object):
     """Set a value, ignoring any previous value.
 
     >>> s = Schema(Any(int, SetTo(42)))
@@ -1684,19 +1786,22 @@ def SetTo(value):
     >>> s("foo")
     42
     """
-    value = default_factory(value)
 
-    @wraps(SetTo)
-    def f(v):
-        return value()
-    return f
+    def __init__(self, value):
+        self.value = default_factory(value)
+
+    def __call__(self, v):
+        return self.value()
+
+    def __repr__(self):
+        return 'SetTo(%s)' % (self.value(),)
 
 
 class ExactSequenceInvalid(Invalid):
     pass
 
 
-def ExactSequence(validators, **kwargs):
+class ExactSequence(object):
     """Matches each element in a sequence against the corresponding element in
     the validators.
 
@@ -1711,19 +1816,24 @@ def ExactSequence(validators, **kwargs):
     >>> validate(('hourly_report', 10, [], []))
     ('hourly_report', 10, [], [])
     """
-    msg = kwargs.pop('msg', None)
-    schemas = [Schema(val, **kwargs) for val in validators]
 
-    @wraps(ExactSequence)
-    def f(v):
+    def __init__(self, validators, **kwargs):
+        self.validators = validators
+        self.msg = kwargs.pop('msg', None)
+        self._schemas = [Schema(val, **kwargs) for val in validators]
+
+    def __call__(self, v):
         if not isinstance(v, (list, tuple)):
-            raise ExactSequenceInvalid(msg)
+            raise ExactSequenceInvalid(self.msg)
         try:
-            v = type(v)(schema(x) for x, schema in zip(v, schemas))
+            v = type(v)(schema(x) for x, schema in zip(v, self._schemas))
         except Invalid as e:
-            raise e if msg is None else ExactSequenceInvalid(msg)
+            raise e if self.msg is None else ExactSequenceInvalid(self.msg)
         return v
-    return f
+
+    def __repr__(self):
+        return 'ExactSequence([%s])' % (", ".join(repr(v)
+                                                  for v in self.validators))
 
 
 class Literal(object):
@@ -1745,7 +1855,7 @@ class Literal(object):
         return repr(self.lit)
 
 
-def Unique(msg=None):
+class Unique(object):
     """Ensure an iterable does not contain duplicate items.
 
     Only iterables convertable to a set are supported (native types and
@@ -1770,23 +1880,28 @@ def Unique(msg=None):
     >>> with raises(Invalid, regex="^contains duplicate items: "):
     ...   s('aabbc')
     """
-    @wraps(Unique)
-    def f(v):
+
+    def __init__(self, msg=None):
+        self.msg = msg
+
+    def __call__(self, v):
         try:
             set_v = set(v)
         except TypeError as e:
-            raise TypeInvalid(msg or 'contains unhashable elements: {0}'.format(e))
-
+            raise TypeInvalid(
+                self.msg or 'contains unhashable elements: {0}'.format(e))
         if len(set_v) != len(v):
             seen = set()
             dupes = list(set(x for x in v if x in seen or seen.add(x)))
-            raise Invalid(msg or 'contains duplicate items: {0}'.format(dupes))
-
+            raise Invalid(
+                self.msg or 'contains duplicate items: {0}'.format(dupes))
         return v
-    return f
+
+    def __repr__(self):
+        return 'Unique()'
 
 
-def Set(msg=None):
+class Set(object):
     """Convert a list into a set.
 
     >>> s = Schema(Set())
@@ -1797,15 +1912,20 @@ def Set(msg=None):
     >>> with raises(Invalid, regex="^cannot be presented as set: "):
     ...   s([set([1, 2]), set([3, 4])])
     """
-    @wraps(Set)
-    def f(v):
+
+    def __init__(self, msg=None):
+        self.msg = msg
+
+    def __call__(self, v):
         try:
             set_v = set(v)
         except Exception as e:
-            raise TypeInvalid(msg or 'cannot be presented as set: {0}'.format(e))
-
+            raise TypeInvalid(
+                self.msg or 'cannot be presented as set: {0}'.format(e))
         return set_v
-    return f
+
+    def __repr__(self):
+        return 'Set()'
 
 
 if __name__ == '__main__':
