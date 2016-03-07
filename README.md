@@ -393,6 +393,21 @@ True
 
 ```
 
+### Recursive schema
+
+There is no syntax to have a recursive schema. The best way to do it is to have a wrapper like this:
+
+```pycon
+>>> from voluptuous import Schema, Any
+>>> def s2(v):
+...     return s1(v)
+...
+>>> s1 = Schema({"key": Any(s2, "value")})
+>>> s1({"key": {"key": "value"}})
+{'key': {'key': 'value'}}
+
+```
+
 ### Extending an existing Schema
 
 Often it comes handy to have a base `Schema` that is extended with more
