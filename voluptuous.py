@@ -1234,7 +1234,7 @@ class Coerce(object):
             raise CoerceInvalid(msg)
 
     def __repr__(self):
-        return 'Coerce(%s)' % (self.type_name)
+        return 'Coerce(%s, msg=%r)' % (self.type_name, self.msg)
 
 
 @message('value was not true', cls=TrueInvalid)
@@ -1395,7 +1395,10 @@ class All(object):
         return v
 
     def __repr__(self):
-        return 'All([%s])' % (", ".join(repr(v) for v in self.validators))
+        return 'All(%s, msg=%r)' % (
+            ", ".join(repr(v) for v in self.validators),
+            self.msg
+        )
 
 
 # Convenience alias
@@ -1437,7 +1440,7 @@ class Match(object):
         return v
 
     def __repr__(self):
-        return 'Match(%s)' % (self.pattern.pattern)
+        return 'Match(%r, msg=%r)' % (self.pattern.pattern, self.msg)
 
 
 class Replace(object):
@@ -1460,8 +1463,9 @@ class Replace(object):
         return self.pattern.sub(self.substitution, v)
 
     def __repr__(self):
-        return 'Replace(%s, %s)' % (self.pattern.pattern,
-                                    self.substitution)
+        return 'Replace(%r, %r, msg=%r)' % (self.pattern.pattern,
+                                            self.substitution,
+                                            self.msg)
 
 
 @message('expected a URL', cls=UrlInvalid)
@@ -1569,10 +1573,11 @@ class Range(object):
         return v
 
     def __repr__(self):
-        return ('Range(min=%s, max=%s, min_included=%s,'
-                ' max_included=%s)' (self.min, self.max,
-                                     self.min_included,
-                                     self.max_included))
+        return ('Range(min=%r, max=%r, min_included=%r,'
+                ' max_included=%r, msg=%r)' % (self.min, self.max,
+                                               self.min_included,
+                                               self.max_included,
+                                               self.msg))
 
 
 class Clamp(object):

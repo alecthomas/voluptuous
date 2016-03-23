@@ -4,7 +4,8 @@ from nose.tools import assert_equal
 import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
-    Url, MultipleInvalid, LiteralInvalid, NotIn
+    Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
+    Replace, Range, Coerce, All,
 )
 
 
@@ -221,3 +222,23 @@ def test_schema_extend_overrides():
     assert base.extra == voluptuous.PREVENT_EXTRA
     assert extended.required == False
     assert extended.extra == voluptuous.ALLOW_EXTRA
+
+
+def test_repr():
+    """Verify that __repr__ returns valid Python expressions"""
+    match = Match('a pattern', msg='message')
+    replace = Replace('you', 'I', msg='you and I')
+    range_ = Range(min=0, max=42, min_included=False,
+                  max_included=False, msg='number not in range')
+    coerce_ = Coerce(int, msg="moo")
+    all_ = All('10', Coerce(int), msg='all msg')
+
+    assert_equal(repr(match), "Match('a pattern', msg='message')")
+    assert_equal(repr(replace), "Replace('you', 'I', msg='you and I')")
+    assert_equal(
+        repr(range_),
+        "Range(min=0, max=42, min_included=False, " \
+        "max_included=False, msg='number not in range')"
+    )
+    assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
+    assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
