@@ -1570,9 +1570,9 @@ class Range(object):
 
     def __repr__(self):
         return ('Range(min=%s, max=%s, min_included=%s,'
-                ' max_included=%s)' (self.min, self.max,
-                                     self.min_included,
-                                     self.max_included))
+                ' max_included=%s)' % (self.min, self.max,
+                                       self.min_included,
+                                       self.max_included))
 
 
 class Clamp(object):
