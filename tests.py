@@ -112,7 +112,7 @@ def test_literal():
     try:
         schema([{"c": 1}])
     except Invalid as e:
-        assert_equal(str(e), 'invalid list value @ data[0]')
+        assert_equal(str(e), "{'c': 1} not match for {'b': 1} @ data[0]")
     else:
         assert False, "Did not raise Invalid"
 
@@ -242,3 +242,24 @@ def test_repr():
     )
     assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
     assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
+
+
+def test_list_validation_messages():
+    """ Make sure useful error messages are available """
+
+    def is_even(value):
+        if value % 2:
+            raise Invalid('%i is not even' % value)
+        return value
+
+    schema = Schema(dict(even_numbers=[All(int, is_even)]))
+
+    try:
+        schema(dict(even_numbers=[3]))
+    except Invalid as e:
+        assert_equal(len(e.errors), 2, e.errors)
+        assert_equal(str(e.errors[0]), "3 is not even @ data['even_numbers'][0]")
+        assert_equal(str(e.errors[1]), "invalid list value @ data['even_numbers'][0]")
+        assert_equal(str(e), "3 is not even @ data['even_numbers'][0]")
+    else:
+        assert False, "Did not raise Invalid"

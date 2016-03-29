@@ -16,7 +16,7 @@ value:
     ...   raise AssertionError('MultipleInvalid not raised')
     ... except MultipleInvalid as e:
     ...   exc = e
-    >>> str(exc) == 'invalid list value @ data[1]'
+    >>> str(exc) == 'expected a dictionary @ data[1]'
     True
 
 It should also be accurate for nested values:
@@ -35,7 +35,7 @@ It should also be accurate for nested values:
     ... except MultipleInvalid as e:
     ...   exc = e
     >>> str(exc)
-    "invalid list value @ data[0]['four'][0]"
+    "not a valid value @ data[0]['four'][0]"
 
     >>> try:
     ...   schema([{'six': {'seven': 'nine'}}])
@@ -116,8 +116,11 @@ Multiple errors are reported:
     ...   schema([1, 2, 3])
     ... except MultipleInvalid as e:
     ...   print([str(i) for i in e.errors])  # doctest: +NORMALIZE_WHITESPACE
-    ['invalid list value @ data[0]',
+    ['expected a list @ data[0]',
+     'invalid list value @ data[0]',
+     'expected a list @ data[1]',
      'invalid list value @ data[1]',
+     'expected a list @ data[2]',
      'invalid list value @ data[2]']
 
 Required fields in dictionary which are invalid should not have required :
