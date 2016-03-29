@@ -699,8 +699,7 @@ class Schema(object):
                         invalid = e
                 else:
                     if len(invalid.path) <= len(index_path):
-                        if invalid is not None:
-                            errors.append(invalid)
+                        errors.append(invalid)
                         invalid = SequenceItemInvalid('invalid %s value' % seq_type_name, index_path)
                     errors.append(invalid)
             if errors:
