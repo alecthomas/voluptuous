@@ -227,10 +227,6 @@ class InclusiveInvalid(Invalid):
     """Not all values found in inclusion group."""
 
 
-class SequenceItemInvalid(Invalid):
-    """One of the values found in a sequence was invalid."""
-
-
 class SequenceTypeInvalid(Invalid):
     """The type found is not a sequence type."""
 
@@ -664,7 +660,7 @@ class Schema(object):
         >>> validator = Schema(['one', 'two', int])
         >>> validator(['one'])
         ['one']
-        >>> with raises(MultipleInvalid, 'invalid list value @ data[0]'):
+        >>> with raises(MultipleInvalid, 'expected int @ data[0]'):
         ...   validator([3.5])
         >>> validator([1])
         [1]
@@ -698,8 +694,6 @@ class Schema(object):
                             raise
                         invalid = e
                 else:
-                    if len(invalid.path) <= len(index_path):
-                        invalid = SequenceItemInvalid('invalid %s value' % seq_type_name, index_path)
                     errors.append(invalid)
             if errors:
                 raise MultipleInvalid(errors)
@@ -714,7 +708,7 @@ class Schema(object):
         >>> validator = Schema(('one', 'two', int))
         >>> validator(('one',))
         ('one',)
-        >>> with raises(MultipleInvalid, 'invalid tuple value @ data[0]'):
+        >>> with raises(MultipleInvalid, 'expected int @ data[0]'):
         ...   validator((3.5,))
         >>> validator((1,))
         (1,)
@@ -729,7 +723,7 @@ class Schema(object):
         >>> validator = Schema(['one', 'two', int])
         >>> validator(['one'])
         ['one']
-        >>> with raises(MultipleInvalid, 'invalid list value @ data[0]'):
+        >>> with raises(MultipleInvalid, 'expected int @ data[0]'):
         ...   validator([3.5])
         >>> validator([1])
         [1]
@@ -1095,7 +1089,7 @@ class Msg(object):
     Messages are only applied to invalid direct descendants of the schema:
 
     >>> validate = Schema(Msg([['one', 'two', int]], 'not okay!'))
-    >>> with raises(MultipleInvalid, 'invalid list value @ data[0][0]'):
+    >>> with raises(MultipleInvalid, 'expected int @ data[0][0]'):
     ...   validate([['three']])
 
     The type which is thrown can be overridden but needs to be a subclass of Invalid

@@ -522,7 +522,7 @@ backtracking is attempted:
 ...   raise AssertionError('MultipleInvalid not raised')
 ... except MultipleInvalid as e:
 ...   exc = e
->>> str(exc) == "invalid list value @ data[0][0]"
+>>> str(exc) == "not a valid value @ data[0][0]"
 True
 
 ```
