@@ -117,11 +117,8 @@ Multiple errors are reported:
     ... except MultipleInvalid as e:
     ...   print([str(i) for i in e.errors])  # doctest: +NORMALIZE_WHITESPACE
     ['expected a list @ data[0]',
-     'invalid list value @ data[0]',
      'expected a list @ data[1]',
-     'invalid list value @ data[1]',
-     'expected a list @ data[2]',
-     'invalid list value @ data[2]']
+     'expected a list @ data[2]']
 
 Required fields in dictionary which are invalid should not have required :
 

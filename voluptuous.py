@@ -227,10 +227,6 @@ class InclusiveInvalid(Invalid):
     """Not all values found in inclusion group."""
 
 
-class SequenceItemInvalid(Invalid):
-    """One of the values found in a sequence was invalid."""
-
-
 class SequenceTypeInvalid(Invalid):
     """The type found is not a sequence type."""
 
@@ -698,9 +694,6 @@ class Schema(object):
                             raise
                         invalid = e
                 else:
-                    if len(invalid.path) <= len(index_path):
-                        errors.append(invalid)
-                        invalid = SequenceItemInvalid('invalid %s value' % seq_type_name, index_path)
                     errors.append(invalid)
             if errors:
                 raise MultipleInvalid(errors)

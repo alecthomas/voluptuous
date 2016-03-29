@@ -257,9 +257,8 @@ def test_list_validation_messages():
     try:
         schema(dict(even_numbers=[3]))
     except Invalid as e:
-        assert_equal(len(e.errors), 2, e.errors)
+        assert_equal(len(e.errors), 1, e.errors)
         assert_equal(str(e.errors[0]), "3 is not even @ data['even_numbers'][0]")
-        assert_equal(str(e.errors[1]), "invalid list value @ data['even_numbers'][0]")
         assert_equal(str(e), "3 is not even @ data['even_numbers'][0]")
     else:
         assert False, "Did not raise Invalid"
