@@ -790,10 +790,10 @@ def _compile_scalar(schema):
                 raise ValueInvalid('not a valid value', path)
             except MultipleInvalid as e:
                 for error in e.errors:
-                    error.path = path + error.path
+                    error.path[0:0] = path
                 raise
             except Invalid as e:
-                e.path = path + e.path
+                e.path[0:0] = path
                 raise
         return validate_callable
 
