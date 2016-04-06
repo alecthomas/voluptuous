@@ -180,6 +180,9 @@ class Invalid(Error):
             output += ' for ' + self.error_type
         return output + path
 
+    def prepend(self, path):
+        self.path = path + self.path
+
 
 class MultipleInvalid(Invalid):
     def __init__(self, errors=None):
@@ -205,6 +208,10 @@ class MultipleInvalid(Invalid):
 
     def __str__(self):
         return str(self.errors[0])
+
+    def prepend(self, path):
+        for error in self.errors:
+            error.prepend(path)
 
 
 class RequiredFieldInvalid(Invalid):
@@ -790,7 +797,7 @@ def _compile_scalar(schema):
                 raise ValueInvalid('not a valid value', path)
             except MultipleInvalid as e:
                 for error in e.errors:
-                    error.path = path + error.path
+                    error.prepend(path)
                 raise
             except Invalid as e:
                 e.path = path + e.path

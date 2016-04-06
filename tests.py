@@ -5,7 +5,7 @@ import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
-    Replace, Range, Coerce, All,
+    Replace, Range, Coerce, All, Length
 )
 
 
@@ -253,6 +253,27 @@ def test_list_validation_messages():
         return value
 
     schema = Schema(dict(even_numbers=[All(int, is_even)]))
+
+    try:
+        schema(dict(even_numbers=[3]))
+    except Invalid as e:
+        assert_equal(len(e.errors), 1, e.errors)
+        assert_equal(str(e.errors[0]), "3 is not even @ data['even_numbers'][0]")
+        assert_equal(str(e), "3 is not even @ data['even_numbers'][0]")
+    else:
+        assert False, "Did not raise Invalid"
+
+
+def test_nested_multiple_validation_errors():
+    """ Make sure useful error messages are available """
+
+    def is_even(value):
+        if value % 2:
+            raise Invalid('%i is not even' % value)
+        return value
+
+    schema = Schema(dict(even_numbers=All([All(int, is_even)],
+                                          Length(min=1))))
 
     try:
         schema(dict(even_numbers=[3]))
