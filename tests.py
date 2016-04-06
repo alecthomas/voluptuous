@@ -1,11 +1,11 @@
 import copy
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 
 import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
-    Replace, Range, Coerce, All, Length
+    Replace, Range, Coerce, All, Any, Length
 )
 
 
@@ -283,3 +283,9 @@ def test_nested_multiple_validation_errors():
         assert_equal(str(e), "3 is not even @ data['even_numbers'][0]")
     else:
         assert False, "Did not raise Invalid"
+
+
+def test_fix_157():
+    s = Schema(All([Any('one', 'two', 'three')]), Length(min=1))
+    assert_equal(['one'], s(['one']))
+    assert_raises(MultipleInvalid, s, ['four'])

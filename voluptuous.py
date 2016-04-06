@@ -795,12 +795,8 @@ def _compile_scalar(schema):
                 return schema(data)
             except ValueError as e:
                 raise ValueInvalid('not a valid value', path)
-            except MultipleInvalid as e:
-                for error in e.errors:
-                    error.prepend(path)
-                raise
             except Invalid as e:
-                e.path = path + e.path
+                e.prepend(path)
                 raise
         return validate_callable
 
