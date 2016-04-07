@@ -180,6 +180,25 @@ True
 
 ```
 
+### URL's
+
+URL's in the schema are matched by using `urlparse` library.
+
+```pycon
+>>> from voluptuous import Url
+>>> schema = Schema(Url())
+>>> schema('http://w3.org')
+'http://w3.org'
+>>> try:
+...   schema('one')
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "expected a URL"
+True
+
+```
+
 ### Lists
 
 Lists in the schema are treated as a set of valid values. Each element
