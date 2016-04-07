@@ -448,11 +448,9 @@ class Schema(object):
                         if is_remove or remove_key:
                             continue
                         for err in exception_errors:
-                            if len(err.path) > len(key_path):
-                                errors.append(err)
-                            else:
+                            if len(err.path) <= len(key_path):
                                 err.error_type = invalid_msg
-                                errors.append(err)
+                            errors.append(err)
                         # If there is a validation error for a required
                         # key, this means that the key was provided.
                         # Discard the required key so it does not
@@ -639,14 +637,11 @@ class Schema(object):
             for label, group in groups_of_inclusion.items():
                 included = [node.schema in data for node in group]
                 if any(included) and not all(included):
-                    msg = None
+                    msg = "some but not all values in the same group of inclusion '%s'" % label
                     for g in group:
                         if hasattr(g, 'msg') and g.msg:
                             msg = g.msg
                             break
-                    if msg is None:
-                        msg = ("some but not all values in the same group of "
-                               "inclusion '%s'") % label
                     next_path = path + [VirtualPathComponent(label)]
                     errors.append(InclusiveInvalid(msg, next_path))
                     break
