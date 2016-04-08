@@ -135,6 +135,20 @@ def test_url_validation():
     assert 'http://example.com/', out_.get("url")
 
 
+def test_url_without_prefix():
+    """ test with invalid domain """
+    schema = Schema({"url": Url()})
+    url_without_domain = 'http://example/'
+
+    try:
+        schema({"url": url_without_domain})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for domainless url"
+
+
 def test_url_validation_with_none():
     """ test with invalid None url"""
     schema = Schema({"url": Url()})
