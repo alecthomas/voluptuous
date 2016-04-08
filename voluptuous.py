@@ -1472,7 +1472,7 @@ def Url(v):
     """
     try:
         parsed = urlparse.urlparse(v)
-        if not parsed.scheme or not parsed.netloc:
+        if not parsed.scheme or not parsed.netloc or "." not in parsed.netloc:
             raise UrlInvalid("must have a URL scheme and host")
         return v
     except:
