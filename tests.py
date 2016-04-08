@@ -5,7 +5,7 @@ import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
-    Replace, Range, Coerce, All, Any, Length
+    Replace, Range, Coerce, All, Any, Length, FqdnUrl
 )
 
 
@@ -127,26 +127,32 @@ def test_literal():
         assert False, "Did not raise Invalid"
 
 
+def test_fqdn_url_validation():
+    """ test with valid fully qualified domain name url """
+    schema = Schema({"url": FqdnUrl()})
+    out_ = schema({"url": "http://example.com/"})
+
+    assert 'http://example.com/', out_.get("url")
+
+
+def test_fqdn_url_without_domain_name():
+    """ test with invalid fully qualified domain name url """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": None})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for None url"
+
+
 def test_url_validation():
     """ test with valid URL """
     schema = Schema({"url": Url()})
     out_ = schema({"url": "http://example.com/"})
 
     assert 'http://example.com/', out_.get("url")
-
-
-def test_url_without_prefix():
-    """ test with invalid domain """
-    schema = Schema({"url": Url()})
-    url_without_domain = 'http://example/'
-
-    try:
-        schema({"url": url_without_domain})
-    except MultipleInvalid as e:
-        assert_equal(str(e),
-                     "expected a URL for dictionary value @ data['url']")
-    else:
-        assert False, "Did not raise Invalid for domainless url"
 
 
 def test_url_validation_with_none():
