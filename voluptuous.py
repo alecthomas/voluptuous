@@ -1460,6 +1460,32 @@ class Replace(object):
                                             self.msg)
 
 
+def _url_validation(v):
+    parsed = urlparse.urlparse(v)
+    if not parsed.scheme or not parsed.netloc:
+        raise UrlInvalid("must have a URL scheme and host")
+    return parsed
+
+
+@message('expected a Fully qualified domain name URL', cls=UrlInvalid)
+def FqdnUrl(v):
+    """Verify that the value is a Fully qualified domain name URL.
+
+    >>> s = Schema(FqdnUrl())
+    >>> with raises(MultipleInvalid, 'expected a Fully qualified domain name URL'):
+    ...   s("http://localhost/")
+    >>> s('http://w3.org')
+    'http://w3.org'
+    """
+    try:
+        parsed_url = _url_validation(v)
+        if "." not in parsed_url.netloc:
+            raise UrlInvalid("must have a domain name in URL")
+        return v
+    except:
+        raise ValueError
+
+
 @message('expected a URL', cls=UrlInvalid)
 def Url(v):
     """Verify that the value is a URL.
@@ -1471,9 +1497,7 @@ def Url(v):
     'http://w3.org'
     """
     try:
-        parsed = urlparse.urlparse(v)
-        if not parsed.scheme or not parsed.netloc:
-            raise UrlInvalid("must have a URL scheme and host")
+        _url_validation(v)
         return v
     except:
         raise ValueError

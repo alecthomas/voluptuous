@@ -5,7 +5,7 @@ import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
-    Replace, Range, Coerce, All, Any, Length
+    Replace, Range, Coerce, All, Any, Length, FqdnUrl
 )
 
 
@@ -125,6 +125,62 @@ def test_literal():
         assert_equal(type(e.errors[0]), LiteralInvalid)
     else:
         assert False, "Did not raise Invalid"
+
+
+def test_fqdn_url_validation():
+    """ test with valid fully qualified domain name url """
+    schema = Schema({"url": FqdnUrl()})
+    out_ = schema({"url": "http://example.com/"})
+
+    assert 'http://example.com/', out_.get("url")
+
+
+def test_fqdn_url_without_domain_name():
+    """ test with invalid fully qualified domain name url """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": None})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for None url"
+
+
+def test_fqdnurl_validation_with_none():
+    """ test with invalid None FQDN url"""
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": None})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for None url"
+
+
+def test_fqdnurl_validation_with_empty_string():
+    """ test with empty string FQDN URL """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": ''})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for empty string url"
+
+
+def test_fqdnurl_validation_without_host():
+    """ test with empty host FQDN URL """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": 'http://'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for empty string url"
 
 
 def test_url_validation():
