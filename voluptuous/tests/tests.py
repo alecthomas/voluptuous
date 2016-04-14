@@ -1,11 +1,10 @@
 import copy
 from nose.tools import assert_equal, assert_raises
 
-import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
-    Replace, Range, Coerce, All, Any, Length
+    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA
 )
 
 
@@ -37,8 +36,8 @@ def test_iterate_candidates():
         Extra: object,
     }
     # toaster should be first.
-    assert_equal(voluptuous._iterate_mapping_candidates(schema)[0][0],
-                 'toaster')
+    from voluptuous.schema_builder import _iterate_mapping_candidates
+    assert_equal(_iterate_mapping_candidates(schema)[0][0], 'toaster')
 
 
 def test_in():
@@ -125,6 +124,62 @@ def test_literal():
         assert_equal(type(e.errors[0]), LiteralInvalid)
     else:
         assert False, "Did not raise Invalid"
+
+
+def test_fqdn_url_validation():
+    """ test with valid fully qualified domain name url """
+    schema = Schema({"url": FqdnUrl()})
+    out_ = schema({"url": "http://example.com/"})
+
+    assert 'http://example.com/', out_.get("url")
+
+
+def test_fqdn_url_without_domain_name():
+    """ test with invalid fully qualified domain name url """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": None})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for None url"
+
+
+def test_fqdnurl_validation_with_none():
+    """ test with invalid None FQDN url"""
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": None})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for None url"
+
+
+def test_fqdnurl_validation_with_empty_string():
+    """ test with empty string FQDN URL """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": ''})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for empty string url"
+
+
+def test_fqdnurl_validation_without_host():
+    """ test with empty host FQDN URL """
+    schema = Schema({"url": FqdnUrl()})
+    try:
+        schema({"url": 'http://'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+    else:
+        assert False, "Did not raise Invalid for empty string url"
 
 
 def test_url_validation():
@@ -216,12 +271,12 @@ def test_schema_extend_overrides():
     """Verify that Schema.extend can override required/extra parameters."""
 
     base = Schema({'a': int}, required=True)
-    extended = base.extend({'b': str}, required=False, extra=voluptuous.ALLOW_EXTRA)
+    extended = base.extend({'b': str}, required=False, extra=ALLOW_EXTRA)
 
-    assert base.required == True
-    assert base.extra == voluptuous.PREVENT_EXTRA
-    assert extended.required == False
-    assert extended.extra == voluptuous.ALLOW_EXTRA
+    assert base.required is True
+    assert base.extra == PREVENT_EXTRA
+    assert extended.required is False
+    assert extended.extra == ALLOW_EXTRA
 
 
 def test_repr():
@@ -229,7 +284,7 @@ def test_repr():
     match = Match('a pattern', msg='message')
     replace = Replace('you', 'I', msg='you and I')
     range_ = Range(min=0, max=42, min_included=False,
-                  max_included=False, msg='number not in range')
+                   max_included=False, msg='number not in range')
     coerce_ = Coerce(int, msg="moo")
     all_ = All('10', Coerce(int), msg='all msg')
 
@@ -237,8 +292,7 @@ def test_repr():
     assert_equal(repr(replace), "Replace('you', 'I', msg='you and I')")
     assert_equal(
         repr(range_),
-        "Range(min=0, max=42, min_included=False, " \
-        "max_included=False, msg='number not in range')"
+        "Range(min=0, max=42, min_included=False, max_included=False, msg='number not in range')"
     )
     assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
     assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
@@ -253,6 +307,27 @@ def test_list_validation_messages():
         return value
 
     schema = Schema(dict(even_numbers=[All(int, is_even)]))
+
+    try:
+        schema(dict(even_numbers=[3]))
+    except Invalid as e:
+        assert_equal(len(e.errors), 1, e.errors)
+        assert_equal(str(e.errors[0]), "3 is not even @ data['even_numbers'][0]")
+        assert_equal(str(e), "3 is not even @ data['even_numbers'][0]")
+    else:
+        assert False, "Did not raise Invalid"
+
+
+def test_nested_multiple_validation_errors():
+    """ Make sure useful error messages are available """
+
+    def is_even(value):
+        if value % 2:
+            raise Invalid('%i is not even' % value)
+        return value
+
+    schema = Schema(dict(even_numbers=All([All(int, is_even)],
+                                          Length(min=1))))
 
     try:
         schema(dict(even_numbers=[3]))

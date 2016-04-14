@@ -51,4 +51,7 @@ setup(
     install_requires=[
         'setuptools >= 0.6b1',
     ],
+    setup_requires=[
+        'flake8',
+    ]
 )
