@@ -13,3 +13,4 @@ dist
 .tox
 MANIFEST
 .idea
+venv
