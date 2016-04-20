@@ -1,11 +1,10 @@
 import copy
 from nose.tools import assert_equal, assert_raises
 
-import voluptuous
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match,
-    Replace, Range, Coerce, All, Any, Length, FqdnUrl
+    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA
 )
 
 
@@ -37,8 +36,8 @@ def test_iterate_candidates():
         Extra: object,
     }
     # toaster should be first.
-    assert_equal(voluptuous._iterate_mapping_candidates(schema)[0][0],
-                 'toaster')
+    from voluptuous.schema_builder import _iterate_mapping_candidates
+    assert_equal(_iterate_mapping_candidates(schema)[0][0], 'toaster')
 
 
 def test_in():
@@ -272,12 +271,12 @@ def test_schema_extend_overrides():
     """Verify that Schema.extend can override required/extra parameters."""
 
     base = Schema({'a': int}, required=True)
-    extended = base.extend({'b': str}, required=False, extra=voluptuous.ALLOW_EXTRA)
+    extended = base.extend({'b': str}, required=False, extra=ALLOW_EXTRA)
 
-    assert base.required == True
-    assert base.extra == voluptuous.PREVENT_EXTRA
-    assert extended.required == False
-    assert extended.extra == voluptuous.ALLOW_EXTRA
+    assert base.required is True
+    assert base.extra == PREVENT_EXTRA
+    assert extended.required is False
+    assert extended.extra == ALLOW_EXTRA
 
 
 def test_repr():
@@ -285,7 +284,7 @@ def test_repr():
     match = Match('a pattern', msg='message')
     replace = Replace('you', 'I', msg='you and I')
     range_ = Range(min=0, max=42, min_included=False,
-                  max_included=False, msg='number not in range')
+                   max_included=False, msg='number not in range')
     coerce_ = Coerce(int, msg="moo")
     all_ = All('10', Coerce(int), msg='all msg')
 
@@ -293,8 +292,7 @@ def test_repr():
     assert_equal(repr(replace), "Replace('you', 'I', msg='you and I')")
     assert_equal(
         repr(range_),
-        "Range(min=0, max=42, min_included=False, " \
-        "max_included=False, msg='number not in range')"
+        "Range(min=0, max=42, min_included=False, max_included=False, msg='number not in range')"
     )
     assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
     assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
