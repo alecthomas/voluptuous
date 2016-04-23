@@ -141,6 +141,10 @@ class UrlInvalid(Invalid):
     """The value is not a url."""
 
 
+class EmailInvalid(Invalid):
+    """The value is not a email."""
+
+
 class FileInvalid(Invalid):
     """The value is not a file."""
 
