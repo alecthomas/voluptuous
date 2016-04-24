@@ -19,6 +19,24 @@ if sys.version_info >= (3,):
 else:
     import urlparse
 
+# Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py
+USER_REGEX = re.compile(
+    # dot-atom
+    r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+"
+    r"(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*$"
+    # quoted-string
+    r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|'
+    r"""\\[\001-\011\013\014\016-\177])*"$)""",
+    re.IGNORECASE
+)
+DOMAIN_REGEX = re.compile(
+    # domain
+    r'(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'
+    r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?$)'
+    # literal form, ipv4 address (SMTP 4.1.3)
+    r'|^\[(25[0-5]|2[0-4]\d|[0-1]?\d?\d)'
+    r'(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$',
+    re.IGNORECASE)
 
 __author__ = 'tusharmakkar08'
 
@@ -319,6 +337,32 @@ def _url_validation(v):
     if not parsed.scheme or not parsed.netloc:
         raise UrlInvalid("must have a URL scheme and host")
     return parsed
+
+
+@message('expected an Email', cls=UrlInvalid)
+def Email(v):
+    """Verify that the value is an Email or not.
+
+    >>> s = Schema(Email())
+    >>> with raises(MultipleInvalid, 'expected an Email'):
+    ...   s("a.com")
+    >>> with raises(MultipleInvalid, 'expected an Email'):
+    ...   s("a@.com")
+    >>> with raises(MultipleInvalid, 'expected an Email'):
+    ...   s("a@.com")
+    >>> s('t@x.com')
+    't@x.com'
+    """
+    try:
+        if not v or "@" not in v:
+            raise EmailInvalid("Invalid Email")
+        user_part, domain_part = v.rsplit('@', 1)
+
+        if not (USER_REGEX.match(user_part) and DOMAIN_REGEX.match(domain_part)):
+            raise EmailInvalid("Invalid Email")
+        return v
+    except:
+        raise ValueError
 
 
 @message('expected a Fully qualified domain name URL', cls=UrlInvalid)
