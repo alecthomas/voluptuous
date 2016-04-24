@@ -1,3 +1,5 @@
+# flake8: noqa
+
 try:
     from schema_builder import *
     from validators import *
