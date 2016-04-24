@@ -199,6 +199,25 @@ True
 
 ```
 
+### Email's
+
+Email's in the schema are matched by using regex matching.
+
+```pycon
+>>> from voluptuous import Email
+>>> schema = Schema(Email())
+>>> schema('voluptuous@librelist.com')
+'voluptuous@librelist.com'
+>>> try:
+...   schema('one')
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "expected an Email"
+True
+
+```
+
 ### Lists
 
 Lists in the schema are treated as a set of valid values. Each element
