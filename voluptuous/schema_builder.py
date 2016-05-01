@@ -15,11 +15,14 @@ if sys.version_info >= (3,):
     unicode = str
     basestring = str
     ifilter = filter
-    iteritems = lambda d: d.items()
+
+    def iteritems(d):
+        return d.items()
 else:
     from itertools import ifilter
 
-    iteritems = lambda d: d.iteritems()
+    def iteritems(d):
+        return d.iteritems()
 
 """Schema validation for Python data structures.
 
@@ -102,6 +105,7 @@ PREVENT_EXTRA = 0  # any extra key not in schema will raise an error
 ALLOW_EXTRA = 1  # extra keys not in schema will be included in output
 REMOVE_EXTRA = 2  # extra keys not in schema will be excluded from output
 
+
 class Undefined(object):
     def __nonzero__(self):
         return False
@@ -117,6 +121,7 @@ def default_factory(value):
     if value is UNDEFINED or callable(value):
         return value
     return lambda: value
+
 
 @contextmanager
 def raises(exc, msg=None, regex=None):
@@ -217,14 +222,14 @@ class Schema(object):
 
         # Keys that may be required
         all_required_keys = set(key for key in schema
-                                if key is not Extra
-                                and ((self.required and not isinstance(key, (Optional, Remove)))
-                                     or isinstance(key, Required)))
+                                if key is not Extra and
+                                ((self.required and not isinstance(key, (Optional, Remove))) or
+                                 isinstance(key, Required)))
 
         # Keys that may have defaults
         all_default_keys = set(key for key in schema
-                               if isinstance(key, Required)
-                               or isinstance(key, Optional))
+                               if isinstance(key, Required) or
+                               isinstance(key, Optional))
 
         _compiled_schema = {}
         for skey, svalue in iteritems(schema):
@@ -344,8 +349,7 @@ class Schema(object):
             schema, invalid_msg='object value')
 
         def validate_object(path, data):
-            if (schema.cls is not UNDEFINED
-                and not isinstance(data, schema.cls)):
+            if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
                 raise er.ObjectInvalid('expected a {0!r}'.format(schema.cls), path)
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
@@ -778,8 +782,7 @@ class VirtualPathComponent(str):
         return self.__str__()
 
 
-## Markers.py
-
+# Markers.py
 
 
 class Marker(object):
