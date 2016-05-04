@@ -15,11 +15,14 @@ if sys.version_info >= (3,):
     unicode = str
     basestring = str
     ifilter = filter
-    iteritems = lambda d: d.items()
+
+    def iteritems(d):
+        return d.items()
 else:
     from itertools import ifilter
 
-    iteritems = lambda d: d.iteritems()
+    def iteritems(d):
+        return d.iteritems()
 
 """Schema validation for Python data structures.
 
@@ -219,14 +222,14 @@ class Schema(object):
 
         # Keys that may be required
         all_required_keys = set(key for key in schema
-                                if key is not Extra
-                                and ((self.required and not isinstance(key, (Optional, Remove)))
-                                     or isinstance(key, Required)))
+                                if key is not Extra and
+                                ((self.required and not isinstance(key, (Optional, Remove))) or
+                                 isinstance(key, Required)))
 
         # Keys that may have defaults
         all_default_keys = set(key for key in schema
-                               if isinstance(key, Required)
-                               or isinstance(key, Optional))
+                               if isinstance(key, Required) or
+                               isinstance(key, Optional))
 
         _compiled_schema = {}
         for skey, svalue in iteritems(schema):
@@ -798,8 +801,7 @@ class VirtualPathComponent(str):
         return self.__str__()
 
 
-## Markers.py
-
+# Markers.py
 
 
 class Marker(object):

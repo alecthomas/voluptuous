@@ -7,10 +7,16 @@ from functools import wraps
 
 try:
     from schema_builder import Schema, raises, message
-    from error import *
+    from error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
+                       AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
+                       PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, InInvalid, TypeInvalid,
+                       NotInInvalid)
 except ImportError:
     from .schema_builder import Schema, raises, message
-    from .error import *
+    from .error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
+                        AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
+                        PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, InInvalid, TypeInvalid,
+                        NotInInvalid)
 
 
 if sys.version_info >= (3,):
@@ -614,7 +620,7 @@ class ExactSequence(object):
     :param kwargs: All other keyword arguments are passed to the sub-Schema
         constructors.
 
-    >>> from voluptuous import *
+    >>> from voluptuous import Schema, ExactSequence
     >>> validate = Schema(ExactSequence([str, int, list, list]))
     >>> validate(['hourly_report', 10, [], []])
     ['hourly_report', 10, [], []]
