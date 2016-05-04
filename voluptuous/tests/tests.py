@@ -2,10 +2,42 @@ import copy
 from nose.tools import assert_equal, assert_raises
 
 from voluptuous import (
-    Schema, Required, Extra, Invalid, In, Remove, Literal,
+    Schema, Required, Extra, Invalid, In, Remove, Literal, AtleastOne,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA
 )
+
+
+def test_atleastone():
+    """Verify that AtleastOne works."""
+    schema = Schema({AtleastOne('onetwo', 'group1'): Any(1, 2, None),
+                    AtleastOne('threefour', 'group1'): Any(3, 4, None), 'abc': 'abc'})
+    # Can't use nose's raises (because we need to access the raised
+    # exception, nor assert_raises which fails with Python 2.6.9.
+    try:
+        schema({})
+    except Invalid as e:
+        assert_equal(str(e), "No value is present in the same group of inclusion 'group1' @ data[<group1>]")
+    else:
+        assert False, "Did not raise Invalid"
+    try:
+        schema({'abc': 'abc'})
+    except Invalid as e:
+        assert_equal(str(e), "No value is present in the same group of inclusion 'group1' @ data[<group1>]")
+    else:
+        assert False, "Did not raise Invalid"
+    try:
+        schema({'onetwo': 3, 'abc': 'abc'})
+    except Invalid as e:
+        assert_equal(str(e), "not a valid value for dictionary value @ data['onetwo']")
+    else:
+        assert False, "Did not raise Invalid"
+    expected_output = schema({'onetwo': 2, 'abc': 'abc'})
+    assert_equal(expected_output, {'onetwo': 2, 'abc': 'abc'})
+    expected_output = schema({'threefour': 4, 'abc': 'abc'})
+    assert_equal(expected_output, {'threefour': 4, 'abc': 'abc'})
+    expected_output = schema({'onetwo': 1, 'threefour': 3, 'abc': 'abc'})
+    assert_equal(expected_output, {'onetwo': 1, 'threefour': 3, 'abc': 'abc'})
 
 
 def test_required():

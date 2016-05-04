@@ -346,8 +346,7 @@ class Schema(object):
             schema, invalid_msg='object value')
 
         def validate_object(path, data):
-            if (schema.cls is not UNDEFINED
-                and not isinstance(data, schema.cls)):
+            if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
                 raise er.ObjectInvalid('expected a {0!r}'.format(schema.cls), path)
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
