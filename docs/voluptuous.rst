@@ -1,35 +1,37 @@
-Voluptuous Package
+voluptuous package
 ==================
 
-:mod:`schema_builder` Module
------------------------------
+Submodules
+----------
 
-.. automodule:: voluptuous.schema_builder
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`error` Module
------------------------------
+voluptuous.error module
+-----------------------
 
 .. automodule:: voluptuous.error
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`validators` Module
------------------------------
+voluptuous.schema_builder module
+--------------------------------
 
-.. automodule:: voluptuous.validators
+.. automodule:: voluptuous.schema_builder
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-:mod:`util` Module
------------------------------
+voluptuous.util module
+----------------------
 
 .. automodule:: voluptuous.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+voluptuous.validators module
+----------------------------
+
+.. automodule:: voluptuous.validators
     :members:
     :undoc-members:
     :show-inheritance:

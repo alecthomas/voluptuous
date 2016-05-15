@@ -11,9 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   modules
    voluptuous
-
-
 
 Indices and tables
 ==================
