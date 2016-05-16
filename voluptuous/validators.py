@@ -345,7 +345,7 @@ def _url_validation(v):
     return parsed
 
 
-@message('expected an Email', cls=UrlInvalid)
+@message('expected an Email', cls=EmailInvalid)
 def Email(v):
     """Verify that the value is an Email or not.
 
