@@ -439,12 +439,16 @@ class Schema(object):
 
         groups_of_exclusion = {}
         groups_of_inclusion = {}
+        groups_of_atleast_one = {}
         for node in schema:
             if isinstance(node, Exclusive):
                 g = groups_of_exclusion.setdefault(node.group_of_exclusion, [])
                 g.append(node)
             elif isinstance(node, Inclusive):
                 g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
+                g.append(node)
+            elif isinstance(node, AtleastOne):
+                g = groups_of_atleast_one.setdefault(node.group_of_atleast_one, [])
                 g.append(node)
 
         def validate_dict(path, data):
@@ -471,6 +475,21 @@ class Schema(object):
                 included = [node.schema in data for node in group]
                 if any(included) and not all(included):
                     msg = "some but not all values in the same group of inclusion '%s'" % label
+                    for g in group:
+                        if hasattr(g, 'msg') and g.msg:
+                            msg = g.msg
+                            break
+                    next_path = path + [VirtualPathComponent(label)]
+                    errors.append(er.InclusiveInvalid(msg, next_path))
+                    break
+
+            if errors:
+                raise er.MultipleInvalid(errors)
+
+            for label, group in groups_of_atleast_one.items():
+                included = any([node.schema in data for node in group])
+                if not included:
+                    msg = "No value is present in the same group of inclusion '%s'" % label
                     for g in group:
                         if hasattr(g, 'msg') and g.msg:
                             msg = g.msg
@@ -945,6 +964,46 @@ class Required(Marker):
     def __init__(self, schema, msg=None, default=UNDEFINED):
         super(Required, self).__init__(schema, msg=msg)
         self.default = default_factory(default)
+
+
+class AtleastOne(Optional):
+    """ Mark a node in the schema as inclusive.
+
+    Exclusive keys inherited from Optional:
+
+    >>> schema = Schema({
+    ...     AtleastOne('onetwo', 'group1'): 2,
+    ...     AtleastOne('threefour', 'group1'): 3,
+    ...     'abc': 'abc'
+    ... })
+    >>> data = {'onetwo': 2, 'abc': 'abc'}
+    >>> data == schema(data)
+    True
+    >>> data = {'onetwo': 25, 'abc': 'abc'}
+    >>> with raises(er.MultipleInvalid, "not a valid value for dictionary value @ data['onetwo']"):
+    ...   schema(data)
+    >>> data = {'abc': 'abc'}
+    >>> with raises(er.MultipleInvalid, "No value is present in the same group of inclusion 'group1' @ data[<group1>]"):
+    ...   schema(data)
+    >>> schema = Schema({
+    ...     AtleastOne('onetwo', 'group1'): 2,
+    ...     AtleastOne('threefour', 'group2'): 3,
+    ...     'abc': 'abc'
+    ... })
+    >>> data = {'onetwo': 2, 'threefour': 3, 'abc': 'abc'}
+    >>> data == schema(data)
+    True
+    >>> data = {'threefour': 3, 'abc': 'abc'}
+    >>> with raises(er.MultipleInvalid, "No value is present in the same group of inclusion 'group1' @ data[<group1>]"):
+    ...   schema(data)
+    >>> data = {'onetwo': 2, 'abc': 'abc'}
+    >>> with raises(er.MultipleInvalid, "No value is present in the same group of inclusion 'group2' @ data[<group2>]"):
+    ...   schema(data)
+    """
+
+    def __init__(self, schema, group_of_atleast_one, msg=None):
+        super(AtleastOne, self).__init__(schema, msg=msg)
+        self.group_of_atleast_one = group_of_atleast_one
 
 
 class Remove(Marker):
