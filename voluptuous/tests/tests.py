@@ -6,6 +6,7 @@ from voluptuous import (
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA
 )
+from voluptuous.humanize import humanize_error
 
 
 def test_required():
@@ -381,6 +382,27 @@ def test_nested_multiple_validation_errors():
         assert_equal(str(e), "3 is not even @ data['even_numbers'][0]")
     else:
         assert False, "Did not raise Invalid"
+
+
+def test_humanize_error():
+    data = {
+        'a': 'not an int',
+        'b': [123]
+    }
+    schema = Schema({
+        'a': int,
+        'b': [str]
+    })
+    try:
+        schema(data)
+    except MultipleInvalid as e:
+        assert_equal(
+            humanize_error(data, e),
+            "expected int for dictionary value @ data['a']. Got 'not an int'\n"
+            "expected str @ data['b'][0]. Got 123"
+        )
+    else:
+        assert False, 'Did not raise MultipleInvalid'
 
 
 def test_fix_157():
