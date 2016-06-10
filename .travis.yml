@@ -5,6 +5,8 @@ python:
   # Not quite ready for prime time...
   - "3.2"
   - "3.3"
+  - "3.4"
+  - "3.5"
   - "pypy"
 # command to install dependencies
 #install: "pip install -r requirements.txt --use-mirrors"
