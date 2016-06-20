@@ -13,6 +13,7 @@ Contents:
 
    modules
    voluptuous
+   voluptuous.tests
 
 Indices and tables
 ==================
