@@ -23,6 +23,10 @@ You can also contact me directly via [email](mailto:alec@swapoff.org) or
 
 To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/issues/new) on GitHub with a short example of how to replicate the issue.
 
+## Documentation
+
+The documentation is provided [here] (http://alecthomas.github.io/voluptuous/). 
+
 ## Show me an example
 
 Twitter's [user search API](https://dev.twitter.com/docs/api/1/get/users/search) accepts
