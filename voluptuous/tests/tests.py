@@ -4,7 +4,8 @@ from nose.tools import assert_equal, assert_raises
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
-    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA
+    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
+    validate_schema,
 )
 from voluptuous.humanize import humanize_error
 
@@ -409,3 +410,12 @@ def test_fix_157():
     s = Schema(All([Any('one', 'two', 'three')]), Length(min=1))
     assert_equal(['one'], s(['one']))
     assert_raises(MultipleInvalid, s, ['four'])
+
+
+def test_schema_decorator():
+    @validate_schema(int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+    assert_raises(Invalid, fn, 1.0)
