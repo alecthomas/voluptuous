@@ -9,5 +9,5 @@ except ImportError:
     from .validators import *
     from .util import *
 
-__version__ = '0.8.11'
+__version__ = '0.9.0'
 __author__ = 'tusharmakkar08'
