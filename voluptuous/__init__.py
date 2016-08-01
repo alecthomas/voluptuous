@@ -11,5 +11,5 @@ except ImportError:
     from .util import *
     from .error import *
 
-__version__ = '0.9.1'
+__version__ = '0.9.2'
 __author__ = 'tusharmakkar08'
