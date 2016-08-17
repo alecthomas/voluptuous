@@ -419,3 +419,8 @@ def test_schema_decorator():
 
     fn(1)
     assert_raises(Invalid, fn, 1.0)
+
+
+def test_range_exlcudes_nan():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, float('nan'))
