@@ -5,9 +5,20 @@ from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate_schema,
+    validate_schema, ExactSequence
 )
 from voluptuous.humanize import humanize_error
+
+
+def test_exact_sequence():
+    schema = Schema(ExactSequence([int, int]))
+    try:
+        schema([1, 2, 3])
+    except Invalid:
+        assert True
+    else:
+        assert False, "Did not raise Invalid"
+    assert_equal(schema([1, 2]), [1, 2])
 
 
 def test_required():
