@@ -691,3 +691,32 @@ class Unique(object):
 
     def __repr__(self):
         return 'Unique()'
+
+
+class Equal(object):
+    """Ensure that value matches target.
+
+    >>> s = Schema(Equal(1))
+    >>> s(1)
+    1
+    >>> with raises(Invalid):
+    ...    s(2)
+
+    Validators are not supported, match must be exact:
+
+    >>> s = Schema(Equal(str))
+    >>> with raises(Invalid):
+    ...     s('foo')
+    """
+
+    def __init__(self, target, msg=None):
+        self.target = target
+        self.msg = msg
+
+    def __call__(self, v):
+        if v != self.target:
+            raise Invalid(self.msg or 'Values are not equal: value:{} != target:{}'.format(v, self.target))
+        return v
+
+    def __repr__(self):
+        return 'Equal({})'.format(self.target)
