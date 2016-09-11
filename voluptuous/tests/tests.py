@@ -5,7 +5,7 @@ from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate_schema, ExactSequence
+    validate_schema, ExactSequence, Equal
 )
 from voluptuous.humanize import humanize_error
 
@@ -435,3 +435,19 @@ def test_schema_decorator():
 def test_range_exlcudes_nan():
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, float('nan'))
+
+
+def test_equal():
+    s = Schema(Equal(1))
+    s(1)
+    assert_raises(Invalid, s, 2)
+    s = Schema(Equal('foo'))
+    s('foo')
+    assert_raises(Invalid, s, 'bar')
+    s = Schema(Equal([1, 2]))
+    s([1, 2])
+    assert_raises(Invalid, s, [])
+    assert_raises(Invalid, s, [1, 2, 3])
+    # Evaluates exactly, not through validators
+    s = Schema(Equal(str))
+    assert_raises(Invalid, s, 'foo')
