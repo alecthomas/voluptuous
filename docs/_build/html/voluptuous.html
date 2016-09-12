@@ -1197,6 +1197,25 @@ Unique allows ensuring that such array does not contain dupes.</p>
 </div>
 </dd></dl>
 
+<dl class="class">
+<dt id="voluptuous.validators.Unordered">
+<em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Unordered</code><span class="sig-paren">(</span><em>validators</em>, <em>msg=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Unordered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Unordered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Ensures sequence contains values in unspecified order.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unordered</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">[2, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="go">[1, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unordered</span><span class="p">([</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">[&#39;foo&#39;, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">])</span>
+<span class="go">[1, &#39;foo&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="function">
 <dt id="voluptuous.validators.Url">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">Url</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Url" title="Permalink to this definition">¶</a></dt>
