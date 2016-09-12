@@ -219,6 +219,25 @@ in the schema list is compared to each value in the input data:
 
 ```
 
+However, an empty list (`[]`) is treated as is. If you want to specify a list that can
+contain anything, specify it as `list`:
+
+```pycon
+>>> schema = Schema([])
+>>> schema([1])  # doctest: +IGNORE_EXCEPTION_DETAIL
+Traceback (most recent call last):
+    ...
+MultipleInvalid: not a valid value
+>>> schema([])
+[]
+>>> schema = Schema(list)
+>>> schema([])
+[]
+>>> schema([1, 2])
+[1, 2]
+
+```
+
 ### Validation functions
 
 Validators are simple callables that raise an `Invalid` exception when

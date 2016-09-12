@@ -203,7 +203,7 @@ class Schema(object):
             return self._compile_object(schema)
         if isinstance(schema, collections.Mapping):
             return self._compile_dict(schema)
-        elif isinstance(schema, list):
+        elif isinstance(schema, list) and len(schema):
             return self._compile_list(schema)
         elif isinstance(schema, tuple):
             return self._compile_tuple(schema)
