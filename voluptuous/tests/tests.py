@@ -479,3 +479,9 @@ def test_unordered():
     assert_raises(Invalid, s, [3, 2])
     s = Schema(Unordered([3, int]))
     s([3, 2])
+
+
+def test_empty_list_as_exact():
+    s = Schema([])
+    assert_raises(Invalid, s, [1])
+    s([])
