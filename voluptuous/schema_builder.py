@@ -1016,3 +1016,17 @@ def message(default=None, cls=None):
         return check
 
     return decorator
+
+
+def validate_schema(*a, **kw):
+    schema = Schema(*a, **kw)
+
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            result = f(*args, **kwargs)
+            schema(result)
+            return result
+        return wrapper
+
+    return decorator

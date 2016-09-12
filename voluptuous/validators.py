@@ -475,19 +475,19 @@ class Range(object):
 
     def __call__(self, v):
         if self.min_included:
-            if self.min is not None and v < self.min:
+            if self.min is not None and not v >= self.min:
                 raise RangeInvalid(
                     self.msg or 'value must be at least %s' % self.min)
         else:
-            if self.min is not None and v <= self.min:
+            if self.min is not None and not v > self.min:
                 raise RangeInvalid(
                     self.msg or 'value must be higher than %s' % self.min)
         if self.max_included:
-            if self.max is not None and v > self.max:
+            if self.max is not None and not v <= self.max:
                 raise RangeInvalid(
                     self.msg or 'value must be at most %s' % self.max)
         else:
-            if self.max is not None and v >= self.max:
+            if self.max is not None and not v < self.max:
                 raise RangeInvalid(
                     self.msg or 'value must be lower than %s' % self.max)
         return v
@@ -634,7 +634,7 @@ class ExactSequence(object):
         self._schemas = [Schema(val, **kwargs) for val in validators]
 
     def __call__(self, v):
-        if not isinstance(v, (list, tuple)):
+        if not isinstance(v, (list, tuple)) or len(v) != len(self._schemas):
             raise ExactSequenceInvalid(self.msg)
         try:
             v = type(v)(schema(x) for x, schema in zip(v, self._schemas))
@@ -691,3 +691,32 @@ class Unique(object):
 
     def __repr__(self):
         return 'Unique()'
+
+
+class Equal(object):
+    """Ensure that value matches target.
+
+    >>> s = Schema(Equal(1))
+    >>> s(1)
+    1
+    >>> with raises(Invalid):
+    ...    s(2)
+
+    Validators are not supported, match must be exact:
+
+    >>> s = Schema(Equal(str))
+    >>> with raises(Invalid):
+    ...     s('foo')
+    """
+
+    def __init__(self, target, msg=None):
+        self.target = target
+        self.msg = msg
+
+    def __call__(self, v):
+        if v != self.target:
+            raise Invalid(self.msg or 'Values are not equal: value:{} != target:{}'.format(v, self.target))
+        return v
+
+    def __repr__(self):
+        return 'Equal({})'.format(self.target)

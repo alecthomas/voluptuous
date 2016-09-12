@@ -4,9 +4,21 @@ from nose.tools import assert_equal, assert_raises
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
-    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA
+    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
+    validate_schema, ExactSequence, Equal
 )
 from voluptuous.humanize import humanize_error
+
+
+def test_exact_sequence():
+    schema = Schema(ExactSequence([int, int]))
+    try:
+        schema([1, 2, 3])
+    except Invalid:
+        assert True
+    else:
+        assert False, "Did not raise Invalid"
+    assert_equal(schema([1, 2]), [1, 2])
 
 
 def test_required():
@@ -409,3 +421,33 @@ def test_fix_157():
     s = Schema(All([Any('one', 'two', 'three')]), Length(min=1))
     assert_equal(['one'], s(['one']))
     assert_raises(MultipleInvalid, s, ['four'])
+
+
+def test_schema_decorator():
+    @validate_schema(int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+    assert_raises(Invalid, fn, 1.0)
+
+
+def test_range_exlcudes_nan():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, float('nan'))
+
+
+def test_equal():
+    s = Schema(Equal(1))
+    s(1)
+    assert_raises(Invalid, s, 2)
+    s = Schema(Equal('foo'))
+    s('foo')
+    assert_raises(Invalid, s, 'bar')
+    s = Schema(Equal([1, 2]))
+    s([1, 2])
+    assert_raises(Invalid, s, [])
+    assert_raises(Invalid, s, [1, 2, 3])
+    # Evaluates exactly, not through validators
+    s = Schema(Equal(str))
+    assert_raises(Invalid, s, 'foo')
