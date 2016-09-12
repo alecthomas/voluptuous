@@ -24,9 +24,10 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="Voluptuous 0.8.11 documentation" href="../../index.html" />
-    <link rel="up" title="voluptuous" href="../voluptuous.html" />
+    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -40,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.schema_builder</h1><div class="highlight"><pre>
-<span class="kn">import</span> <span class="nn">collections</span>
+<span></span><span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
@@ -142,10 +143,10 @@
 <span class="sd">    True</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c"># options for extra keys</span>
-<span class="n">PREVENT_EXTRA</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c"># any extra key not in schema will raise an error</span>
-<span class="n">ALLOW_EXTRA</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c"># extra keys not in schema will be included in output</span>
-<span class="n">REMOVE_EXTRA</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c"># extra keys not in schema will be excluded from output</span>
+<span class="c1"># options for extra keys</span>
+<span class="n">PREVENT_EXTRA</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># any extra key not in schema will raise an error</span>
+<span class="n">ALLOW_EXTRA</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># extra keys not in schema will be included in output</span>
+<span class="n">REMOVE_EXTRA</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># extra keys not in schema will be excluded from output</span>
 
 
 <div class="viewcode-block" id="Undefined"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.Undefined">[docs]</a><span class="k">class</span> <span class="nc">Undefined</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -153,7 +154,7 @@
         <span class="k">return</span> <span class="bp">False</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;...&#39;</span></div>
+        <span class="k">return</span> <span class="s1">&#39;...&#39;</span></div>
 
 
 <span class="n">UNDEFINED</span> <span class="o">=</span> <span class="n">Undefined</span><span class="p">()</span>
@@ -171,18 +172,18 @@
         <span class="k">yield</span>
     <span class="k">except</span> <span class="n">exc</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="n">msg</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%r</span><span class="s"> != </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> != </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">regex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)),</span> <span class="s">&#39;</span><span class="si">%r</span><span class="s"> does not match </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">regex</span><span class="p">)</span></div>
+            <span class="k">assert</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)),</span> <span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> does not match </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">regex</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Extra"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.Extra">[docs]</a><span class="k">def</span> <span class="nf">Extra</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Allow keys in the data that are not present in the schema.&quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s">&#39;&quot;Extra&quot; should never be called&#39;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s1">&#39;&quot;Extra&quot; should never be called&#39;</span><span class="p">)</span></div>
 
 
-<span class="c"># As extra() is never called there&#39;s no way to catch references to the</span>
-<span class="c"># deprecated object, so we just leave an alias here instead.</span>
+<span class="c1"># As extra() is never called there&#39;s no way to catch references to the</span>
+<span class="c1"># deprecated object, so we just leave an alias here instead.</span>
 <span class="n">extra</span> <span class="o">=</span> <span class="n">Extra</span>
 
 
@@ -198,9 +199,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_extra_to_name</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">REMOVE_EXTRA</span><span class="p">:</span> <span class="s">&#39;REMOVE_EXTRA&#39;</span><span class="p">,</span>
-        <span class="n">ALLOW_EXTRA</span><span class="p">:</span> <span class="s">&#39;ALLOW_EXTRA&#39;</span><span class="p">,</span>
-        <span class="n">PREVENT_EXTRA</span><span class="p">:</span> <span class="s">&#39;PREVENT_EXTRA&#39;</span><span class="p">,</span>
+        <span class="n">REMOVE_EXTRA</span><span class="p">:</span> <span class="s1">&#39;REMOVE_EXTRA&#39;</span><span class="p">,</span>
+        <span class="n">ALLOW_EXTRA</span><span class="p">:</span> <span class="s1">&#39;ALLOW_EXTRA&#39;</span><span class="p">,</span>
+        <span class="n">PREVENT_EXTRA</span><span class="p">:</span> <span class="s1">&#39;PREVENT_EXTRA&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">PREVENT_EXTRA</span><span class="p">):</span>
@@ -220,12 +221,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="n">required</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">extra</span><span class="p">)</span>  <span class="c"># ensure the value is an integer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">extra</span><span class="p">)</span>  <span class="c1"># ensure the value is an integer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compiled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;&lt;Schema(</span><span class="si">%s</span><span class="s">, extra=</span><span class="si">%s</span><span class="s">, required=</span><span class="si">%s</span><span class="s">) object at 0x</span><span class="si">%x</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extra_to_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span> <span class="s">&#39;??&#39;</span><span class="p">),</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Schema(</span><span class="si">%s</span><span class="s2">, extra=</span><span class="si">%s</span><span class="s2">, required=</span><span class="si">%s</span><span class="s2">) object at 0x</span><span class="si">%x</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extra_to_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span> <span class="s1">&#39;??&#39;</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -236,7 +237,7 @@
             <span class="k">raise</span>
         <span class="k">except</span> <span class="n">er</span><span class="o">.</span><span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">([</span><span class="n">e</span><span class="p">])</span>
-            <span class="c"># return self.validate([], self.schema, data)</span>
+            <span class="c1"># return self.validate([], self.schema, data)</span>
 
     <span class="k">def</span> <span class="nf">_compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="n">Extra</span><span class="p">:</span>
@@ -255,20 +256,20 @@
         <span class="k">if</span> <span class="n">type_</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">long</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span>
                      <span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">None</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">callable</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">_compile_scalar</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s">&#39;unsupported schema data type </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span>
+        <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s1">&#39;unsupported schema data type </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span>
                              <span class="nb">type</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_compile_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">invalid_msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create validator for given mapping.&quot;&quot;&quot;</span>
-        <span class="n">invalid_msg</span> <span class="o">=</span> <span class="n">invalid_msg</span> <span class="ow">or</span> <span class="s">&#39;mapping value&#39;</span>
+        <span class="n">invalid_msg</span> <span class="o">=</span> <span class="n">invalid_msg</span> <span class="ow">or</span> <span class="s1">&#39;mapping value&#39;</span>
 
-        <span class="c"># Keys that may be required</span>
+        <span class="c1"># Keys that may be required</span>
         <span class="n">all_required_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">schema</span>
                                 <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Extra</span> <span class="ow">and</span>
                                 <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">Optional</span><span class="p">,</span> <span class="n">Remove</span><span class="p">)))</span> <span class="ow">or</span>
                                  <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Required</span><span class="p">)))</span>
 
-        <span class="c"># Keys that may have defaults</span>
+        <span class="c1"># Keys that may have defaults</span>
         <span class="n">all_default_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">schema</span>
                                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Required</span><span class="p">)</span> <span class="ow">or</span>
                                <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Optional</span><span class="p">))</span>
@@ -283,7 +284,7 @@
 
         <span class="k">def</span> <span class="nf">validate_mapping</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
             <span class="n">required_keys</span> <span class="o">=</span> <span class="n">all_required_keys</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="c"># keeps track of all default keys that haven&#39;t been filled</span>
+            <span class="c1"># keeps track of all default keys that haven&#39;t been filled</span>
             <span class="n">default_keys</span> <span class="o">=</span> <span class="n">all_default_keys</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">error</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
@@ -291,8 +292,8 @@
                 <span class="n">key_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="n">remove_key</span> <span class="o">=</span> <span class="bp">False</span>
 
-                <span class="c"># compare each given key/value against all compiled key/values</span>
-                <span class="c"># schema key, (compiled key, compiled value)</span>
+                <span class="c1"># compare each given key/value against all compiled key/values</span>
+                <span class="c1"># schema key, (compiled key, compiled value)</span>
                 <span class="k">for</span> <span class="n">skey</span><span class="p">,</span> <span class="p">(</span><span class="n">ckey</span><span class="p">,</span> <span class="n">cvalue</span><span class="p">)</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">new_key</span> <span class="o">=</span> <span class="n">ckey</span><span class="p">(</span><span class="n">key_path</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -302,14 +303,14 @@
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">error</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
                             <span class="n">error</span> <span class="o">=</span> <span class="n">e</span>
                         <span class="k">continue</span>
-                    <span class="c"># Backtracking is not performed once a key is selected, so if</span>
-                    <span class="c"># the value is invalid we immediately throw an exception.</span>
+                    <span class="c1"># Backtracking is not performed once a key is selected, so if</span>
+                    <span class="c1"># the value is invalid we immediately throw an exception.</span>
                     <span class="n">exception_errors</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="c"># check if the key is marked for removal</span>
+                    <span class="c1"># check if the key is marked for removal</span>
                     <span class="n">is_remove</span> <span class="o">=</span> <span class="n">new_key</span> <span class="ow">is</span> <span class="n">Remove</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">cval</span> <span class="o">=</span> <span class="n">cvalue</span><span class="p">(</span><span class="n">key_path</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                        <span class="c"># include if it&#39;s not marked for removal</span>
+                        <span class="c1"># include if it&#39;s not marked for removal</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_remove</span><span class="p">:</span>
                             <span class="n">out</span><span class="p">[</span><span class="n">new_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cval</span>
                         <span class="k">else</span><span class="p">:</span>
@@ -327,40 +328,40 @@
                             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_path</span><span class="p">):</span>
                                 <span class="n">err</span><span class="o">.</span><span class="n">error_type</span> <span class="o">=</span> <span class="n">invalid_msg</span>
                             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-                        <span class="c"># If there is a validation error for a required</span>
-                        <span class="c"># key, this means that the key was provided.</span>
-                        <span class="c"># Discard the required key so it does not</span>
-                        <span class="c"># create an additional, noisy exception.</span>
+                        <span class="c1"># If there is a validation error for a required</span>
+                        <span class="c1"># key, this means that the key was provided.</span>
+                        <span class="c1"># Discard the required key so it does not</span>
+                        <span class="c1"># create an additional, noisy exception.</span>
                         <span class="n">required_keys</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">skey</span><span class="p">)</span>
                         <span class="k">break</span>
 
-                    <span class="c"># Key and value okay, mark any Required() fields as found.</span>
+                    <span class="c1"># Key and value okay, mark any Required() fields as found.</span>
                     <span class="n">required_keys</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">skey</span><span class="p">)</span>
 
-                    <span class="c"># No need for a default if it was filled</span>
+                    <span class="c1"># No need for a default if it was filled</span>
                     <span class="n">default_keys</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">skey</span><span class="p">)</span>
 
                     <span class="k">break</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">remove_key</span><span class="p">:</span>
-                        <span class="c"># remove key</span>
+                        <span class="c1"># remove key</span>
                         <span class="k">continue</span>
                     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">==</span> <span class="n">ALLOW_EXTRA</span><span class="p">:</span>
                         <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">!=</span> <span class="n">REMOVE_EXTRA</span><span class="p">:</span>
-                        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">(</span><span class="s">&#39;extra keys not allowed&#39;</span><span class="p">,</span> <span class="n">key_path</span><span class="p">))</span>
-                        <span class="c"># else REMOVE_EXTRA: ignore the key so it&#39;s removed from output</span>
+                        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">(</span><span class="s1">&#39;extra keys not allowed&#39;</span><span class="p">,</span> <span class="n">key_path</span><span class="p">))</span>
+                        <span class="c1"># else REMOVE_EXTRA: ignore the key so it&#39;s removed from output</span>
 
-            <span class="c"># set defaults for any that can have defaults</span>
+            <span class="c1"># set defaults for any that can have defaults</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">default_keys</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">):</span>  <span class="c"># if the user provides a default with the node</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">):</span>  <span class="c1"># if the user provides a default with the node</span>
                     <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">schema</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">:</span>
                         <span class="n">required_keys</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-            <span class="c"># for any required keys left that weren&#39;t found and don&#39;t have defaults:</span>
+            <span class="c1"># for any required keys left that weren&#39;t found and don&#39;t have defaults:</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">msg</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s">&#39;msg&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">msg</span> <span class="k">else</span> <span class="s">&#39;required key not provided&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">msg</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;msg&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">msg</span> <span class="k">else</span> <span class="s1">&#39;required key not provided&#39;</span>
                 <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">RequiredFieldInvalid</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">key</span><span class="p">]))</span>
             <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
@@ -388,11 +389,11 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">base_validate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile_mapping</span><span class="p">(</span>
-            <span class="n">schema</span><span class="p">,</span> <span class="n">invalid_msg</span><span class="o">=</span><span class="s">&#39;object value&#39;</span><span class="p">)</span>
+            <span class="n">schema</span><span class="p">,</span> <span class="n">invalid_msg</span><span class="o">=</span><span class="s1">&#39;object value&#39;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">validate_object</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">UNDEFINED</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">cls</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">ObjectInvalid</span><span class="p">(</span><span class="s">&#39;expected a {0!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">cls</span><span class="p">),</span> <span class="n">path</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">ObjectInvalid</span><span class="p">(</span><span class="s1">&#39;expected a {0!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">cls</span><span class="p">),</span> <span class="n">path</span><span class="p">)</span>
             <span class="n">iterable</span> <span class="o">=</span> <span class="n">_iterate_object</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="n">iterable</span> <span class="o">=</span> <span class="n">ifilter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">iterable</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">base_validate</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="p">{})</span>
@@ -477,7 +478,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">base_validate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile_mapping</span><span class="p">(</span>
-            <span class="n">schema</span><span class="p">,</span> <span class="n">invalid_msg</span><span class="o">=</span><span class="s">&#39;dictionary value&#39;</span><span class="p">)</span>
+            <span class="n">schema</span><span class="p">,</span> <span class="n">invalid_msg</span><span class="o">=</span><span class="s1">&#39;dictionary value&#39;</span><span class="p">)</span>
 
         <span class="n">groups_of_exclusion</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">groups_of_inclusion</span> <span class="o">=</span> <span class="p">{}</span>
@@ -491,7 +492,7 @@
 
         <span class="k">def</span> <span class="nf">validate_dict</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">DictInvalid</span><span class="p">(</span><span class="s">&#39;expected a dictionary&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">DictInvalid</span><span class="p">(</span><span class="s1">&#39;expected a dictionary&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups_of_exclusion</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -499,8 +500,8 @@
                 <span class="k">for</span> <span class="n">exclusive</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">exclusive</span><span class="o">.</span><span class="n">schema</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
-                            <span class="n">msg</span> <span class="o">=</span> <span class="n">exclusive</span><span class="o">.</span><span class="n">msg</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">exclusive</span><span class="p">,</span> <span class="s">&#39;msg&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exclusive</span><span class="o">.</span><span class="n">msg</span> <span class="k">else</span> \
-                                <span class="s">&quot;two or more values in the same group of exclusion &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">label</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="n">exclusive</span><span class="o">.</span><span class="n">msg</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">exclusive</span><span class="p">,</span> <span class="s1">&#39;msg&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exclusive</span><span class="o">.</span><span class="n">msg</span> <span class="k">else</span> \
+                                <span class="s2">&quot;two or more values in the same group of exclusion &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">label</span>
                             <span class="n">next_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">VirtualPathComponent</span><span class="p">(</span><span class="n">label</span><span class="p">)]</span>
                             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">ExclusiveInvalid</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">next_path</span><span class="p">))</span>
                             <span class="k">break</span>
@@ -512,9 +513,9 @@
             <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups_of_inclusion</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">included</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">schema</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">included</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">included</span><span class="p">):</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;some but not all values in the same group of inclusion &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">label</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;some but not all values in the same group of inclusion &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">label</span>
                     <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s">&#39;msg&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">g</span><span class="o">.</span><span class="n">msg</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;msg&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">g</span><span class="o">.</span><span class="n">msg</span><span class="p">:</span>
                             <span class="n">msg</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">msg</span>
                             <span class="k">break</span>
                     <span class="n">next_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">VirtualPathComponent</span><span class="p">(</span><span class="n">label</span><span class="p">)]</span>
@@ -547,9 +548,9 @@
 
         <span class="k">def</span> <span class="nf">validate_sequence</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seq_type</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SequenceTypeInvalid</span><span class="p">(</span><span class="s">&#39;expected a </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">seq_type_name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SequenceTypeInvalid</span><span class="p">(</span><span class="s1">&#39;expected a </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">seq_type_name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
-            <span class="c"># Empty seq schema, allow any data.</span>
+            <span class="c1"># Empty seq schema, allow any data.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data</span>
 
@@ -563,7 +564,7 @@
                 <span class="k">for</span> <span class="n">validate</span> <span class="ow">in</span> <span class="n">_compiled</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">cval</span> <span class="o">=</span> <span class="n">validate</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">cval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Remove</span><span class="p">:</span>  <span class="c"># do not include Remove values</span>
+                        <span class="k">if</span> <span class="n">cval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Remove</span><span class="p">:</span>  <span class="c1"># do not include Remove values</span>
                             <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cval</span><span class="p">)</span>
                         <span class="k">break</span>
                     <span class="k">except</span> <span class="n">er</span><span class="o">.</span><span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -622,7 +623,7 @@
 <span class="sd">        :param extra: if set, overrides `extra` of this `Schema`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">,</span> <span class="s">&#39;Both schemas must be dictionary-based&#39;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">,</span> <span class="s1">&#39;Both schemas must be dictionary-based&#39;</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
@@ -656,7 +657,7 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">data</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;expected </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">schema</span><span class="o">.</span><span class="n">__name__</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;expected </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">schema</span><span class="o">.</span><span class="n">__name__</span>
                 <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">TypeInvalid</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">validate_instance</span>
@@ -666,7 +667,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">schema</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">ValueInvalid</span><span class="p">(</span><span class="s">&#39;not a valid value&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">ValueInvalid</span><span class="p">(</span><span class="s1">&#39;not a valid value&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">er</span><span class="o">.</span><span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">e</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
                 <span class="k">raise</span>
@@ -675,7 +676,7 @@
 
     <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="o">!=</span> <span class="n">schema</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">ScalarInvalid</span><span class="p">(</span><span class="s">&#39;not a valid value&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">ScalarInvalid</span><span class="p">(</span><span class="s1">&#39;not a valid value&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">return</span> <span class="n">validate_value</span>
@@ -699,23 +700,23 @@
     <span class="k">def</span> <span class="nf">is_callable</span><span class="p">(</span><span class="n">key_</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">callable</span><span class="p">(</span><span class="n">key_</span><span class="p">)</span>
 
-    <span class="c"># priority list for map sorting (in order of checking)</span>
-    <span class="c"># We want Extra to match last, because it&#39;s a catch-all. On the other hand,</span>
-    <span class="c"># Remove markers should match first (since invalid values will not</span>
-    <span class="c"># raise an Error, instead the validator will check if other schemas match</span>
-    <span class="c"># the same value).</span>
-    <span class="n">priority</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="n">is_remove</span><span class="p">),</span>  <span class="c"># Remove highest priority after values</span>
-                <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">is_marker</span><span class="p">),</span>  <span class="c"># then other Markers</span>
-                <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">is_type</span><span class="p">),</span>  <span class="c"># types/classes lowest before Extra</span>
-                <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">is_callable</span><span class="p">),</span>  <span class="c"># callables after markers</span>
-                <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">is_extra</span><span class="p">)]</span>  <span class="c"># Extra lowest priority</span>
+    <span class="c1"># priority list for map sorting (in order of checking)</span>
+    <span class="c1"># We want Extra to match last, because it&#39;s a catch-all. On the other hand,</span>
+    <span class="c1"># Remove markers should match first (since invalid values will not</span>
+    <span class="c1"># raise an Error, instead the validator will check if other schemas match</span>
+    <span class="c1"># the same value).</span>
+    <span class="n">priority</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="n">is_remove</span><span class="p">),</span>  <span class="c1"># Remove highest priority after values</span>
+                <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">is_marker</span><span class="p">),</span>  <span class="c1"># then other Markers</span>
+                <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">is_type</span><span class="p">),</span>  <span class="c1"># types/classes lowest before Extra</span>
+                <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">is_callable</span><span class="p">),</span>  <span class="c1"># callables after markers</span>
+                <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">is_extra</span><span class="p">)]</span>  <span class="c1"># Extra lowest priority</span>
 
     <span class="k">def</span> <span class="nf">item_priority</span><span class="p">(</span><span class="n">item_</span><span class="p">):</span>
         <span class="n">key_</span> <span class="o">=</span> <span class="n">item_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">check_</span> <span class="ow">in</span> <span class="n">priority</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">check_</span><span class="p">(</span><span class="n">key_</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">i</span>
-        <span class="c"># values have hightest priorities</span>
+        <span class="c1"># values have hightest priorities</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">item_priority</span>
@@ -726,9 +727,9 @@
 
 <span class="k">def</span> <span class="nf">_iterate_mapping_candidates</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Iterate over schema in a meaningful order.&quot;&quot;&quot;</span>
-    <span class="c"># Without this, Extra might appear first in the iterator, and fail to</span>
-    <span class="c"># validate a key even though it&#39;s a Required that has its own validation,</span>
-    <span class="c"># generating a false positive.</span>
+    <span class="c1"># Without this, Extra might appear first in the iterator, and fail to</span>
+    <span class="c1"># validate a key even though it&#39;s a Required that has its own validation,</span>
+    <span class="c1"># generating a false positive.</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">iteritems</span><span class="p">(</span><span class="n">schema</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">_sort_item</span><span class="p">)</span>
 
 
@@ -741,8 +742,8 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">d</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-        <span class="c"># maybe we have named tuple here?</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;_asdict&#39;</span><span class="p">):</span>
+        <span class="c1"># maybe we have named tuple here?</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;_asdict&#39;</span><span class="p">):</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
         <span class="k">yield</span> <span class="n">item</span>
@@ -752,7 +753,7 @@
         <span class="k">pass</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s">&#39;__dict__&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
     <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
 
@@ -788,8 +789,8 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">cls</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s">&quot;Msg can only use subclases of&quot;</span>
-                                 <span class="s">&quot; Invalid as custom class&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s2">&quot;Msg can only use subclases of&quot;</span>
+                                 <span class="s2">&quot; Invalid as custom class&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span> <span class="o">=</span> <span class="n">schema</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
@@ -805,7 +806,7 @@
                 <span class="k">raise</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span> <span class="ow">or</span> <span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Msg(</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, cls=</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Msg(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, cls=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
@@ -818,13 +819,13 @@
 
 <div class="viewcode-block" id="VirtualPathComponent"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.VirtualPathComponent">[docs]</a><span class="k">class</span> <span class="nc">VirtualPathComponent</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="bp">self</span> <span class="o">+</span> <span class="s">&#39;&gt;&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="bp">self</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
 
 
-<span class="c"># Markers.py</span>
+<span class="c1"># Markers.py</span>
 
 
 <div class="viewcode-block" id="Marker"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.Marker">[docs]</a><span class="k">class</span> <span class="nc">Marker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -1009,7 +1010,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;Remove(</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,)</span></div>
+        <span class="k">return</span> <span class="s2">&quot;Remove(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,)</span></div>
 
 
 <div class="viewcode-block" id="message"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.message">[docs]</a><span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1041,7 +1042,7 @@
 <span class="sd">        ...   assert isinstance(e.errors[0], IntegerInvalid)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">cls</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s">&quot;message can only use subclases of Invalid as custom class&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">(</span><span class="s2">&quot;message can only use subclases of Invalid as custom class&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -1051,11 +1052,25 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="p">(</span><span class="n">clsoverride</span> <span class="ow">or</span> <span class="n">cls</span> <span class="ow">or</span> <span class="n">er</span><span class="o">.</span><span class="n">ValueInvalid</span><span class="p">)(</span><span class="n">msg</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">or</span> <span class="s">&#39;invalid value&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="p">(</span><span class="n">clsoverride</span> <span class="ow">or</span> <span class="n">cls</span> <span class="ow">or</span> <span class="n">er</span><span class="o">.</span><span class="n">ValueInvalid</span><span class="p">)(</span><span class="n">msg</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">or</span> <span class="s1">&#39;invalid value&#39;</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">wrapper</span>
 
         <span class="k">return</span> <span class="n">check</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<div class="viewcode-block" id="validate_schema"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.validate_schema">[docs]</a><span class="k">def</span> <span class="nf">validate_schema</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">schema</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
 
     <span class="k">return</span> <span class="n">decorator</span></div>
 </pre></div>
@@ -1069,8 +1084,6 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module code</a><ul>
-  <li><a href="../voluptuous.html">voluptuous</a><ul>
-  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -1094,7 +1107,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

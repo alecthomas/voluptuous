@@ -24,9 +24,10 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="Voluptuous 0.8.11 documentation" href="../../../index.html" />
-    <link rel="up" title="voluptuous" href="../../voluptuous.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -40,300 +41,312 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.tests.tests</h1><div class="highlight"><pre>
-<span class="kn">import</span> <span class="nn">copy</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">assert_raises</span>
 
 <span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Schema</span><span class="p">,</span> <span class="n">Required</span><span class="p">,</span> <span class="n">Extra</span><span class="p">,</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">In</span><span class="p">,</span> <span class="n">Remove</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span>
     <span class="n">Url</span><span class="p">,</span> <span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">NotIn</span><span class="p">,</span> <span class="n">Match</span><span class="p">,</span> <span class="n">Email</span><span class="p">,</span>
-    <span class="n">Replace</span><span class="p">,</span> <span class="n">Range</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">,</span> <span class="n">All</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Length</span><span class="p">,</span> <span class="n">FqdnUrl</span><span class="p">,</span> <span class="n">ALLOW_EXTRA</span><span class="p">,</span> <span class="n">PREVENT_EXTRA</span>
+    <span class="n">Replace</span><span class="p">,</span> <span class="n">Range</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">,</span> <span class="n">All</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Length</span><span class="p">,</span> <span class="n">FqdnUrl</span><span class="p">,</span> <span class="n">ALLOW_EXTRA</span><span class="p">,</span> <span class="n">PREVENT_EXTRA</span><span class="p">,</span>
+    <span class="n">validate_schema</span><span class="p">,</span> <span class="n">ExactSequence</span><span class="p">,</span> <span class="n">Equal</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">voluptuous.humanize</span> <span class="kn">import</span> <span class="n">humanize_error</span>
 
 
+<div class="viewcode-block" id="test_exact_sequence"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_exact_sequence">[docs]</a><span class="k">def</span> <span class="nf">test_exact_sequence</span><span class="p">():</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">ExactSequence</span><span class="p">([</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="k">except</span> <span class="n">Invalid</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid&quot;</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">schema</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span></div>
+
+
 <div class="viewcode-block" id="test_required"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_required">[docs]</a><span class="k">def</span> <span class="nf">test_required</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that Required works.&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>
-    <span class="c"># Can&#39;t use nose&#39;s raises (because we need to access the raised</span>
-    <span class="c"># exception, nor assert_raises which fails with Python 2.6.9.</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="c1"># Can&#39;t use nose&#39;s raises (because we need to access the raised</span>
+    <span class="c1"># exception, nor assert_raises which fails with Python 2.6.9.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">schema</span><span class="p">({})</span>
     <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s">&quot;required key not provided @ data[&#39;q&#39;]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;required key not provided @ data[&#39;q&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_extra_with_required"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_extra_with_required">[docs]</a><span class="k">def</span> <span class="nf">test_extra_with_required</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that Required does not break Extra.&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s">&#39;toaster&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Extra</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s">&#39;toaster&#39;</span><span class="p">:</span> <span class="s">&#39;blue&#39;</span><span class="p">,</span> <span class="s">&#39;another_valid_key&#39;</span><span class="p">:</span> <span class="s">&#39;another_valid_value&#39;</span><span class="p">})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;toaster&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Extra</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;toaster&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;another_valid_key&#39;</span><span class="p">:</span> <span class="s1">&#39;another_valid_value&#39;</span><span class="p">})</span>
     <span class="n">assert_equal</span><span class="p">(</span>
-        <span class="n">r</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;toaster&#39;</span><span class="p">:</span> <span class="s">&#39;blue&#39;</span><span class="p">,</span> <span class="s">&#39;another_valid_key&#39;</span><span class="p">:</span> <span class="s">&#39;another_valid_value&#39;</span><span class="p">})</span></div>
+        <span class="n">r</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;toaster&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;another_valid_key&#39;</span><span class="p">:</span> <span class="s1">&#39;another_valid_value&#39;</span><span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="test_iterate_candidates"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_iterate_candidates">[docs]</a><span class="k">def</span> <span class="nf">test_iterate_candidates</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that the order for iterating over mapping candidates is right.&quot;&quot;&quot;</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s">&quot;toaster&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;toaster&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">Extra</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="c"># toaster should be first.</span>
+    <span class="c1"># toaster should be first.</span>
     <span class="kn">from</span> <span class="nn">voluptuous.schema_builder</span> <span class="kn">import</span> <span class="n">_iterate_mapping_candidates</span>
-    <span class="n">assert_equal</span><span class="p">(</span><span class="n">_iterate_mapping_candidates</span><span class="p">(</span><span class="n">schema</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;toaster&#39;</span><span class="p">)</span></div>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">_iterate_mapping_candidates</span><span class="p">(</span><span class="n">schema</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;toaster&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_in"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_in">[docs]</a><span class="k">def</span> <span class="nf">test_in</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that In works.&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;color&quot;</span><span class="p">:</span> <span class="n">In</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">([</span><span class="s">&quot;blue&quot;</span><span class="p">,</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> <span class="s">&quot;yellow&quot;</span><span class="p">]))})</span>
-    <span class="n">schema</span><span class="p">({</span><span class="s">&quot;color&quot;</span><span class="p">:</span> <span class="s">&quot;blue&quot;</span><span class="p">})</span></div>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">In</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">([</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">]))})</span>
+    <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="test_not_in"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_not_in">[docs]</a><span class="k">def</span> <span class="nf">test_not_in</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that NotIn works.&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;color&quot;</span><span class="p">:</span> <span class="n">NotIn</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">([</span><span class="s">&quot;blue&quot;</span><span class="p">,</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> <span class="s">&quot;yellow&quot;</span><span class="p">]))})</span>
-    <span class="n">schema</span><span class="p">({</span><span class="s">&quot;color&quot;</span><span class="p">:</span> <span class="s">&quot;orange&quot;</span><span class="p">})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">NotIn</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">([</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">]))})</span>
+    <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;orange&quot;</span><span class="p">})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;color&quot;</span><span class="p">:</span> <span class="s">&quot;blue&quot;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s">&quot;value is not allowed for dictionary value @ data[&#39;color&#39;]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;value is not allowed for dictionary value @ data[&#39;color&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise NotInInvalid&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise NotInInvalid&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_remove"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_remove">[docs]</a><span class="k">def</span> <span class="nf">test_remove</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that Remove works.&quot;&quot;&quot;</span>
-    <span class="c"># remove dict keys</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;weight&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                     <span class="n">Remove</span><span class="p">(</span><span class="s">&quot;color&quot;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
-                     <span class="n">Remove</span><span class="p">(</span><span class="s">&quot;amount&quot;</span><span class="p">):</span> <span class="nb">int</span><span class="p">})</span>
-    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&quot;color&quot;</span><span class="p">:</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> <span class="s">&quot;amount&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
-    <span class="k">assert</span> <span class="s">&quot;color&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_</span> <span class="ow">and</span> <span class="s">&quot;amount&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_</span>
+    <span class="c1"># remove dict keys</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">Remove</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">Remove</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">):</span> <span class="nb">int</span><span class="p">})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="s2">&quot;color&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_</span> <span class="ow">and</span> <span class="s2">&quot;amount&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_</span>
 
-    <span class="c"># remove keys by type</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;weight&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                     <span class="s">&quot;amount&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                     <span class="c"># remvove str keys with int values</span>
+    <span class="c1"># remove keys by type</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                     <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="c1"># remvove str keys with int values</span>
                      <span class="n">Remove</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span> <span class="nb">int</span><span class="p">,</span>
-                     <span class="c"># keep str keys with str values</span>
+                     <span class="c1"># keep str keys with str values</span>
                      <span class="nb">str</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
-    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">73.4</span><span class="p">,</span>
-                   <span class="s">&quot;condition&quot;</span><span class="p">:</span> <span class="s">&quot;new&quot;</span><span class="p">,</span>
-                   <span class="s">&quot;amount&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-                   <span class="s">&quot;left&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
-    <span class="c"># amount should stay since it&#39;s defined</span>
-    <span class="c"># other string keys with int values will be removed</span>
-    <span class="k">assert</span> <span class="s">&quot;amount&quot;</span> <span class="ow">in</span> <span class="n">out_</span> <span class="ow">and</span> <span class="s">&quot;left&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_</span>
-    <span class="c"># string keys with string values will stay</span>
-    <span class="k">assert</span> <span class="s">&quot;condition&quot;</span> <span class="ow">in</span> <span class="n">out_</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">73.4</span><span class="p">,</span>
+                   <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="s2">&quot;new&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                   <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+    <span class="c1"># amount should stay since it&#39;s defined</span>
+    <span class="c1"># other string keys with int values will be removed</span>
+    <span class="k">assert</span> <span class="s2">&quot;amount&quot;</span> <span class="ow">in</span> <span class="n">out_</span> <span class="ow">and</span> <span class="s2">&quot;left&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_</span>
+    <span class="c1"># string keys with string values will stay</span>
+    <span class="k">assert</span> <span class="s2">&quot;condition&quot;</span> <span class="ow">in</span> <span class="n">out_</span>
 
-    <span class="c"># remove value from list</span>
+    <span class="c1"># remove value from list</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">([</span><span class="n">Remove</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nb">int</span><span class="p">])</span>
     <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="n">assert_equal</span><span class="p">(</span><span class="n">out_</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
 
-    <span class="c"># remove values from list by type</span>
+    <span class="c1"># remove values from list by type</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Remove</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="nb">int</span><span class="p">])</span>
     <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
     <span class="n">assert_equal</span><span class="p">(</span><span class="n">out_</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="test_extra_empty_errors"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_extra_empty_errors">[docs]</a><span class="k">def</span> <span class="nf">test_extra_empty_errors</span><span class="p">():</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">Extra</span><span class="p">:</span> <span class="nb">object</span><span class="p">}},</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">schema</span><span class="p">({</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="p">{}})</span></div>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">Extra</span><span class="p">:</span> <span class="nb">object</span><span class="p">}},</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{}})</span></div>
 
 
 <div class="viewcode-block" id="test_literal"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_literal">[docs]</a><span class="k">def</span> <span class="nf">test_literal</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with Literal &quot;&quot;&quot;</span>
 
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">([</span><span class="n">Literal</span><span class="p">({</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="n">Literal</span><span class="p">({</span><span class="s">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})])</span>
-    <span class="n">schema</span><span class="p">([{</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
-    <span class="n">schema</span><span class="p">([{</span><span class="s">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
-    <span class="n">schema</span><span class="p">([{</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">([</span><span class="n">Literal</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="n">Literal</span><span class="p">({</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})])</span>
+    <span class="n">schema</span><span class="p">([{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
+    <span class="n">schema</span><span class="p">([{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
+    <span class="n">schema</span><span class="p">([{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">([{</span><span class="s">&quot;c&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
+        <span class="n">schema</span><span class="p">([{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}])</span>
     <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s">&quot;{&#39;c&#39;: 1} not match for {&#39;b&#39;: 1} @ data[0]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;{&#39;c&#39;: 1} not match for {&#39;b&#39;: 1} @ data[0]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid&quot;</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid&quot;</span>
 
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Literal</span><span class="p">({</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}))</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Literal</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}))</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s">&quot;{&#39;b&#39;: 1} not match for {&#39;a&#39;: 1}&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;{&#39;b&#39;: 1} not match for {&#39;a&#39;: 1}&quot;</span><span class="p">)</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">LiteralInvalid</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_email_validation"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_email_validation">[docs]</a><span class="k">def</span> <span class="nf">test_email_validation</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with valid email &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
-    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="s">&quot;example@example.com&quot;</span><span class="p">})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;example@example.com&quot;</span><span class="p">})</span>
 
-    <span class="k">assert</span> <span class="s">&#39;example@example.com&quot;&#39;</span><span class="p">,</span> <span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;url&quot;</span><span class="p">)</span></div>
+    <span class="k">assert</span> <span class="s1">&#39;example@example.com&quot;&#39;</span><span class="p">,</span> <span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_email_validation_with_none"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_email_validation_with_none">[docs]</a><span class="k">def</span> <span class="nf">test_email_validation_with_none</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with invalid None Email&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected an Email for dictionary value @ data[&#39;email&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected an Email for dictionary value @ data[&#39;email&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for None url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for None url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_email_validation_with_empty_string"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_email_validation_with_empty_string">[docs]</a><span class="k">def</span> <span class="nf">test_email_validation_with_empty_string</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with empty string Email&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected an Email for dictionary value @ data[&#39;email&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected an Email for dictionary value @ data[&#39;email&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for empty string url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for empty string url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_email_validation_without_host"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_email_validation_without_host">[docs]</a><span class="k">def</span> <span class="nf">test_email_validation_without_host</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with empty host name in email &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">Email</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="s">&#39;a@.com&#39;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s1">&#39;a@.com&#39;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected an Email for dictionary value @ data[&#39;email&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected an Email for dictionary value @ data[&#39;email&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for empty string url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for empty string url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_fqdn_url_validation"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_fqdn_url_validation">[docs]</a><span class="k">def</span> <span class="nf">test_fqdn_url_validation</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with valid fully qualified domain name url &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
-    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&quot;http://example.com/&quot;</span><span class="p">})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://example.com/&quot;</span><span class="p">})</span>
 
-    <span class="k">assert</span> <span class="s">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;url&quot;</span><span class="p">)</span></div>
+    <span class="k">assert</span> <span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_fqdn_url_without_domain_name"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_fqdn_url_without_domain_name">[docs]</a><span class="k">def</span> <span class="nf">test_fqdn_url_without_domain_name</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with invalid fully qualified domain name url &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&quot;http://localhost/&quot;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://localhost/&quot;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for None url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for None url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_fqdnurl_validation_with_none"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_fqdnurl_validation_with_none">[docs]</a><span class="k">def</span> <span class="nf">test_fqdnurl_validation_with_none</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with invalid None FQDN url&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for None url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for None url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_fqdnurl_validation_with_empty_string"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_fqdnurl_validation_with_empty_string">[docs]</a><span class="k">def</span> <span class="nf">test_fqdnurl_validation_with_empty_string</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with empty string FQDN URL &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for empty string url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for empty string url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_fqdnurl_validation_without_host"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_fqdnurl_validation_without_host">[docs]</a><span class="k">def</span> <span class="nf">test_fqdnurl_validation_without_host</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with empty host FQDN URL &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">FqdnUrl</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&#39;http://&#39;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s1">&#39;http://&#39;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a Fully qualified domain name URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for empty string url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for empty string url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_url_validation"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_url_validation">[docs]</a><span class="k">def</span> <span class="nf">test_url_validation</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with valid URL &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
-    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&quot;http://example.com/&quot;</span><span class="p">})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://example.com/&quot;</span><span class="p">})</span>
 
-    <span class="k">assert</span> <span class="s">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;url&quot;</span><span class="p">)</span></div>
+    <span class="k">assert</span> <span class="s1">&#39;http://example.com/&#39;</span><span class="p">,</span> <span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_url_validation_with_none"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_url_validation_with_none">[docs]</a><span class="k">def</span> <span class="nf">test_url_validation_with_none</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with invalid None url&quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for None url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for None url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_url_validation_with_empty_string"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_url_validation_with_empty_string">[docs]</a><span class="k">def</span> <span class="nf">test_url_validation_with_empty_string</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with empty string URL &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for empty string url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for empty string url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_url_validation_without_host"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_url_validation_without_host">[docs]</a><span class="k">def</span> <span class="nf">test_url_validation_without_host</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with empty host URL &quot;&quot;&quot;</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">Url</span><span class="p">()})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&#39;http://&#39;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s1">&#39;http://&#39;</span><span class="p">})</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                     <span class="s">&quot;expected a URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
+                     <span class="s2">&quot;expected a URL for dictionary value @ data[&#39;url&#39;]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid for empty string url&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for empty string url&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_copy_dict_undefined"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_copy_dict_undefined">[docs]</a><span class="k">def</span> <span class="nf">test_copy_dict_undefined</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; test with a copied dictionary &quot;&quot;&quot;</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">Required</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">):</span> <span class="nb">int</span>
+        <span class="n">Required</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">):</span> <span class="nb">int</span>
     <span class="p">}</span>
     <span class="n">copied_fields</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
 
     <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">copied_fields</span><span class="p">)</span>
 
-    <span class="c"># This used to raise a `TypeError` because the instance of `Undefined`</span>
-    <span class="c"># was a copy, so object comparison would not work correctly.</span>
+    <span class="c1"># This used to raise a `TypeError` because the instance of `Undefined`</span>
+    <span class="c1"># was a copy, so object comparison would not work correctly.</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">schema</span><span class="p">({</span><span class="s">&quot;foo&quot;</span><span class="p">:</span> <span class="s">&quot;bar&quot;</span><span class="p">})</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">})</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">MultipleInvalid</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_sorting"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_sorting">[docs]</a><span class="k">def</span> <span class="nf">test_sorting</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Expect alphabetic sorting &quot;&quot;&quot;</span>
-    <span class="n">foo</span> <span class="o">=</span> <span class="n">Required</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
-    <span class="n">bar</span> <span class="o">=</span> <span class="n">Required</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
     <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">foo</span><span class="p">,</span> <span class="n">bar</span><span class="p">]</span>
     <span class="n">expected</span> <span class="o">=</span> <span class="p">[</span><span class="n">bar</span><span class="p">,</span> <span class="n">foo</span><span class="p">]</span>
     <span class="n">result</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
@@ -343,13 +356,13 @@
 <div class="viewcode-block" id="test_schema_extend"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_extend">[docs]</a><span class="k">def</span> <span class="nf">test_schema_extend</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that Schema.extend copies schema keys from both.&quot;&quot;&quot;</span>
 
-    <span class="n">base</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">extension</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">}</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">}</span>
     <span class="n">extended</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">base</span><span class="o">.</span><span class="n">schema</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">}</span>
-    <span class="k">assert</span> <span class="n">extension</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">}</span>
-    <span class="k">assert</span> <span class="n">extended</span><span class="o">.</span><span class="n">schema</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">base</span><span class="o">.</span><span class="n">schema</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">extension</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">extended</span><span class="o">.</span><span class="n">schema</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">}</span>
     <span class="k">assert</span> <span class="n">extended</span><span class="o">.</span><span class="n">required</span> <span class="o">==</span> <span class="n">base</span><span class="o">.</span><span class="n">required</span>
     <span class="k">assert</span> <span class="n">extended</span><span class="o">.</span><span class="n">extra</span> <span class="o">==</span> <span class="n">base</span><span class="o">.</span><span class="n">extra</span></div>
 
@@ -357,8 +370,8 @@
 <div class="viewcode-block" id="test_schema_extend_overrides"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_extend_overrides">[docs]</a><span class="k">def</span> <span class="nf">test_schema_extend_overrides</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that Schema.extend can override required/extra parameters.&quot;&quot;&quot;</span>
 
-    <span class="n">base</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">extended</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">extend</span><span class="p">({</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ALLOW_EXTRA</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">extended</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">extend</span><span class="p">({</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ALLOW_EXTRA</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="n">base</span><span class="o">.</span><span class="n">required</span> <span class="ow">is</span> <span class="bp">True</span>
     <span class="k">assert</span> <span class="n">base</span><span class="o">.</span><span class="n">extra</span> <span class="o">==</span> <span class="n">PREVENT_EXTRA</span>
@@ -368,21 +381,21 @@
 
 <div class="viewcode-block" id="test_repr"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_repr">[docs]</a><span class="k">def</span> <span class="nf">test_repr</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that __repr__ returns valid Python expressions&quot;&quot;&quot;</span>
-    <span class="n">match</span> <span class="o">=</span> <span class="n">Match</span><span class="p">(</span><span class="s">&#39;a pattern&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;message&#39;</span><span class="p">)</span>
-    <span class="n">replace</span> <span class="o">=</span> <span class="n">Replace</span><span class="p">(</span><span class="s">&#39;you&#39;</span><span class="p">,</span> <span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;you and I&#39;</span><span class="p">)</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">Match</span><span class="p">(</span><span class="s1">&#39;a pattern&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;message&#39;</span><span class="p">)</span>
+    <span class="n">replace</span> <span class="o">=</span> <span class="n">Replace</span><span class="p">(</span><span class="s1">&#39;you&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;you and I&#39;</span><span class="p">)</span>
     <span class="n">range_</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">min_included</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">max_included</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;number not in range&#39;</span><span class="p">)</span>
-    <span class="n">coerce_</span> <span class="o">=</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&quot;moo&quot;</span><span class="p">)</span>
-    <span class="n">all_</span> <span class="o">=</span> <span class="n">All</span><span class="p">(</span><span class="s">&#39;10&#39;</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;all msg&#39;</span><span class="p">)</span>
+                   <span class="n">max_included</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;number not in range&#39;</span><span class="p">)</span>
+    <span class="n">coerce_</span> <span class="o">=</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;moo&quot;</span><span class="p">)</span>
+    <span class="n">all_</span> <span class="o">=</span> <span class="n">All</span><span class="p">(</span><span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;all msg&#39;</span><span class="p">)</span>
 
-    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">match</span><span class="p">),</span> <span class="s">&quot;Match(&#39;a pattern&#39;, msg=&#39;message&#39;)&quot;</span><span class="p">)</span>
-    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">replace</span><span class="p">),</span> <span class="s">&quot;Replace(&#39;you&#39;, &#39;I&#39;, msg=&#39;you and I&#39;)&quot;</span><span class="p">)</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">match</span><span class="p">),</span> <span class="s2">&quot;Match(&#39;a pattern&#39;, msg=&#39;message&#39;)&quot;</span><span class="p">)</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">replace</span><span class="p">),</span> <span class="s2">&quot;Replace(&#39;you&#39;, &#39;I&#39;, msg=&#39;you and I&#39;)&quot;</span><span class="p">)</span>
     <span class="n">assert_equal</span><span class="p">(</span>
         <span class="nb">repr</span><span class="p">(</span><span class="n">range_</span><span class="p">),</span>
-        <span class="s">&quot;Range(min=0, max=42, min_included=False, max_included=False, msg=&#39;number not in range&#39;)&quot;</span>
+        <span class="s2">&quot;Range(min=0, max=42, min_included=False, max_included=False, msg=&#39;number not in range&#39;)&quot;</span>
     <span class="p">)</span>
-    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">coerce_</span><span class="p">),</span> <span class="s">&quot;Coerce(int, msg=&#39;moo&#39;)&quot;</span><span class="p">)</span>
-    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">all_</span><span class="p">),</span> <span class="s">&quot;All(&#39;10&#39;, Coerce(int, msg=None), msg=&#39;all msg&#39;)&quot;</span><span class="p">)</span></div>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">coerce_</span><span class="p">),</span> <span class="s2">&quot;Coerce(int, msg=&#39;moo&#39;)&quot;</span><span class="p">)</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">all_</span><span class="p">),</span> <span class="s2">&quot;All(&#39;10&#39;, Coerce(int, msg=None), msg=&#39;all msg&#39;)&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_list_validation_messages"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_list_validation_messages">[docs]</a><span class="k">def</span> <span class="nf">test_list_validation_messages</span><span class="p">():</span>
@@ -390,7 +403,7 @@
 
     <span class="k">def</span> <span class="nf">is_even</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%i</span><span class="s"> is not even&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> is not even&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">value</span>
 
     <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">even_numbers</span><span class="o">=</span><span class="p">[</span><span class="n">All</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">is_even</span><span class="p">)]))</span>
@@ -399,10 +412,10 @@
         <span class="n">schema</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">even_numbers</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
     <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s2">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_nested_multiple_validation_errors"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_nested_multiple_validation_errors">[docs]</a><span class="k">def</span> <span class="nf">test_nested_multiple_validation_errors</span><span class="p">():</span>
@@ -410,7 +423,7 @@
 
     <span class="k">def</span> <span class="nf">is_even</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%i</span><span class="s"> is not even&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> is not even&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">value</span>
 
     <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">even_numbers</span><span class="o">=</span><span class="n">All</span><span class="p">([</span><span class="n">All</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">is_even</span><span class="p">)],</span>
@@ -420,37 +433,67 @@
         <span class="n">schema</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">even_numbers</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
     <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
-        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s2">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;3 is not even @ data[&#39;even_numbers&#39;][0]&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Did not raise Invalid&quot;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid&quot;</span></div>
 
 
 <div class="viewcode-block" id="test_humanize_error"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_humanize_error">[docs]</a><span class="k">def</span> <span class="nf">test_humanize_error</span><span class="p">():</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="s">&#39;not an int&#39;</span><span class="p">,</span>
-        <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">123</span><span class="p">]</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;not an int&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">123</span><span class="p">]</span>
     <span class="p">}</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
-        <span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="p">})</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">schema</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">assert_equal</span><span class="p">(</span>
             <span class="n">humanize_error</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">e</span><span class="p">),</span>
-            <span class="s">&quot;expected int for dictionary value @ data[&#39;a&#39;]. Got &#39;not an int&#39;</span><span class="se">\n</span><span class="s">&quot;</span>
-            <span class="s">&quot;expected str @ data[&#39;b&#39;][0]. Got 123&quot;</span>
+            <span class="s2">&quot;expected int for dictionary value @ data[&#39;a&#39;]. Got &#39;not an int&#39;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;expected str @ data[&#39;b&#39;][0]. Got 123&quot;</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;Did not raise MultipleInvalid&#39;</span></div>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;Did not raise MultipleInvalid&#39;</span></div>
 
 
 <div class="viewcode-block" id="test_fix_157"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_fix_157">[docs]</a><span class="k">def</span> <span class="nf">test_fix_157</span><span class="p">():</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">All</span><span class="p">([</span><span class="n">Any</span><span class="p">(</span><span class="s">&#39;one&#39;</span><span class="p">,</span> <span class="s">&#39;two&#39;</span><span class="p">,</span> <span class="s">&#39;three&#39;</span><span class="p">)]),</span> <span class="n">Length</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">assert_equal</span><span class="p">([</span><span class="s">&#39;one&#39;</span><span class="p">],</span> <span class="n">s</span><span class="p">([</span><span class="s">&#39;one&#39;</span><span class="p">]))</span>
-    <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;four&#39;</span><span class="p">])</span></div>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">All</span><span class="p">([</span><span class="n">Any</span><span class="p">(</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="p">)]),</span> <span class="n">Length</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">assert_equal</span><span class="p">([</span><span class="s1">&#39;one&#39;</span><span class="p">],</span> <span class="n">s</span><span class="p">([</span><span class="s1">&#39;one&#39;</span><span class="p">]))</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;four&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator</span><span class="p">():</span>
+    <span class="nd">@validate_schema</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_range_exlcudes_nan"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_range_exlcudes_nan">[docs]</a><span class="k">def</span> <span class="nf">test_range_exlcudes_nan</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="test_equal"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_equal">[docs]</a><span class="k">def</span> <span class="nf">test_equal</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">))</span>
+    <span class="n">s</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Equal</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+    <span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="c1"># Evaluates exactly, not through validators</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -462,8 +505,6 @@
 <ul>
   <li><a href="../../../index.html">Documentation overview</a><ul>
   <li><a href="../../index.html">Module code</a><ul>
-  <li><a href="../../voluptuous.html">voluptuous</a><ul>
-  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -487,7 +528,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 
