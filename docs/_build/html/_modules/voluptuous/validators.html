@@ -24,9 +24,10 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="Voluptuous 0.8.11 documentation" href="../../index.html" />
-    <link rel="up" title="voluptuous" href="../voluptuous.html" />
+    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -40,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.validators</h1><div class="highlight"><pre>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -67,26 +68,26 @@
 <span class="k">else</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urlparse</span>
 
-<span class="c"># Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py</span>
+<span class="c1"># Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py</span>
 <span class="n">USER_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="c"># dot-atom</span>
-    <span class="s">r&quot;(^[-!#$%&amp;&#39;*+/=?^_`{}|~0-9A-Z]+&quot;</span>
-    <span class="s">r&quot;(\.[-!#$%&amp;&#39;*+/=?^_`{}|~0-9A-Z]+)*$&quot;</span>
-    <span class="c"># quoted-string</span>
-    <span class="s">r&#39;|^&quot;([\001-\010\013\014\016-\037!#-\[\]-\177]|&#39;</span>
+    <span class="c1"># dot-atom</span>
+    <span class="s2">r&quot;(^[-!#$%&amp;&#39;*+/=?^_`{}|~0-9A-Z]+&quot;</span>
+    <span class="s2">r&quot;(\.[-!#$%&amp;&#39;*+/=?^_`{}|~0-9A-Z]+)*$&quot;</span>
+    <span class="c1"># quoted-string</span>
+    <span class="s1">r&#39;|^&quot;([\001-\010\013\014\016-\037!#-\[\]-\177]|&#39;</span>
     <span class="sd">r&quot;&quot;&quot;\\[\001-\011\013\014\016-\177])*&quot;$)&quot;&quot;&quot;</span><span class="p">,</span>
     <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
 <span class="p">)</span>
 <span class="n">DOMAIN_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="c"># domain</span>
-    <span class="s">r&#39;(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+&#39;</span>
-    <span class="s">r&#39;(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?$)&#39;</span>
-    <span class="c"># literal form, ipv4 address (SMTP 4.1.3)</span>
-    <span class="s">r&#39;|^\[(25[0-5]|2[0-4]\d|[0-1]?\d?\d)&#39;</span>
-    <span class="s">r&#39;(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$&#39;</span><span class="p">,</span>
+    <span class="c1"># domain</span>
+    <span class="s1">r&#39;(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+&#39;</span>
+    <span class="s1">r&#39;(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?$)&#39;</span>
+    <span class="c1"># literal form, ipv4 address (SMTP 4.1.3)</span>
+    <span class="s1">r&#39;|^\[(25[0-5]|2[0-4]\d|[0-1]?\d?\d)&#39;</span>
+    <span class="s1">r&#39;(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$&#39;</span><span class="p">,</span>
     <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tusharmakkar08&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;tusharmakkar08&#39;</span>
 
 
 <div class="viewcode-block" id="truth"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.truth">[docs]</a><span class="k">def</span> <span class="nf">truth</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
@@ -142,14 +143,14 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="p">(</span><span class="s">&#39;expected </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;expected </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">CoerceInvalid</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Coerce(</span><span class="si">%s</span><span class="s">, msg=</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Coerce(</span><span class="si">%s</span><span class="s1">, msg=</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;value was not true&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">TrueInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;value was not true&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">TrueInvalid</span><span class="p">)</span>
 <span class="nd">@truth</span>
 <div class="viewcode-block" id="IsTrue"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.IsTrue">[docs]</a><span class="k">def</span> <span class="nf">IsTrue</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assert that a value is true, in the Python sense.</span>
@@ -176,7 +177,7 @@
     <span class="k">return</span> <span class="n">v</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;value was not false&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">FalseInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;value was not false&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">FalseInvalid</span><span class="p">)</span>
 <div class="viewcode-block" id="IsFalse"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.IsFalse">[docs]</a><span class="k">def</span> <span class="nf">IsFalse</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assert that a value is false, in the Python sense.</span>
 
@@ -198,7 +199,7 @@
     <span class="k">return</span> <span class="n">v</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;expected boolean&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">BooleanInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;expected boolean&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">BooleanInvalid</span><span class="p">)</span>
 <div class="viewcode-block" id="Boolean"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Boolean">[docs]</a><span class="k">def</span> <span class="nf">Boolean</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert human-readable boolean values to a bool.</span>
 
@@ -221,9 +222,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;true&#39;</span><span class="p">,</span> <span class="s">&#39;yes&#39;</span><span class="p">,</span> <span class="s">&#39;on&#39;</span><span class="p">,</span> <span class="s">&#39;enable&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span> <span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="s1">&#39;enable&#39;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;false&#39;</span><span class="p">,</span> <span class="s">&#39;no&#39;</span><span class="p">,</span> <span class="s">&#39;off&#39;</span><span class="p">,</span> <span class="s">&#39;disable&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span> <span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="s1">&#39;disable&#39;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">False</span>
         <span class="k">raise</span> <span class="ne">ValueError</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
@@ -256,7 +257,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="n">validators</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;msg&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;msg&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
@@ -270,13 +271,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">error</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">AnyInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">AnyInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;no valid value found&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">AnyInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;no valid value found&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Any([</span><span class="si">%s</span><span class="s">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Any([</span><span class="si">%s</span><span class="s1">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">))</span></div>
 
 
-<span class="c"># Convenience alias</span>
+<span class="c1"># Convenience alias</span>
 <span class="n">Or</span> <span class="o">=</span> <span class="n">Any</span>
 
 
@@ -295,7 +296,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="n">validators</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;msg&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;msg&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
@@ -307,13 +308,13 @@
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;All(</span><span class="si">%s</span><span class="s">, msg=</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">),</span>
+        <span class="k">return</span> <span class="s1">&#39;All(</span><span class="si">%s</span><span class="s1">, msg=</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>
         <span class="p">)</span></div>
 
 
-<span class="c"># Convenience alias</span>
+<span class="c1"># Convenience alias</span>
 <span class="n">And</span> <span class="o">=</span> <span class="n">All</span>
 
 
@@ -346,13 +347,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">MatchInvalid</span><span class="p">(</span><span class="s">&quot;expected string or buffer&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">MatchInvalid</span><span class="p">(</span><span class="s2">&quot;expected string or buffer&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">MatchInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;does not match regular expression&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">MatchInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;does not match regular expression&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Match(</span><span class="si">%r</span><span class="s">, msg=</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Match(</span><span class="si">%r</span><span class="s1">, msg=</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Replace"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Replace">[docs]</a><span class="k">class</span> <span class="nc">Replace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -375,7 +376,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substitution</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Replace(</span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, msg=</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span>
+        <span class="k">return</span> <span class="s1">&#39;Replace(</span><span class="si">%r</span><span class="s1">, </span><span class="si">%r</span><span class="s1">, msg=</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span></div>
 
@@ -383,11 +384,11 @@
 <span class="k">def</span> <span class="nf">_url_validation</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">parsed</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UrlInvalid</span><span class="p">(</span><span class="s">&quot;must have a URL scheme and host&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">UrlInvalid</span><span class="p">(</span><span class="s2">&quot;must have a URL scheme and host&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">parsed</span>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;expected an Email&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">EmailInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;expected an Email&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">EmailInvalid</span><span class="p">)</span>
 <div class="viewcode-block" id="Email"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Email">[docs]</a><span class="k">def</span> <span class="nf">Email</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify that the value is an Email or not.</span>
 
@@ -402,18 +403,18 @@
 <span class="sd">    &#39;t@x.com&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span> <span class="ow">or</span> <span class="s">&quot;@&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">EmailInvalid</span><span class="p">(</span><span class="s">&quot;Invalid Email&quot;</span><span class="p">)</span>
-        <span class="n">user_part</span><span class="p">,</span> <span class="n">domain_part</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;@&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span> <span class="ow">or</span> <span class="s2">&quot;@&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EmailInvalid</span><span class="p">(</span><span class="s2">&quot;Invalid Email&quot;</span><span class="p">)</span>
+        <span class="n">user_part</span><span class="p">,</span> <span class="n">domain_part</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">USER_REGEX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">user_part</span><span class="p">)</span> <span class="ow">and</span> <span class="n">DOMAIN_REGEX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">domain_part</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="n">EmailInvalid</span><span class="p">(</span><span class="s">&quot;Invalid Email&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">EmailInvalid</span><span class="p">(</span><span class="s2">&quot;Invalid Email&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;expected a Fully qualified domain name URL&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">UrlInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;expected a Fully qualified domain name URL&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">UrlInvalid</span><span class="p">)</span>
 <div class="viewcode-block" id="FqdnUrl"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.FqdnUrl">[docs]</a><span class="k">def</span> <span class="nf">FqdnUrl</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify that the value is a Fully qualified domain name URL.</span>
 
@@ -425,14 +426,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">_url_validation</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UrlInvalid</span><span class="p">(</span><span class="s">&quot;must have a domain name in URL&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UrlInvalid</span><span class="p">(</span><span class="s2">&quot;must have a domain name in URL&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;expected a URL&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">UrlInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;expected a URL&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">UrlInvalid</span><span class="p">)</span>
 <div class="viewcode-block" id="Url"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Url">[docs]</a><span class="k">def</span> <span class="nf">Url</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify that the value is a URL.</span>
 
@@ -449,7 +450,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;not a file&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">FileInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;not a file&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">FileInvalid</span><span class="p">)</span>
 <span class="nd">@truth</span>
 <div class="viewcode-block" id="IsFile"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.IsFile">[docs]</a><span class="k">def</span> <span class="nf">IsFile</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify the file exists.</span>
@@ -462,7 +463,7 @@
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;not a directory&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DirInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;not a directory&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DirInvalid</span><span class="p">)</span>
 <span class="nd">@truth</span>
 <div class="viewcode-block" id="IsDir"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.IsDir">[docs]</a><span class="k">def</span> <span class="nf">IsDir</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify the directory exists.</span>
@@ -473,7 +474,7 @@
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
 
 
-<span class="nd">@message</span><span class="p">(</span><span class="s">&#39;path does not exist&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">PathInvalid</span><span class="p">)</span>
+<span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;path does not exist&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">PathInvalid</span><span class="p">)</span>
 <span class="nd">@truth</span>
 <div class="viewcode-block" id="PathExists"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.PathExists">[docs]</a><span class="k">def</span> <span class="nf">PathExists</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify the path exists, regardless of its type.</span>
@@ -517,26 +518,26 @@
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_included</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">v</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">RangeInvalid</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value must be at least </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value must be at least </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">RangeInvalid</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value must be higher than </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value must be higher than </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_included</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">RangeInvalid</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value must be at most </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value must be at most </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">RangeInvalid</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value must be lower than </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value must be lower than </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;Range(min=</span><span class="si">%r</span><span class="s">, max=</span><span class="si">%r</span><span class="s">, min_included=</span><span class="si">%r</span><span class="s">,&#39;</span>
-                <span class="s">&#39; max_included=</span><span class="si">%r</span><span class="s">, msg=</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Range(min=</span><span class="si">%r</span><span class="s1">, max=</span><span class="si">%r</span><span class="s1">, min_included=</span><span class="si">%r</span><span class="s1">,&#39;</span>
+                <span class="s1">&#39; max_included=</span><span class="si">%r</span><span class="s1">, msg=</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">min_included</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">max_included</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">))</span></div>
@@ -568,7 +569,7 @@
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Clamp(min=</span><span class="si">%s</span><span class="s">, max=</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Clamp(min=</span><span class="si">%s</span><span class="s1">, max=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Length"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Length">[docs]</a><span class="k">class</span> <span class="nc">Length</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -582,20 +583,20 @@
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">LengthInvalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;length of value must be at least </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;length of value must be at least </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">LengthInvalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;length of value must be at most </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;length of value must be at most </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Length(min=</span><span class="si">%s</span><span class="s">, max=</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Length(min=</span><span class="si">%s</span><span class="s1">, max=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Datetime"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Datetime">[docs]</a><span class="k">class</span> <span class="nc">Datetime</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Validate that the value matches the datetime format.&quot;&quot;&quot;</span>
 
-    <span class="n">DEFAULT_FORMAT</span> <span class="o">=</span> <span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">T%H:%M:%S.</span><span class="si">%f</span><span class="s">Z&#39;</span>
+    <span class="n">DEFAULT_FORMAT</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">Z&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">format</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FORMAT</span>
@@ -606,12 +607,12 @@
             <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">DatetimeInvalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value does not match&#39;</span>
-                            <span class="s">&#39; expected format </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value does not match&#39;</span>
+                            <span class="s1">&#39; expected format </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Datetime(format=</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Datetime(format=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span></div>
 
 
 <div class="viewcode-block" id="In"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.In">[docs]</a><span class="k">class</span> <span class="nc">In</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -627,11 +628,11 @@
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">check</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">InInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value is not allowed&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value is not allowed&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;In(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">,)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;In(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">,)</span></div>
 
 
 <div class="viewcode-block" id="NotIn"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.NotIn">[docs]</a><span class="k">class</span> <span class="nc">NotIn</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -647,11 +648,11 @@
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">check</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NotInInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;value is not allowed&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NotInInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value is not allowed&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;NotIn(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">,)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;NotIn(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">,)</span></div>
 
 
 <div class="viewcode-block" id="ExactSequence"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.ExactSequence">[docs]</a><span class="k">class</span> <span class="nc">ExactSequence</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -672,11 +673,11 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="n">validators</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;msg&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;msg&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ExactSequenceInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)(</span><span class="n">schema</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">schema</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span><span class="p">))</span>
@@ -685,7 +686,7 @@
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;ExactSequence([</span><span class="si">%s</span><span class="s">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;ExactSequence([</span><span class="si">%s</span><span class="s1">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
                                                   <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">))</span></div>
 
 
@@ -723,16 +724,104 @@
             <span class="n">set_v</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TypeInvalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;contains unhashable elements: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;contains unhashable elements: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
             <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
             <span class="n">dupes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">or</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
             <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;contains duplicate items: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dupes</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;contains duplicate items: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dupes</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Unique()&#39;</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Unique()&#39;</span></div>
+
+
+<div class="viewcode-block" id="Equal"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Equal">[docs]</a><span class="k">class</span> <span class="nc">Equal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensure that value matches target.</span>
+
+<span class="sd">    &gt;&gt;&gt; s = Schema(Equal(1))</span>
+<span class="sd">    &gt;&gt;&gt; s(1)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; with raises(Invalid):</span>
+<span class="sd">    ...    s(2)</span>
+
+<span class="sd">    Validators are not supported, match must be exact:</span>
+
+<span class="sd">    &gt;&gt;&gt; s = Schema(Equal(str))</span>
+<span class="sd">    &gt;&gt;&gt; with raises(Invalid):</span>
+<span class="sd">    ...     s(&#39;foo&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;Values are not equal: value:{} != target:{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Equal({})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Unordered"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Unordered">[docs]</a><span class="k">class</span> <span class="nc">Unordered</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensures sequence contains values in unspecified order.</span>
+
+<span class="sd">    &gt;&gt;&gt; s = Schema(Unordered([2, 1]))</span>
+<span class="sd">    &gt;&gt;&gt; s([2, 1])</span>
+<span class="sd">    [2, 1]</span>
+<span class="sd">    &gt;&gt;&gt; s([1, 2])</span>
+<span class="sd">    [1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; s = Schema(Unordered([str, int]))</span>
+<span class="sd">    &gt;&gt;&gt; s([&#39;foo&#39;, 1])</span>
+<span class="sd">    [&#39;foo&#39;, 1]</span>
+<span class="sd">    &gt;&gt;&gt; s([1, &#39;foo&#39;])</span>
+<span class="sd">    [1, &#39;foo&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="n">validators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;Value {} is not sequence!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;List lengths differ, value:{} != target:{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span><span class="p">)))</span>
+
+        <span class="n">consumed</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schemas</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">consumed</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">s</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">Invalid</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">consumed</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">el</span> <span class="o">=</span> <span class="n">missing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;Element #{} ({}) is not valid against any validator&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MultipleInvalid</span><span class="p">([</span>
+                <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;Element #{} ({}) is not valid against any validator&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">missing</span>
+            <span class="p">])</span>
+        <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Unordered([{}])&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">))</span></div>
 </pre></div>
 
           </div>
@@ -744,8 +833,6 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module code</a><ul>
-  <li><a href="../voluptuous.html">voluptuous</a><ul>
-  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -769,7 +856,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

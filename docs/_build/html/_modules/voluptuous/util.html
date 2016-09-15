@@ -24,9 +24,10 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="Voluptuous 0.8.11 documentation" href="../../index.html" />
-    <link rel="up" title="voluptuous" href="../voluptuous.html" />
+    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -40,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.util</h1><div class="highlight"><pre>
-<span class="k">try</span><span class="p">:</span>
+<span></span><span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">error</span> <span class="kn">import</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">Invalid</span>
     <span class="kn">from</span> <span class="nn">schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>
     <span class="kn">import</span> <span class="nn">validators</span>
@@ -49,7 +50,7 @@
     <span class="kn">from</span> <span class="nn">.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>
     <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">validators</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tusharmakkar08&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;tusharmakkar08&#39;</span>
 
 
 <div class="viewcode-block" id="Lower"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Lower">[docs]</a><span class="k">def</span> <span class="nf">Lower</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
@@ -123,7 +124,7 @@
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;DefaultTo(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_value</span><span class="p">(),)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;DefaultTo(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_value</span><span class="p">(),)</span></div>
 
 
 <div class="viewcode-block" id="SetTo"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.SetTo">[docs]</a><span class="k">class</span> <span class="nc">SetTo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -143,7 +144,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;SetTo(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(),)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;SetTo(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(),)</span></div>
 
 
 <div class="viewcode-block" id="Set"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Set">[docs]</a><span class="k">class</span> <span class="nc">Set</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -166,11 +167,11 @@
             <span class="n">set_v</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TypeInvalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;cannot be presented as set: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;cannot be presented as set: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">set_v</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;Set()&#39;</span></div>
+        <span class="k">return</span> <span class="s1">&#39;Set()&#39;</span></div>
 
 
 <div class="viewcode-block" id="Literal"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Literal">[docs]</a><span class="k">class</span> <span class="nc">Literal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -180,7 +181,7 @@
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">LiteralInvalid</span><span class="p">(</span>
-                <span class="n">msg</span> <span class="ow">or</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> not match for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not match for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span>
@@ -201,8 +202,6 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module code</a><ul>
-  <li><a href="../voluptuous.html">voluptuous</a><ul>
-  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -226,7 +225,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

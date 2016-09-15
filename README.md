@@ -25,12 +25,12 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 ## Documentation
 
-The documentation is provided [here] (http://alecthomas.github.io/voluptuous/). 
+The documentation is provided [here] (http://alecthomas.github.io/voluptuous/).
 
 ## Contribution to Documentation
 
 Documentation is built using `Sphinx`. You can install it by
- 
+
     pip install -r requirements.txt
 
 For building `sphinx-apidoc` from scratch you need to set PYTHONPATH to `voluptuous/voluptuous` repository.

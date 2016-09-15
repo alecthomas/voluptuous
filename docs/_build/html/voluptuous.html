@@ -24,8 +24,11 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Voluptuous 0.8.11 documentation" href="index.html" />
+    <link rel="next" title="voluptuous.tests package" href="voluptuous.tests.html" />
+    <link rel="prev" title="Welcome to Voluptuous’s documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -351,36 +354,36 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Optional" title="voluptuous.schema_builder.Optional"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Optional</span></code></a></p>
 <p>Mark a node in the schema as exclusive.</p>
 <p>Exclusive keys inherited from Optional:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Exclusive</span><span class="p">(</span><span class="s">&#39;alpha&#39;</span><span class="p">,</span> <span class="s">&#39;angles&#39;</span><span class="p">):</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Exclusive</span><span class="p">(</span><span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="s">&#39;angles&#39;</span><span class="p">):</span> <span class="nb">int</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({</span><span class="s">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Exclusive</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;angles&#39;</span><span class="p">):</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Exclusive</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;angles&#39;</span><span class="p">):</span> <span class="nb">int</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({</span><span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">})</span>
 <span class="go">{&#39;alpha&#39;: 30}</span>
 </pre></div>
 </div>
 <p>Keys inside a same group of exclusion cannot be together, it only makes sense for dictionaries:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;two or more values in the same group of exclusion &#39;angles&#39; @ data[&lt;angles&gt;]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">schema</span><span class="p">({</span><span class="s">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s">&#39;beta&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;two or more values in the same group of exclusion &#39;angles&#39; @ data[&lt;angles&gt;]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s1">&#39;beta&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">})</span>
 </pre></div>
 </div>
 <p>For example, API can provides multiple types of authentication, but only one works in the same time:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Please, use only one type of authentication at the same time.&#39;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Please, use only one type of authentication at the same time.&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
-<span class="gp">... </span><span class="n">Exclusive</span><span class="p">(</span><span class="s">&#39;classic&#39;</span><span class="p">,</span> <span class="s">&#39;auth&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):{</span>
-<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s">&#39;email&#39;</span><span class="p">):</span> <span class="n">basestring</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s">&#39;password&#39;</span><span class="p">):</span> <span class="n">basestring</span>
+<span class="gp">... </span><span class="n">Exclusive</span><span class="p">(</span><span class="s1">&#39;classic&#39;</span><span class="p">,</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):{</span>
+<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">):</span> <span class="n">basestring</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">):</span> <span class="n">basestring</span>
 <span class="gp">... </span>    <span class="p">},</span>
-<span class="gp">... </span><span class="n">Exclusive</span><span class="p">(</span><span class="s">&#39;internal&#39;</span><span class="p">,</span> <span class="s">&#39;auth&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):{</span>
-<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s">&#39;secret_key&#39;</span><span class="p">):</span> <span class="n">basestring</span>
+<span class="gp">... </span><span class="n">Exclusive</span><span class="p">(</span><span class="s1">&#39;internal&#39;</span><span class="p">,</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):{</span>
+<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;secret_key&#39;</span><span class="p">):</span> <span class="n">basestring</span>
 <span class="gp">... </span>    <span class="p">},</span>
-<span class="gp">... </span><span class="n">Exclusive</span><span class="p">(</span><span class="s">&#39;social&#39;</span><span class="p">,</span> <span class="s">&#39;auth&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):{</span>
-<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s">&#39;social_network&#39;</span><span class="p">):</span> <span class="n">basestring</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s">&#39;token&#39;</span><span class="p">):</span> <span class="n">basestring</span>
+<span class="gp">... </span><span class="n">Exclusive</span><span class="p">(</span><span class="s1">&#39;social&#39;</span><span class="p">,</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):{</span>
+<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;social_network&#39;</span><span class="p">):</span> <span class="n">basestring</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">Required</span><span class="p">(</span><span class="s1">&#39;token&#39;</span><span class="p">):</span> <span class="n">basestring</span>
 <span class="gp">... </span>    <span class="p">}</span>
 <span class="gp">... </span><span class="p">})</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;Please, use only one type of authentication at the same time. @ data[&lt;auth&gt;]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s">&#39;classic&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="s">&#39;foo@example.com&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">:</span> <span class="s">&#39;bar&#39;</span><span class="p">},</span>
-<span class="gp">... </span>            <span class="s">&#39;social&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;social_network&#39;</span><span class="p">:</span> <span class="s">&#39;barfoo&#39;</span><span class="p">,</span> <span class="s">&#39;token&#39;</span><span class="p">:</span> <span class="s">&#39;tEMp&#39;</span><span class="p">}})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;Please, use only one type of authentication at the same time. @ data[&lt;auth&gt;]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;classic&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">},</span>
+<span class="gp">... </span>            <span class="s1">&#39;social&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;social_network&#39;</span><span class="p">:</span> <span class="s1">&#39;barfoo&#39;</span><span class="p">,</span> <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="s1">&#39;tEMp&#39;</span><span class="p">}})</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -397,42 +400,42 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Optional" title="voluptuous.schema_builder.Optional"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Optional</span></code></a></p>
 <p>Mark a node in the schema as inclusive.</p>
 <p>Exclusive keys inherited from Optional:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
-<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s">&#39;filename&#39;</span><span class="p">,</span> <span class="s">&#39;file&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s">&#39;mimetype&#39;</span><span class="p">,</span> <span class="s">&#39;file&#39;</span><span class="p">):</span> <span class="nb">str</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s1">&#39;mimetype&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">):</span> <span class="nb">str</span>
 <span class="gp">... </span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="s">&#39;dog.jpg&#39;</span><span class="p">,</span> <span class="s">&#39;mimetype&#39;</span><span class="p">:</span> <span class="s">&#39;image/jpeg&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;dog.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;mimetype&#39;</span><span class="p">:</span> <span class="s1">&#39;image/jpeg&#39;</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">==</span> <span class="n">schema</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="go">True</span>
 </pre></div>
 </div>
 <p>Keys inside a same group of inclusive must exist together, it only makes sense for dictionaries:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;some but not all values in the same group of inclusion &#39;file&#39; @ data[&lt;file&gt;]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="s">&#39;dog.jpg&#39;</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;some but not all values in the same group of inclusion &#39;file&#39; @ data[&lt;file&gt;]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;dog.jpg&#39;</span><span class="p">})</span>
 </pre></div>
 </div>
 <p>If none of the keys in the group are present, it is accepted:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
 <span class="go">{}</span>
 </pre></div>
 </div>
 <p>For example, API can return &#8216;height&#8217; and &#8216;width&#8217; together, but not separately.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Height and width must exist together&quot;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Height and width must exist together&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
-<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):</span> <span class="nb">int</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s">&#39;width&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):</span> <span class="nb">int</span>
+<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):</span> <span class="nb">int</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">):</span> <span class="nb">int</span>
 <span class="gp">... </span><span class="p">})</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">msg</span> <span class="o">+</span> <span class="s">&quot; @ data[&lt;size&gt;]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s">&#39;height&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">msg</span> <span class="o">+</span> <span class="s2">&quot; @ data[&lt;size&gt;]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">msg</span> <span class="o">+</span> <span class="s">&quot; @ data[&lt;size&gt;]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s">&#39;width&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">msg</span> <span class="o">+</span> <span class="s2">&quot; @ data[&lt;size&gt;]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">})</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;height&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s">&#39;width&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">==</span> <span class="n">schema</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="go">True</span>
 </pre></div>
@@ -451,28 +454,28 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Msg</code><span class="sig-paren">(</span><em>schema</em>, <em>msg</em>, <em>cls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Report a user-friendly message if a schema fails to validate.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span>
-<span class="gp">... </span>  <span class="n">Msg</span><span class="p">([</span><span class="s">&#39;one&#39;</span><span class="p">,</span> <span class="s">&#39;two&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-<span class="gp">... </span>      <span class="s">&#39;should be one of &quot;one&quot;, &quot;two&quot; or an integer&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;should be one of &quot;one&quot;, &quot;two&quot; or an integer&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">([</span><span class="s">&#39;three&#39;</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span>
+<span class="gp">... </span>  <span class="n">Msg</span><span class="p">([</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="gp">... </span>      <span class="s1">&#39;should be one of &quot;one&quot;, &quot;two&quot; or an integer&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;should be one of &quot;one&quot;, &quot;two&quot; or an integer&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">([</span><span class="s1">&#39;three&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Messages are only applied to invalid direct descendants of the schema:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Msg</span><span class="p">([[</span><span class="s">&#39;one&#39;</span><span class="p">,</span> <span class="s">&#39;two&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="s">&#39;not okay!&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected int @ data[0][0]&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">([[</span><span class="s">&#39;three&#39;</span><span class="p">]])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Msg</span><span class="p">([[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="s1">&#39;not okay!&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected int @ data[0][0]&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">([[</span><span class="s1">&#39;three&#39;</span><span class="p">]])</span>
 </pre></div>
 </div>
 <p>The type which is thrown can be overridden but needs to be a subclass of Invalid</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">,</span> <span class="s">&#39;Msg can only use subclases of Invalid as custom class&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Msg</span><span class="p">([</span><span class="nb">int</span><span class="p">],</span> <span class="s">&#39;should be int&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="ne">KeyError</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">SchemaError</span><span class="p">,</span> <span class="s1">&#39;Msg can only use subclases of Invalid as custom class&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Msg</span><span class="p">([</span><span class="nb">int</span><span class="p">],</span> <span class="s1">&#39;should be int&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="ne">KeyError</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>If you do use a subclass of Invalid, that error will be thrown (wrapped in a MultipleInvalid)</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Msg</span><span class="p">([[</span><span class="s">&#39;one&#39;</span><span class="p">,</span> <span class="s">&#39;two&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="s">&#39;not okay!&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">er</span><span class="o">.</span><span class="n">RangeInvalid</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Msg</span><span class="p">([[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="s1">&#39;not okay!&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">er</span><span class="o">.</span><span class="n">RangeInvalid</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
-<span class="gp">... </span> <span class="n">validate</span><span class="p">([</span><span class="s">&#39;three&#39;</span><span class="p">])</span>
+<span class="gp">... </span> <span class="n">validate</span><span class="p">([</span><span class="s1">&#39;three&#39;</span><span class="p">])</span>
 <span class="gp">... </span><span class="k">except</span> <span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 <span class="gp">... </span>  <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">er</span><span class="o">.</span><span class="n">RangeInvalid</span><span class="p">)</span>
 </pre></div>
@@ -491,23 +494,23 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Optional</code><span class="sig-paren">(</span><em>schema</em>, <em>msg=None</em>, <em>default=...</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Optional"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Optional" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Marker" title="voluptuous.schema_builder.Marker"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Marker</span></code></a></p>
 <p>Mark a node in the schema as optional, and optionally provide a default</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
 <span class="go">{}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;value&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
 <span class="go">{&#39;key&#39;: &#39;value&#39;}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">list</span><span class="p">):</span> <span class="nb">list</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">list</span><span class="p">):</span> <span class="nb">list</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
 <span class="go">{&#39;key&#39;: []}</span>
 </pre></div>
 </div>
 <p>If &#8216;required&#8217; flag is set for an entire schema, optional keys aren&#8217;t required</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
-<span class="gp">... </span>   <span class="n">Optional</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
-<span class="gp">... </span>   <span class="s">&#39;key2&#39;</span><span class="p">:</span> <span class="nb">str</span>
-<span class="gp">... </span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({</span><span class="s">&#39;key2&#39;</span><span class="p">:</span><span class="s">&#39;value&#39;</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
+<span class="gp">... </span>   <span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="s1">&#39;key2&#39;</span><span class="p">:</span> <span class="nb">str</span>
+<span class="gp">... </span><span class="p">},</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({</span><span class="s1">&#39;key2&#39;</span><span class="p">:</span><span class="s1">&#39;value&#39;</span><span class="p">})</span>
 <span class="go">{&#39;key2&#39;: &#39;value&#39;}</span>
 </pre></div>
 </div>
@@ -520,13 +523,13 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <p>Mark a node in the schema to be removed and excluded from the validated
 output. Keys that fail validation will not raise <code class="docutils literal"><span class="pre">Invalid</span></code>. Instead, these
 keys will be treated as extras.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="nb">str</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Remove</span><span class="p">(</span><span class="nb">int</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;extra keys not allowed @ data[1]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>   <span class="n">schema</span><span class="p">({</span><span class="s">&#39;keep&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="s">&#39;red&#39;</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s">&#39;green&#39;</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="nb">str</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Remove</span><span class="p">(</span><span class="nb">int</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;extra keys not allowed @ data[1]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="n">schema</span><span class="p">({</span><span class="s1">&#39;keep&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;green&#39;</span><span class="p">})</span>
 <span class="go">{&#39;red&#39;: 1}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">([</span><span class="nb">int</span><span class="p">,</span> <span class="n">Remove</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">Extra</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="s">&#39;7&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">])</span>
 <span class="go">[1, 2, 3, 5, &#39;7&#39;]</span>
 </pre></div>
 </div>
@@ -537,15 +540,15 @@ keys will be treated as extras.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Required</code><span class="sig-paren">(</span><em>schema</em>, <em>msg=None</em>, <em>default=...</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Required"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Required" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Marker" title="voluptuous.schema_builder.Marker"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Marker</span></code></a></p>
 <p>Mark a node in the schema as being required, and optionally provide a default value.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;required key not provided @ data[&#39;key&#39;]&quot;</span><span class="p">):</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;required key not provided @ data[&#39;key&#39;]&quot;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">schema</span><span class="p">({})</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;value&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
 <span class="go">{&#39;key&#39;: &#39;value&#39;}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">list</span><span class="p">):</span> <span class="nb">list</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">list</span><span class="p">):</span> <span class="nb">list</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span><span class="p">({})</span>
 <span class="go">{&#39;key&#39;: []}</span>
 </pre></div>
@@ -620,27 +623,27 @@ this, unless overridden.</p>
 <code class="descclassname">voluptuous.schema_builder.</code><code class="descname">message</code><span class="sig-paren">(</span><em>default=None</em>, <em>cls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience decorator to allow functions to provide a message.</p>
 <p>Set a default message:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nd">@message</span><span class="p">(</span><span class="s">&#39;not an integer&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;not an integer&#39;</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">isint</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isint</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;not an integer&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isint</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;not an integer&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The message can be overridden on a per validator basis:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isint</span><span class="p">(</span><span class="s">&#39;bad&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;bad&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isint</span><span class="p">(</span><span class="s1">&#39;bad&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;bad&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The class thrown too:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">IntegerInvalid</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">):</span> <span class="k">pass</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isint</span><span class="p">(</span><span class="s">&#39;bad&#39;</span><span class="p">,</span> <span class="n">clsoverride</span><span class="o">=</span><span class="n">IntegerInvalid</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">IntegerInvalid</span><span class="p">(</span><span class="n">er</span><span class="o">.</span><span class="n">Invalid</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isint</span><span class="p">(</span><span class="s1">&#39;bad&#39;</span><span class="p">,</span> <span class="n">clsoverride</span><span class="o">=</span><span class="n">IntegerInvalid</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
-<span class="gp">... </span> <span class="n">validate</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span>
+<span class="gp">... </span> <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">except</span> <span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 <span class="gp">... </span>  <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">IntegerInvalid</span><span class="p">)</span>
 </pre></div>
@@ -652,6 +655,11 @@ this, unless overridden.</p>
 <code class="descclassname">voluptuous.schema_builder.</code><code class="descname">raises</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#raises"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.raises" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="function">
+<dt id="voluptuous.schema_builder.validate_schema">
+<code class="descclassname">voluptuous.schema_builder.</code><code class="descname">validate_schema</code><span class="sig-paren">(</span><em>*a</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#validate_schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.validate_schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-voluptuous.util">
 <span id="voluptuous-util-module"></span><h2>voluptuous.util module<a class="headerlink" href="#module-voluptuous.util" title="Permalink to this headline">¶</a></h2>
@@ -659,8 +667,8 @@ this, unless overridden.</p>
 <dt id="voluptuous.util.Capitalize">
 <code class="descclassname">voluptuous.util.</code><code class="descname">Capitalize</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#Capitalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.Capitalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Capitalise a string.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Capitalize</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;hello world&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Capitalize</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">)</span>
 <span class="go">&#39;Hello world&#39;</span>
 </pre></div>
 </div>
@@ -671,11 +679,11 @@ this, unless overridden.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.util.</code><code class="descname">DefaultTo</code><span class="sig-paren">(</span><em>default_value</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#DefaultTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.DefaultTo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Sets a value to default_value if none provided.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">DefaultTo</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="k">None</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">DefaultTo</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 <span class="go">42</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">DefaultTo</span><span class="p">(</span><span class="nb">list</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="k">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 <span class="go">[]</span>
 </pre></div>
 </div>
@@ -691,8 +699,8 @@ this, unless overridden.</p>
 <dt id="voluptuous.util.Lower">
 <code class="descclassname">voluptuous.util.</code><code class="descname">Lower</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#Lower"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.Lower" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a string to lower case.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Lower</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;HI&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Lower</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;HI&#39;</span><span class="p">)</span>
 <span class="go">&#39;hi&#39;</span>
 </pre></div>
 </div>
@@ -703,12 +711,12 @@ this, unless overridden.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.util.</code><code class="descname">Set</code><span class="sig-paren">(</span><em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#Set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.Set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Convert a list into a set.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Set</span><span class="p">())</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Set</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([])</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s">&quot;^cannot be presented as set: &quot;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^cannot be presented as set: &quot;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">s</span><span class="p">([</span><span class="nb">set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="nb">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])])</span>
 </pre></div>
 </div>
@@ -719,10 +727,10 @@ this, unless overridden.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.util.</code><code class="descname">SetTo</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#SetTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.SetTo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Set a value, ignoring any previous value.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">validators</span><span class="o">.</span><span class="n">Any</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">SetTo</span><span class="p">(</span><span class="mi">42</span><span class="p">)))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">validators</span><span class="o">.</span><span class="n">Any</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">SetTo</span><span class="p">(</span><span class="mi">42</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">)</span>
 <span class="go">42</span>
 </pre></div>
 </div>
@@ -732,8 +740,8 @@ this, unless overridden.</p>
 <dt id="voluptuous.util.Strip">
 <code class="descclassname">voluptuous.util.</code><code class="descname">Strip</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#Strip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.Strip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Strip whitespace from a string.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Strip</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;  hello world  &#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Strip</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;  hello world  &#39;</span><span class="p">)</span>
 <span class="go">&#39;hello world&#39;</span>
 </pre></div>
 </div>
@@ -743,8 +751,8 @@ this, unless overridden.</p>
 <dt id="voluptuous.util.Title">
 <code class="descclassname">voluptuous.util.</code><code class="descname">Title</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#Title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.Title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Title case a string.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Title</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;hello world&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Title</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">)</span>
 <span class="go">&#39;Hello World&#39;</span>
 </pre></div>
 </div>
@@ -754,8 +762,8 @@ this, unless overridden.</p>
 <dt id="voluptuous.util.Upper">
 <code class="descclassname">voluptuous.util.</code><code class="descname">Upper</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#Upper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.Upper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a string to upper case.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Upper</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;hi&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Upper</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;hi&#39;</span><span class="p">)</span>
 <span class="go">&#39;HI&#39;</span>
 </pre></div>
 </div>
@@ -782,8 +790,8 @@ this, unless overridden.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">All</span><span class="p">(</span><span class="s">&#39;10&#39;</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&#39;10&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">All</span><span class="p">(</span><span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;10&#39;</span><span class="p">)</span>
 <span class="go">10</span>
 </pre></div>
 </div>
@@ -815,21 +823,21 @@ this, unless overridden.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="s">&#39;true&#39;</span><span class="p">,</span> <span class="s">&#39;false&#39;</span><span class="p">,</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                      <span class="n">All</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="n">Coerce</span><span class="p">(</span><span class="nb">bool</span><span class="p">))))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&#39;true&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
 <span class="go">&#39;true&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;not a valid value&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;moo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;not a valid value&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;moo&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>msg argument is used</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&quot;Expected 1 2 or 3&quot;</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Expected 1 2 or 3&quot;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;Expected 1 2 or 3&quot;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;Expected 1 2 or 3&quot;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -841,17 +849,17 @@ this, unless overridden.</p>
 <dd><p>Convert human-readable boolean values to a bool.</p>
 <p>Accepted values are 1, true, yes, on, enable, and their negatives.
 Non-string values are cast to bool.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Boolean</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="k">True</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Boolean</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&quot;1&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&quot;0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;expected boolean&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;moo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;expected boolean&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;moo&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
-<span class="gp">... </span> <span class="n">validate</span><span class="p">(</span><span class="s">&#39;moo&#39;</span><span class="p">)</span>
+<span class="gp">... </span> <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;moo&#39;</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 <span class="gp">... </span>  <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">BooleanInvalid</span><span class="p">)</span>
 </pre></div>
@@ -881,17 +889,17 @@ Non-string values are cast to bool.</p>
 <p>If the type constructor throws a ValueError or TypeError, the value
 will be marked as Invalid.</p>
 <p>Default behavior:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected int&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="k">None</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected int&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected int&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected int&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>With custom message:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s">&quot;moo&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;moo&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Coerce</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;moo&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;moo&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -912,15 +920,35 @@ will be marked as Invalid.</p>
 <dt id="voluptuous.validators.Email">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">Email</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Email"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Email" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify that the value is an Email or not.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Email</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected an Email&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s">&quot;a.com&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected an Email&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s">&quot;a@.com&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected an Email&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s">&quot;a@.com&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;t@x.com&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Email</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected an Email&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s2">&quot;a.com&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected an Email&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s2">&quot;a@.com&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected an Email&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s2">&quot;a@.com&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;t@x.com&#39;</span><span class="p">)</span>
 <span class="go">&#39;t@x.com&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="voluptuous.validators.Equal">
+<em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Equal</code><span class="sig-paren">(</span><em>target</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Ensure that value matches target.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Validators are not supported, match must be exact:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">s</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -944,11 +972,11 @@ constructors.</li>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">voluptuous</span> <span class="k">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">ExactSequence</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">voluptuous</span> <span class="k">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">ExactSequence</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">ExactSequence</span><span class="p">([</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">([</span><span class="s">&#39;hourly_report&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">([</span><span class="s1">&#39;hourly_report&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[]])</span>
 <span class="go">[&#39;hourly_report&#39;, 10, [], []]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">((</span><span class="s">&#39;hourly_report&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">((</span><span class="s1">&#39;hourly_report&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[]))</span>
 <span class="go">(&#39;hourly_report&#39;, 10, [], [])</span>
 </pre></div>
 </div>
@@ -958,10 +986,10 @@ constructors.</li>
 <dt id="voluptuous.validators.FqdnUrl">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">FqdnUrl</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#FqdnUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.FqdnUrl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify that the value is a Fully qualified domain name URL.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">FqdnUrl</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected a Fully qualified domain name URL&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s">&quot;http://localhost/&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;http://w3.org&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">FqdnUrl</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected a Fully qualified domain name URL&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s2">&quot;http://localhost/&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;http://w3.org&#39;</span><span class="p">)</span>
 <span class="go">&#39;http://w3.org&#39;</span>
 </pre></div>
 </div>
@@ -978,7 +1006,7 @@ constructors.</li>
 <dt id="voluptuous.validators.IsDir">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">IsDir</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify the directory exists.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">IsDir</span><span class="p">()(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IsDir</span><span class="p">()(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 <span class="go">&#39;/&#39;</span>
 </pre></div>
 </div>
@@ -989,15 +1017,15 @@ constructors.</li>
 <code class="descclassname">voluptuous.validators.</code><code class="descname">IsFalse</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsFalse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsFalse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assert that a value is false, in the Python sense.</p>
 <p>(see <a class="reference internal" href="#voluptuous.validators.IsTrue" title="voluptuous.validators.IsTrue"><code class="xref py py-func docutils literal"><span class="pre">IsTrue()</span></code></a> for more detail)</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">IsFalse</span><span class="p">())</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">IsFalse</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">([])</span>
 <span class="go">[]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;value was not false&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="k">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;value was not false&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
-<span class="gp">... </span> <span class="n">validate</span><span class="p">(</span><span class="k">True</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span> <span class="n">validate</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 <span class="gp">... </span>  <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FalseInvalid</span><span class="p">)</span>
 </pre></div>
@@ -1008,10 +1036,10 @@ constructors.</li>
 <dt id="voluptuous.validators.IsFile">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">IsFile</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify the file exists.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">IsFile</span><span class="p">()(</span><span class="n">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;validators.py&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">IsFile</span><span class="p">()(</span><span class="n">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;validators.py&#39;</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">FileInvalid</span><span class="p">,</span> <span class="s">&#39;not a file&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">IsFile</span><span class="p">()(</span><span class="s">&quot;random_filename_goes_here.py&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">FileInvalid</span><span class="p">,</span> <span class="s1">&#39;not a file&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">IsFile</span><span class="p">()(</span><span class="s2">&quot;random_filename_goes_here.py&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1020,21 +1048,21 @@ constructors.</li>
 <dt id="voluptuous.validators.IsTrue">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">IsTrue</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsTrue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsTrue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assert that a value is true, in the Python sense.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">IsTrue</span><span class="p">())</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">IsTrue</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>&#8220;In the Python sense&#8221; means that implicitly false values, such as empty
 lists, dictionaries, etc. are treated as &#8220;false&#8221;:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;value was not true&quot;</span><span class="p">):</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;value was not true&quot;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">validate</span><span class="p">([])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
 <span class="go">[1]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;value was not true&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="k">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;value was not true&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>...and so on.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
 <span class="gp">... </span> <span class="n">validate</span><span class="p">([])</span>
 <span class="gp">... </span><span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 <span class="gp">... </span>  <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">TrueInvalid</span><span class="p">)</span>
@@ -1054,20 +1082,20 @@ lists, dictionaries, etc. are treated as &#8220;false&#8221;:</p>
 <em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Match</code><span class="sig-paren">(</span><em>pattern</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Value must be a string that matches the regular expression.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Match</span><span class="p">(</span><span class="s">r&#39;^0x[A-F0-9]+$&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&#39;0x123EF4&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Match</span><span class="p">(</span><span class="s1">r&#39;^0x[A-F0-9]+$&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;0x123EF4&#39;</span><span class="p">)</span>
 <span class="go">&#39;0x123EF4&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&quot;does not match regular expression&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;123EF4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s2">&quot;does not match regular expression&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;123EF4&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected string or buffer&#39;</span><span class="p">):</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected string or buffer&#39;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Pattern may also be a _compiled regular expression:</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;0x[A-F0-9]+&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&#39;0x123ef4&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">r&#39;0x[A-F0-9]+&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;0x123ef4&#39;</span><span class="p">)</span>
 <span class="go">&#39;0x123ef4&#39;</span>
 </pre></div>
 </div>
@@ -1090,10 +1118,10 @@ lists, dictionaries, etc. are treated as &#8220;false&#8221;:</p>
 <dt id="voluptuous.validators.PathExists">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">PathExists</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#PathExists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.PathExists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify the path exists, regardless of its type.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">PathExists</span><span class="p">()(</span><span class="n">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;validators.py&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">PathExists</span><span class="p">()(</span><span class="n">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;validators.py&#39;</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="s">&#39;path does not exist&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">PathExists</span><span class="p">()(</span><span class="s">&quot;random_filename_goes_here.py&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="s1">&#39;path does not exist&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">PathExists</span><span class="p">()(</span><span class="s2">&quot;random_filename_goes_here.py&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1113,17 +1141,17 @@ Either min or max can be excluded from the range of accepted values.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_included</span><span class="o">=</span><span class="k">False</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_included</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="go">5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="go">10</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;value must be at most 10&#39;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;value must be at most 10&#39;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;value must be higher than 1&#39;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;value must be higher than 1&#39;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;value must be lower than 10&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">Schema</span><span class="p">(</span><span class="n">Range</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_included</span><span class="o">=</span><span class="k">False</span><span class="p">))(</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;value must be lower than 10&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">Schema</span><span class="p">(</span><span class="n">Range</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_included</span><span class="o">=</span><span class="kc">False</span><span class="p">))(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1133,9 +1161,9 @@ Either min or max can be excluded from the range of accepted values.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Replace</code><span class="sig-paren">(</span><em>pattern</em>, <em>substitution</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Replace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Regex substitution.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">All</span><span class="p">(</span><span class="n">Replace</span><span class="p">(</span><span class="s">&#39;you&#39;</span><span class="p">,</span> <span class="s">&#39;I&#39;</span><span class="p">),</span>
-<span class="gp">... </span>                      <span class="n">Replace</span><span class="p">(</span><span class="s">&#39;hello&#39;</span><span class="p">,</span> <span class="s">&#39;goodbye&#39;</span><span class="p">)))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&#39;you say hello&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">All</span><span class="p">(</span><span class="n">Replace</span><span class="p">(</span><span class="s1">&#39;you&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                      <span class="n">Replace</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;goodbye&#39;</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;you say hello&#39;</span><span class="p">)</span>
 <span class="go">&#39;I say goodbye&#39;</span>
 </pre></div>
 </div>
@@ -1150,21 +1178,40 @@ Either min or max can be excluded from the range of accepted values.</p>
 objects with correct __eq__).</p>
 <p>JSON does not support set, so they need to be presented as arrays.
 Unique allows ensuring that such array does not contain dupes.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unique</span><span class="p">())</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unique</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([])</span>
 <span class="go">[]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 <span class="go">[1, 2]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="s">&#39;contains duplicate items: [1]&#39;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="s1">&#39;contains duplicate items: [1]&#39;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="s">&quot;contains duplicate items: [&#39;one&#39;]&quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">s</span><span class="p">([</span><span class="s">&#39;one&#39;</span><span class="p">,</span> <span class="s">&#39;two&#39;</span><span class="p">,</span> <span class="s">&#39;one&#39;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s">&quot;^contains unhashable elements: &quot;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="s2">&quot;contains duplicate items: [&#39;one&#39;]&quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">([</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;one&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^contains unhashable elements: &quot;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">s</span><span class="p">([</span><span class="nb">set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="nb">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;abc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;abc&#39;</span><span class="p">)</span>
 <span class="go">&#39;abc&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s">&quot;^contains duplicate items: &quot;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s">&#39;aabbc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^contains duplicate items: &quot;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="s1">&#39;aabbc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="voluptuous.validators.Unordered">
+<em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Unordered</code><span class="sig-paren">(</span><em>validators</em>, <em>msg=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Unordered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Unordered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Ensures sequence contains values in unspecified order.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unordered</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">[2, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="go">[1, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unordered</span><span class="p">([</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">[&#39;foo&#39;, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">])</span>
+<span class="go">[1, &#39;foo&#39;]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1173,10 +1220,10 @@ Unique allows ensuring that such array does not contain dupes.</p>
 <dt id="voluptuous.validators.Url">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">Url</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify that the value is a URL.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Url</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;expected a URL&#39;</span><span class="p">):</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Url</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected a URL&#39;</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s">&#39;http://w3.org&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="s1">&#39;http://w3.org&#39;</span><span class="p">)</span>
 <span class="go">&#39;http://w3.org&#39;</span>
 </pre></div>
 </div>
@@ -1186,14 +1233,14 @@ Unique allows ensuring that such array does not contain dupes.</p>
 <dt id="voluptuous.validators.truth">
 <code class="descclassname">voluptuous.validators.</code><code class="descname">truth</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#truth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.truth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience decorator to convert truth functions into validators.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nd">@truth</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@truth</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">isdir</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
 <span class="gp">... </span>  <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">isdir</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 <span class="go">&#39;/&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s">&#39;not a valid value&#39;</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s">&#39;/notavaliddir&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;not a valid value&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">validate</span><span class="p">(</span><span class="s1">&#39;/notavaliddir&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1228,6 +1275,8 @@ Unique allows ensuring that such array does not contain dupes.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Voluptuous&#8217;s documentation!</a></li>
+      <li>Next: <a href="voluptuous.tests.html" title="next chapter">voluptuous.tests package</a></li>
   </ul></li>
 </ul>
 </div>
@@ -1257,7 +1306,7 @@ Unique allows ensuring that such array does not contain dupes.</p>
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="_sources/voluptuous.txt"
