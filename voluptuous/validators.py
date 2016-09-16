@@ -416,8 +416,13 @@ def IsFile(v):
     True
     >>> with raises(FileInvalid, 'not a file'):
     ...   IsFile()("random_filename_goes_here.py")
+    >>> with raises(FileInvalid, 'Not a file'):
+    ...   IsFile()(None)
     """
-    return os.path.isfile(v)
+    if v:
+        return os.path.isfile(v)
+    else:
+        raise FileInvalid('Not a file')
 
 
 @message('not a directory', cls=DirInvalid)
@@ -427,8 +432,13 @@ def IsDir(v):
 
     >>> IsDir()('/')
     '/'
+    >>> with raises(DirInvalid, 'Not a directory'):
+    ...   IsDir()(None)
     """
-    return os.path.isdir(v)
+    if v:
+        return os.path.isdir(v)
+    else:
+        raise DirInvalid("Not a directory")
 
 
 @message('path does not exist', cls=PathInvalid)
@@ -440,8 +450,13 @@ def PathExists(v):
     True
     >>> with raises(Invalid, 'path does not exist'):
     ...   PathExists()("random_filename_goes_here.py")
+    >>> with raises(PathInvalid, 'Not a Path'):
+    ...   PathExists()(None)
     """
-    return os.path.exists(v)
+    if v:
+        return os.path.exists(v)
+    else:
+        raise PathInvalid("Not a Path")
 
 
 class Range(object):
