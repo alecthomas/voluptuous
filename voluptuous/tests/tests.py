@@ -5,7 +5,7 @@ from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate_schema, ExactSequence, Equal, Unordered
+    validate, ExactSequence, Equal, Unordered
 )
 from voluptuous.humanize import humanize_error
 
@@ -423,14 +423,6 @@ def test_fix_157():
     assert_raises(MultipleInvalid, s, ['four'])
 
 
-def test_schema_decorator():
-    @validate_schema(int)
-    def fn(arg):
-        return arg
-
-    fn(1)
-    assert_raises(Invalid, fn, 1.0)
-
 
 def test_range_exlcudes_nan():
     s = Schema(Range(min=0, max=10))
@@ -485,3 +477,83 @@ def test_empty_list_as_exact():
     s = Schema([])
     assert_raises(Invalid, s, [1])
     s([])
+
+
+def test_schema_decorator_match_with_args():
+    @validate(int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_with_args():
+    @validate(int)
+    def fn(arg):
+        return arg
+
+    assert_raises(Invalid, fn, 1.0)
+
+
+def test_schema_decorator_match_with_kwargs():
+    @validate(arg=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_with_kwargs():
+    @validate(arg=int)
+    def fn(arg):
+        return arg
+
+    assert_raises(Invalid, fn, 1.0)
+
+
+def test_schema_decorator_match_return_with_args():
+    @validate(int, __return__=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_return_with_args():
+    @validate(int, __return__=int)
+    def fn(arg):
+        return "hello"
+
+    assert_raises(Invalid, fn, 1)
+
+
+def test_schema_decorator_match_return_with_kwargs():
+    @validate(arg=int, __return__=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_return_with_kwargs():
+    @validate(arg=int, __return__=int)
+    def fn(arg):
+        return "hello"
+
+    assert_raises(Invalid, fn, 1)
+
+
+def test_schema_decorator_return_only_match():
+    @validate(__return__=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_return_only_unmatch():
+    @validate(__return__=int)
+    def fn(arg):
+        return "hello"
+
+    assert_raises(Invalid, fn, 1)
