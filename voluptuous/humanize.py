@@ -9,11 +9,10 @@ def _nested_getitem(data, path):
     for item_index in path:
         try:
             data = data[item_index]
-        except (KeyError, IndexError):
-            # The index is not present in the dictionary, list or other indexable
+        except (KeyError, IndexError, TypeError):
+            # The index is not present in the dictionary, list or other
+            # indexable or data is not subscriptable
             return None
-        except TypeError: # data is not subscriptable
-            break
     return data
 
 
