@@ -12,6 +12,8 @@ def _nested_getitem(data, path):
         except (KeyError, IndexError):
             # The index is not present in the dictionary, list or other indexable
             return None
+        except TypeError: # data is not subscriptable
+            break
     return data
 
 
