@@ -583,35 +583,35 @@ def test_number_validation_with_invalid_precision_invalid_scale():
         assert False, "Did not raise Invalid for String"
 
 
-def test_number_validation_with_valid_precision_scale():
+def test_number_validation_with_valid_precision_scale_yield_decimal_true():
     """ test with Number with valid precision and scale"""
     schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=True)})
     out_ = schema({"number": '1234.00'})
     assert_equal(float(out_.get("number")), 1234.00)
 
 
-def test_number_when_precision_scale_none():
+def test_number_when_precision_scale_none_yield_decimal_true():
     """ test with Number with no precision and scale"""
     schema = Schema({"number" : Number(yield_decimal=True)})
     out_ = schema({"number": '12345678901234'})
     assert_equal(out_.get("number"), 12345678901234)
 
 
-def test_number_when_precision_none_n_valid_scale_case1():
+def test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true():
     """ test with Number with no precision and valid scale case 1"""
     schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789.34'})
     assert_equal(float(out_.get("number")), 123456789.34)
 
 
-def test_number_when_precision_none_n_valid_scale_case2():
+def test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true():
     """ test with Number with no precision and valid scale case 2 with zero in decimal part"""
     schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789012.00'})
     assert_equal(float(out_.get("number")), 123456789012.00)
 
 
-def test_number_when_precision_none_n_invalid_scale():
+def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
     """ test with Number with no precision and invalid scale"""
     schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
     try:
@@ -623,14 +623,14 @@ def test_number_when_precision_none_n_invalid_scale():
         assert False, "Did not raise Invalid for String"
 
 
-def test_number_when_valid_precision_n_scale_none():
+def test_number_when_valid_precision_n_scale_none_yield_decimal_true():
     """ test with Number with no precision and valid scale"""
     schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
     out_ = schema({"number": '1234567.8901234'})
     assert_equal(float(out_.get("number")), 1234567.8901234)
 
 
-def test_number_when_invalid_precision_n_scale_none():
+def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
     """ test with Number with no precision and invalid scale"""
     schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
     try:
@@ -642,16 +642,8 @@ def test_number_when_invalid_precision_n_scale_none():
         assert False, "Did not raise Invalid for String"
 
 
-def test_number_validation_with_valid_precision_scale_yield_decimal_none():
-    """ test with Number with valid precision, scale and no yield_decimal"""
-    schema = Schema({"number" : Number(precision=6, scale=2)})
-    out_ = schema({"number": '1234.00'})
-    assert_equal(out_.get("number"), '1234.00')
-
-
 def test_number_validation_with_valid_precision_scale_yield_decimal_false():
     """ test with Number with valid precision, scale and no yield_decimal"""
     schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=False)})
     out_ = schema({"number": '1234.00'})
     assert_equal(out_.get("number"), '1234.00')
-

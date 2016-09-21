@@ -796,7 +796,6 @@ class Unordered(object):
         return 'Unordered([{}])'.format(", ".join(repr(v) for v in self.validators))
 
 
-
 class Number(object):
     """
     Verify the number of digits that are present in the number(Precision),
