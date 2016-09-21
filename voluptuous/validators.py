@@ -3,7 +3,7 @@ import re
 import datetime
 import sys
 from functools import wraps
-
+from decimal import Decimal, InvalidOperation
 
 try:
     from schema_builder import Schema, raises, message
@@ -794,3 +794,63 @@ class Unordered(object):
 
     def __repr__(self):
         return 'Unordered([{}])'.format(", ".join(repr(v) for v in self.validators))
+
+
+
+class Number(object):
+    """
+    Verify the number of digits that are present in the number(Precision),
+    and the decimal places(Scale)
+
+    :raises Invalid: If the value does not match the provided Precision and Scale.
+
+    >>> schema = Schema(Number(precision=6, scale=2))
+    >>> schema('1234.01')
+    '1234.01'
+    >>> schema = Schema(Number(precision=6, scale=2, yield_decimal=True))
+    >>> schema('1234.01')
+    Decimal('1234.01')
+    """
+
+    def __init__(self, precision=None, scale=None, msg=None, yield_decimal=False):
+        self.precision = precision
+        self.scale = scale
+        self.msg = msg
+        self.yield_decimal = yield_decimal
+
+    def __call__(self, v):
+        """
+        :param v: is a number enclosed with string
+        :return: Decimal number
+        """
+        precision, scale, decimal_num = self._get_precision_scale(v)
+
+        if self.precision is not None and self.scale is not None and\
+            precision != self.precision and scale != self.scale:
+            raise Invalid(self.msg or "Precision must be equal to %s, and Scale must be equal to %s" %(self.precision, self.scale))
+        else:
+            if self.precision is not None and precision != self.precision:
+                raise Invalid(self.msg or "Precision must be equal to %s"%self.precision)
+
+            if self.scale is not None and scale != self.scale :
+                raise Invalid(self.msg or "Scale must be equal to %s"%self.scale)
+
+        if self.yield_decimal:
+            return decimal_num
+        else:
+            return v
+
+    def __repr__(self):
+        return ('Number(precision=%s, scale=%s, msg=%s)' % (self.precision, self.scale, self.msg))
+
+    def _get_precision_scale(self, number):
+        """
+        :param number:
+        :return: tuple(precision, scale, decimal_number)
+        """
+        try:
+            decimal_num = Decimal(number)
+        except InvalidOperation:
+            raise Invalid(self.msg or 'Value must be a number enclosed with string')
+
+        return (len(decimal_num.as_tuple().digits), -(decimal_num.as_tuple().exponent), decimal_num)
