@@ -153,6 +153,21 @@ class Schema(object):
     Nodes can be values, in which case a direct comparison is used, types,
     in which case an isinstance() check is performed, or callables, which will
     validate and optionally convert the value.
+
+    We can equate schemas also.
+
+    For Example:
+
+            >>> class Structure(object):
+            ...     def __init__(self, one=None, three=None):
+            ...         self.one = one
+            ...         self.three = three
+            ...
+            >>> validate = Schema(Object({'one': 'two', 'three': 'four'}, cls=Structure))
+            >>> validate1 = Schema(Object({'one': 'two', 'three': 'four'}, cls=Structure))
+            >>> assert validate1 == validate
+            >>> validate2 = Schema(Object({'one1': 'two1', 'three': 'four'}, cls=Structure))
+            >>> assert validate2 != validate
     """
 
     _extra_to_name = {
@@ -180,6 +195,11 @@ class Schema(object):
         self.required = required
         self.extra = int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
+
+    def __eq__(self, other):
+        if other == self.schema:
+            return True
+        return False
 
     def __repr__(self):
         return "<Schema(%s, extra=%s, required=%s) object at 0x%x>" % (
@@ -1053,7 +1073,7 @@ def validate(*a, **kw):
     Set restriction for returned value:
 
         >>> @validate(arg=int, __return__=int)
-        ... def foo(arg1):
+        ... def bar(arg1):
         ...   return arg1 * 2
 
     """
