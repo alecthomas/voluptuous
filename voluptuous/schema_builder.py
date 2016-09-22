@@ -1073,7 +1073,7 @@ def validate(*a, **kw):
     Set restriction for returned value:
 
         >>> @validate(arg=int, __return__=int)
-        ... def foo(arg1):
+        ... def bar(arg1):
         ...   return arg1 * 2
 
     """
