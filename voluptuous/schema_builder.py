@@ -158,16 +158,12 @@ class Schema(object):
 
     For Example:
 
-            >>> class Structure(object):
-            ...     def __init__(self, one=None, three=None):
-            ...         self.one = one
-            ...         self.three = three
-            ...
-            >>> validate = Schema(Object({'one': 'two', 'three': 'four'}, cls=Structure))
-            >>> validate1 = Schema(Object({'one': 'two', 'three': 'four'}, cls=Structure))
-            >>> assert validate1 == validate
-            >>> validate2 = Schema(Object({'one1': 'two1', 'three': 'four'}, cls=Structure))
-            >>> assert validate2 != validate
+            >>> v = Schema({Required('a'): unicode})
+            >>> v1 = Schema({Required('a'): unicode})
+            >>> v2 = Schema({Required('b'): unicode})
+            >>> assert v == v1
+            >>> assert v != v2
+
     """
 
     _extra_to_name = {
@@ -197,9 +193,13 @@ class Schema(object):
         self._compiled = self._compile(schema)
 
     def __eq__(self, other):
-        if other == self.schema:
+        if str(other) == str(self.schema):
+            # Because repr is combination mixture of object and schema
             return True
         return False
+
+    def __str__(self):
+        return str(self.schema)
 
     def __repr__(self):
         return "<Schema(%s, extra=%s, required=%s) object at 0x%x>" % (
