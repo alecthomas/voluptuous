@@ -9,6 +9,11 @@ python:
   - "3.5"
   - "pypy"
 # command to install dependencies
-#install: "pip install -r requirements.txt --use-mirrors"
+install:
+  - pip install coveralls
+  # Need to do this since coverage is broken in travis https://github.com/travis-ci/travis-ci/issues/4866
+  - pip install 'coverage<4'
 # command to run tests
-script: nosetests
+script: nosetests --with-coverage --cover-package=voluptuous
+after_success:
+  - coveralls
