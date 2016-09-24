@@ -423,7 +423,6 @@ def test_fix_157():
     assert_raises(MultipleInvalid, s, ['four'])
 
 
-
 def test_range_exlcudes_nan():
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, float('nan'))
