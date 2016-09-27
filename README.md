@@ -27,6 +27,10 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 The documentation is provided [here] (http://alecthomas.github.io/voluptuous/). 
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## Show me an example
 
 Twitter's [user search API](https://dev.twitter.com/docs/api/1/get/users/search) accepts
