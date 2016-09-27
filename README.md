@@ -224,10 +224,13 @@ contain anything, specify it as `list`:
 
 ```pycon
 >>> schema = Schema([])
->>> schema([1])  # doctest: +IGNORE_EXCEPTION_DETAIL
-Traceback (most recent call last):
-    ...
-MultipleInvalid: not a valid value
+>>> try:
+...   schema([1])
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "not a valid value"
+True
 >>> schema([])
 []
 >>> schema = Schema(list)
