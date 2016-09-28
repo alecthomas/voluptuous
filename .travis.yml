@@ -13,6 +13,7 @@ install:
   - pip install coveralls
   # Need to do this since coverage is broken in travis https://github.com/travis-ci/travis-ci/issues/4866
   - pip install 'coverage<4'
+  - pip install pytest>=3.0.2 pytest-cov
 # command to run tests
 script: py.test --cov voluptuous voluptuous/tests/tests.py
 after_success:
