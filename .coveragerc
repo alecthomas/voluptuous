@@ -1,2 +1,5 @@
 [run]
 omit = *tests*
+branch = True
+source =
+       voluptuous
