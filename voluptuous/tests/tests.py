@@ -1,13 +1,14 @@
 import copy
-from nose.tools import assert_equal, assert_raises
+from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
     Schema, Required, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate, ExactSequence, Equal, Unordered
+    validate, ExactSequence, Equal, Unordered, Number
 )
 from voluptuous.humanize import humanize_error
+from voluptuous.util import to_utf8_py2, u
 
 
 def test_exact_sequence():
@@ -556,3 +557,120 @@ def test_schema_decorator_return_only_unmatch():
         return "hello"
 
     assert_raises(Invalid, fn, 1)
+
+
+def test_unicode_key_is_converted_to_utf8_when_in_marker():
+    """Verify that when using unicode key the 'u' prefix is not thrown in the exception"""
+    schema = Schema({Required(u('q')): 1})
+    # Can't use nose's raises (because we need to access the raised
+    # exception, nor assert_raises which fails with Python 2.6.9.
+    try:
+        schema({})
+    except Invalid as e:
+        assert_equal(str(e), "required key not provided @ data['q']")
+
+
+def test_number_validation_with_string():
+    """ test with Number with string"""
+    schema = Schema({"number" : Number(precision=6, scale=2)})
+    try:
+        schema({"number": 'teststr'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Value must be a number enclosed with string for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_unicode_key_is_converted_to_utf8_when_plain_text():
+    key = u('q')
+    schema = Schema({key: int})
+    # Can't use nose's raises (because we need to access the raised
+    # exception, nor assert_raises which fails with Python 2.6.9.
+    try:
+        schema({key: 'will fail'})
+    except Invalid as e:
+        assert_equal(str(e), "expected int for dictionary value @ data['q']")
+
+
+def test_number_validation_with_invalid_precision_invalid_scale():
+    """ test with Number with invalid precision and scale"""
+    schema = Schema({"number" : Number(precision=6, scale=2)})
+    try:
+        schema({"number": '123456.712'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Precision must be equal to 6, and Scale must be equal to 2 for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_number_validation_with_valid_precision_scale_yield_decimal_true():
+    """ test with Number with valid precision and scale"""
+    schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=True)})
+    out_ = schema({"number": '1234.00'})
+    assert_equal(float(out_.get("number")), 1234.00)
+
+
+def test_number_when_precision_scale_none_yield_decimal_true():
+    """ test with Number with no precision and scale"""
+    schema = Schema({"number" : Number(yield_decimal=True)})
+    out_ = schema({"number": '12345678901234'})
+    assert_equal(out_.get("number"), 12345678901234)
+
+
+def test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true():
+    """ test with Number with no precision and valid scale case 1"""
+    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    out_ = schema({"number": '123456789.34'})
+    assert_equal(float(out_.get("number")), 123456789.34)
+
+
+def test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true():
+    """ test with Number with no precision and valid scale case 2 with zero in decimal part"""
+    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    out_ = schema({"number": '123456789012.00'})
+    assert_equal(float(out_.get("number")), 123456789012.00)
+
+
+def test_to_utf8():
+    s = u('hello')
+    assert_true(isinstance(to_utf8_py2(s), str))
+
+
+def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
+    """ test with Number with no precision and invalid scale"""
+    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    try:
+        schema({"number": '12345678901.234'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Scale must be equal to 2 for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_number_when_valid_precision_n_scale_none_yield_decimal_true():
+    """ test with Number with no precision and valid scale"""
+    schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
+    out_ = schema({"number": '1234567.8901234'})
+    assert_equal(float(out_.get("number")), 1234567.8901234)
+
+
+def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
+    """ test with Number with no precision and invalid scale"""
+    schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
+    try:
+        schema({"number": '12345674.8901234'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Precision must be equal to 14 for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_number_validation_with_valid_precision_scale_yield_decimal_false():
+    """ test with Number with valid precision, scale and no yield_decimal"""
+    schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=False)})
+    out_ = schema({"number": '1234.00'})
+    assert_equal(out_.get("number"), '1234.00')

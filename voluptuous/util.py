@@ -1,3 +1,5 @@
+import sys
+
 try:
     from error import LiteralInvalid, TypeInvalid, Invalid
     from schema_builder import Schema, default_factory, raises
@@ -148,3 +150,16 @@ class Literal(object):
 
     def __repr__(self):
         return repr(self.lit)
+
+
+def to_utf8_py2(data):
+    if sys.version_info < (3,) and isinstance(data, unicode):
+        return data.encode('utf-8')
+    return data
+
+
+def u(x):
+    if sys.version_info < (3,):
+        return unicode(x)
+    else:
+        return x
