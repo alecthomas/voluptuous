@@ -608,8 +608,43 @@ class Schema(object):
         assert type(self.schema) == dict and type(schema) == dict, 'Both schemas must be dictionary-based'
 
         result = self.schema.copy()
-        result.update(schema)
 
+        # returns the key that may have been passed as arugment to Marker constructor
+        def key_literal(key):
+            return (key.schema if isinstance(key, Marker) else key)
+
+        # build a map that takes the key literals to the needed objects
+        # literal -> Required|Optional|literal
+        result_key_map = dict((key_literal(key), key) for key in result)
+
+        # for each item in the extension schema, replace duplicates
+        # or add new keys
+        for key, value in iteritems(schema):
+            
+            # if the key is already in the dictionary, we need to replace it
+            # transform key to literal before checking presence
+            if key_literal(key) in result_key_map:
+
+                result_key = result_key_map[key_literal(key)]
+                result_value = result[result_key]
+
+                # if both are dictionaries, we need to extend recursively
+                # create the new extended sub schema, then remove the old key and add the new one
+                if type(result_value) == dict and type(value) == dict:
+                    new_value = Schema(result_value).extend(value).schema
+                    del result[result_key]
+                    result[key] = new_value
+                # one or the other or both are not sub-schemas, simple replacement is fine
+                # remove old key and add new one
+                else:
+                    del result[result_key]
+                    result[key] = value
+
+            # key is new and can simply be added
+            else:
+                result[key] = value
+
+        # recompile and send old object
         result_required = (required if required is not None else self.required)
         result_extra = (extra if extra is not None else self.extra)
         return Schema(result, required=result_required, extra=result_extra)
