@@ -2,7 +2,7 @@ import copy
 from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
-    Schema, Required, Extra, Invalid, In, Remove, Literal,
+    Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number
@@ -335,6 +335,31 @@ def test_schema_extend_overrides():
     assert base.extra == PREVENT_EXTRA
     assert extended.required is False
     assert extended.extra == ALLOW_EXTRA
+
+
+def test_schema_extend_key_swap():
+    """Verify that Schema.extend can replace keys, even when different markers are used"""
+
+    base = Schema({Optional('a'): int})
+    extension = {Required('a'): int}
+    extended = base.extend(extension)
+
+    assert_equal(len(base.schema), 1)
+    assert_true(isinstance(list(base.schema)[0], Optional))
+    assert_equal(len(extended.schema), 1)
+    assert_true((list(extended.schema)[0], Required))
+
+
+def test_subschema_extension():
+    """Verify that Schema.extend adds and replaces keys in a subschema"""
+
+    base = Schema({'a': {'b': int, 'c': float}})
+    extension = {'d': str, 'a': {'b': str, 'e': int}}
+    extended = base.extend(extension)
+
+    assert_equal(base.schema, {'a': {'b': int, 'c': float}})
+    assert_equal(extension, {'d': str, 'a': {'b': str, 'e': int}})
+    assert_equal(extended.schema, {'a': {'b': str, 'c': float, 'e': int}, 'd': str})
 
 
 def test_repr():
