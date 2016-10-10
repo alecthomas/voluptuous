@@ -1,4 +1,5 @@
 import copy
+import collections
 from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
@@ -699,3 +700,14 @@ def test_number_validation_with_valid_precision_scale_yield_decimal_false():
     schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=False)})
     out_ = schema({"number": '1234.00'})
     assert_equal(out_.get("number"), '1234.00')
+
+
+def test_named_tuples_validate_as_tuples():
+    NT = collections.namedtuple('NT', ['a', 'b'])
+    nt = NT(1, 2)
+    t = (1, 2)
+
+    Schema((int, int))(nt)
+    Schema((int, int))(t)
+    Schema(NT(int, int))(nt)
+    Schema(NT(int, int))(t)

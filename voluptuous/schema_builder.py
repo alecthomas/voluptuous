@@ -106,6 +106,10 @@ ALLOW_EXTRA = 1  # extra keys not in schema will be included in output
 REMOVE_EXTRA = 2  # extra keys not in schema will be excluded from output
 
 
+def _isnamedtuple(obj):
+    return isinstance(obj, tuple) and hasattr(obj, '_fields')
+
+
 class Undefined(object):
     def __nonzero__(self):
         return False
@@ -557,7 +561,11 @@ class Schema(object):
                     errors.append(invalid)
             if errors:
                 raise er.MultipleInvalid(errors)
-            return type(data)(out)
+
+            if _isnamedtuple(data):
+                return type(data)(*out)
+            else:
+                return type(data)(out)
 
         return validate_sequence
 
