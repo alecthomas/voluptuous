@@ -459,6 +459,35 @@ def PathExists(v):
         raise PathInvalid("Not a Path")
 
 
+class Maybe(object):
+    """Validate that the object is of a given type or is None.
+
+    :raises Invalid: if the value is not of the type declared and is not None
+
+    >>> s = Schema(Maybe(int))
+    >>> s(10)
+    10
+    >>> with raises(Invalid):
+    ...  s("string")
+
+    """
+    def __init__(self, kind, msg=None):
+        if not isinstance(kind, type):
+            raise TypeError("kind has to be a type")
+
+        self.kind = kind
+        self.msg = msg
+
+    def __call__(self, v):
+        if v is not None and not isinstance(v, self.kind):
+            raise Invalid(self.msg or "%s must be None or of type %s" % (v, self.kind))
+
+        return v
+
+    def __repr__(self):
+        return 'Maybe(%s)' % str(self.kind)
+
+
 class Range(object):
     """Limit a value to a range.
 

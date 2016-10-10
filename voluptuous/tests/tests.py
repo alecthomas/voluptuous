@@ -6,7 +6,7 @@ from voluptuous import (
     Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate, ExactSequence, Equal, Unordered, Number, Date, Datetime
+    validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date
 )
 from voluptuous.humanize import humanize_error
 from voluptuous.util import to_utf8_py2, u
@@ -371,6 +371,7 @@ def test_repr():
                    max_included=False, msg='number not in range')
     coerce_ = Coerce(int, msg="moo")
     all_ = All('10', Coerce(int), msg='all msg')
+    maybe_int = Maybe(int)
 
     assert_equal(repr(match), "Match('a pattern', msg='message')")
     assert_equal(repr(replace), "Replace('you', 'I', msg='you and I')")
@@ -380,6 +381,7 @@ def test_repr():
     )
     assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
     assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
+    assert_equal(repr(maybe_int), "Maybe(%s)" % str(int))
 
 
 def test_list_validation_messages():
@@ -497,6 +499,16 @@ def test_unordered():
     assert_raises(Invalid, s, [3, 2])
     s = Schema(Unordered([3, int]))
     s([3, 2])
+
+
+def test_maybe():
+    assert_raises(TypeError, Maybe, lambda x: x)
+
+    s = Schema(Maybe(int))
+    assert s(1) == 1
+    assert s(None) is None
+
+    assert_raises(Invalid, s, 'foo')
 
 
 def test_empty_list_as_exact():
