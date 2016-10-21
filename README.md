@@ -28,6 +28,10 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 The documentation is provided [here] (http://alecthomas.github.io/voluptuous/). 
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## Show me an example
 
 Twitter's [user search API](https://dev.twitter.com/docs/api/1/get/users/search) accepts
@@ -225,10 +229,13 @@ contain anything, specify it as `list`:
 
 ```pycon
 >>> schema = Schema([])
->>> schema([1])  # doctest: +IGNORE_EXCEPTION_DETAIL
-Traceback (most recent call last):
-    ...
-MultipleInvalid: not a valid value
+>>> try:
+...   schema([1])
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "not a valid value"
+True
 >>> schema([])
 []
 >>> schema = Schema(list)
@@ -358,6 +365,28 @@ token `extra` as a key:
 >>> schema = Schema({1: {Extra: object}})
 >>> schema({1: {'foo': 'bar'}})
 {1: {'foo': 'bar'}}
+
+```
+
+However, an empty dict (`{}`) is treated as is. If you want to specify a list that can
+contain anything, specify it as `dict`:
+
+```pycon
+>>> schema = Schema({}, extra=ALLOW_EXTRA)  # don't do this
+>>> try:
+...   schema({'extra': 1})
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "not a valid value"
+True
+>>> schema({})
+{}
+>>> schema = Schema(dict)  # do this instead
+>>> schema({})
+{}
+>>> schema({'extra': 1})
+{'extra': 1}
 
 ```
 

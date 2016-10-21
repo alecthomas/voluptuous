@@ -225,7 +225,7 @@ class Schema(object):
             return lambda _, v: v
         if isinstance(schema, Object):
             return self._compile_object(schema)
-        if isinstance(schema, collections.Mapping):
+        if isinstance(schema, collections.Mapping) and len(schema):
             return self._compile_dict(schema)
         elif isinstance(schema, list) and len(schema):
             return self._compile_list(schema)
@@ -395,7 +395,7 @@ class Schema(object):
 
         A dictionary schema will only validate a dictionary:
 
-            >>> validate = Schema({})
+            >>> validate = Schema({'prop': str})
             >>> with raises(er.MultipleInvalid, 'expected a dictionary'):
             ...   validate([])
 
@@ -410,7 +410,6 @@ class Schema(object):
             >>> with raises(er.MultipleInvalid, "extra keys not allowed @ data['two']"):
             ...   validate({'two': 'three'})
 
-
         Validation function, in this case the "int" type:
 
             >>> validate = Schema({'one': 'two', 'three': 'four', int: str})
@@ -420,10 +419,17 @@ class Schema(object):
             >>> validate({10: 'twenty'})
             {10: 'twenty'}
 
+        An empty dictionary is matched as value:
+
+            >>> validate = Schema({})
+            >>> with raises(er.MultipleInvalid, 'not a valid value'):
+            ...   validate([])
+
         By default, a "type" in the schema (in this case "int") will be used
         purely to validate that the corresponding value is of that type. It
         will not Coerce the value:
 
+            >>> validate = Schema({'one': 'two', 'three': 'four', int: str})
             >>> with raises(er.MultipleInvalid, "extra keys not allowed @ data['10']"):
             ...   validate({'10': 'twenty'})
 
