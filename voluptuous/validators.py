@@ -9,14 +9,14 @@ try:
     from schema_builder import Schema, raises, message
     from error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
                        AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
-                       PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, InInvalid, TypeInvalid,
-                       NotInInvalid)
+                       PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
+                       TypeInvalid, NotInInvalid)
 except ImportError:
     from .schema_builder import Schema, raises, message
     from .error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
                         AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
-                        PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, InInvalid, TypeInvalid,
-                        NotInInvalid)
+                        PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
+                        TypeInvalid, NotInInvalid)
 
 
 if sys.version_info >= (3,):
@@ -585,6 +585,29 @@ class Datetime(object):
 
     def __repr__(self):
         return 'Datetime(format=%s)' % self.format
+
+
+class Date(Datetime):
+    """Validate that the value matches the date format."""
+
+    DEFAULT_FORMAT = '%Y-%m-%d'
+    FORMAT_DESCRIPTION = 'yyyy-mm-dd'
+
+    def __call__(self, v):
+        try:
+            datetime.datetime.strptime(v, self.format)
+            if len(v) != len(self.FORMAT_DESCRIPTION):
+                raise DateInvalid(
+                    self.msg or 'value has invalid length'
+                                ' expected length %d (%s)' % (len(self.FORMAT_DESCRIPTION), self.FORMAT_DESCRIPTION))
+        except (TypeError, ValueError):
+            raise DateInvalid(
+                self.msg or 'value does not match'
+                            ' expected format %s' % self.format)
+        return v
+
+    def __repr__(self):
+        return 'Date(format=%s)' % self.format
 
 
 class In(object):

@@ -6,7 +6,7 @@ from voluptuous import (
     Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate, ExactSequence, Equal, Unordered, Number
+    validate, ExactSequence, Equal, Unordered, Number, Date, Datetime
 )
 from voluptuous.humanize import humanize_error
 from voluptuous.util import to_utf8_py2, u
@@ -745,3 +745,16 @@ def test_named_tuples_validate_as_tuples():
     Schema((int, int))(t)
     Schema(NT(int, int))(nt)
     Schema(NT(int, int))(t)
+
+
+def test_datetime():
+    schema = Schema({"datetime": Datetime()})
+    schema({"datetime": "2016-10-24T14:01:57.102152Z"})
+    assert_raises(MultipleInvalid, schema, {"datetime": "2016-10-24T14:01:57"})
+
+
+def test_date():
+    schema = Schema({"date": Date()})
+    schema({"date": "2016-10-24"})
+    assert_raises(MultipleInvalid, schema, {"date": "2016-10-2"})
+    assert_raises(MultipleInvalid, schema, {"date": "2016-10-24Z"})
