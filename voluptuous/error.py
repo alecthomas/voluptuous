@@ -169,6 +169,10 @@ class DatetimeInvalid(Invalid):
     """The value is not a formatted datetime string."""
 
 
+class DateInvalid(Invalid):
+    """The value is not a formatted date string."""
+
+
 class InInvalid(Invalid):
     pass
 
