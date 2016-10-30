@@ -519,6 +519,7 @@ class Clamp(object):
     """Clamp a value to a range.
 
     Either min or max may be omitted.
+
     >>> s = Schema(Clamp(min=0, max=1))
     >>> s(0.5)
     0.5
