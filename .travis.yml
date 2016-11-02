@@ -17,3 +17,4 @@ install:
 script: nosetests --with-coverage --cover-package=voluptuous
 after_success:
   - coveralls
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./update_documentation.sh; fi'
