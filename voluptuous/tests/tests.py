@@ -1,13 +1,15 @@
 import copy
-from nose.tools import assert_equal, assert_raises
+import collections
+from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
-    Schema, Required, Extra, Invalid, In, Remove, Literal,
+    Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate_schema, ExactSequence, Equal, Unordered
+    validate, ExactSequence, Equal, Unordered, Number, Date, Datetime
 )
 from voluptuous.humanize import humanize_error
+from voluptuous.util import to_utf8_py2, u
 
 
 def test_exact_sequence():
@@ -336,6 +338,31 @@ def test_schema_extend_overrides():
     assert extended.extra == ALLOW_EXTRA
 
 
+def test_schema_extend_key_swap():
+    """Verify that Schema.extend can replace keys, even when different markers are used"""
+
+    base = Schema({Optional('a'): int})
+    extension = {Required('a'): int}
+    extended = base.extend(extension)
+
+    assert_equal(len(base.schema), 1)
+    assert_true(isinstance(list(base.schema)[0], Optional))
+    assert_equal(len(extended.schema), 1)
+    assert_true((list(extended.schema)[0], Required))
+
+
+def test_subschema_extension():
+    """Verify that Schema.extend adds and replaces keys in a subschema"""
+
+    base = Schema({'a': {'b': int, 'c': float}})
+    extension = {'d': str, 'a': {'b': str, 'e': int}}
+    extended = base.extend(extension)
+
+    assert_equal(base.schema, {'a': {'b': int, 'c': float}})
+    assert_equal(extension, {'d': str, 'a': {'b': str, 'e': int}})
+    assert_equal(extended.schema, {'a': {'b': str, 'c': float, 'e': int}, 'd': str})
+
+
 def test_repr():
     """Verify that __repr__ returns valid Python expressions"""
     match = Match('a pattern', msg='message')
@@ -423,15 +450,6 @@ def test_fix_157():
     assert_raises(MultipleInvalid, s, ['four'])
 
 
-def test_schema_decorator():
-    @validate_schema(int)
-    def fn(arg):
-        return arg
-
-    fn(1)
-    assert_raises(Invalid, fn, 1.0)
-
-
 def test_range_exlcudes_nan():
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, float('nan'))
@@ -479,3 +497,264 @@ def test_unordered():
     assert_raises(Invalid, s, [3, 2])
     s = Schema(Unordered([3, int]))
     s([3, 2])
+
+
+def test_empty_list_as_exact():
+    s = Schema([])
+    assert_raises(Invalid, s, [1])
+    s([])
+
+
+def test_empty_dict_as_exact():
+    # {} always evaluates as {}
+    s = Schema({})
+    assert_raises(Invalid, s, {'extra': 1})
+    s = Schema({}, extra=ALLOW_EXTRA)  # this should not be used
+    assert_raises(Invalid, s, {'extra': 1})
+
+    # {...} evaluates as Schema({...})
+    s = Schema({'foo': int})
+    assert_raises(Invalid, s, {'foo': 1, 'extra': 1})
+    s = Schema({'foo': int}, extra=ALLOW_EXTRA)
+    s({'foo': 1, 'extra': 1})
+
+    # dict matches {} or {...}
+    s = Schema(dict)
+    s({'extra': 1})
+    s({})
+    s = Schema(dict, extra=PREVENT_EXTRA)
+    s({'extra': 1})
+    s({})
+
+    # nested {} evaluate as {}
+    s = Schema({
+        'inner': {}
+    }, extra=ALLOW_EXTRA)
+    assert_raises(Invalid, s, {'inner': {'extra': 1}})
+    s({})
+    s = Schema({
+        'inner': Schema({}, extra=ALLOW_EXTRA)
+    })
+    assert_raises(Invalid, s, {'inner': {'extra': 1}})
+    s({})
+
+
+def test_schema_decorator_match_with_args():
+    @validate(int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_with_args():
+    @validate(int)
+    def fn(arg):
+        return arg
+
+    assert_raises(Invalid, fn, 1.0)
+
+
+def test_schema_decorator_match_with_kwargs():
+    @validate(arg=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_with_kwargs():
+    @validate(arg=int)
+    def fn(arg):
+        return arg
+
+    assert_raises(Invalid, fn, 1.0)
+
+
+def test_schema_decorator_match_return_with_args():
+    @validate(int, __return__=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_return_with_args():
+    @validate(int, __return__=int)
+    def fn(arg):
+        return "hello"
+
+    assert_raises(Invalid, fn, 1)
+
+
+def test_schema_decorator_match_return_with_kwargs():
+    @validate(arg=int, __return__=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_unmatch_return_with_kwargs():
+    @validate(arg=int, __return__=int)
+    def fn(arg):
+        return "hello"
+
+    assert_raises(Invalid, fn, 1)
+
+
+def test_schema_decorator_return_only_match():
+    @validate(__return__=int)
+    def fn(arg):
+        return arg
+
+    fn(1)
+
+
+def test_schema_decorator_return_only_unmatch():
+    @validate(__return__=int)
+    def fn(arg):
+        return "hello"
+
+    assert_raises(Invalid, fn, 1)
+
+
+def test_unicode_key_is_converted_to_utf8_when_in_marker():
+    """Verify that when using unicode key the 'u' prefix is not thrown in the exception"""
+    schema = Schema({Required(u('q')): 1})
+    # Can't use nose's raises (because we need to access the raised
+    # exception, nor assert_raises which fails with Python 2.6.9.
+    try:
+        schema({})
+    except Invalid as e:
+        assert_equal(str(e), "required key not provided @ data['q']")
+
+
+def test_number_validation_with_string():
+    """ test with Number with string"""
+    schema = Schema({"number" : Number(precision=6, scale=2)})
+    try:
+        schema({"number": 'teststr'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Value must be a number enclosed with string for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_unicode_key_is_converted_to_utf8_when_plain_text():
+    key = u('q')
+    schema = Schema({key: int})
+    # Can't use nose's raises (because we need to access the raised
+    # exception, nor assert_raises which fails with Python 2.6.9.
+    try:
+        schema({key: 'will fail'})
+    except Invalid as e:
+        assert_equal(str(e), "expected int for dictionary value @ data['q']")
+
+
+def test_number_validation_with_invalid_precision_invalid_scale():
+    """ test with Number with invalid precision and scale"""
+    schema = Schema({"number" : Number(precision=6, scale=2)})
+    try:
+        schema({"number": '123456.712'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Precision must be equal to 6, and Scale must be equal to 2 for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_number_validation_with_valid_precision_scale_yield_decimal_true():
+    """ test with Number with valid precision and scale"""
+    schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=True)})
+    out_ = schema({"number": '1234.00'})
+    assert_equal(float(out_.get("number")), 1234.00)
+
+
+def test_number_when_precision_scale_none_yield_decimal_true():
+    """ test with Number with no precision and scale"""
+    schema = Schema({"number" : Number(yield_decimal=True)})
+    out_ = schema({"number": '12345678901234'})
+    assert_equal(out_.get("number"), 12345678901234)
+
+
+def test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true():
+    """ test with Number with no precision and valid scale case 1"""
+    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    out_ = schema({"number": '123456789.34'})
+    assert_equal(float(out_.get("number")), 123456789.34)
+
+
+def test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true():
+    """ test with Number with no precision and valid scale case 2 with zero in decimal part"""
+    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    out_ = schema({"number": '123456789012.00'})
+    assert_equal(float(out_.get("number")), 123456789012.00)
+
+
+def test_to_utf8():
+    s = u('hello')
+    assert_true(isinstance(to_utf8_py2(s), str))
+
+
+def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
+    """ test with Number with no precision and invalid scale"""
+    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    try:
+        schema({"number": '12345678901.234'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Scale must be equal to 2 for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_number_when_valid_precision_n_scale_none_yield_decimal_true():
+    """ test with Number with no precision and valid scale"""
+    schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
+    out_ = schema({"number": '1234567.8901234'})
+    assert_equal(float(out_.get("number")), 1234567.8901234)
+
+
+def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
+    """ test with Number with no precision and invalid scale"""
+    schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
+    try:
+        schema({"number": '12345674.8901234'})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "Precision must be equal to 14 for dictionary value @ data['number']")
+    else:
+        assert False, "Did not raise Invalid for String"
+
+
+def test_number_validation_with_valid_precision_scale_yield_decimal_false():
+    """ test with Number with valid precision, scale and no yield_decimal"""
+    schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=False)})
+    out_ = schema({"number": '1234.00'})
+    assert_equal(out_.get("number"), '1234.00')
+
+
+def test_named_tuples_validate_as_tuples():
+    NT = collections.namedtuple('NT', ['a', 'b'])
+    nt = NT(1, 2)
+    t = (1, 2)
+
+    Schema((int, int))(nt)
+    Schema((int, int))(t)
+    Schema(NT(int, int))(nt)
+    Schema(NT(int, int))(t)
+
+
+def test_datetime():
+    schema = Schema({"datetime": Datetime()})
+    schema({"datetime": "2016-10-24T14:01:57.102152Z"})
+    assert_raises(MultipleInvalid, schema, {"datetime": "2016-10-24T14:01:57"})
+
+
+def test_date():
+    schema = Schema({"date": Date()})
+    schema({"date": "2016-10-24"})
+    assert_raises(MultipleInvalid, schema, {"date": "2016-10-2"})
+    assert_raises(MultipleInvalid, schema, {"date": "2016-10-24Z"})

@@ -1,14 +1,20 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  # Not quite ready for prime time...
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "pypy"
-# command to install dependencies
-#install: "pip install -r requirements.txt --use-mirrors"
-# command to run tests
-script: nosetests
+- '2.6'
+- '2.7'
+- '3.2'
+- '3.3'
+- '3.4'
+- '3.5'
+- pypy
+install:
+- pip install coveralls
+- pip install 'coverage<4'
+script: nosetests --with-coverage --cover-package=voluptuous
+after_success:
+- coveralls
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./update_documentation.sh $USERNAME $PASSWORD; fi
+env:
+  global:
+  - secure: UKVFCaFRRECYeNaLJr4POqt6zENBjyUe79U/5b9pEGBFWzXWoJ+EElOFOJdkquL6u3AwL6Bw93GqRIYHKcRW70doCYiEI7p2CuXey2mjoC7bLKdk4Fcrj0MTbiS6WJxEDfcsP/Tj3tv4kPqA4nYYm9DQoNfUX3skns442h0zals=
+  - secure: EK2dbVB4T7qNFWCSu3tL+l2YnpcrCvPk9E3W05rGZnkT38Do21kVDncf8XRh/5Nn4J6zGmdoHw6NFqeQtF6/+3GNIqEW4PzA5x5pUx1rI6drB0hTaEURG3VYUmLOoQ/thziaEmnez8Qt1hUtn/0Jhl6eUYOtmSTSkDeLz7zehm0=

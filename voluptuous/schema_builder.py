@@ -106,6 +106,10 @@ ALLOW_EXTRA = 1  # extra keys not in schema will be included in output
 REMOVE_EXTRA = 2  # extra keys not in schema will be excluded from output
 
 
+def _isnamedtuple(obj):
+    return isinstance(obj, tuple) and hasattr(obj, '_fields')
+
+
 class Undefined(object):
     def __nonzero__(self):
         return False
@@ -153,6 +157,17 @@ class Schema(object):
     Nodes can be values, in which case a direct comparison is used, types,
     in which case an isinstance() check is performed, or callables, which will
     validate and optionally convert the value.
+
+    We can equate schemas also.
+
+    For Example:
+
+            >>> v = Schema({Required('a'): unicode})
+            >>> v1 = Schema({Required('a'): unicode})
+            >>> v2 = Schema({Required('b'): unicode})
+            >>> assert v == v1
+            >>> assert v != v2
+
     """
 
     _extra_to_name = {
@@ -181,6 +196,15 @@ class Schema(object):
         self.extra = int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
 
+    def __eq__(self, other):
+        if str(other) == str(self.schema):
+            # Because repr is combination mixture of object and schema
+            return True
+        return False
+
+    def __str__(self):
+        return str(self.schema)
+
     def __repr__(self):
         return "<Schema(%s, extra=%s, required=%s) object at 0x%x>" % (
             self.schema, self._extra_to_name.get(self.extra, '??'),
@@ -201,9 +225,9 @@ class Schema(object):
             return lambda _, v: v
         if isinstance(schema, Object):
             return self._compile_object(schema)
-        if isinstance(schema, collections.Mapping):
+        if isinstance(schema, collections.Mapping) and len(schema):
             return self._compile_dict(schema)
-        elif isinstance(schema, list):
+        elif isinstance(schema, list) and len(schema):
             return self._compile_list(schema)
         elif isinstance(schema, tuple):
             return self._compile_tuple(schema)
@@ -240,12 +264,17 @@ class Schema(object):
         candidates = list(_iterate_mapping_candidates(_compiled_schema))
 
         def validate_mapping(path, iterable, out):
+            try:
+                from util import to_utf8_py2
+            except ImportError:
+                from .util import to_utf8_py2
             required_keys = all_required_keys.copy()
             # keeps track of all default keys that haven't been filled
             default_keys = all_default_keys.copy()
             error = None
             errors = []
             for key, value in iterable:
+                key = to_utf8_py2(key)
                 key_path = path + [key]
                 remove_key = False
 
@@ -366,7 +395,7 @@ class Schema(object):
 
         A dictionary schema will only validate a dictionary:
 
-            >>> validate = Schema({})
+            >>> validate = Schema({'prop': str})
             >>> with raises(er.MultipleInvalid, 'expected a dictionary'):
             ...   validate([])
 
@@ -381,7 +410,6 @@ class Schema(object):
             >>> with raises(er.MultipleInvalid, "extra keys not allowed @ data['two']"):
             ...   validate({'two': 'three'})
 
-
         Validation function, in this case the "int" type:
 
             >>> validate = Schema({'one': 'two', 'three': 'four', int: str})
@@ -391,10 +419,17 @@ class Schema(object):
             >>> validate({10: 'twenty'})
             {10: 'twenty'}
 
+        An empty dictionary is matched as value:
+
+            >>> validate = Schema({})
+            >>> with raises(er.MultipleInvalid, 'not a valid value'):
+            ...   validate([])
+
         By default, a "type" in the schema (in this case "int") will be used
         purely to validate that the corresponding value is of that type. It
         will not Coerce the value:
 
+            >>> validate = Schema({'one': 'two', 'three': 'four', int: str})
             >>> with raises(er.MultipleInvalid, "extra keys not allowed @ data['10']"):
             ...   validate({'10': 'twenty'})
 
@@ -532,7 +567,11 @@ class Schema(object):
                     errors.append(invalid)
             if errors:
                 raise er.MultipleInvalid(errors)
-            return type(data)(out)
+
+            if _isnamedtuple(data):
+                return type(data)(*out)
+            else:
+                return type(data)(out)
 
         return validate_sequence
 
@@ -583,8 +622,43 @@ class Schema(object):
         assert type(self.schema) == dict and type(schema) == dict, 'Both schemas must be dictionary-based'
 
         result = self.schema.copy()
-        result.update(schema)
 
+        # returns the key that may have been passed as arugment to Marker constructor
+        def key_literal(key):
+            return (key.schema if isinstance(key, Marker) else key)
+
+        # build a map that takes the key literals to the needed objects
+        # literal -> Required|Optional|literal
+        result_key_map = dict((key_literal(key), key) for key in result)
+
+        # for each item in the extension schema, replace duplicates
+        # or add new keys
+        for key, value in iteritems(schema):
+            
+            # if the key is already in the dictionary, we need to replace it
+            # transform key to literal before checking presence
+            if key_literal(key) in result_key_map:
+
+                result_key = result_key_map[key_literal(key)]
+                result_value = result[result_key]
+
+                # if both are dictionaries, we need to extend recursively
+                # create the new extended sub schema, then remove the old key and add the new one
+                if type(result_value) == dict and type(value) == dict:
+                    new_value = Schema(result_value).extend(value).schema
+                    del result[result_key]
+                    result[key] = new_value
+                # one or the other or both are not sub-schemas, simple replacement is fine
+                # remove old key and add new one
+                else:
+                    del result[result_key]
+                    result[key] = value
+
+            # key is new and can simply be added
+            else:
+                result[key] = value
+
+        # recompile and send old object
         result_required = (required if required is not None else self.required)
         result_extra = (extra if extra is not None else self.extra)
         return Schema(result, required=result_required, extra=result_extra)
@@ -789,6 +863,11 @@ class Marker(object):
     """Mark nodes for special treatment."""
 
     def __init__(self, schema_, msg=None):
+        try:
+            from util import to_utf8_py2
+        except ImportError:
+            from .util import to_utf8_py2
+        schema_ = to_utf8_py2(schema_)
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
@@ -1018,15 +1097,71 @@ def message(default=None, cls=None):
     return decorator
 
 
-def validate_schema(*a, **kw):
-    schema = Schema(*a, **kw)
+def _args_to_dict(func, args):
+    """Returns argument names as values as key-value pairs."""
+    if sys.version_info >= (3, 0):
+        arg_count = func.__code__.co_argcount
+        arg_names = func.__code__.co_varnames[:arg_count]
+    else:
+        arg_count = func.func_code.co_argcount
+        arg_names = func.func_code.co_varnames[:arg_count]
 
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            result = f(*args, **kwargs)
-            schema(result)
-            return result
-        return wrapper
+    arg_value_list = list(args)
+    arguments = dict((arg_name, arg_value_list[i])
+                     for i, arg_name in enumerate(arg_names)
+                     if i < len(arg_value_list))
+    return arguments
 
-    return decorator
+
+def _merge_args_with_kwargs(args_dict, kwargs_dict):
+    """Merge args with kwargs."""
+    ret = args_dict.copy()
+    ret.update(kwargs_dict)
+    return ret
+
+
+def validate(*a, **kw):
+    """Decorator for validating arguments of a function against a given schema.
+
+    Set restrictions for arguments:
+
+        >>> @validate(arg1=int, arg2=int)
+        ... def foo(arg1, arg2):
+        ...   return arg1 * arg2
+
+    Set restriction for returned value:
+
+        >>> @validate(arg=int, __return__=int)
+        ... def bar(arg1):
+        ...   return arg1 * 2
+
+    """
+    RETURNS_KEY = '__return__'
+
+    def validate_schema_decorator(func):
+
+        returns_defined = False
+        returns = None
+
+        schema_args_dict = _args_to_dict(func, a)
+        schema_arguments = _merge_args_with_kwargs(schema_args_dict, kw)
+
+        if RETURNS_KEY in schema_arguments:
+            returns_defined = True
+            returns = schema_arguments[RETURNS_KEY]
+            del schema_arguments[RETURNS_KEY]
+
+        input_schema = Schema(schema_arguments) if len(schema_arguments) != 0 else lambda x: x
+        output_schema = Schema(returns) if returns_defined else lambda x: x
+
+        @wraps(func)
+        def func_wrapper(*args, **kwargs):
+            args_dict = _args_to_dict(func, args)
+            arguments = _merge_args_with_kwargs(args_dict, kwargs)
+            validated_arguments = input_schema(arguments)
+            output = func(**validated_arguments)
+            return output_schema(output)
+
+        return func_wrapper
+
+    return validate_schema_decorator

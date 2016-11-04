@@ -1,6 +1,7 @@
 # Voluptuous is a Python data validation library
 
 [![Build Status](https://travis-ci.org/alecthomas/voluptuous.png)](https://travis-ci.org/alecthomas/voluptuous) [![Stories in Ready](https://badge.waffle.io/alecthomas/voluptuous.png?label=ready&title=Ready)](https://waffle.io/alecthomas/voluptuous)
+[![Coverage Status](https://coveralls.io/repos/github/alecthomas/voluptuous/badge.svg?branch=master)](https://coveralls.io/github/alecthomas/voluptuous?branch=master)
 
 Voluptuous, *despite* the name, is a Python data validation library. It
 is primarily intended for validating data coming into Python as JSON,
@@ -34,6 +35,10 @@ Documentation is built using `Sphinx`. You can install it by
     pip install -r requirements.txt
 
 For building `sphinx-apidoc` from scratch you need to set PYTHONPATH to `voluptuous/voluptuous` repository.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Show me an example
 
@@ -227,6 +232,28 @@ in the schema list is compared to each value in the input data:
 
 ```
 
+However, an empty list (`[]`) is treated as is. If you want to specify a list that can
+contain anything, specify it as `list`:
+
+```pycon
+>>> schema = Schema([])
+>>> try:
+...   schema([1])
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "not a valid value"
+True
+>>> schema([])
+[]
+>>> schema = Schema(list)
+>>> schema([])
+[]
+>>> schema([1, 2])
+[1, 2]
+
+```
+
 ### Validation functions
 
 Validators are simple callables that raise an `Invalid` exception when
@@ -346,6 +373,28 @@ token `extra` as a key:
 >>> schema = Schema({1: {Extra: object}})
 >>> schema({1: {'foo': 'bar'}})
 {1: {'foo': 'bar'}}
+
+```
+
+However, an empty dict (`{}`) is treated as is. If you want to specify a list that can
+contain anything, specify it as `dict`:
+
+```pycon
+>>> schema = Schema({}, extra=ALLOW_EXTRA)  # don't do this
+>>> try:
+...   schema({'extra': 1})
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "not a valid value"
+True
+>>> schema({})
+{}
+>>> schema = Schema(dict)  # do this instead
+>>> schema({})
+{}
+>>> schema({'extra': 1})
+{'extra': 1}
 
 ```
 
