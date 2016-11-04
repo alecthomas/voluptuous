@@ -127,7 +127,7 @@
 <dl class="exception">
 <dt id="voluptuous.error.Error">
 <em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">Error</code><a class="reference internal" href="_modules/voluptuous/error.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.Error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
 <p>Base validation exception.</p>
 </dd></dl>
 
@@ -668,7 +668,7 @@ this, unless overridden.</p>
 
 <dl class="function">
 <dt id="voluptuous.schema_builder.raises">
-<code class="descclassname">voluptuous.schema_builder.</code><code class="descname">raises</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#raises"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.raises" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.schema_builder.</code><code class="descname">raises</code><span class="sig-paren">(</span><em>exc</em>, <em>msg=None</em>, <em>regex=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#raises"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.raises" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -884,7 +884,7 @@ this, unless overridden.</p>
 
 <dl class="function">
 <dt id="voluptuous.validators.Boolean">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">Boolean</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Boolean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Boolean" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">Boolean</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Boolean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Boolean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert human-readable boolean values to a bool.</p>
 <p>Accepted values are 1, true, yes, on, enable, and their negatives.
 Non-string values are cast to bool.</p>
@@ -976,7 +976,7 @@ will be marked as Invalid.</p>
 
 <dl class="function">
 <dt id="voluptuous.validators.Email">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">Email</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Email"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Email" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">Email</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Email"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Email" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify that the value is an Email or not.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Email</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected an Email&#39;</span><span class="p">):</span>
@@ -1042,7 +1042,7 @@ constructors.</li>
 
 <dl class="function">
 <dt id="voluptuous.validators.FqdnUrl">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">FqdnUrl</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#FqdnUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.FqdnUrl" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">FqdnUrl</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#FqdnUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.FqdnUrl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify that the value is a Fully qualified domain name URL.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">FqdnUrl</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected a Fully qualified domain name URL&#39;</span><span class="p">):</span>
@@ -1062,7 +1062,7 @@ constructors.</li>
 
 <dl class="function">
 <dt id="voluptuous.validators.IsDir">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">IsDir</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsDir" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">IsDir</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify the directory exists.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IsDir</span><span class="p">()(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 <span class="go">&#39;/&#39;</span>
@@ -1074,7 +1074,7 @@ constructors.</li>
 
 <dl class="function">
 <dt id="voluptuous.validators.IsFalse">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">IsFalse</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsFalse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsFalse" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">IsFalse</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsFalse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsFalse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assert that a value is false, in the Python sense.</p>
 <p>(see <a class="reference internal" href="#voluptuous.validators.IsTrue" title="voluptuous.validators.IsTrue"><code class="xref py py-func docutils literal"><span class="pre">IsTrue()</span></code></a> for more detail)</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">IsFalse</span><span class="p">())</span>
@@ -1094,7 +1094,7 @@ constructors.</li>
 
 <dl class="function">
 <dt id="voluptuous.validators.IsFile">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">IsFile</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsFile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">IsFile</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify the file exists.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">IsFile</span><span class="p">()(</span><span class="n">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;validators.py&#39;</span><span class="p">)</span>
 <span class="go">True</span>
@@ -1108,7 +1108,7 @@ constructors.</li>
 
 <dl class="function">
 <dt id="voluptuous.validators.IsTrue">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">IsTrue</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsTrue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsTrue" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">IsTrue</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#IsTrue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.IsTrue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assert that a value is true, in the Python sense.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">IsTrue</span><span class="p">())</span>
 </pre></div>
@@ -1202,7 +1202,7 @@ and the decimal places(Scale)</p>
 
 <dl class="function">
 <dt id="voluptuous.validators.PathExists">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">PathExists</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#PathExists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.PathExists" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">PathExists</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#PathExists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.PathExists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify the path exists, regardless of its type.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">PathExists</span><span class="p">()(</span><span class="n">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;validators.py&#39;</span><span class="p">)</span>
 <span class="go">True</span>
@@ -1306,7 +1306,7 @@ Unique allows ensuring that such array does not contain dupes.</p>
 
 <dl class="function">
 <dt id="voluptuous.validators.Url">
-<code class="descclassname">voluptuous.validators.</code><code class="descname">Url</code><span class="sig-paren">(</span><em>msg=None</em>, <em>clsoverride=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Url" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">voluptuous.validators.</code><code class="descname">Url</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Verify that the value is a URL.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Url</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;expected a URL&#39;</span><span class="p">):</span>
