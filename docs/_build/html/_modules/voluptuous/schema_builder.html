@@ -149,6 +149,10 @@
 <span class="n">REMOVE_EXTRA</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># extra keys not in schema will be excluded from output</span>
 
 
+<span class="k">def</span> <span class="nf">_isnamedtuple</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;_fields&#39;</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="Undefined"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.Undefined">[docs]</a><span class="k">class</span> <span class="nc">Undefined</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">False</span>
@@ -196,6 +200,17 @@
 <span class="sd">    Nodes can be values, in which case a direct comparison is used, types,</span>
 <span class="sd">    in which case an isinstance() check is performed, or callables, which will</span>
 <span class="sd">    validate and optionally convert the value.</span>
+
+<span class="sd">    We can equate schemas also.</span>
+
+<span class="sd">    For Example:</span>
+
+<span class="sd">            &gt;&gt;&gt; v = Schema({Required(&#39;a&#39;): unicode})</span>
+<span class="sd">            &gt;&gt;&gt; v1 = Schema({Required(&#39;a&#39;): unicode})</span>
+<span class="sd">            &gt;&gt;&gt; v2 = Schema({Required(&#39;b&#39;): unicode})</span>
+<span class="sd">            &gt;&gt;&gt; assert v == v1</span>
+<span class="sd">            &gt;&gt;&gt; assert v != v2</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_extra_to_name</span> <span class="o">=</span> <span class="p">{</span>
@@ -224,6 +239,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">extra</span><span class="p">)</span>  <span class="c1"># ensure the value is an integer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_compiled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">):</span>
+            <span class="c1"># Because repr is combination mixture of object and schema</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;Schema(</span><span class="si">%s</span><span class="s2">, extra=</span><span class="si">%s</span><span class="s2">, required=</span><span class="si">%s</span><span class="s2">) object at 0x</span><span class="si">%x</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extra_to_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span> <span class="s1">&#39;??&#39;</span><span class="p">),</span>
@@ -244,9 +268,9 @@
             <span class="k">return</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Object</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile_object</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile_dict</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile_list</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compile_tuple</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
@@ -283,12 +307,17 @@
         <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_iterate_mapping_candidates</span><span class="p">(</span><span class="n">_compiled_schema</span><span class="p">))</span>
 
         <span class="k">def</span> <span class="nf">validate_mapping</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="n">to_utf8_py2</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">to_utf8_py2</span>
             <span class="n">required_keys</span> <span class="o">=</span> <span class="n">all_required_keys</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="c1"># keeps track of all default keys that haven&#39;t been filled</span>
             <span class="n">default_keys</span> <span class="o">=</span> <span class="n">all_default_keys</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">error</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">to_utf8_py2</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">key_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="n">remove_key</span> <span class="o">=</span> <span class="bp">False</span>
 
@@ -409,7 +438,7 @@
 
 <span class="sd">        A dictionary schema will only validate a dictionary:</span>
 
-<span class="sd">            &gt;&gt;&gt; validate = Schema({})</span>
+<span class="sd">            &gt;&gt;&gt; validate = Schema({&#39;prop&#39;: str})</span>
 <span class="sd">            &gt;&gt;&gt; with raises(er.MultipleInvalid, &#39;expected a dictionary&#39;):</span>
 <span class="sd">            ...   validate([])</span>
 
@@ -424,7 +453,6 @@
 <span class="sd">            &gt;&gt;&gt; with raises(er.MultipleInvalid, &quot;extra keys not allowed @ data[&#39;two&#39;]&quot;):</span>
 <span class="sd">            ...   validate({&#39;two&#39;: &#39;three&#39;})</span>
 
-
 <span class="sd">        Validation function, in this case the &quot;int&quot; type:</span>
 
 <span class="sd">            &gt;&gt;&gt; validate = Schema({&#39;one&#39;: &#39;two&#39;, &#39;three&#39;: &#39;four&#39;, int: str})</span>
@@ -434,10 +462,17 @@
 <span class="sd">            &gt;&gt;&gt; validate({10: &#39;twenty&#39;})</span>
 <span class="sd">            {10: &#39;twenty&#39;}</span>
 
+<span class="sd">        An empty dictionary is matched as value:</span>
+
+<span class="sd">            &gt;&gt;&gt; validate = Schema({})</span>
+<span class="sd">            &gt;&gt;&gt; with raises(er.MultipleInvalid, &#39;not a valid value&#39;):</span>
+<span class="sd">            ...   validate([])</span>
+
 <span class="sd">        By default, a &quot;type&quot; in the schema (in this case &quot;int&quot;) will be used</span>
 <span class="sd">        purely to validate that the corresponding value is of that type. It</span>
 <span class="sd">        will not Coerce the value:</span>
 
+<span class="sd">            &gt;&gt;&gt; validate = Schema({&#39;one&#39;: &#39;two&#39;, &#39;three&#39;: &#39;four&#39;, int: str})</span>
 <span class="sd">            &gt;&gt;&gt; with raises(er.MultipleInvalid, &quot;extra keys not allowed @ data[&#39;10&#39;]&quot;):</span>
 <span class="sd">            ...   validate({&#39;10&#39;: &#39;twenty&#39;})</span>
 
@@ -575,7 +610,11 @@
                     <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invalid</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">er</span><span class="o">.</span><span class="n">MultipleInvalid</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)(</span><span class="n">out</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">_isnamedtuple</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)(</span><span class="o">*</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)(</span><span class="n">out</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">validate_sequence</span>
 
@@ -626,8 +665,43 @@
         <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">,</span> <span class="s1">&#39;Both schemas must be dictionary-based&#39;</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
 
+        <span class="c1"># returns the key that may have been passed as arugment to Marker constructor</span>
+        <span class="k">def</span> <span class="nf">key_literal</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">schema</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Marker</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span><span class="p">)</span>
+
+        <span class="c1"># build a map that takes the key literals to the needed objects</span>
+        <span class="c1"># literal -&gt; Required|Optional|literal</span>
+        <span class="n">result_key_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">key_literal</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">result</span><span class="p">)</span>
+
+        <span class="c1"># for each item in the extension schema, replace duplicates</span>
+        <span class="c1"># or add new keys</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
+            
+            <span class="c1"># if the key is already in the dictionary, we need to replace it</span>
+            <span class="c1"># transform key to literal before checking presence</span>
+            <span class="k">if</span> <span class="n">key_literal</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">in</span> <span class="n">result_key_map</span><span class="p">:</span>
+
+                <span class="n">result_key</span> <span class="o">=</span> <span class="n">result_key_map</span><span class="p">[</span><span class="n">key_literal</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+                <span class="n">result_value</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">result_key</span><span class="p">]</span>
+
+                <span class="c1"># if both are dictionaries, we need to extend recursively</span>
+                <span class="c1"># create the new extended sub schema, then remove the old key and add the new one</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">result_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+                    <span class="n">new_value</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">result_value</span><span class="p">)</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">schema</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">result_key</span><span class="p">]</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                <span class="c1"># one or the other or both are not sub-schemas, simple replacement is fine</span>
+                <span class="c1"># remove old key and add new one</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">result_key</span><span class="p">]</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="c1"># key is new and can simply be added</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># recompile and send old object</span>
         <span class="n">result_required</span> <span class="o">=</span> <span class="p">(</span><span class="n">required</span> <span class="k">if</span> <span class="n">required</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">)</span>
         <span class="n">result_extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">extra</span> <span class="k">if</span> <span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="n">result_required</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">result_extra</span><span class="p">)</span></div></div>
@@ -832,6 +906,11 @@
     <span class="sd">&quot;&quot;&quot;Mark nodes for special treatment.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema_</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="n">to_utf8_py2</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">to_utf8_py2</span>
+        <span class="n">schema_</span> <span class="o">=</span> <span class="n">to_utf8_py2</span><span class="p">(</span><span class="n">schema_</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">schema_</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">schema_</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
@@ -1061,18 +1140,74 @@
     <span class="k">return</span> <span class="n">decorator</span></div>
 
 
-<div class="viewcode-block" id="validate_schema"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.validate_schema">[docs]</a><span class="k">def</span> <span class="nf">validate_schema</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_args_to_dict</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns argument names as values as key-value pairs.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">arg_count</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__code__</span><span class="o">.</span><span class="n">co_argcount</span>
+        <span class="n">arg_names</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[:</span><span class="n">arg_count</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">arg_count</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">func_code</span><span class="o">.</span><span class="n">co_argcount</span>
+        <span class="n">arg_names</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">func_code</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[:</span><span class="n">arg_count</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-        <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">schema</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">result</span>
-        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="n">arg_value_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">arguments</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg_names</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_value_list</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">arguments</span>
 
-    <span class="k">return</span> <span class="n">decorator</span></div>
+
+<span class="k">def</span> <span class="nf">_merge_args_with_kwargs</span><span class="p">(</span><span class="n">args_dict</span><span class="p">,</span> <span class="n">kwargs_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Merge args with kwargs.&quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<div class="viewcode-block" id="validate"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.schema_builder.validate">[docs]</a><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator for validating arguments of a function against a given schema.</span>
+
+<span class="sd">    Set restrictions for arguments:</span>
+
+<span class="sd">        &gt;&gt;&gt; @validate(arg1=int, arg2=int)</span>
+<span class="sd">        ... def foo(arg1, arg2):</span>
+<span class="sd">        ...   return arg1 * arg2</span>
+
+<span class="sd">    Set restriction for returned value:</span>
+
+<span class="sd">        &gt;&gt;&gt; @validate(arg=int, __return__=int)</span>
+<span class="sd">        ... def bar(arg1):</span>
+<span class="sd">        ...   return arg1 * 2</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">RETURNS_KEY</span> <span class="o">=</span> <span class="s1">&#39;__return__&#39;</span>
+
+    <span class="k">def</span> <span class="nf">validate_schema_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="n">returns_defined</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">schema_args_dict</span> <span class="o">=</span> <span class="n">_args_to_dict</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="n">schema_arguments</span> <span class="o">=</span> <span class="n">_merge_args_with_kwargs</span><span class="p">(</span><span class="n">schema_args_dict</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">RETURNS_KEY</span> <span class="ow">in</span> <span class="n">schema_arguments</span><span class="p">:</span>
+            <span class="n">returns_defined</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">returns</span> <span class="o">=</span> <span class="n">schema_arguments</span><span class="p">[</span><span class="n">RETURNS_KEY</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">schema_arguments</span><span class="p">[</span><span class="n">RETURNS_KEY</span><span class="p">]</span>
+
+        <span class="n">input_schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">schema_arguments</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema_arguments</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        <span class="n">output_schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">returns</span><span class="p">)</span> <span class="k">if</span> <span class="n">returns_defined</span> <span class="k">else</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">func_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">args_dict</span> <span class="o">=</span> <span class="n">_args_to_dict</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">arguments</span> <span class="o">=</span> <span class="n">_merge_args_with_kwargs</span><span class="p">(</span><span class="n">args_dict</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">validated_arguments</span> <span class="o">=</span> <span class="n">input_schema</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">validated_arguments</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">output_schema</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">func_wrapper</span>
+
+    <span class="k">return</span> <span class="n">validate_schema_decorator</span></div>
 </pre></div>
 
           </div>

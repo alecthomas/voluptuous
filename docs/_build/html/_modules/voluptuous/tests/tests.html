@@ -42,15 +42,17 @@
             
   <h1>Source code for voluptuous.tests.tests</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">assert_raises</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span><span class="p">,</span> <span class="n">assert_raises</span><span class="p">,</span> <span class="n">assert_true</span>
 
 <span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Schema</span><span class="p">,</span> <span class="n">Required</span><span class="p">,</span> <span class="n">Extra</span><span class="p">,</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">In</span><span class="p">,</span> <span class="n">Remove</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">Schema</span><span class="p">,</span> <span class="n">Required</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Extra</span><span class="p">,</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">In</span><span class="p">,</span> <span class="n">Remove</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span>
     <span class="n">Url</span><span class="p">,</span> <span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">NotIn</span><span class="p">,</span> <span class="n">Match</span><span class="p">,</span> <span class="n">Email</span><span class="p">,</span>
     <span class="n">Replace</span><span class="p">,</span> <span class="n">Range</span><span class="p">,</span> <span class="n">Coerce</span><span class="p">,</span> <span class="n">All</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Length</span><span class="p">,</span> <span class="n">FqdnUrl</span><span class="p">,</span> <span class="n">ALLOW_EXTRA</span><span class="p">,</span> <span class="n">PREVENT_EXTRA</span><span class="p">,</span>
-    <span class="n">validate_schema</span><span class="p">,</span> <span class="n">ExactSequence</span><span class="p">,</span> <span class="n">Equal</span><span class="p">,</span> <span class="n">Unordered</span>
+    <span class="n">validate</span><span class="p">,</span> <span class="n">ExactSequence</span><span class="p">,</span> <span class="n">Equal</span><span class="p">,</span> <span class="n">Unordered</span><span class="p">,</span> <span class="n">Number</span><span class="p">,</span> <span class="n">Date</span><span class="p">,</span> <span class="n">Datetime</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">voluptuous.humanize</span> <span class="kn">import</span> <span class="n">humanize_error</span>
+<span class="kn">from</span> <span class="nn">voluptuous.util</span> <span class="kn">import</span> <span class="n">to_utf8_py2</span><span class="p">,</span> <span class="n">u</span>
 
 
 <div class="viewcode-block" id="test_exact_sequence"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_exact_sequence">[docs]</a><span class="k">def</span> <span class="nf">test_exact_sequence</span><span class="p">():</span>
@@ -379,6 +381,31 @@
     <span class="k">assert</span> <span class="n">extended</span><span class="o">.</span><span class="n">extra</span> <span class="o">==</span> <span class="n">ALLOW_EXTRA</span></div>
 
 
+<div class="viewcode-block" id="test_schema_extend_key_swap"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_extend_key_swap">[docs]</a><span class="k">def</span> <span class="nf">test_schema_extend_key_swap</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Verify that Schema.extend can replace keys, even when different markers are used&quot;&quot;&quot;</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">):</span> <span class="nb">int</span><span class="p">})</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="p">{</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">):</span> <span class="nb">int</span><span class="p">}</span>
+    <span class="n">extended</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">schema</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">assert_true</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">schema</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Optional</span><span class="p">))</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">extended</span><span class="o">.</span><span class="n">schema</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">assert_true</span><span class="p">((</span><span class="nb">list</span><span class="p">(</span><span class="n">extended</span><span class="o">.</span><span class="n">schema</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Required</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="test_subschema_extension"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_subschema_extension">[docs]</a><span class="k">def</span> <span class="nf">test_subschema_extension</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Verify that Schema.extend adds and replaces keys in a subschema&quot;&quot;&quot;</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">}})</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">}}</span>
+    <span class="n">extended</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">}})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">extension</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">}})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">extended</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">},</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span></div>
+
+
 <div class="viewcode-block" id="test_repr"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_repr">[docs]</a><span class="k">def</span> <span class="nf">test_repr</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Verify that __repr__ returns valid Python expressions&quot;&quot;&quot;</span>
     <span class="n">match</span> <span class="o">=</span> <span class="n">Match</span><span class="p">(</span><span class="s1">&#39;a pattern&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;message&#39;</span><span class="p">)</span>
@@ -466,15 +493,6 @@
     <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;four&#39;</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="test_schema_decorator"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator</span><span class="p">():</span>
-    <span class="nd">@validate_schema</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">arg</span>
-
-    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="test_range_exlcudes_nan"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_range_exlcudes_nan">[docs]</a><span class="k">def</span> <span class="nf">test_range_exlcudes_nan</span><span class="p">():</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
     <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span></div>
@@ -522,6 +540,267 @@
     <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Unordered</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="nb">int</span><span class="p">]))</span>
     <span class="n">s</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_empty_list_as_exact"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_empty_list_as_exact">[docs]</a><span class="k">def</span> <span class="nf">test_empty_list_as_exact</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">([])</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">s</span><span class="p">([])</span></div>
+
+
+<div class="viewcode-block" id="test_empty_dict_as_exact"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_empty_dict_as_exact">[docs]</a><span class="k">def</span> <span class="nf">test_empty_dict_as_exact</span><span class="p">():</span>
+    <span class="c1"># {} always evaluates as {}</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({})</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({},</span> <span class="n">extra</span><span class="o">=</span><span class="n">ALLOW_EXTRA</span><span class="p">)</span>  <span class="c1"># this should not be used</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+
+    <span class="c1"># {...} evaluates as Schema({...})</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">},</span> <span class="n">extra</span><span class="o">=</span><span class="n">ALLOW_EXTRA</span><span class="p">)</span>
+    <span class="n">s</span><span class="p">({</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+
+    <span class="c1"># dict matches {} or {...}</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">s</span><span class="p">({</span><span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="n">s</span><span class="p">({})</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">PREVENT_EXTRA</span><span class="p">)</span>
+    <span class="n">s</span><span class="p">({</span><span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="n">s</span><span class="p">({})</span>
+
+    <span class="c1"># nested {} evaluate as {}</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
+        <span class="s1">&#39;inner&#39;</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="p">},</span> <span class="n">extra</span><span class="o">=</span><span class="n">ALLOW_EXTRA</span><span class="p">)</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;inner&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}})</span>
+    <span class="n">s</span><span class="p">({})</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
+        <span class="s1">&#39;inner&#39;</span><span class="p">:</span> <span class="n">Schema</span><span class="p">({},</span> <span class="n">extra</span><span class="o">=</span><span class="n">ALLOW_EXTRA</span><span class="p">)</span>
+    <span class="p">})</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;inner&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}})</span>
+    <span class="n">s</span><span class="p">({})</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_match_with_args"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_match_with_args">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_match_with_args</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_unmatch_with_args"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_unmatch_with_args">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_unmatch_with_args</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_match_with_kwargs"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_match_with_kwargs">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_match_with_kwargs</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_unmatch_with_kwargs"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_unmatch_with_kwargs">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_unmatch_with_kwargs</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_match_return_with_args"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_match_return_with_args">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_match_return_with_args</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">__return__</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_unmatch_return_with_args"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_unmatch_return_with_args">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_unmatch_return_with_args</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">__return__</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;hello&quot;</span>
+
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_match_return_with_kwargs"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_match_return_with_kwargs">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_match_return_with_kwargs</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">__return__</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_unmatch_return_with_kwargs"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_unmatch_return_with_kwargs">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_unmatch_return_with_kwargs</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">__return__</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;hello&quot;</span>
+
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_return_only_match"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_return_only_match">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_return_only_match</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="n">__return__</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
+
+    <span class="n">fn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_schema_decorator_return_only_unmatch"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_schema_decorator_return_only_unmatch">[docs]</a><span class="k">def</span> <span class="nf">test_schema_decorator_return_only_unmatch</span><span class="p">():</span>
+    <span class="nd">@validate</span><span class="p">(</span><span class="n">__return__</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;hello&quot;</span>
+
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_unicode_key_is_converted_to_utf8_when_in_marker"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_unicode_key_is_converted_to_utf8_when_in_marker">[docs]</a><span class="k">def</span> <span class="nf">test_unicode_key_is_converted_to_utf8_when_in_marker</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Verify that when using unicode key the &#39;u&#39; prefix is not thrown in the exception&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="n">u</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">)):</span> <span class="mi">1</span><span class="p">})</span>
+    <span class="c1"># Can&#39;t use nose&#39;s raises (because we need to access the raised</span>
+    <span class="c1"># exception, nor assert_raises which fails with Python 2.6.9.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">({})</span>
+    <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;required key not provided @ data[&#39;q&#39;]&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_number_validation_with_string"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_validation_with_string">[docs]</a><span class="k">def</span> <span class="nf">test_number_validation_with_string</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with string&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;teststr&#39;</span><span class="p">})</span>
+    <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                     <span class="s2">&quot;Value must be a number enclosed with string for dictionary value @ data[&#39;number&#39;]&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for String&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_unicode_key_is_converted_to_utf8_when_plain_text"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_unicode_key_is_converted_to_utf8_when_plain_text">[docs]</a><span class="k">def</span> <span class="nf">test_unicode_key_is_converted_to_utf8_when_plain_text</span><span class="p">():</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">u</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
+    <span class="c1"># Can&#39;t use nose&#39;s raises (because we need to access the raised</span>
+    <span class="c1"># exception, nor assert_raises which fails with Python 2.6.9.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;will fail&#39;</span><span class="p">})</span>
+    <span class="k">except</span> <span class="n">Invalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;expected int for dictionary value @ data[&#39;q&#39;]&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_number_validation_with_invalid_precision_invalid_scale"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_validation_with_invalid_precision_invalid_scale">[docs]</a><span class="k">def</span> <span class="nf">test_number_validation_with_invalid_precision_invalid_scale</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with invalid precision and scale&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;123456.712&#39;</span><span class="p">})</span>
+    <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                     <span class="s2">&quot;Precision must be equal to 6, and Scale must be equal to 2 for dictionary value @ data[&#39;number&#39;]&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for String&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_number_validation_with_valid_precision_scale_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_validation_with_valid_precision_scale_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_validation_with_valid_precision_scale_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with valid precision and scale&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;1234.00&#39;</span><span class="p">})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)),</span> <span class="mf">1234.00</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_number_when_precision_scale_none_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_when_precision_scale_none_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_when_precision_scale_none_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with no precision and scale&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;12345678901234&#39;</span><span class="p">})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">),</span> <span class="mi">12345678901234</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with no precision and valid scale case 1&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;123456789.34&#39;</span><span class="p">})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)),</span> <span class="mf">123456789.34</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with no precision and valid scale case 2 with zero in decimal part&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;123456789012.00&#39;</span><span class="p">})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)),</span> <span class="mf">123456789012.00</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_to_utf8"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_to_utf8">[docs]</a><span class="k">def</span> <span class="nf">test_to_utf8</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">u</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+    <span class="n">assert_true</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">to_utf8_py2</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="nb">str</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="test_number_when_precision_none_n_invalid_scale_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_when_precision_none_n_invalid_scale_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_when_precision_none_n_invalid_scale_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with no precision and invalid scale&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;12345678901.234&#39;</span><span class="p">})</span>
+    <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                     <span class="s2">&quot;Scale must be equal to 2 for dictionary value @ data[&#39;number&#39;]&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for String&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_number_when_valid_precision_n_scale_none_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_when_valid_precision_n_scale_none_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_when_valid_precision_n_scale_none_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with no precision and valid scale&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;1234567.8901234&#39;</span><span class="p">})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)),</span> <span class="mf">1234567.8901234</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_number_when_invalid_precision_n_scale_none_yield_decimal_true"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_when_invalid_precision_n_scale_none_yield_decimal_true">[docs]</a><span class="k">def</span> <span class="nf">test_number_when_invalid_precision_n_scale_none_yield_decimal_true</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with no precision and invalid scale&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">True</span><span class="p">)})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;12345674.8901234&#39;</span><span class="p">})</span>
+    <span class="k">except</span> <span class="n">MultipleInvalid</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">assert_equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                     <span class="s2">&quot;Precision must be equal to 14 for dictionary value @ data[&#39;number&#39;]&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;Did not raise Invalid for String&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_number_validation_with_valid_precision_scale_yield_decimal_false"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_number_validation_with_valid_precision_scale_yield_decimal_false">[docs]</a><span class="k">def</span> <span class="nf">test_number_validation_with_valid_precision_scale_yield_decimal_false</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; test with Number with valid precision, scale and no yield_decimal&quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span> <span class="p">:</span> <span class="n">Number</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">False</span><span class="p">)})</span>
+    <span class="n">out_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="s1">&#39;1234.00&#39;</span><span class="p">})</span>
+    <span class="n">assert_equal</span><span class="p">(</span><span class="n">out_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">),</span> <span class="s1">&#39;1234.00&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_named_tuples_validate_as_tuples"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_named_tuples_validate_as_tuples">[docs]</a><span class="k">def</span> <span class="nf">test_named_tuples_validate_as_tuples</span><span class="p">():</span>
+    <span class="n">NT</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;NT&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">])</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="n">NT</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">Schema</span><span class="p">((</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">))(</span><span class="n">nt</span><span class="p">)</span>
+    <span class="n">Schema</span><span class="p">((</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">))(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">Schema</span><span class="p">(</span><span class="n">NT</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">))(</span><span class="n">nt</span><span class="p">)</span>
+    <span class="n">Schema</span><span class="p">(</span><span class="n">NT</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">))(</span><span class="n">t</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_datetime"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_datetime">[docs]</a><span class="k">def</span> <span class="nf">test_datetime</span><span class="p">():</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;datetime&quot;</span><span class="p">:</span> <span class="n">Datetime</span><span class="p">()})</span>
+    <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;2016-10-24T14:01:57.102152Z&quot;</span><span class="p">})</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;2016-10-24T14:01:57&quot;</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="test_date"><a class="viewcode-back" href="../../../voluptuous.tests.html#voluptuous.tests.tests.test_date">[docs]</a><span class="k">def</span> <span class="nf">test_date</span><span class="p">():</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">Date</span><span class="p">()})</span>
+    <span class="n">schema</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2016-10-24&quot;</span><span class="p">})</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2016-10-2&quot;</span><span class="p">})</span>
+    <span class="n">assert_raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2016-10-24Z&quot;</span><span class="p">})</span></div>
 </pre></div>
 
           </div>

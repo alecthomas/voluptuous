@@ -52,8 +52,9 @@
     <span class="k">for</span> <span class="n">item_index</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">item_index</span><span class="p">]</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
-            <span class="c1"># The index is not present in the dictionary, list or other indexable</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="c1"># The index is not present in the dictionary, list or other</span>
+            <span class="c1"># indexable or data is not subscriptable</span>
             <span class="k">return</span> <span class="bp">None</span>
     <span class="k">return</span> <span class="n">data</span>
 

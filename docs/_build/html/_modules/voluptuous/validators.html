@@ -46,20 +46,20 @@
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span><span class="p">,</span> <span class="n">InvalidOperation</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">message</span>
     <span class="kn">from</span> <span class="nn">error</span> <span class="kn">import</span> <span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">CoerceInvalid</span><span class="p">,</span> <span class="n">TrueInvalid</span><span class="p">,</span> <span class="n">FalseInvalid</span><span class="p">,</span> <span class="n">BooleanInvalid</span><span class="p">,</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">AnyInvalid</span><span class="p">,</span>
                        <span class="n">AllInvalid</span><span class="p">,</span> <span class="n">MatchInvalid</span><span class="p">,</span> <span class="n">UrlInvalid</span><span class="p">,</span> <span class="n">EmailInvalid</span><span class="p">,</span> <span class="n">FileInvalid</span><span class="p">,</span> <span class="n">DirInvalid</span><span class="p">,</span> <span class="n">RangeInvalid</span><span class="p">,</span>
-                       <span class="n">PathInvalid</span><span class="p">,</span> <span class="n">ExactSequenceInvalid</span><span class="p">,</span> <span class="n">LengthInvalid</span><span class="p">,</span> <span class="n">DatetimeInvalid</span><span class="p">,</span> <span class="n">InInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span>
-                       <span class="n">NotInInvalid</span><span class="p">)</span>
+                       <span class="n">PathInvalid</span><span class="p">,</span> <span class="n">ExactSequenceInvalid</span><span class="p">,</span> <span class="n">LengthInvalid</span><span class="p">,</span> <span class="n">DatetimeInvalid</span><span class="p">,</span> <span class="n">DateInvalid</span><span class="p">,</span> <span class="n">InInvalid</span><span class="p">,</span>
+                       <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">NotInInvalid</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">raises</span><span class="p">,</span> <span class="n">message</span>
     <span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="n">CoerceInvalid</span><span class="p">,</span> <span class="n">TrueInvalid</span><span class="p">,</span> <span class="n">FalseInvalid</span><span class="p">,</span> <span class="n">BooleanInvalid</span><span class="p">,</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">AnyInvalid</span><span class="p">,</span>
                         <span class="n">AllInvalid</span><span class="p">,</span> <span class="n">MatchInvalid</span><span class="p">,</span> <span class="n">UrlInvalid</span><span class="p">,</span> <span class="n">EmailInvalid</span><span class="p">,</span> <span class="n">FileInvalid</span><span class="p">,</span> <span class="n">DirInvalid</span><span class="p">,</span> <span class="n">RangeInvalid</span><span class="p">,</span>
-                        <span class="n">PathInvalid</span><span class="p">,</span> <span class="n">ExactSequenceInvalid</span><span class="p">,</span> <span class="n">LengthInvalid</span><span class="p">,</span> <span class="n">DatetimeInvalid</span><span class="p">,</span> <span class="n">InInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span>
-                        <span class="n">NotInInvalid</span><span class="p">)</span>
+                        <span class="n">PathInvalid</span><span class="p">,</span> <span class="n">ExactSequenceInvalid</span><span class="p">,</span> <span class="n">LengthInvalid</span><span class="p">,</span> <span class="n">DatetimeInvalid</span><span class="p">,</span> <span class="n">DateInvalid</span><span class="p">,</span> <span class="n">InInvalid</span><span class="p">,</span>
+                        <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">NotInInvalid</span><span class="p">)</span>
 
 
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
@@ -459,8 +459,13 @@
 <span class="sd">    True</span>
 <span class="sd">    &gt;&gt;&gt; with raises(FileInvalid, &#39;not a file&#39;):</span>
 <span class="sd">    ...   IsFile()(&quot;random_filename_goes_here.py&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; with raises(FileInvalid, &#39;Not a file&#39;):</span>
+<span class="sd">    ...   IsFile()(None)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">v</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FileInvalid</span><span class="p">(</span><span class="s1">&#39;Not a file&#39;</span><span class="p">)</span></div>
 
 
 <span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;not a directory&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">DirInvalid</span><span class="p">)</span>
@@ -470,8 +475,13 @@
 
 <span class="sd">    &gt;&gt;&gt; IsDir()(&#39;/&#39;)</span>
 <span class="sd">    &#39;/&#39;</span>
+<span class="sd">    &gt;&gt;&gt; with raises(DirInvalid, &#39;Not a directory&#39;):</span>
+<span class="sd">    ...   IsDir()(None)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">v</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DirInvalid</span><span class="p">(</span><span class="s2">&quot;Not a directory&quot;</span><span class="p">)</span></div>
 
 
 <span class="nd">@message</span><span class="p">(</span><span class="s1">&#39;path does not exist&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">PathInvalid</span><span class="p">)</span>
@@ -483,8 +493,13 @@
 <span class="sd">    True</span>
 <span class="sd">    &gt;&gt;&gt; with raises(Invalid, &#39;path does not exist&#39;):</span>
 <span class="sd">    ...   PathExists()(&quot;random_filename_goes_here.py&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; with raises(PathInvalid, &#39;Not a Path&#39;):</span>
+<span class="sd">    ...   PathExists()(None)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">v</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PathInvalid</span><span class="p">(</span><span class="s2">&quot;Not a Path&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Range"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Range">[docs]</a><span class="k">class</span> <span class="nc">Range</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -547,6 +562,7 @@
     <span class="sd">&quot;&quot;&quot;Clamp a value to a range.</span>
 
 <span class="sd">    Either min or max may be omitted.</span>
+
 <span class="sd">    &gt;&gt;&gt; s = Schema(Clamp(min=0, max=1))</span>
 <span class="sd">    &gt;&gt;&gt; s(0.5)</span>
 <span class="sd">    0.5</span>
@@ -613,6 +629,29 @@
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;Datetime(format=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span></div>
+
+
+<div class="viewcode-block" id="Date"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Date">[docs]</a><span class="k">class</span> <span class="nc">Date</span><span class="p">(</span><span class="n">Datetime</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate that the value matches the date format.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_FORMAT</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span>
+    <span class="n">FORMAT_DESCRIPTION</span> <span class="o">=</span> <span class="s1">&#39;yyyy-mm-dd&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FORMAT_DESCRIPTION</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">DateInvalid</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value has invalid length&#39;</span>
+                                <span class="s1">&#39; expected length </span><span class="si">%d</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FORMAT_DESCRIPTION</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT_DESCRIPTION</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DateInvalid</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;value does not match&#39;</span>
+                            <span class="s1">&#39; expected format </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Date(format=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span></div>
 
 
 <div class="viewcode-block" id="In"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.In">[docs]</a><span class="k">class</span> <span class="nc">In</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -822,6 +861,65 @@
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;Unordered([{}])&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Number"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.validators.Number">[docs]</a><span class="k">class</span> <span class="nc">Number</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verify the number of digits that are present in the number(Precision),</span>
+<span class="sd">    and the decimal places(Scale)</span>
+
+<span class="sd">    :raises Invalid: If the value does not match the provided Precision and Scale.</span>
+
+<span class="sd">    &gt;&gt;&gt; schema = Schema(Number(precision=6, scale=2))</span>
+<span class="sd">    &gt;&gt;&gt; schema(&#39;1234.01&#39;)</span>
+<span class="sd">    &#39;1234.01&#39;</span>
+<span class="sd">    &gt;&gt;&gt; schema = Schema(Number(precision=6, scale=2, yield_decimal=True))</span>
+<span class="sd">    &gt;&gt;&gt; schema(&#39;1234.01&#39;)</span>
+<span class="sd">    Decimal(&#39;1234.01&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yield_decimal</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="n">precision</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yield_decimal</span> <span class="o">=</span> <span class="n">yield_decimal</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param v: is a number enclosed with string</span>
+<span class="sd">        :return: Decimal number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">precision</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">decimal_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_precision_scale</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span>\
+            <span class="n">precision</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="ow">and</span> <span class="n">scale</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s2">&quot;Precision must be equal to </span><span class="si">%s</span><span class="s2">, and Scale must be equal to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">precision</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s2">&quot;Precision must be equal to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">scale</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="p">:</span>
+                <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s2">&quot;Scale must be equal to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">yield_decimal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">decimal_num</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Number(precision=</span><span class="si">%s</span><span class="s1">, scale=</span><span class="si">%s</span><span class="s1">, msg=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_get_precision_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param number:</span>
+<span class="sd">        :return: tuple(precision, scale, decimal_number)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">decimal_num</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidOperation</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;Value must be a number enclosed with string&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">decimal_num</span><span class="o">.</span><span class="n">as_tuple</span><span class="p">()</span><span class="o">.</span><span class="n">digits</span><span class="p">),</span> <span class="o">-</span><span class="p">(</span><span class="n">decimal_num</span><span class="o">.</span><span class="n">as_tuple</span><span class="p">()</span><span class="o">.</span><span class="n">exponent</span><span class="p">),</span> <span class="n">decimal_num</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
