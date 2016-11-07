@@ -13,7 +13,7 @@ install:
 script: nosetests --with-coverage --cover-package=voluptuous
 after_success:
 - coveralls
-- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./update_documentation.sh $USERNAME $PASSWORD; fi
+#- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./update_documentation.sh $USERNAME $PASSWORD; fi # Fix this later
 env:
   global:
   - secure: UKVFCaFRRECYeNaLJr4POqt6zENBjyUe79U/5b9pEGBFWzXWoJ+EElOFOJdkquL6u3AwL6Bw93GqRIYHKcRW70doCYiEI7p2CuXey2mjoC7bLKdk4Fcrj0MTbiS6WJxEDfcsP/Tj3tv4kPqA4nYYm9DQoNfUX3skns442h0zals=
