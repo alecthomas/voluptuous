@@ -34,11 +34,11 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## Show me an example
 
-Twitter's [user search API](https://dev.twitter.com/docs/api/1/get/users/search) accepts
+Twitter's [user search API](https://dev.twitter.com/rest/reference/get/users/search) accepts
 query URLs like:
 
 ```
-$ curl 'http://api.twitter.com/1/users/search.json?q=python&per_page=20&page=1
+$ curl 'http://api.twitter.com/1.1/users/search.json?q=python&per_page=20&page=1'
 ```
 
 To validate this we might use a schema like:
