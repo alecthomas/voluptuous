@@ -27,7 +27,7 @@ def humanize_error(data, validation_error, max_sub_error_length=MAX_VALIDATION_E
             for sub_error in validation_error.errors
         ))
     else:
-        offending_item_summary = repr(_nested_getitem(data, validation_error.path))
+        offending_item_summary = repr(_nested_getitem(data, validation_error.state))
         if len(offending_item_summary) > max_sub_error_length:
             offending_item_summary = offending_item_summary[:max_sub_error_length - 3] + '...'
         return '%s. Got %s' % (validation_error, offending_item_summary)

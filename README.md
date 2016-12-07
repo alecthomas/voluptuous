@@ -558,8 +558,8 @@ an HTTP API.
 ...     exc = e
 >>> str(exc)
 "This email is invalid. for dictionary value @ data['email']"
->>> exc.path
-['email']
+>>> exc.state
+<ValidationState @ data['email']>
 >>> exc.msg
 'This email is invalid.'
 >>> exc.error_message

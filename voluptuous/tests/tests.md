@@ -52,9 +52,11 @@ Errors should be reported depth-first:
     ...   validate({'one': {'four': 'six'}})
     ... except Invalid as e:
     ...   print(e)
-    ...   print(e.path)
+    ...   print(repr(e.state))
+    ...   print(e.state)
     not a valid value for dictionary value @ data['one']['four']
-    ['one', 'four']
+    <ValidationState @ data['one']['four']>
+     @ data['one']['four']
 
 Voluptuous supports validation when extra fields are present in the
 data:

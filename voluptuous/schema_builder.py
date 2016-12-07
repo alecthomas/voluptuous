@@ -4,6 +4,7 @@ import re
 from functools import wraps
 import sys
 from contextlib import contextmanager
+from voluptuous.validation_state import check_cache, StateValidator, ValidationState
 
 try:
     import error as er
@@ -110,6 +111,7 @@ def _isnamedtuple(obj):
     return isinstance(obj, tuple) and hasattr(obj, '_fields')
 
 
+
 class Undefined(object):
     def __nonzero__(self):
         return False
@@ -148,7 +150,7 @@ def Extra(_):
 extra = Extra
 
 
-class Schema(object):
+class Schema(StateValidator):
     """A validation schema.
 
     The schema is a Python tree-like structure where nodes are pattern
@@ -210,15 +212,18 @@ class Schema(object):
             self.schema, self._extra_to_name.get(self.extra, '??'),
             self.required, id(self))
 
-    def __call__(self, data):
+    def __call__(self, data, state=None):
         """Validate data against this schema."""
         try:
-            return self._compiled([], data)
+            # validated_cache - prevent creation of duplicate objects
+            # this is a dict[schema][id(obj)] with validated object values
+            if state is None:
+                state = ValidationState()
+            return self._compiled(state, data)
         except er.MultipleInvalid:
             raise
         except er.Invalid as e:
             raise er.MultipleInvalid([e])
-            # return self.validate([], self.schema, data)
 
     def _compile(self, schema):
         if schema is Extra:
@@ -263,7 +268,7 @@ class Schema(object):
 
         candidates = list(_iterate_mapping_candidates(_compiled_schema))
 
-        def validate_mapping(path, iterable, out):
+        def validate_mapping(state, iterable, out):
             try:
                 from util import to_utf8_py2
             except ImportError:
@@ -275,7 +280,7 @@ class Schema(object):
             errors = []
             for key, value in iterable:
                 key = to_utf8_py2(key)
-                key_path = path + [key]
+                key_path = state + [key]
                 remove_key = False
 
                 # compare each given key/value against all compiled key/values
@@ -284,9 +289,9 @@ class Schema(object):
                     try:
                         new_key = ckey(key_path, key)
                     except er.Invalid as e:
-                        if len(e.path) > len(key_path):
+                        if len(e.state) > len(key_path):
                             raise
-                        if not error or len(e.path) > len(error.path):
+                        if not error or len(e.state) > len(error.state):
                             error = e
                         continue
                     # Backtracking is not performed once a key is selected, so if
@@ -311,7 +316,7 @@ class Schema(object):
                         if is_remove or remove_key:
                             continue
                         for err in exception_errors:
-                            if len(err.path) <= len(key_path):
+                            if len(err.state) <= len(key_path):
                                 err.error_type = invalid_msg
                             errors.append(err)
                         # If there is a validation error for a required
@@ -348,7 +353,7 @@ class Schema(object):
             # for any required keys left that weren't found and don't have defaults:
             for key in required_keys:
                 msg = key.msg if hasattr(key, 'msg') and key.msg else 'required key not provided'
-                errors.append(er.RequiredFieldInvalid(msg, path + [key]))
+                errors.append(er.RequiredFieldInvalid(msg, state + [key]))
             if errors:
                 raise er.MultipleInvalid(errors)
 
@@ -377,12 +382,13 @@ class Schema(object):
         base_validate = self._compile_mapping(
             schema, invalid_msg='object value')
 
-        def validate_object(path, data):
+        @check_cache
+        def validate_object(state, data):
             if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
-                raise er.ObjectInvalid('expected a {0!r}'.format(schema.cls), path)
+                raise er.ObjectInvalid('expected a {0!r}'.format(schema.cls), state)
             iterable = _iterate_object(data)
             iterable = ifilter(lambda item: item[1] is not None, iterable)
-            out = base_validate(path, iterable, {})
+            out = base_validate(state, iterable, {})
             return type(data)(**out)
 
         return validate_object
@@ -482,9 +488,10 @@ class Schema(object):
                 g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
                 g.append(node)
 
-        def validate_dict(path, data):
+        @check_cache
+        def validate_dict(state, data):
             if not isinstance(data, dict):
-                raise er.DictInvalid('expected a dictionary', path)
+                raise er.DictInvalid('expected a dictionary', state)
 
             errors = []
             for label, group in groups_of_exclusion.items():
@@ -494,8 +501,8 @@ class Schema(object):
                         if exists:
                             msg = exclusive.msg if hasattr(exclusive, 'msg') and exclusive.msg else \
                                 "two or more values in the same group of exclusion '%s'" % label
-                            next_path = path + [VirtualPathComponent(label)]
-                            errors.append(er.ExclusiveInvalid(msg, next_path))
+                            next_state = state + [VirtualPathComponent(label)]
+                            errors.append(er.ExclusiveInvalid(msg, next_state))
                             break
                         exists = True
 
@@ -510,15 +517,15 @@ class Schema(object):
                         if hasattr(g, 'msg') and g.msg:
                             msg = g.msg
                             break
-                    next_path = path + [VirtualPathComponent(label)]
-                    errors.append(er.InclusiveInvalid(msg, next_path))
+                    next_state = state + [VirtualPathComponent(label)]
+                    errors.append(er.InclusiveInvalid(msg, next_state))
                     break
 
             if errors:
                 raise er.MultipleInvalid(errors)
 
             out = {}
-            return base_validate(path, iteritems(data), out)
+            return base_validate(state, iteritems(data), out)
 
         return validate_dict
 
@@ -538,9 +545,10 @@ class Schema(object):
         _compiled = [self._compile(s) for s in schema]
         seq_type_name = seq_type.__name__
 
-        def validate_sequence(path, data):
+        @check_cache
+        def validate_sequence(state, data):
             if not isinstance(data, seq_type):
-                raise er.SequenceTypeInvalid('expected a %s' % seq_type_name, path)
+                raise er.SequenceTypeInvalid('expected a %s' % seq_type_name, state)
 
             # Empty seq schema, allow any data.
             if not schema:
@@ -549,18 +557,18 @@ class Schema(object):
             out = []
             invalid = None
             errors = []
-            index_path = UNDEFINED
+            index_state = UNDEFINED
             for i, value in enumerate(data):
-                index_path = path + [i]
+                index_state = state + [i]
                 invalid = None
                 for validate in _compiled:
                     try:
-                        cval = validate(index_path, value)
+                        cval = validate(index_state, value)
                         if cval is not Remove:  # do not include Remove values
                             out.append(cval)
                         break
                     except er.Invalid as e:
-                        if len(e.path) > len(index_path):
+                        if len(e.state) > len(index_state):
                             raise
                         invalid = e
                 else:
@@ -684,30 +692,40 @@ def _compile_scalar(schema):
     ...   _compile_scalar(lambda v: float(v))([], 'a')
     """
     if isinstance(schema, type):
-        def validate_instance(path, data):
+        @check_cache
+        def validate_instance(state, data):
             if isinstance(data, schema):
                 return data
             else:
                 msg = 'expected %s' % schema.__name__
-                raise er.TypeInvalid(msg, path)
+                raise er.TypeInvalid(msg, state)
 
         return validate_instance
 
     if callable(schema):
-        def validate_callable(path, data):
-            try:
-                return schema(data)
-            except ValueError as e:
-                raise er.ValueInvalid('not a valid value', path)
-            except er.Invalid as e:
-                e.prepend(path)
-                raise
+        if isinstance(schema, StateValidator):
+            @check_cache
+            def validate_callable(state, data):
+                return schema(data, state=state)
+        else:
+            @check_cache
+            def validate_callable(state, data):
+                try:
+                    return schema(data)
+                except ValueError as e:
+                    raise er.ValueInvalid('not a valid value', state)
+                except er.Invalid as e:
+                    if not e.state:
+                        e.state = state
+                    raise
+                
 
         return validate_callable
 
-    def validate_value(path, data):
+    @check_cache
+    def validate_value(state, data):
         if data != schema:
-            raise er.ScalarInvalid('not a valid value', path)
+            raise er.ScalarInvalid('not a valid value', state)
         return data
 
     return validate_value
@@ -789,7 +807,7 @@ def _iterate_object(obj):
     raise StopIteration()
 
 
-class Msg(object):
+class Msg(StateValidator):
     """Report a user-friendly message if a schema fails to validate.
 
     >>> validate = Schema(
@@ -827,11 +845,11 @@ class Msg(object):
         self.msg = msg
         self.cls = cls
 
-    def __call__(self, v):
+    def __call__(self, data, state=None):
         try:
-            return self.schema(v)
+            return self.schema(data, state)
         except er.Invalid as e:
-            if len(e.path) > 1:
+            if len(e.state) > 1:
                 raise e
             else:
                 raise (self.cls or er.Invalid)(self.msg)
@@ -859,7 +877,7 @@ class VirtualPathComponent(str):
 # Markers.py
 
 
-class Marker(object):
+class Marker(StateValidator):
     """Mark nodes for special treatment."""
 
     def __init__(self, schema_, msg=None):
@@ -872,11 +890,11 @@ class Marker(object):
         self._schema = Schema(schema_)
         self.msg = msg
 
-    def __call__(self, v):
+    def __call__(self, data, state=None):
         try:
-            return self._schema(v)
+            return self._schema(data, state)
         except er.Invalid as e:
-            if not self.msg or len(e.path) > 1:
+            if not self.msg or len(e.state) > 1:
                 raise
             raise er.Invalid(self.msg)
 
@@ -1041,8 +1059,8 @@ class Remove(Marker):
     [1, 2, 3, 5, '7']
     """
 
-    def __call__(self, v):
-        super(Remove, self).__call__(v)
+    def __call__(self, data, state=None):
+        super(Remove, self).__call__(data, state)
         return self.__class__
 
     def __repr__(self):

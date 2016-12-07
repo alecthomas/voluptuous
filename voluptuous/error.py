@@ -1,4 +1,7 @@
 
+from validation_state import ValidationState
+
+
 class Error(Exception):
     """Base validation exception."""
 
@@ -17,9 +20,9 @@ class Invalid(Error):
 
     """
 
-    def __init__(self, message, path=None, error_message=None, error_type=None):
+    def __init__(self, message, state=None, error_message=None, error_type=None):
         Error.__init__(self, message)
-        self.path = path or []
+        self.state = ValidationState(state)
         self.error_message = error_message or message
         self.error_type = error_type
 
@@ -28,18 +31,15 @@ class Invalid(Error):
         return self.args[0]
 
     def __str__(self):
-        path = ' @ data[%s]' % ']['.join(map(repr, self.path)) \
-            if self.path else ''
+        path = str(self.state)
         output = Exception.__str__(self)
         if self.error_type:
             output += ' for ' + self.error_type
         return output + path
 
-    def prepend(self, path):
-        self.path = path + self.path
-
 
 class MultipleInvalid(Invalid):
+
     def __init__(self, errors=None):
         self.errors = errors[:] if errors else []
 
@@ -51,8 +51,13 @@ class MultipleInvalid(Invalid):
         return self.errors[0].msg
 
     @property
-    def path(self):
-        return self.errors[0].path
+    def state(self):
+        return self.errors[0].state
+
+    @state.setter
+    def state(self, state):
+        for error in self.errors:
+            error.state = state + error.state
 
     @property
     def error_message(self):
@@ -63,10 +68,6 @@ class MultipleInvalid(Invalid):
 
     def __str__(self):
         return str(self.errors[0])
-
-    def prepend(self, path):
-        for error in self.errors:
-            error.prepend(path)
 
 
 class RequiredFieldInvalid(Invalid):
