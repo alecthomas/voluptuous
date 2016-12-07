@@ -517,7 +517,7 @@ class Schema(object):
             if errors:
                 raise er.MultipleInvalid(errors)
 
-            out = {}
+            out = data.__class__()
             return base_validate(path, iteritems(data), out)
 
         return validate_dict
