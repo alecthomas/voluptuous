@@ -644,7 +644,7 @@ def test_unicode_key_is_converted_to_utf8_when_in_marker():
 
 def test_number_validation_with_string():
     """ test with Number with string"""
-    schema = Schema({"number" : Number(precision=6, scale=2)})
+    schema = Schema({"number": Number(precision=6, scale=2)})
     try:
         schema({"number": 'teststr'})
     except MultipleInvalid as e:
@@ -667,7 +667,7 @@ def test_unicode_key_is_converted_to_utf8_when_plain_text():
 
 def test_number_validation_with_invalid_precision_invalid_scale():
     """ test with Number with invalid precision and scale"""
-    schema = Schema({"number" : Number(precision=6, scale=2)})
+    schema = Schema({"number": Number(precision=6, scale=2)})
     try:
         schema({"number": '123456.712'})
     except MultipleInvalid as e:
@@ -679,28 +679,28 @@ def test_number_validation_with_invalid_precision_invalid_scale():
 
 def test_number_validation_with_valid_precision_scale_yield_decimal_true():
     """ test with Number with valid precision and scale"""
-    schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=True)})
+    schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=True)})
     out_ = schema({"number": '1234.00'})
     assert_equal(float(out_.get("number")), 1234.00)
 
 
 def test_number_when_precision_scale_none_yield_decimal_true():
     """ test with Number with no precision and scale"""
-    schema = Schema({"number" : Number(yield_decimal=True)})
+    schema = Schema({"number": Number(yield_decimal=True)})
     out_ = schema({"number": '12345678901234'})
     assert_equal(out_.get("number"), 12345678901234)
 
 
 def test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true():
     """ test with Number with no precision and valid scale case 1"""
-    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789.34'})
     assert_equal(float(out_.get("number")), 123456789.34)
 
 
 def test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true():
     """ test with Number with no precision and valid scale case 2 with zero in decimal part"""
-    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789012.00'})
     assert_equal(float(out_.get("number")), 123456789012.00)
 
@@ -712,7 +712,7 @@ def test_to_utf8():
 
 def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
     """ test with Number with no precision and invalid scale"""
-    schema = Schema({"number" : Number(scale=2, yield_decimal=True)})
+    schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     try:
         schema({"number": '12345678901.234'})
     except MultipleInvalid as e:
@@ -724,14 +724,14 @@ def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
 
 def test_number_when_valid_precision_n_scale_none_yield_decimal_true():
     """ test with Number with no precision and valid scale"""
-    schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
+    schema = Schema({"number": Number(precision=14, yield_decimal=True)})
     out_ = schema({"number": '1234567.8901234'})
     assert_equal(float(out_.get("number")), 1234567.8901234)
 
 
 def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
     """ test with Number with no precision and invalid scale"""
-    schema = Schema({"number" : Number(precision=14, yield_decimal=True)})
+    schema = Schema({"number": Number(precision=14, yield_decimal=True)})
     try:
         schema({"number": '12345674.8901234'})
     except MultipleInvalid as e:
@@ -743,7 +743,7 @@ def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
 
 def test_number_validation_with_valid_precision_scale_yield_decimal_false():
     """ test with Number with valid precision, scale and no yield_decimal"""
-    schema = Schema({"number" : Number(precision=6, scale=2, yield_decimal=False)})
+    schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=False)})
     out_ = schema({"number": '1234.00'})
     assert_equal(out_.get("number"), '1234.00')
 
@@ -770,3 +770,21 @@ def test_date():
     schema({"date": "2016-10-24"})
     assert_raises(MultipleInvalid, schema, {"date": "2016-10-2"})
     assert_raises(MultipleInvalid, schema, {"date": "2016-10-24Z"})
+
+
+def test_references():
+    mouse = Schema({"name": str, "birthday": Date()})
+    mice = Schema([mouse])
+    schema = Schema({
+        "as value": mouse,
+        "in list": mice
+    })
+    mickey = dict(name="Mickey", birthday="1928-11-18")
+    data = {"as value": mickey,
+            "in list": [mickey, mickey]
+            }
+    out = schema(data)
+    copy1 = out["as value"]
+    copy2, copy3 = out["in list"]
+    assert copy1 is copy2, 'they are not the same ({}) != ({})'.format(id(copy1), id(copy2))
+    assert copy1 is copy3, 'they are not the same ({}) != ({})'.format(id(copy1), id(copy3))

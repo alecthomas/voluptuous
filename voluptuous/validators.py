@@ -7,12 +7,14 @@ from decimal import Decimal, InvalidOperation
 
 try:
     from schema_builder import Schema, raises, message
+    from .validation_state import StateValidator
     from error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
                        AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
                        PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
                        TypeInvalid, NotInInvalid)
 except ImportError:
     from .schema_builder import Schema, raises, message
+    from .validation_state import StateValidator
     from .error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
                         AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
                         PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
@@ -70,7 +72,7 @@ def truth(f):
     return check
 
 
-class Coerce(object):
+class Coerce(StateValidator):
     """Coerce a value to a type.
 
     If the type constructor throws a ValueError or TypeError, the value
@@ -96,9 +98,9 @@ class Coerce(object):
         self.msg = msg
         self.type_name = type.__name__
 
-    def __call__(self, v):
+    def __call__(self, data, state=None):
         try:
-            return self.type(v)
+            return self.type(data)
         except (ValueError, TypeError):
             msg = self.msg or ('expected %s' % self.type_name)
             raise CoerceInvalid(msg)
@@ -187,7 +189,7 @@ def Boolean(v):
     return bool(v)
 
 
-class Any(object):
+class Any(StateValidator):
     """Use the first validated value.
 
     :param msg: Message to deliver to user if validation fails.
@@ -217,13 +219,13 @@ class Any(object):
         self.msg = kwargs.pop('msg', None)
         self._schemas = [Schema(val, **kwargs) for val in validators]
 
-    def __call__(self, v):
+    def __call__(self, data, state=None):
         error = None
         for schema in self._schemas:
             try:
-                return schema(v)
+                return schema(data, state=state)
             except Invalid as e:
-                if error is None or len(e.path) > len(error.path):
+                if error is None or len(e.state) > len(error.state):
                     error = e
         else:
             if error:
@@ -238,7 +240,7 @@ class Any(object):
 Or = Any
 
 
-class All(object):
+class All(StateValidator):
     """Value must pass all validators.
 
     The output of each validator is passed as input to the next.
@@ -256,13 +258,13 @@ class All(object):
         self.msg = kwargs.pop('msg', None)
         self._schemas = [Schema(val, **kwargs) for val in validators]
 
-    def __call__(self, v):
+    def __call__(self, data, state=None):
         try:
             for schema in self._schemas:
-                v = schema(v)
+                data = schema(data, state=state)
         except Invalid as e:
             raise e if self.msg is None else AllInvalid(self.msg)
-        return v
+        return data
 
     def __repr__(self):
         return 'All(%s, msg=%r)' % (
