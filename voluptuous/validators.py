@@ -10,13 +10,13 @@ try:
     from error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
                        AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
                        PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
-                       TypeInvalid, NotInInvalid)
+                       TypeInvalid, NotInInvalid, ContainsInvalid)
 except ImportError:
     from .schema_builder import Schema, raises, message
     from .error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
                         AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
                         PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
-                        TypeInvalid, NotInInvalid)
+                        TypeInvalid, NotInInvalid, ContainsInvalid)
 
 
 if sys.version_info >= (3,):
@@ -678,6 +678,26 @@ class NotIn(object):
 
     def __repr__(self):
         return 'NotIn(%s)' % (self.container,)
+
+
+class Contains(object):
+    """Validate that a value is in a collection."""
+
+    def __init__(self, item, msg=None):
+        self.item = item
+        self.msg = msg
+
+    def __call__(self, v):
+        try:
+            check = self.item not in v
+        except TypeError:
+            check = True
+        if check:
+            raise ContainsInvalid(self.msg or 'value is not allowed')
+        return v
+
+    def __repr__(self):
+        return 'Contains(%s)' % (self.item, )
 
 
 class ExactSequence(object):
