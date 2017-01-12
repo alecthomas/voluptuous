@@ -6,7 +6,8 @@ from voluptuous import (
     Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date
+    validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
+    Contains
 )
 from voluptuous.humanize import humanize_error
 from voluptuous.util import to_utf8_py2, u
@@ -71,6 +72,17 @@ def test_not_in():
         assert_equal(str(e), "value is not allowed for dictionary value @ data['color']")
     else:
         assert False, "Did not raise NotInInvalid"
+
+
+def test_contains():
+    """Verify contains validation method."""
+    schema = Schema({'color': Contains('red')})
+    schema({'color': ['blue', 'red', 'yellow']})
+    try:
+        schema({'color': ['blue', 'yellow']})
+    except Invalid as e:
+        assert_equal(str(e),
+                    "value is not allowed for dictionary value @ data['color']")
 
 
 def test_remove():

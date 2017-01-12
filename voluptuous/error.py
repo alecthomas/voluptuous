@@ -101,6 +101,10 @@ class ValueInvalid(Invalid):
     """The value was found invalid by evaluation function."""
 
 
+class ContainsInvalid(Invalid):
+    """List does not contain item"""
+
+
 class ScalarInvalid(Invalid):
     """Scalars did not match."""
 
