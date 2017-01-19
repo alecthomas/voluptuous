@@ -5,6 +5,8 @@ from functools import wraps
 import sys
 from contextlib import contextmanager
 
+import itertools
+
 try:
     import error as er
 except ImportError:
@@ -108,6 +110,9 @@ REMOVE_EXTRA = 2  # extra keys not in schema will be excluded from output
 
 def _isnamedtuple(obj):
     return isinstance(obj, tuple) and hasattr(obj, '_fields')
+
+
+primitive_types = (str, unicode, bool, int, float)
 
 
 class Undefined(object):
@@ -263,6 +268,20 @@ class Schema(object):
 
         candidates = list(_iterate_mapping_candidates(_compiled_schema))
 
+        # After we have the list of candidates in the correct order, we want to apply some optimization so that each
+        # key in the data being validated will be matched against the relevant schema keys only.
+        # No point in matching against different keys
+        additional_candidates = []
+        candidates_by_key = {}
+        for skey, (ckey, cvalue) in candidates:
+            if type(skey) in primitive_types:
+                candidates_by_key.setdefault(skey, []).append((skey, (ckey, cvalue)))
+            elif isinstance(skey, Marker) and type(skey.schema) in primitive_types:
+                candidates_by_key.setdefault(skey.schema, []).append((skey, (ckey, cvalue)))
+            else:
+                # These are wildcards such as 'int', 'str', 'Remove' and others which should be applied to all keys
+                additional_candidates.append((skey, (ckey, cvalue)))
+
         def validate_mapping(path, iterable, out):
             try:
                 from util import to_utf8_py2
@@ -278,9 +297,12 @@ class Schema(object):
                 key_path = path + [key]
                 remove_key = False
 
+                # Optimization. Validate against the matching key first, then fallback to the rest
+                relevant_candidates = itertools.chain(candidates_by_key.get(key, []), additional_candidates)
+
                 # compare each given key/value against all compiled key/values
                 # schema key, (compiled key, compiled value)
-                for skey, (ckey, cvalue) in candidates:
+                for skey, (ckey, cvalue) in relevant_candidates:
                     try:
                         new_key = ckey(key_path, key)
                     except er.Invalid as e:
@@ -634,7 +656,7 @@ class Schema(object):
         # for each item in the extension schema, replace duplicates
         # or add new keys
         for key, value in iteritems(schema):
-            
+
             # if the key is already in the dictionary, we need to replace it
             # transform key to literal before checking presence
             if key_literal(key) in result_key_map:

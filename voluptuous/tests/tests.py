@@ -7,8 +7,7 @@ from voluptuous import (
     Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
-    Contains
-)
+    Contains, Marker)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import to_utf8_py2, u
 
@@ -82,7 +81,7 @@ def test_contains():
         schema({'color': ['blue', 'yellow']})
     except Invalid as e:
         assert_equal(str(e),
-                    "value is not allowed for dictionary value @ data['color']")
+                     "value is not allowed for dictionary value @ data['color']")
 
 
 def test_remove():
@@ -788,10 +787,47 @@ def test_ordered_dict():
     if not hasattr(collections, 'OrderedDict'):
         # collections.OrderedDict was added in Python2.7; only run if present
         return
-    schema = Schema({Number(): Number()}) # x, y pairs (for interpolation or something)
+    schema = Schema({Number(): Number()})  # x, y pairs (for interpolation or something)
     data = collections.OrderedDict([(5.0, 3.7), (24.0, 8.7), (43.0, 1.5),
                                     (62.0, 2.1), (71.5, 6.7), (90.5, 4.1),
                                     (109.0, 3.9)])
     out = schema(data)
     assert isinstance(out, collections.OrderedDict), 'Collection is no longer ordered'
     assert data.keys() == out.keys(), 'Order is not consistent'
+
+
+def test_validation_performance():
+    """
+    This test comes to make sure the validation complexity of dictionaries is done in a linear time.
+    to achieve this a custom marker is used in the scheme that counts each time it is evaluated.
+    By doing so we can determine if the validation is done in linear complexity.
+    Prior to issue https://github.com/alecthomas/voluptuous/issues/259 this was exponential
+    """
+    num_of_keys = 1000
+
+    schema_dict = {}
+    data = {}
+    data_extra_keys = {}
+
+    counter = [0]
+
+    class CounterMarker(Marker):
+        def __call__(self, *args, **kwargs):
+            counter[0] += 1
+            return super(CounterMarker, self).__call__(*args, **kwargs)
+
+    for i in range(num_of_keys):
+        schema_dict[CounterMarker(str(i))] = str
+        data[str(i)] = str(i)
+        data_extra_keys[str(i*2)] = str(i)  # half of the keys are present, and half aren't
+
+    schema = Schema(schema_dict, extra=ALLOW_EXTRA)
+
+    schema(data)
+
+    assert counter[0] <= num_of_keys, "Validation complexity is not linear! %s > %s" % (counter[0], num_of_keys)
+
+    counter[0] = 0  # reset counter
+    schema(data_extra_keys)
+
+    assert counter[0] <= num_of_keys, "Validation complexity is not linear! %s > %s" % (counter[0], num_of_keys)
