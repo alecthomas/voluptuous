@@ -984,7 +984,7 @@ class Exclusive(Optional):
 class Inclusive(Optional):
     """ Mark a node in the schema as inclusive.
 
-    Exclusive keys inherited from Optional:
+    Inclusive keys inherited from Optional:
 
     >>> schema = Schema({
     ...     Inclusive('filename', 'file'): str,
