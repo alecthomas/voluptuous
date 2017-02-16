@@ -681,7 +681,14 @@ class NotIn(object):
 
 
 class Contains(object):
-    """Validate that a value is in a collection."""
+    """Validate that the given schema element is in the sequence being validated.
+
+    >>> s = Contains(1)
+    >>> s([3, 2, 1])
+    [3, 2, 1]
+    >>> with raises(ContainsInvalid, 'value is not allowed'):
+    ...   s([3, 2])
+    """
 
     def __init__(self, item, msg=None):
         self.item = item

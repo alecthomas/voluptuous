@@ -16,3 +16,4 @@ MANIFEST
 venv
 docs/_build
 .vscode/
+.venv
