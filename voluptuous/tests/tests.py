@@ -796,6 +796,20 @@ def test_ordered_dict():
     assert data.keys() == out.keys(), 'Order is not consistent'
 
 
+def test_marker_hashable():
+    """Verify that you can get schema keys, even if markers were used"""
+    definition = {
+        Required('x'): int, Optional('y'): float,
+        Remove('j'): int, Remove(int): str, int: int
+    }
+    assert_equal(definition.get('x'), int)
+    assert_equal(definition.get('y'), float)
+    assert_true(Required('x') == Required('x'))
+    assert_true(Required('x') != Required('y'))
+    # Remove markers are not hashable
+    assert_equal(definition.get('j'), None)
+
+
 def test_validation_performance():
     """
     This test comes to make sure the validation complexity of dictionaries is done in a linear time.

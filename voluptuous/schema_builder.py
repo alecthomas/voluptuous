@@ -911,6 +911,15 @@ class Marker(object):
     def __lt__(self, other):
         return self.schema < other.schema
 
+    def __hash__(self):
+        return hash(self.schema)
+
+    def __eq__(self, other):
+        return self.schema == other
+
+    def __ne__(self, other):
+        return not(self.schema == other)
+
 
 class Optional(Marker):
     """Mark a node in the schema as optional, and optionally provide a default
@@ -1070,6 +1079,8 @@ class Remove(Marker):
     def __repr__(self):
         return "Remove(%r)" % (self.schema,)
 
+    def __hash__(self):
+        return object.__hash__(self)
 
 def message(default=None, cls=None):
     """Convenience decorator to allow functions to provide a message.
