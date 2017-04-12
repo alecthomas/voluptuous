@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.2]
+
 **Changes**:
 
 - [#195](https://github.com/alecthomas/voluptuous/pull/195):
