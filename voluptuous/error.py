@@ -36,7 +36,7 @@ class Invalid(Error):
         return output + path
 
     def prepend(self, path):
-        self.path += path
+        self.path = path + self.path
 
 
 class MultipleInvalid(Invalid):

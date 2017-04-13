@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.10.4]
+## [0.10.5]
 
 - [#278](https://github.com/alecthomas/voluptuous/pull/278): Unicode
 translation to python 2 issue fixed.
