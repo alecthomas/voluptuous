@@ -152,12 +152,6 @@ class Literal(object):
         return repr(self.lit)
 
 
-def to_utf8_py2(data):
-    if sys.version_info < (3,) and isinstance(data, unicode):
-        return data.encode('utf-8')
-    return data
-
-
 def u(x):
     if sys.version_info < (3,):
         return unicode(x)
