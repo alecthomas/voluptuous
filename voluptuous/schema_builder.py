@@ -283,17 +283,12 @@ class Schema(object):
                 additional_candidates.append((skey, (ckey, cvalue)))
 
         def validate_mapping(path, iterable, out):
-            try:
-                from util import to_utf8_py2
-            except ImportError:
-                from .util import to_utf8_py2
             required_keys = all_required_keys.copy()
             # keeps track of all default keys that haven't been filled
             default_keys = all_default_keys.copy()
             error = None
             errors = []
             for key, value in iterable:
-                key = to_utf8_py2(key)
                 key_path = path + [key]
                 remove_key = False
 
@@ -885,11 +880,6 @@ class Marker(object):
     """Mark nodes for special treatment."""
 
     def __init__(self, schema_, msg=None):
-        try:
-            from util import to_utf8_py2
-        except ImportError:
-            from .util import to_utf8_py2
-        schema_ = to_utf8_py2(schema_)
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
