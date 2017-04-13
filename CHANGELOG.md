@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.10.3]
+
+- [#278](https://github.com/alecthomas/voluptuous/pull/278): Unicode
+translation to python 2 issue fixed.
+
 ## [0.10.2]
 
 **Changes**:
