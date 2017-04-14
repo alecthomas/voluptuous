@@ -5,7 +5,7 @@ from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
     Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
-    Url, MultipleInvalid, LiteralInvalid, NotIn, Match, Email,
+    Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
     Contains, Marker)
@@ -149,6 +149,39 @@ def test_literal():
         assert_equal(str(e), "{'b': 1} not match for {'a': 1}")
         assert_equal(len(e.errors), 1)
         assert_equal(type(e.errors[0]), LiteralInvalid)
+    else:
+        assert False, "Did not raise Invalid"
+
+
+def test_class():
+    class C1(object):
+        pass
+
+    schema = Schema(C1)
+    schema(C1())
+
+    try:
+        schema(None)
+    except MultipleInvalid as e:
+        assert_equal(str(e), "expected C1")
+        assert_equal(len(e.errors), 1)
+        assert_equal(type(e.errors[0]), TypeInvalid)
+    else:
+        assert False, "Did not raise Invalid"
+
+    # In Python 2, this will be an old-style class (classobj instance)
+    class C2:
+        pass
+
+    schema = Schema(C2)
+    schema(C2())
+
+    try:
+        schema(None)
+    except MultipleInvalid as e:
+        assert_equal(str(e), "expected C2")
+        assert_equal(len(e.errors), 1)
+        assert_equal(type(e.errors[0]), TypeInvalid)
     else:
         assert False, "Did not raise Invalid"
 

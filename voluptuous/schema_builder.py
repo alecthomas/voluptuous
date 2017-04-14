@@ -237,7 +237,7 @@ class Schema(object):
         elif isinstance(schema, tuple):
             return self._compile_tuple(schema)
         type_ = type(schema)
-        if type_ is type:
+        if inspect.isclass(schema):
             type_ = schema
         if type_ in (bool, bytes, int, long, str, unicode, float, complex, object,
                      list, dict, type(None)) or callable(schema):
@@ -700,7 +700,7 @@ def _compile_scalar(schema):
     >>> with raises(er.Invalid, 'not a valid value'):
     ...   _compile_scalar(lambda v: float(v))([], 'a')
     """
-    if isinstance(schema, type):
+    if inspect.isclass(schema):
         def validate_instance(path, data):
             if isinstance(data, schema):
                 return data
