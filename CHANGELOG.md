@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- [#279](https://github.com/alecthomas/voluptuous/pull/279):
+  Treat Python 2 old-style classes like types when validating.
+
 ## [0.10.5]
 
 - [#278](https://github.com/alecthomas/voluptuous/pull/278): Unicode
