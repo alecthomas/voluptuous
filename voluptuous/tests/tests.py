@@ -1,6 +1,8 @@
 import copy
 import collections
+import os
 import sys
+
 from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
@@ -8,7 +10,7 @@ from voluptuous import (
     Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
-    Contains, Marker)
+    Contains, Marker, IsDir, IsFile, PathExists)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import u
 
@@ -849,7 +851,7 @@ def test_validation_performance():
     for i in range(num_of_keys):
         schema_dict[CounterMarker(str(i))] = str
         data[str(i)] = str(i)
-        data_extra_keys[str(i*2)] = str(i)  # half of the keys are present, and half aren't
+        data_extra_keys[str(i * 2)] = str(i)  # half of the keys are present, and half aren't
 
     schema = Schema(schema_dict, extra=ALLOW_EXTRA)
 
@@ -861,3 +863,21 @@ def test_validation_performance():
     schema(data_extra_keys)
 
     assert counter[0] <= num_of_keys, "Validation complexity is not linear! %s > %s" % (counter[0], num_of_keys)
+
+
+def test_IsDir():
+    schema = Schema(IsDir())
+    assert_raises(MultipleInvalid, schema, 3)
+    schema(os.path.dirname(os.path.abspath(__file__)))
+
+
+def test_IsFile():
+    schema = Schema(IsFile())
+    assert_raises(MultipleInvalid, schema, 3)
+    schema(os.path.abspath(__file__))
+
+
+def test_PathExists():
+    schema = Schema(PathExists())
+    assert_raises(MultipleInvalid, schema, 3)
+    schema(os.path.abspath(__file__))

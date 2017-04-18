@@ -18,9 +18,9 @@ except ImportError:
                         PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
                         TypeInvalid, NotInInvalid, ContainsInvalid)
 
-
 if sys.version_info >= (3,):
     import urllib.parse as urlparse
+
     basestring = str
 else:
     import urlparse
@@ -419,9 +419,13 @@ def IsFile(v):
     >>> with raises(FileInvalid, 'Not a file'):
     ...   IsFile()(None)
     """
-    if v:
-        return os.path.isfile(v)
-    else:
+    try:
+        if v:
+            v = str(v)
+            return os.path.isfile(v)
+        else:
+            raise FileInvalid('Not a file')
+    except TypeError:
         raise FileInvalid('Not a file')
 
 
@@ -435,9 +439,13 @@ def IsDir(v):
     >>> with raises(DirInvalid, 'Not a directory'):
     ...   IsDir()(None)
     """
-    if v:
-        return os.path.isdir(v)
-    else:
+    try:
+        if v:
+            v = str(v)
+            return os.path.isdir(v)
+        else:
+            raise DirInvalid("Not a directory")
+    except TypeError:
         raise DirInvalid("Not a directory")
 
 
@@ -453,9 +461,13 @@ def PathExists(v):
     >>> with raises(PathInvalid, 'Not a Path'):
     ...   PathExists()(None)
     """
-    if v:
-        return os.path.exists(v)
-    else:
+    try:
+        if v:
+            v = str(v)
+            return os.path.exists(v)
+        else:
+            raise PathInvalid("Not a Path")
+    except TypeError:
         raise PathInvalid("Not a Path")
 
 
@@ -471,6 +483,7 @@ class Maybe(object):
     ...  s("string")
 
     """
+
     def __init__(self, kind, msg=None):
         if not isinstance(kind, type):
             raise TypeError("kind has to be a type")
@@ -704,7 +717,7 @@ class Contains(object):
         return v
 
     def __repr__(self):
-        return 'Contains(%s)' % (self.item, )
+        return 'Contains(%s)' % (self.item,)
 
 
 class ExactSequence(object):
@@ -866,10 +879,8 @@ class Unordered(object):
             el = missing[0]
             raise Invalid(self.msg or 'Element #{} ({}) is not valid against any validator'.format(el[0], el[1]))
         elif missing:
-            raise MultipleInvalid([
-                Invalid(self.msg or 'Element #{} ({}) is not valid against any validator'.format(el[0], el[1]))
-                for el in missing
-            ])
+            raise MultipleInvalid([Invalid(self.msg or 'Element #{} ({}) is not valid against any validator'.format(
+                el[0], el[1])) for el in missing])
         return v
 
     def __repr__(self):
@@ -904,15 +915,16 @@ class Number(object):
         """
         precision, scale, decimal_num = self._get_precision_scale(v)
 
-        if self.precision is not None and self.scale is not None and\
-            precision != self.precision and scale != self.scale:
-            raise Invalid(self.msg or "Precision must be equal to %s, and Scale must be equal to %s" %(self.precision, self.scale))
+        if self.precision is not None and self.scale is not None and precision != self.precision\
+                and scale != self.scale:
+            raise Invalid(self.msg or "Precision must be equal to %s, and Scale must be equal to %s" % (self.precision,
+                                                                                                        self.scale))
         else:
             if self.precision is not None and precision != self.precision:
-                raise Invalid(self.msg or "Precision must be equal to %s"%self.precision)
+                raise Invalid(self.msg or "Precision must be equal to %s" % self.precision)
 
-            if self.scale is not None and scale != self.scale :
-                raise Invalid(self.msg or "Scale must be equal to %s"%self.scale)
+            if self.scale is not None and scale != self.scale:
+                raise Invalid(self.msg or "Scale must be equal to %s" % self.scale)
 
         if self.yield_decimal:
             return decimal_num
