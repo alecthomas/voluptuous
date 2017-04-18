@@ -1072,6 +1072,7 @@ class Remove(Marker):
     def __hash__(self):
         return object.__hash__(self)
 
+
 def message(default=None, cls=None):
     """Convenience decorator to allow functions to provide a message.
 
