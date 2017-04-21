@@ -26,7 +26,7 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 ## Documentation
 
-The documentation is provided [here] (http://alecthomas.github.io/voluptuous/). 
+The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 ## Changelog
 

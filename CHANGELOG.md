@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- [#280](https://github.com/alecthomas/voluptuous/pull/280): Making
+`IsDir()`, `IsFile()` and `PathExists()` consistent between different python versions.
 - [#279](https://github.com/alecthomas/voluptuous/pull/279):
   Treat Python 2 old-style classes like types when validating.
 
