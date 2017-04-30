@@ -552,8 +552,12 @@ def test_maybe():
     s = Schema(Maybe(int))
     assert s(1) == 1
     assert s(None) is None
-
     assert_raises(Invalid, s, 'foo')
+
+    s = Schema(Maybe({str: Coerce(int)}))
+    assert s({'foo': '100'}) == {'foo': 100}
+    assert s(None) is None
+    assert_raises(Invalid, s, {'foo': 'bar'})
 
 
 def test_empty_list_as_exact():
