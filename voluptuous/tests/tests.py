@@ -549,8 +549,6 @@ def test_unordered():
 
 
 def test_maybe():
-    assert_raises(TypeError, Maybe, lambda x: x)
-
     s = Schema(Maybe(int))
     assert s(1) == 1
     assert s(None) is None
