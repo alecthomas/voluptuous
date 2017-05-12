@@ -549,13 +549,15 @@ def test_unordered():
 
 
 def test_maybe():
-    assert_raises(TypeError, Maybe, lambda x: x)
-
     s = Schema(Maybe(int))
     assert s(1) == 1
     assert s(None) is None
-
     assert_raises(Invalid, s, 'foo')
+
+    s = Schema(Maybe({str: Coerce(int)}))
+    assert s({'foo': '100'}) == {'foo': 100}
+    assert s(None) is None
+    assert_raises(Invalid, s, {'foo': 'bar'})
 
 
 def test_empty_list_as_exact():
