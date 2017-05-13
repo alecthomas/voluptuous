@@ -5,18 +5,11 @@ import sys
 from functools import wraps
 from decimal import Decimal, InvalidOperation
 
-try:
-    from schema_builder import Schema, raises, message
-    from error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
-                       AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
-                       PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
-                       TypeInvalid, NotInInvalid, ContainsInvalid)
-except ImportError:
-    from .schema_builder import Schema, raises, message
-    from .error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid, AnyInvalid,
-                        AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid, RangeInvalid,
-                        PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid, DateInvalid, InInvalid,
-                        TypeInvalid, NotInInvalid, ContainsInvalid)
+from voluptuous.schema_builder import Schema, raises, message
+from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
+                              AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
+                              RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
+                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid)
 
 if sys.version_info >= (3,):
     import urllib.parse as urlparse

@@ -6,11 +6,7 @@ import sys
 from contextlib import contextmanager
 
 import itertools
-
-try:
-    import error as er
-except ImportError:
-    from . import error as er
+from voluptuous import error as er
 
 if sys.version_info >= (3,):
     long = int
