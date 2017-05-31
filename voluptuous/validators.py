@@ -92,7 +92,7 @@ class Coerce(object):
     def __call__(self, v):
         try:
             return self.type(v)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, InvalidOperation):
             msg = self.msg or ('expected %s' % self.type_name)
             raise CoerceInvalid(msg)
 
