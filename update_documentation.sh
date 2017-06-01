@@ -34,11 +34,16 @@ echo "Checking out $FROM_BRANCH..." && \
 git fetch origin ${FROM_BRANCH}:${FROM_BRANCH} && \
 git checkout ${FROM_BRANCH}
 
+echo "Pulling the $FROM_BRANCH branch" && \
+git pull && \
 
 echo "Checking out $TO_BRANCH..." && \
 # Checkout the latest stable
 git fetch origin ${TO_BRANCH}:${TO_BRANCH} && \
 git checkout ${TO_BRANCH} && \
+
+echo "Pulling the $TO_BRANCH branch" && \
+git pull && \
 
 # Merge the dev into latest stable
 echo "Merging changes..." && \
