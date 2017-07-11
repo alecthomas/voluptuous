@@ -566,40 +566,6 @@ def test_empty_list_as_exact():
     s([])
 
 
-def test_empty_dict_as_exact():
-    # {} always evaluates as {}
-    s = Schema({})
-    assert_raises(Invalid, s, {'extra': 1})
-    s = Schema({}, extra=ALLOW_EXTRA)  # this should not be used
-    assert_raises(Invalid, s, {'extra': 1})
-
-    # {...} evaluates as Schema({...})
-    s = Schema({'foo': int})
-    assert_raises(Invalid, s, {'foo': 1, 'extra': 1})
-    s = Schema({'foo': int}, extra=ALLOW_EXTRA)
-    s({'foo': 1, 'extra': 1})
-
-    # dict matches {} or {...}
-    s = Schema(dict)
-    s({'extra': 1})
-    s({})
-    s = Schema(dict, extra=PREVENT_EXTRA)
-    s({'extra': 1})
-    s({})
-
-    # nested {} evaluate as {}
-    s = Schema({
-        'inner': {}
-    }, extra=ALLOW_EXTRA)
-    assert_raises(Invalid, s, {'inner': {'extra': 1}})
-    s({})
-    s = Schema({
-        'inner': Schema({}, extra=ALLOW_EXTRA)
-    })
-    assert_raises(Invalid, s, {'inner': {'extra': 1}})
-    s({})
-
-
 def test_schema_decorator_match_with_args():
     @validate(int)
     def fn(arg):

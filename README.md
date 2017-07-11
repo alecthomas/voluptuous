@@ -368,28 +368,6 @@ token `extra` as a key:
 
 ```
 
-However, an empty dict (`{}`) is treated as is. If you want to specify a list that can
-contain anything, specify it as `dict`:
-
-```pycon
->>> schema = Schema({}, extra=ALLOW_EXTRA)  # don't do this
->>> try:
-...   schema({'extra': 1})
-...   raise AssertionError('MultipleInvalid not raised')
-... except MultipleInvalid as e:
-...   exc = e
->>> str(exc) == "not a valid value"
-True
->>> schema({})
-{}
->>> schema = Schema(dict)  # do this instead
->>> schema({})
-{}
->>> schema({'extra': 1})
-{'extra': 1}
-
-```
-
 #### Required dictionary keys
 
 By default, keys in the schema are not required to be in the data:
