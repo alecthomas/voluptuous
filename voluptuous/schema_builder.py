@@ -228,7 +228,7 @@ class Schema(object):
             return self._compile_object(schema)
         if isinstance(schema, collections.Mapping):
             return self._compile_dict(schema)
-        elif isinstance(schema, list) and len(schema):
+        elif isinstance(schema, list):
             return self._compile_list(schema)
         elif isinstance(schema, tuple):
             return self._compile_tuple(schema)
@@ -551,6 +551,10 @@ class Schema(object):
 
             # Empty seq schema, allow any data.
             if not schema:
+                if data:
+                    raise er.MultipleInvalid([
+                        er.ValueInvalid('not a valid value', [value]) for value in data
+                    ])
                 return data
 
             out = []

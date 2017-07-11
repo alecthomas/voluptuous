@@ -234,7 +234,7 @@ contain anything, specify it as `list`:
 ...   raise AssertionError('MultipleInvalid not raised')
 ... except MultipleInvalid as e:
 ...   exc = e
->>> str(exc) == "not a valid value"
+>>> str(exc) == "not a valid value @ data[1]"
 True
 >>> schema([])
 []
