@@ -38,7 +38,7 @@ Twitter's [user search API](https://dev.twitter.com/rest/reference/get/users/sea
 query URLs like:
 
 ```
-$ curl 'http://api.twitter.com/1.1/users/search.json?q=python&per_page=20&page=1'
+$ curl 'https://api.twitter.com/1.1/users/search.json?q=python&per_page=20&page=1'
 ```
 
 To validate this we might use a schema like:
