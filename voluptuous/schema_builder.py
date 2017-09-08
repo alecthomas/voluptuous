@@ -1171,7 +1171,8 @@ def validate(*a, **kw):
             returns = schema_arguments[RETURNS_KEY]
             del schema_arguments[RETURNS_KEY]
 
-        input_schema = Schema(schema_arguments) if len(schema_arguments) != 0 else lambda x: x
+        input_schema = (Schema(schema_arguments, extra=ALLOW_EXTRA)
+                        if len(schema_arguments) != 0 else lambda x: x)
         output_schema = Schema(returns) if returns_defined else lambda x: x
 
         @wraps(func)

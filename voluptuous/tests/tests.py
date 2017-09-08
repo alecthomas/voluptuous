@@ -680,6 +680,38 @@ def test_schema_decorator_return_only_unmatch():
     assert_raises(Invalid, fn, 1)
 
 
+def test_schema_decorator_partial_match_called_with_args():
+    @validate(arg1=int)
+    def fn(arg1, arg2):
+        return arg1
+
+    fn(1, "foo")
+
+
+def test_schema_decorator_partial_unmatch_called_with_args():
+    @validate(arg1=int)
+    def fn(arg1, arg2):
+        return arg1
+
+    assert_raises(Invalid, fn, "bar", "foo")
+
+
+def test_schema_decorator_partial_match_called_with_kwargs():
+    @validate(arg2=int)
+    def fn(arg1, arg2):
+        return arg1
+
+    fn(arg1="foo", arg2=1)
+
+
+def test_schema_decorator_partial_unmatch_called_with_kwargs():
+    @validate(arg2=int)
+    def fn(arg1, arg2):
+        return arg1
+
+    assert_raises(Invalid, fn, arg1=1, arg2="foo")
+
+
 def test_unicode_as_key():
     if sys.version_info >= (3,):
         text_type = str
