@@ -875,10 +875,11 @@ class VirtualPathComponent(str):
 class Marker(object):
     """Mark nodes for special treatment."""
 
-    def __init__(self, schema_, msg=None):
+    def __init__(self, schema_, msg=None, description=None):
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
+        self.description = description
 
     def __call__(self, v):
         try:
@@ -930,8 +931,9 @@ class Optional(Marker):
     {'key2': 'value'}
     """
 
-    def __init__(self, schema, msg=None, default=UNDEFINED):
-        super(Optional, self).__init__(schema, msg=msg)
+    def __init__(self, schema, msg=None, default=UNDEFINED, description=None):
+        super(Optional, self).__init__(schema, msg=msg,
+                                       description=description)
         self.default = default_factory(default)
 
 
@@ -971,8 +973,9 @@ class Exclusive(Optional):
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
     """
 
-    def __init__(self, schema, group_of_exclusion, msg=None):
-        super(Exclusive, self).__init__(schema, msg=msg)
+    def __init__(self, schema, group_of_exclusion, msg=None, description=None):
+        super(Exclusive, self).__init__(schema, msg=msg,
+                                        description=description)
         self.group_of_exclusion = group_of_exclusion
 
 
@@ -1038,8 +1041,9 @@ class Required(Marker):
     {'key': []}
     """
 
-    def __init__(self, schema, msg=None, default=UNDEFINED):
-        super(Required, self).__init__(schema, msg=msg)
+    def __init__(self, schema, msg=None, default=UNDEFINED, description=None):
+        super(Required, self).__init__(schema, msg=msg,
+                                       description=description)
         self.default = default_factory(default)
 
 
