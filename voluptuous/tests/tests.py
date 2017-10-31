@@ -6,7 +6,7 @@ import sys
 from nose.tools import assert_equal, assert_raises, assert_true
 
 from voluptuous import (
-    Schema, Required, Optional, Extra, Invalid, In, Remove, Literal,
+    Schema, Required, Exclusive, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
@@ -915,3 +915,17 @@ def test_PathExists():
     schema = Schema(PathExists())
     assert_raises(MultipleInvalid, schema, 3)
     schema(os.path.abspath(__file__))
+
+
+def test_description():
+    marker = Marker(Schema(str), description='Hello')
+    assert marker.description == 'Hello'
+
+    optional = Optional('key', description='Hello')
+    assert optional.description == 'Hello'
+
+    exclusive = Exclusive('alpha', 'angles', description='Hello')
+    assert exclusive.description == 'Hello'
+
+    required = Required('key', description='Hello')
+    assert required.description == 'Hello'
