@@ -197,6 +197,48 @@ class Schema(object):
         self.extra = int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
 
+    @classmethod
+    def infer(cls, data, **kwargs):
+        """Create a Schema from concrete data (e.g. an API response).
+
+        For example, this will take a dict like:
+
+        {
+            'foo': 1,
+            'bar': {
+                'a': True,
+                'b': False
+            },
+            'baz': ['purple', 'monkey', 'dishwasher']
+        }
+
+        And return a Schema:
+
+        {
+            'foo': int,
+            'bar': {
+                'a': bool,
+                'b': bool
+            },
+            'baz': [str]
+        }
+        """
+        def value_to_schema_type(value):
+            if isinstance(value, dict):
+                if len(value) == 0:
+                    return dict
+                return {k: value_to_schema_type(v)
+                        for k, v in iteritems(value)}
+            if isinstance(value, list):
+                if len(value) == 0:
+                    return list
+                else:
+                    return [value_to_schema_type(v)
+                            for v in value]
+            return type(value)
+
+        return cls(value_to_schema_type(data), **kwargs)
+
     def __eq__(self, other):
         if str(other) == str(self.schema):
             # Because repr is combination mixture of object and schema

@@ -828,6 +828,79 @@ def test_marker_hashable():
     assert_equal(definition.get('j'), None)
 
 
+def test_schema_infer():
+    schema = Schema.infer({
+        'str': 'foo',
+        'bool': True,
+        'int': 42,
+        'float': 3.14
+    })
+    assert_equal(schema, Schema({
+        Required('str'): str,
+        Required('bool'): bool,
+        Required('int'): int,
+        Required('float'): float
+    }))
+
+
+def test_schema_infer_dict():
+    schema = Schema.infer({
+        'a': {
+            'b': {
+                'c': 'foo'
+            }
+        }
+    })
+
+    assert_equal(schema, Schema({
+        Required('a'): {
+            Required('b'): {
+                Required('c'): str
+            }
+        }
+    }))
+
+
+def test_schema_infer_list():
+    schema = Schema.infer({
+        'list': ['foo', True, 42, 3.14]
+    })
+
+    assert_equal(schema, Schema({
+        Required('list'): [str, bool, int, float]
+    }))
+
+
+def test_schema_infer_scalar():
+    assert_equal(Schema.infer('foo'), Schema(str))
+    assert_equal(Schema.infer(True), Schema(bool))
+    assert_equal(Schema.infer(42), Schema(int))
+    assert_equal(Schema.infer(3.14), Schema(float))
+    assert_equal(Schema.infer({}), Schema(dict))
+    assert_equal(Schema.infer([]), Schema(list))
+
+
+def test_schema_infer_accepts_kwargs():
+    schema = Schema.infer({
+        'str': 'foo',
+        'bool': True
+    }, required=False, extra=True)
+
+    # Subset of schema should be acceptable thanks to required=False.
+    schema({'bool': False})
+
+    # Keys that are in schema should still match required types.
+    try:
+        schema({'str': 42})
+    except Invalid:
+        pass
+    else:
+        assert False, 'Did not raise Invalid for Number'
+
+    # Extra fields should be acceptable thanks to extra=True.
+    schema({'str': 'bar', 'int': 42})
+
+
 def test_validation_performance():
     """
     This test comes to make sure the validation complexity of dictionaries is done in a linear time.
