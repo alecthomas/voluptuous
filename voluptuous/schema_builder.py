@@ -222,6 +222,8 @@ class Schema(object):
             },
             'baz': [str]
         }
+
+        Note: only very basic inference is supported.
         """
         def value_to_schema_type(value):
             if isinstance(value, dict):
