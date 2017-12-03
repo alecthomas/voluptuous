@@ -9,7 +9,8 @@ from voluptuous.schema_builder import Schema, raises, message
 from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
                               AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
                               RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
-                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid)
+                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
+                              TooManyValid)
 
 if sys.version_info >= (3,):
     import urllib.parse as urlparse
@@ -933,3 +934,49 @@ class Number(object):
             raise Invalid(self.msg or 'Value must be a number enclosed with string')
 
         return (len(decimal_num.as_tuple().digits), -(decimal_num.as_tuple().exponent), decimal_num)
+
+
+class SomeOf(object):
+    """Value must pass at least some validations, determined by the given parameter
+
+    The output of each validator is passed as input to the next.
+
+    >>> validate = Schema(SomeOf(min_valid=2, validators=[Range(1, 5), Any(float, int), 6.6]))
+    >>> validate(6.6)
+    6.6
+    >>> validate(3)
+    3
+    >>> with raises(MultipleInvalid, 'value must be at most 5, not a valid value'):
+    ...     validate(6.2)
+    """
+
+    def __init__(self, min_valid, validators, max_valid=None, **kwargs):
+        self.min_valid = min_valid or 0
+        self.max_valid = max_valid or len(validators)
+        self.validators = validators
+        self.msg = kwargs.pop('msg', None)
+        self._schemas = [Schema(val, **kwargs) for val in validators]
+
+    def __call__(self, v):
+        errors = []
+        for schema in self._schemas:
+            try:
+                v = schema(v)
+            except Invalid as e:
+                errors.append(e)
+
+        passed_count = len(self._schemas) - len(errors)
+        if self.min_valid <= passed_count <= self.max_valid:
+            return v
+
+        msg = self.msg
+        if not msg:
+            msg = ', '.join(map(str, errors))
+
+        if passed_count > self.max_valid:
+            raise TooManyValid(msg)
+        raise NotEnoughValid(msg)
+
+    def __repr__(self):
+        return 'SomeOf(min_valid=%s, validators=[%s], max_valid=%s, msg=%r)' % (
+            self.min_valid, ", ".join(repr(v) for v in self.validators), self.max_valid, self.msg)
