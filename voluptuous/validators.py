@@ -937,9 +937,19 @@ class Number(object):
 
 
 class SomeOf(object):
-    """Value must pass at least some validations, determined by the given parameter
+    """Value must pass at least some validations, determined by the given parameter.
+    Optionally, number of passed validations can be capped.
 
     The output of each validator is passed as input to the next.
+
+    :param min_valid: Minimum number of valid schemas.
+    :param validators: a list of schemas or validators to match input against
+    :param max_valid: Maximum number of valid schemas.
+    :param msg: Message to deliver to user if validation fails.
+    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+
+    :raises NotEnoughValid: if the minimum number of validations isn't met
+    :raises TooManyValid: if the more validations than the given amount is met
 
     >>> validate = Schema(SomeOf(min_valid=2, validators=[Range(1, 5), Any(float, int), 6.6]))
     >>> validate(6.6)
