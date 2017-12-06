@@ -442,6 +442,37 @@ def test_equality_negative():
     assert_false(Schema({'foo': 1, 'bar': 2}) == Schema("{'foo': 1, 'bar': 2}"))
 
 
+def test_inequality():
+    assert_true(Schema('foo') != 'foo')
+
+    assert_true(Schema(['foo', 'bar']) != "['foo', 'bar']")
+    assert_true(Schema(['foo', 'bar']) != Schema("['foo', 'bar']"))
+
+    assert_true(Schema({'foo': 1, 'bar': 2}) != "{'foo': 1, 'bar': 2}")
+    assert_true(Schema({'foo': 1, 'bar': 2}) != Schema("{'foo': 1, 'bar': 2}"))
+
+
+def test_inequality_negative():
+    assert_false(Schema('foo') != Schema('foo'))
+
+    assert_false(Schema(['foo', 'bar', 'baz']) !=
+                 Schema(['foo', 'bar', 'baz']))
+
+    # Ensure two Schemas w/ two equivalent dicts initialized in a different
+    # order are considered equal.
+    dict_a = {}
+    dict_a['foo'] = 1
+    dict_a['bar'] = 2
+    dict_a['baz'] = 3
+
+    dict_b = {}
+    dict_b['baz'] = 3
+    dict_b['bar'] = 2
+    dict_b['foo'] = 1
+
+    assert_false(Schema(dict_a) != Schema(dict_b))
+
+
 def test_repr():
     """Verify that __repr__ returns valid Python expressions"""
     match = Match('a pattern', msg='message')
