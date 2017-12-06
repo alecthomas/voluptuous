@@ -242,10 +242,9 @@ class Schema(object):
         return cls(value_to_schema_type(data), **kwargs)
 
     def __eq__(self, other):
-        if str(other) == str(self.schema):
-            # Because repr is combination mixture of object and schema
-            return True
-        return False
+        if not isinstance(other, Schema):
+            return False
+        return other.schema == self.schema
 
     def __str__(self):
         return str(self.schema)
