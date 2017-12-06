@@ -3,7 +3,7 @@ import collections
 import os
 import sys
 
-from nose.tools import assert_equal, assert_raises, assert_true
+from nose.tools import assert_equal, assert_false, assert_raises, assert_true
 
 from voluptuous import (
     Schema, Required, Exclusive, Optional, Extra, Invalid, In, Remove, Literal,
@@ -429,6 +429,17 @@ def test_equality():
     dict_b['foo'] = 1
 
     assert_equal(Schema(dict_a), Schema(dict_b))
+
+
+def test_equality_negative():
+    """Verify that Schema objects are not equal to string representations"""
+    assert_false(Schema('foo') == 'foo')
+
+    assert_false(Schema(['foo', 'bar']) == "['foo', 'bar']")
+    assert_false(Schema(['foo', 'bar']) == Schema("['foo', 'bar']"))
+
+    assert_false(Schema({'foo': 1, 'bar': 2}) == "{'foo': 1, 'bar': 2}")
+    assert_false(Schema({'foo': 1, 'bar': 2}) == Schema("{'foo': 1, 'bar': 2}"))
 
 
 def test_repr():
