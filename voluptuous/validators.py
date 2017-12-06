@@ -960,7 +960,9 @@ class SomeOf(object):
     ...     validate(6.2)
     """
 
-    def __init__(self, min_valid, validators, max_valid=None, **kwargs):
+    def __init__(self, validators, min_valid=None, max_valid=None, **kwargs):
+        assert min_valid is not None or max_valid is not None, \
+            'when using "%s" you should specify at least one of min_valid and max_valid' % (type(self).__name__,)
         self.min_valid = min_valid or 0
         self.max_valid = max_valid or len(validators)
         self.validators = validators
