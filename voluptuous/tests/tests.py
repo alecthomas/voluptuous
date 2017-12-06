@@ -410,6 +410,27 @@ def test_subschema_extension():
     assert_equal(extended.schema, {'a': {'b': str, 'c': float, 'e': int}, 'd': str})
 
 
+def test_equality():
+    assert_equal(Schema('foo'), Schema('foo'))
+
+    assert_equal(Schema(['foo', 'bar', 'baz']),
+                 Schema(['foo', 'bar', 'baz']))
+
+    # Ensure two Schemas w/ two equivalent dicts initialized in a different
+    # order are considered equal.
+    dict_a = {}
+    dict_a['foo'] = 1
+    dict_a['bar'] = 2
+    dict_a['baz'] = 3
+
+    dict_b = {}
+    dict_b['baz'] = 3
+    dict_b['bar'] = 2
+    dict_b['foo'] = 1
+
+    assert_equal(Schema(dict_a), Schema(dict_b))
+
+
 def test_repr():
     """Verify that __repr__ returns valid Python expressions"""
     match = Match('a pattern', msg='message')
