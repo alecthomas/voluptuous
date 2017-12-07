@@ -10,7 +10,7 @@ from voluptuous import (
     Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
-    Contains, Marker, IsDir, IsFile, PathExists)
+    Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, raises)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import u
 
@@ -1031,3 +1031,40 @@ def test_description():
 
     required = Required('key', description='Hello')
     assert required.description == 'Hello'
+
+
+def test_SomeOf_min_validation():
+    validator = All(Length(min=8), SomeOf(
+        min_valid=3,
+        validators=[Match(r'.*[A-Z]', 'no uppercase letters'),
+                    Match(r'.*[a-z]', 'no lowercase letters'),
+                    Match(r'.*[0-9]', 'no numbers'),
+                    Match(r'.*[$@$!%*#?&^:;/<,>|{}()\-\'._+=]', 'no symbols')]))
+
+    validator('ffe532A1!')
+    with raises(MultipleInvalid, 'length of value must be at least 8'):
+        validator('a')
+
+    with raises(MultipleInvalid, 'no uppercase letters, no lowercase letters'):
+        validator('wqs2!#s111')
+
+    with raises(MultipleInvalid, 'no lowercase letters, no symbols'):
+        validator('3A34SDEF5')
+
+
+def test_SomeOf_max_validation():
+    validator = SomeOf(
+        max_valid=2,
+        validators=[Match(r'.*[A-Z]', 'no uppercase letters'),
+                    Match(r'.*[a-z]', 'no lowercase letters'),
+                    Match(r'.*[0-9]', 'no numbers')],
+        msg='max validation test failed')
+
+    validator('Aa')
+    with raises(TooManyValid, 'max validation test failed'):
+        validator('Aa1')
+
+
+def test_SomeOf_on_bounds_assertion():
+    with raises(AssertionError, 'when using "SomeOf" you should specify at least one of min_valid and max_valid'):
+        SomeOf(validators=[])
