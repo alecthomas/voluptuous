@@ -971,33 +971,37 @@ def test_description():
 
 
 def test_SomeOf_min_validation():
-        validator = All(Length(min=8), SomeOf(
-            min_valid=3,
-            validators=[Match(r'.*[A-Z]', 'no uppercase letters'),
-                        Match(r'.*[a-z]', 'no lowercase letters'),
-                        Match(r'.*[0-9]', 'no numbers'),
-                        Match(r'.*[$@$!%*#?&^:;/<,>|{}()\-\'._+=]', 'no symbols')]))
+    validator = All(Length(min=8), SomeOf(
+        min_valid=3,
+        validators=[Match(r'.*[A-Z]', 'no uppercase letters'),
+                    Match(r'.*[a-z]', 'no lowercase letters'),
+                    Match(r'.*[0-9]', 'no numbers'),
+                    Match(r'.*[$@$!%*#?&^:;/<,>|{}()\-\'._+=]', 'no symbols')]))
 
-        validator('ffe532A1!')
-        with raises(MultipleInvalid, 'length of value must be at least 8'):
-            validator('a')
+    validator('ffe532A1!')
+    with raises(MultipleInvalid, 'length of value must be at least 8'):
+        validator('a')
 
-        with raises(MultipleInvalid, 'no uppercase letters, no lowercase letters'):
-            validator('wqs2!#s111')
+    with raises(MultipleInvalid, 'no uppercase letters, no lowercase letters'):
+        validator('wqs2!#s111')
 
-        with raises(MultipleInvalid, 'no lowercase letters, no symbols'):
-            validator('3A34SDEF5')
+    with raises(MultipleInvalid, 'no lowercase letters, no symbols'):
+        validator('3A34SDEF5')
 
 
 def test_SomeOf_max_validation():
-        validator = SomeOf(
-            min_valid=0,
-            max_valid=2,
-            validators=[Match(r'.*[A-Z]', 'no uppercase letters'),
-                        Match(r'.*[a-z]', 'no lowercase letters'),
-                        Match(r'.*[0-9]', 'no numbers')],
-            msg='max validation test failed')
+    validator = SomeOf(
+        max_valid=2,
+        validators=[Match(r'.*[A-Z]', 'no uppercase letters'),
+                    Match(r'.*[a-z]', 'no lowercase letters'),
+                    Match(r'.*[0-9]', 'no numbers')],
+        msg='max validation test failed')
 
-        validator('Aa')
-        with raises(TooManyValid, 'max validation test failed'):
-            validator('Aa1')
+    validator('Aa')
+    with raises(TooManyValid, 'max validation test failed'):
+        validator('Aa1')
+
+
+def test_SomeOf_on_bounds_assertion():
+    with raises(AssertionError, 'when using "SomeOf" you should specify at least one of min_valid and max_valid'):
+        SomeOf(validators=[])
