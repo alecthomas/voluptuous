@@ -10,7 +10,8 @@ from voluptuous import (
     Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
-    Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, raises)
+    Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
+    raises)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import u
 
@@ -1063,6 +1064,25 @@ def test_SomeOf_max_validation():
     validator('Aa')
     with raises(TooManyValid, 'max validation test failed'):
         validator('Aa1')
+
+
+def test_self_validation():
+    schema = Schema({"number": int,
+                     "follow": Self})
+    try:
+        schema({"number": "abc"})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+    try:
+        schema({"follow": {"number": '123456.712'}})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+    schema({"follow": {"number": 123456}})
+    schema({"follow": {"follow": {"number": 123456}}})
 
 
 def test_SomeOf_on_bounds_assertion():

@@ -443,9 +443,21 @@ True
 
 ```
 
-### Recursive schema
+### Recursive / nested schema
 
-There is no syntax to have a recursive schema. The best way to do it is to have a wrapper like this:
+You can use `voluptuous.Self` to define a nested schema:
+
+```pycon
+>>> from voluptuous import Schema, Self
+>>> recursive = Schema({"more": Self, "value": int})
+>>> recursive({"more": {"value": 42}, "value": 41}) == {'more': {'value': 42}, 'value': 41}
+True
+
+```
+
+This only works if `Self` is used in the `Schema` directly. If you use `Any`,
+`All` or `SomeOf`, this won't work as they compile their arguments down to a
+new `Schema`. In that case, you can use an external reference:
 
 ```pycon
 >>> from voluptuous import Schema, Any

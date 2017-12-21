@@ -122,6 +122,10 @@ class Undefined(object):
 UNDEFINED = Undefined()
 
 
+def Self():
+    raise er.SchemaError('"Self" should never be called')
+
+
 def default_factory(value):
     if value is UNDEFINED or callable(value):
         return value
@@ -270,6 +274,8 @@ class Schema(object):
     def _compile(self, schema):
         if schema is Extra:
             return lambda _, v: v
+        if schema is Self:
+            return lambda p, v: self._compiled(p, v)
         if isinstance(schema, Object):
             return self._compile_object(schema)
         if isinstance(schema, collections.Mapping):
