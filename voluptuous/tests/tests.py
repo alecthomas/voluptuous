@@ -1085,6 +1085,55 @@ def test_self_validation():
     schema({"follow": {"follow": {"number": 123456}}})
 
 
+def test_self_any():
+    schema = Schema({"number": int,
+                     "follow": Any(Self, "stop")})
+    try:
+        schema({"number": "abc"})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+    try:
+        schema({"follow": {"number": '123456.712'}})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+    schema({"follow": {"number": 123456}})
+    schema({"follow": {"follow": {"number": 123456}}})
+    schema({"follow": {"follow": {"number": 123456, "follow": "stop"}}})
+
+
+def test_self_all():
+    schema = Schema({"number": int,
+                     "follow": All(Self,
+                                   Schema({"extra_number": int},
+                                          extra=ALLOW_EXTRA))},
+                    extra=ALLOW_EXTRA)
+    try:
+        schema({"number": "abc"})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+    try:
+        schema({"follow": {"number": '123456.712'}})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+    schema({"follow": {"number": 123456}})
+    schema({"follow": {"follow": {"number": 123456}}})
+    schema({"follow": {"number": 123456, "extra_number": 123}})
+    try:
+        schema({"follow": {"number": 123456, "extra_number": "123"}})
+    except MultipleInvalid:
+        pass
+    else:
+        assert False, "Did not raise Invalid"
+
+
 def test_SomeOf_on_bounds_assertion():
     with raises(AssertionError, 'when using "SomeOf" you should specify at least one of min_valid and max_valid'):
         SomeOf(validators=[])

@@ -276,6 +276,8 @@ class Schema(object):
             return lambda _, v: v
         if schema is Self:
             return lambda p, v: self._compiled(p, v)
+        elif hasattr(schema, "__voluptuous_compile__"):
+            return schema.__voluptuous_compile__(self)
         if isinstance(schema, Object):
             return self._compile_object(schema)
         if isinstance(schema, collections.Mapping):

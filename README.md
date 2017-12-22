@@ -455,21 +455,6 @@ True
 
 ```
 
-This only works if `Self` is used in the `Schema` directly. If you use `Any`,
-`All` or `SomeOf`, this won't work as they compile their arguments down to a
-new `Schema`. In that case, you can use an external reference:
-
-```pycon
->>> from voluptuous import Schema, Any
->>> def s2(v):
-...     return s1(v)
-...
->>> s1 = Schema({"key": Any(s2, "value")})
->>> s1({"key": {"key": "value"}})
-{'key': {'key': 'value'}}
-
-```
-
 ### Extending an existing Schema
 
 Often it comes handy to have a base `Schema` that is extended with more
