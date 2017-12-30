@@ -492,7 +492,7 @@ def test_repr():
     )
     assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
     assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
-    assert_equal(repr(maybe_int), "Maybe(%s)" % str(int))
+    assert_equal(repr(maybe_int), "Any(None, %s, msg=None)" % str(int))
 
 
 def test_list_validation_messages():
