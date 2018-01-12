@@ -620,5 +620,9 @@ Voluptuous is heavily inspired by
 [jsonvalidator](http://code.google.com/p/jsonvalidator/) and
 [json\_schema](http://blog.sendapatch.se/category/json_schema.html).
 
+[pytest-voluptuous](https://github.com/F-Secure/pytest-voluptuous) is a
+[pytest](https://github.com/pytest-dev/pytest) plugin that helps in
+using voluptuous validators in `assert`s.
+
 I greatly prefer the light-weight style promoted by these libraries to
 the complexity of libraries like FormEncode.
