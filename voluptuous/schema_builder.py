@@ -334,11 +334,25 @@ class Schema(object):
 
         def validate_mapping(path, iterable, out):
             required_keys = all_required_keys.copy()
-            # keeps track of all default keys that haven't been filled
-            default_keys = all_default_keys.copy()
+
+            # Build a map of all provided key-value pairs.
+            # The type(out) is used to retain ordering in case a ordered
+            # map type is provided as input.
+            key_value_map = type(out)()
+            for key, value in iterable:
+                key_value_map[key] = value
+
+            # Insert default values for non-existing keys.
+            for key in all_default_keys:
+                if not isinstance(key.default, Undefined) and \
+                   key.schema not in key_value_map:
+                    # A default value has been specified for this missing
+                    # key, insert it.
+                    key_value_map[key.schema] = key.default()
+
             error = None
             errors = []
-            for key, value in iterable:
+            for key, value in key_value_map.items():
                 key_path = path + [key]
                 remove_key = False
 
@@ -388,11 +402,9 @@ class Schema(object):
                         required_keys.discard(skey)
                         break
 
-                    # Key and value okay, mark any Required() fields as found.
+                    # Key and value okay, mark as found in case it was
+                    # a Required() field.
                     required_keys.discard(skey)
-
-                    # No need for a default if it was filled
-                    default_keys.discard(skey)
 
                     break
                 else:
@@ -404,13 +416,6 @@ class Schema(object):
                     elif self.extra != REMOVE_EXTRA:
                         errors.append(er.Invalid('extra keys not allowed', key_path))
                         # else REMOVE_EXTRA: ignore the key so it's removed from output
-
-            # set defaults for any that can have defaults
-            for key in default_keys:
-                if not isinstance(key.default, Undefined):  # if the user provides a default with the node
-                    out[key.schema] = key.default()
-                    if key in required_keys:
-                        required_keys.discard(key)
 
             # for any required keys left that weren't found and don't have defaults:
             for key in required_keys:
