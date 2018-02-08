@@ -733,6 +733,14 @@ class Schema(object):
         result_extra = (extra if extra is not None else self.extra)
         return Schema(result, required=result_required, extra=result_extra)
 
+    def remove(self, schema):
+        """Return Schema without keys in `schema`.
+        
+        Opposite of extend."""
+        removal = {Remove(key): types
+                   for key, types in schema.items()}
+        return self.extend(removal)
+
 
 def _compile_scalar(schema):
     """A scalar value.

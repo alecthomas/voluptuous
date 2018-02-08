@@ -399,6 +399,30 @@ def test_schema_extend_key_swap():
     assert_true((list(extended.schema)[0], Required))
 
 
+def test_remove_method():
+    """Test removal of keys from schema (inverse extend)."""
+
+    article = Schema({Required('art_no'): int,
+                      Required('colour'): str,
+                      Required('size'): int})
+
+    ext = {Required('qty'): int,
+           Required('price'): float}
+
+    pos = article.extend(ext)
+
+    pos1 = {'art_no': 999,
+            'colour': 'green',
+            'size': 20,
+            'qty': 15,
+            'price': 20.9}
+
+    article_from_pos = pos.remove(ext)
+
+    for key in ['price', 'qty']:
+        assert key not in article_from_pos.schema.keys()
+
+
 def test_subschema_extension():
     """Verify that Schema.extend adds and replaces keys in a subschema"""
 
