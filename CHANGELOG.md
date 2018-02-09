@@ -7,7 +7,7 @@
 - [#279](https://github.com/alecthomas/voluptuous/pull/279):
   Treat Python 2 old-style classes like types when validating.
 - [324](https://github.com/alecthomas/voluptuous/pull/324):
-  Default values MUST now pass validation just as any regular value.
+  Default values MUST now pass validation just as any regular value. This is a backward incompatible change if a schema uses default values that don't pass validation against the specified schema.
 
 ## [0.10.5]
 
