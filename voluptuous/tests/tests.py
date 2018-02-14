@@ -1137,3 +1137,7 @@ def test_self_all():
 def test_SomeOf_on_bounds_assertion():
     with raises(AssertionError, 'when using "SomeOf" you should specify at least one of min_valid and max_valid'):
         SomeOf(validators=[])
+
+
+def test_comparing_voluptuous_object_to_str():
+    assert_true(Optional('Classification') < 'Name')
