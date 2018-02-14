@@ -953,7 +953,9 @@ class Marker(object):
         return repr(self.schema)
 
     def __lt__(self, other):
-        return self.schema < other.schema
+        if isinstance(other, Marker):
+            return self.schema < other.schema
+        return self.schema < other
 
     def __hash__(self):
         return hash(self.schema)

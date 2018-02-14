@@ -8,6 +8,8 @@
   Treat Python 2 old-style classes like types when validating.
 - [324](https://github.com/alecthomas/voluptuous/pull/324):
   Default values MUST now pass validation just as any regular value. This is a backward incompatible change if a schema uses default values that don't pass validation against the specified schema.
+- [328](https://github.com/alecthomas/voluptuous/pull/328):
+  Modified __lt__ in Marker class to allow comparison with non Marker objects, such as str and int
 
 ## [0.10.5]
 
