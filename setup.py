@@ -11,7 +11,7 @@ version = __import__('voluptuous').__version__
 
 try:
     import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
+    long_description = pypandoc.convert('README.md', 'rst').encode('utf-8')
     with open('README.rst', 'w') as f:
         f.write(long_description)
     atexit.register(lambda: os.unlink('README.rst'))
