@@ -630,8 +630,6 @@ class Schema(object):
                             out.append(cval)
                         break
                     except er.Invalid as e:
-                        if len(e.path) > len(index_path):
-                            raise
                         invalid = e
                 else:
                     errors.append(invalid)
