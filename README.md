@@ -30,7 +30,7 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md).
+See [CHANGELOG.md](https://github.com/alecthomas/voluptuous/blob/master/CHANGELOG.md).
 
 ## Show me an example
 
