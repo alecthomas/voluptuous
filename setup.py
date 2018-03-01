@@ -11,9 +11,9 @@ version = __import__('voluptuous').__version__
 
 try:
     import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst').encode('utf-8')
-    with open('README.rst', 'w') as f:
-        f.write(long_description)
+    long_description = pypandoc.convert('README.md', 'rst')
+    with open('README.rst', 'wb') as f:
+        f.write(long_description.encode('utf-8'))
     atexit.register(lambda: os.unlink('README.rst'))
 except (ImportError, OSError):
     print('WARNING: Could not locate pandoc, using Markdown long_description.')
