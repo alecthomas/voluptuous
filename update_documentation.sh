@@ -14,8 +14,8 @@ FROM_BRANCH="master"
 TO_BRANCH="gh-pages"
 
 # Needed for setting identity
-git config --global user.email "tusharmakkar08@gmail.com"
-git config --global user.name "Tushar Makkar"
+git config --global user.email "tusharmakkar08@gmail.com"  # TODO NFORD update
+git config --global user.name "Tushar Makkar"  # TODO NFORD update
 git config --global push.default "simple"
 
 # Get the current branch
@@ -50,9 +50,9 @@ git push origin gh-pages &> /dev/null && \
 echo "Merge complete!" || \
 echo "Error Occurred. Merge failed"
 
-export PYTHONPATH=${PYTHONPATH}:$(pwd):$(pwd)/voluptuous
+export PYTHONPATH=${PYTHONPATH}:$(pwd):$(pwd)/morphology
 
-pip install -r requirements.txt && sphinx-apidoc -o  docs -f voluptuous &&
+pip install -r requirements.txt && sphinx-apidoc -o  docs -f morphology &&
 cd docs && make html ||
 echo "Sphinx not able to generate HTML"
 

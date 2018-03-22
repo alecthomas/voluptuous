@@ -7,7 +7,7 @@ import sys
 import os
 import atexit
 sys.path.insert(0, '.')
-version = __import__('voluptuous').__version__
+version = __import__('morphology').__version__
 
 try:
     import pypandoc
@@ -24,15 +24,15 @@ description = long_description.splitlines()[0].strip()
 
 
 setup(
-    name='voluptuous',
-    url='https://github.com/alecthomas/voluptuous',
-    download_url='https://pypi.python.org/pypi/voluptuous',
+    name='morphology',
+    url='https://github.com/egowumpus/morphology',
+    download_url='https://pypi.python.org/pypi/morphology',
     version=version,
     description=description,
     long_description=long_description,
     license='BSD',
     platforms=['any'],
-    packages=['voluptuous'],
+    packages=['morphology'],
     author='Alec Thomas',
     author_email='alec@swapoff.org',
     classifiers=[

@@ -1,8 +1,8 @@
 import sys
 
-from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid
-from voluptuous.schema_builder import Schema, default_factory, raises
-from voluptuous import validators
+from morphology.error import LiteralInvalid, TypeInvalid, Invalid
+from morphology.schema_builder import Schema, default_factory, raises
+from morphology import validators
 
 __author__ = 'tusharmakkar08'
 

@@ -6,7 +6,7 @@ import sys
 from contextlib import contextmanager
 
 import itertools
-from voluptuous import error as er
+from morphology import error as er
 
 if sys.version_info >= (3,):
     long = int
@@ -184,17 +184,17 @@ class Schema(object):
     def __init__(self, schema, required=False, extra=PREVENT_EXTRA):
         """Create a new Schema.
 
-        :param schema: Validation schema. See :module:`voluptuous` for details.
+        :param schema: Validation schema. See :module:`morphology` for details.
         :param required: Keys defined in the schema must be in the data.
         :param extra: Specify how extra keys in the data are treated:
-            - :const:`~voluptuous.PREVENT_EXTRA`: to disallow any undefined
+            - :const:`~morphology.PREVENT_EXTRA`: to disallow any undefined
               extra keys (raise ``Invalid``).
-            - :const:`~voluptuous.ALLOW_EXTRA`: to include undefined extra
+            - :const:`~morphology.ALLOW_EXTRA`: to include undefined extra
               keys in the output.
-            - :const:`~voluptuous.REMOVE_EXTRA`: to exclude undefined extra keys
+            - :const:`~morphology.REMOVE_EXTRA`: to exclude undefined extra keys
               from the output.
             - Any value other than the above defaults to
-              :const:`~voluptuous.PREVENT_EXTRA`
+              :const:`~morphology.PREVENT_EXTRA`
         """
         self.schema = schema
         self.required = required
@@ -276,8 +276,8 @@ class Schema(object):
             return lambda _, v: v
         if schema is Self:
             return lambda p, v: self._compiled(p, v)
-        elif hasattr(schema, "__voluptuous_compile__"):
-            return schema.__voluptuous_compile__(self)
+        elif hasattr(schema, "__morphology_compile__"):
+            return schema.__morphology_compile__(self)
         if isinstance(schema, Object):
             return self._compile_object(schema)
         if isinstance(schema, collections.Mapping):
@@ -500,7 +500,7 @@ class Schema(object):
             ...   validate({'10': 'twenty'})
 
         Wrap them in the Coerce() function to achieve this:
-            >>> from voluptuous import Coerce
+            >>> from morphology import Coerce
             >>> validate = Schema({'one': 'two', 'three': 'four',
             ...                    Coerce(int): str})
             >>> validate({'10': 'twenty'})

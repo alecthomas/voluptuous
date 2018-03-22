@@ -1,6 +1,6 @@
 Error reporting should be accurate:
 
-    >>> from voluptuous import *
+    >>> from morphology import *
     >>> schema = Schema(['one', {'two': 'three', 'four': ['five'],
     ...                          'six': {'seven': 'eight'}}])
     >>> schema(['one'])
@@ -56,7 +56,7 @@ Errors should be reported depth-first:
     not a valid value for dictionary value @ data['one']['four']
     ['one', 'four']
 
-Voluptuous supports validation when extra fields are present in the
+Morphology supports validation when extra fields are present in the
 data:
 
     >>> schema = Schema({'one': 1, Extra: object})
@@ -122,7 +122,7 @@ Multiple errors are reported:
 
 Required fields in dictionary which are invalid should not have required :
 
-    >>> from voluptuous import *
+    >>> from morphology import *
     >>> schema = Schema({'one': {'two': 3}}, required=True)
     >>> try:
     ...   schema({'one': {'two': 2}})

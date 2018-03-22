@@ -1,9 +1,9 @@
-# Voluptuous is a Python data validation library
+# Morphology is a Python data validation library
 
-[![Build Status](https://travis-ci.org/alecthomas/voluptuous.png)](https://travis-ci.org/alecthomas/voluptuous)
-[![Coverage Status](https://coveralls.io/repos/github/alecthomas/voluptuous/badge.svg?branch=master)](https://coveralls.io/github/alecthomas/voluptuous?branch=master) [![Gitter chat](https://badges.gitter.im/alecthomas.png)](https://gitter.im/alecthomas/Lobby)
+[![Build Status](https://travis-ci.org/egowumpus/morphology.png)](https://travis-ci.org/egowumpus/morphology)
+[![Coverage Status](https://coveralls.io/repos/github/egowumpus/morphology/badge.svg?branch=master)](https://coveralls.io/github/egowumpus/morphology?branch=master) [![Gitter chat](https://badges.gitter.im/egowumpus.png)](https://gitter.im/egowumpus/Lobby)
 
-Voluptuous, *despite* the name, is a Python data validation library. It
+Morphology is a Python data validation library. It
 is primarily intended for validating data coming into Python as JSON,
 YAML, etc.
 
@@ -15,22 +15,22 @@ It has three goals:
 
 ## Contact
 
-Voluptuous now has a mailing list! Send a mail to
-[<voluptuous@librelist.com>](mailto:voluptuous@librelist.com) to subscribe. Instructions
+Morphology now has a mailing list! Send a mail to
+[<morphology@librelist.com>](mailto:morphology@librelist.com) to subscribe. Instructions
 will follow.
 
 You can also contact me directly via [email](mailto:alec@swapoff.org) or
-[Twitter](https://twitter.com/alecthomas).
+[Twitter](https://twitter.com/egowumpus).
 
-To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/issues/new) on GitHub with a short example of how to replicate the issue.
+To file a bug, create a [new issue](https://github.com/egowumpus/morphology/issues/new) on GitHub with a short example of how to replicate the issue.
 
 ## Documentation
 
-The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
+The documentation is provided [here](http://egowumpus.github.io/morphology/).
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/alecthomas/voluptuous/blob/master/CHANGELOG.md).
+See [CHANGELOG.md](https://github.com/egowumpus/morphology/blob/master/CHANGELOG.md).
 
 ## Show me an example
 
@@ -44,7 +44,7 @@ $ curl 'https://api.twitter.com/1.1/users/search.json?q=python&per_page=20&page=
 To validate this we might use a schema like:
 
 ```pycon
->>> from voluptuous import Schema
+>>> from morphology import Schema
 >>> schema = Schema({
 ...   'q': str,
 ...   'per_page': int,
@@ -61,7 +61,7 @@ example. To describe the semantics of the API more accurately, our
 schema will need to be more thoroughly defined:
 
 ```pycon
->>> from voluptuous import Required, All, Length, Range
+>>> from morphology import Required, All, Length, Range
 >>> schema = Schema({
 ...   Required('q'): All(str, Length(min=1)),
 ...   Required('per_page', default=5): All(int, Range(min=1, max=20)),
@@ -76,7 +76,7 @@ documentation, and goes a little further for completeness.
 "q" is required:
 
 ```pycon
->>> from voluptuous import MultipleInvalid, Invalid
+>>> from morphology import MultipleInvalid, Invalid
 >>> try:
 ...   schema({})
 ...   raise AssertionError('MultipleInvalid not raised')
@@ -194,7 +194,7 @@ True
 URL's in the schema are matched by using `urlparse` library.
 
 ```pycon
->>> from voluptuous import Url
+>>> from morphology import Url
 >>> schema = Schema(Url())
 >>> schema('http://w3.org')
 'http://w3.org'
@@ -339,7 +339,7 @@ additional keys use
 `Schema(..., extra=ALLOW_EXTRA)`:
 
 ```pycon
->>> from voluptuous import ALLOW_EXTRA
+>>> from morphology import ALLOW_EXTRA
 >>> schema = Schema({2: 3}, extra=ALLOW_EXTRA)
 >>> schema({1: 2, 2: 3})
 {1: 2, 2: 3}
@@ -350,7 +350,7 @@ To remove additional keys use
 `Schema(..., extra=REMOVE_EXTRA)`:
 
 ```pycon
->>> from voluptuous import REMOVE_EXTRA
+>>> from morphology import REMOVE_EXTRA
 >>> schema = Schema({2: 3}, extra=REMOVE_EXTRA)
 >>> schema({1: 2, 2: 3})
 {2: 3}
@@ -361,7 +361,7 @@ It can also be overridden per-dictionary by using the catch-all marker
 token `extra` as a key:
 
 ```pycon
->>> from voluptuous import Extra
+>>> from morphology import Extra
 >>> schema = Schema({1: {Extra: object}})
 >>> schema({1: {'foo': 'bar'}})
 {1: {'foo': 'bar'}}
@@ -416,7 +416,7 @@ If a schema has `required=True`, keys may be individually marked as
 optional using the marker token `Optional(key)`:
 
 ```pycon
->>> from voluptuous import Optional
+>>> from morphology import Optional
 >>> schema = Schema({1: 2, Optional(3): 4}, required=True)
 >>> try:
 ...   schema({})
@@ -445,10 +445,10 @@ True
 
 ### Recursive / nested schema
 
-You can use `voluptuous.Self` to define a nested schema:
+You can use `morphology.Self` to define a nested schema:
 
 ```pycon
->>> from voluptuous import Schema, Self
+>>> from morphology import Schema, Self
 >>> recursive = Schema({"more": Self, "value": int})
 >>> recursive({"more": {"value": 42}, "value": 41}) == {'more': {'value': 42}, 'value': 41}
 True
@@ -462,7 +462,7 @@ requirements. In that case you can use `Schema.extend` to create a new
 `Schema`:
 
 ```pycon
->>> from voluptuous import Schema
+>>> from morphology import Schema
 >>> person = Schema({'name': str})
 >>> person_with_age = person.extend({'age': int})
 >>> sorted(list(person_with_age.schema.keys()))
@@ -478,7 +478,7 @@ Each key-value pair in a schema dictionary is validated against each
 attribute-value pair in the corresponding object:
 
 ```pycon
->>> from voluptuous import Object
+>>> from morphology import Object
 >>> class Structure(object):
 ...     def __init__(self, q=None):
 ...         self.q = q
@@ -496,7 +496,7 @@ attribute-value pair in the corresponding object:
 To allow value to be None as well, use Any:
 
 ```pycon
->>> from voluptuous import Any
+>>> from morphology import Any
 
 >>> schema = Schema(Any(None, int))
 >>> schema(None)
@@ -586,12 +586,12 @@ to the second element in the schema, and succeed:
 
 ## Running tests.
 
-Voluptuous is using nosetests:
+Morphology is using nosetests:
 
     $ nosetests
 
 
-## Why use Voluptuous over another validation library?
+## Why use Morphology over another validation library?
 
 **Validators are simple callables**
 :   No need to subclass anything, just use a function.
@@ -615,14 +615,14 @@ values. Callables are called to validate. Simple.
 
 ## Other libraries and inspirations
 
-Voluptuous is heavily inspired by
+Morphology is heavily inspired by
 [Validino](http://code.google.com/p/validino/), and to a lesser extent,
 [jsonvalidator](http://code.google.com/p/jsonvalidator/) and
 [json\_schema](http://blog.sendapatch.se/category/json_schema.html).
 
-[pytest-voluptuous](https://github.com/F-Secure/pytest-voluptuous) is a
+[pytest-morphology](https://github.com/F-Secure/pytest-morphology) is a
 [pytest](https://github.com/pytest-dev/pytest) plugin that helps in
-using voluptuous validators in `assert`s.
+using morphology validators in `assert`s.
 
 I greatly prefer the light-weight style promoted by these libraries to
 the complexity of libraries like FormEncode.

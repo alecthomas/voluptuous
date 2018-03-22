@@ -5,15 +5,15 @@ import sys
 
 from nose.tools import assert_equal, assert_false, assert_raises, assert_true
 
-from voluptuous import (
+from morphology import (
     Schema, Required, Exclusive, Optional, Extra, Invalid, In, Remove, Literal,
     Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
     Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
     raises)
-from voluptuous.humanize import humanize_error
-from voluptuous.util import u
+from morphology.humanize import humanize_error
+from morphology.util import u
 
 
 def test_exact_sequence():
@@ -55,7 +55,7 @@ def test_iterate_candidates():
         Extra: object,
     }
     # toaster should be first.
-    from voluptuous.schema_builder import _iterate_mapping_candidates
+    from morphology.schema_builder import _iterate_mapping_candidates
     assert_equal(_iterate_mapping_candidates(schema)[0][0], 'toaster')
 
 
@@ -970,7 +970,7 @@ def test_validation_performance():
     This test comes to make sure the validation complexity of dictionaries is done in a linear time.
     to achieve this a custom marker is used in the scheme that counts each time it is evaluated.
     By doing so we can determine if the validation is done in linear complexity.
-    Prior to issue https://github.com/alecthomas/voluptuous/issues/259 this was exponential
+    Prior to issue https://github.com/egowumpus/morphology/issues/259 this was exponential
     """
     num_of_keys = 1000
 
@@ -1139,5 +1139,5 @@ def test_SomeOf_on_bounds_assertion():
         SomeOf(validators=[])
 
 
-def test_comparing_voluptuous_object_to_str():
+def test_comparing_morphology_object_to_str():
     assert_true(Optional('Classification') < 'Name')

@@ -5,8 +5,8 @@ import sys
 from functools import wraps
 from decimal import Decimal, InvalidOperation
 
-from voluptuous.schema_builder import Schema, raises, message
-from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
+from morphology.schema_builder import Schema, raises, message
+from morphology.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
                               AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
                               RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
                               DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
@@ -185,7 +185,7 @@ class _WithSubValidators(object):
     """Base class for validators that use sub-validators.
 
     Special class to use as a parent class for validators using sub-validators.
-    This class provides the `__voluptuous_compile__` method so the
+    This class provides the `__morphology_compile__` method so the
     sub-validators are compiled by the parent `Schema`.
     """
 
@@ -193,7 +193,7 @@ class _WithSubValidators(object):
         self.validators = validators
         self.msg = kwargs.pop('msg', None)
 
-    def __voluptuous_compile__(self, schema):
+    def __morphology_compile__(self, schema):
         self._compiled = [
             schema._compile(v)
             for v in self.validators
@@ -728,7 +728,7 @@ class ExactSequence(object):
     :param kwargs: All other keyword arguments are passed to the sub-Schema
         constructors.
 
-    >>> from voluptuous import Schema, ExactSequence
+    >>> from morphology import Schema, ExactSequence
     >>> validate = Schema(ExactSequence([str, int, list, list]))
     >>> validate(['hourly_report', 10, [], []])
     ['hourly_report', 10, [], []]

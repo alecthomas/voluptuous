@@ -9,7 +9,7 @@ python:
 install:
 - pip install coveralls
 - pip install 'coverage<4'
-script: nosetests --with-coverage --cover-package=voluptuous
+script: nosetests --with-coverage --cover-package=morphology
 after_success:
 - coveralls
 #- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./update_documentation.sh $USERNAME $PASSWORD; fi # Fix this later
