@@ -616,4 +616,5 @@ issue. It is important to recognize that Alec Thomas and the other contributers 
 the functionality here.   
 
 In the future I intend to port any significant upgrades over, and will attempt to keep versions in sync such that one is
-interchangeable with the other with a simple replace-all.
+interchangeable with the other with a simple replace-all. For various build mishagus reasons, morphology minor versions
+will be equivalent to `10x(parent minor version)+c`, where `c` is 0-9 and just has to do with integration fixes. 
