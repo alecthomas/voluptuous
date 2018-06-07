@@ -12,8 +12,11 @@ install:
 script: nosetests --with-coverage --cover-package=morphology
 after_success:
 - coveralls
-#- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./update_documentation.sh $USERNAME $PASSWORD; fi # Fix this later
-#env:
-#  global:
-#  - secure: UKVFCaFRRECYeNaLJr4POqt6zENBjyUe79U/5b9pEGBFWzXWoJ+EElOFOJdkquL6u3AwL6Bw93GqRIYHKcRW70doCYiEI7p2CuXey2mjoC7bLKdk4Fcrj0MTbiS6WJxEDfcsP/Tj3tv4kPqA4nYYm9DQoNfUX3skns442h0zals=
-#  - secure: EK2dbVB4T7qNFWCSu3tL+l2YnpcrCvPk9E3W05rGZnkT38Do21kVDncf8XRh/5Nn4J6zGmdoHw6NFqeQtF6/+3GNIqEW4PzA5x5pUx1rI6drB0hTaEURG3VYUmLOoQ/thziaEmnez8Qt1hUtn/0Jhl6eUYOtmSTSkDeLz7zehm0=
+deploy:
+  provider: pypi
+  user: nathanielford
+  password:
+    secure: M3WgyFOS71ZMKYHmV9bK4HfBgOx/CnJFCgbivxAtAr4GYMpHDsjQaFrZftyK96pR/BnMhiFnDdjuCRNUh2Wo4L0RtWZ1xf59/f8qTSXvewf6fQIsRsx1BpMpWbkyCm7fC3djFZGDk9i+Y0h0SCFmcycNQGGKYkgZsEw2Et/SwkwrvEgU9cutSqSywfvxKtBzQhrgJ0VBh/5zjiPDjg+Sd9RULxqRSkMaIetj14YhdOEhCV0oH3OYH9egcS8a0Y7T91fqZNgZonZv6bNiAB2KUWK5HFpFhpVv2nkFLmZ6IoY8gnhHAvqseZeG3Fnxyr8GiSsoo4QQUif/VZidvInZC3Gadj0PTxkwkIynNtdOFVoiU8mkbs6SdiK/Uy8Dapy6MxEF1+IXiQt+QGQ/0MC9fbDpCQ3uNfCJsjDqW2TjO9arZkiBQ0yLXnS9Geyarc8ueTfXjQxIrb/XMr2QBTw/wUlaPE+ZHOs76o+mnf8QOCsfLHHtH9r15udbcZkGHktr4H+T55QMvMX/+7EqUdaOb01ZnBh7k4gJjM5iI2eXPqu+b7jpuOY5c9QAULGdOe1gOL3yrBj11qBiN+N6FgyzFB9+sJesIs11Do/1qeR/Qv8TxyaVGBc6Sp4W0GppX3/mnu0HoROeRzkASLNuPjJ3WTAPbEqmRLhuEyY9cMB59Ko=
+  on:
+    tags: true
+    branch: production
