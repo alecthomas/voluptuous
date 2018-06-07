@@ -1,8 +1,8 @@
 # Morphology is a Python data validation library
 
-[![Build Status](https://travis-ci.org/egowumpus/morphology.png)](https://travis-ci.org/egowumpus/morphology)
-[![Coverage Status](https://coveralls.io/repos/github/egowumpus/morphology/badge.svg?branch=master)](https://coveralls.io/github/egowumpus/morphology?branch=master) 
-[![Gitter chat](https://badges.gitter.im/egowumpus.png)](https://gitter.im/egowumpus/Lobby)
+[![Build Status](https://travis-ci.org/nathanielford/morphology.png)](https://travis-ci.org/nathanielford/morphology)
+[![Coverage Status](https://coveralls.io/repos/github/nathanielford/morphology/badge.svg?branch=master)](https://coveralls.io/github/nathanielford/morphology?branch=master) 
+[![Gitter chat](https://badges.gitter.im/nathanielford.png)](https://gitter.im/nathanielford/Lobby)
 
 Morphology is a Python data validation library. It is primarily intended for validating data coming into Python as JSON,
 YAML, etc.
@@ -15,15 +15,15 @@ It has three goals:
 
 ## Contact
 
-To file a bug, create a [new issue](https://github.com/egowumpus/morphology/issues/new) on GitHub with a short example of how to replicate the issue.
+To file a bug, create a [new issue](https://github.com/nathanielford/morphology/issues/new) on GitHub with a short example of how to replicate the issue.
 
 ## Documentation
 
-The documentation is provided [here](http://egowumpus.github.io/morphology/).
+The documentation is provided [here](http://nathanielford.github.io/morphology/).
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/egowumpus/morphology/blob/master/CHANGELOG.md).
+See [CHANGELOG.md](https://github.com/nathanielford/morphology/blob/master/CHANGELOG.md).
 
 ## Show me an example
 

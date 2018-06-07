@@ -25,7 +25,7 @@ description = long_description.splitlines()[0].strip()
 
 setup(
     name='morphology',
-    url='https://github.com/egowumpus/morphology',
+    url='https://github.com/nathanielford/morphology',
     download_url='https://pypi.python.org/pypi/morphology',
     version=version,
     description=description,

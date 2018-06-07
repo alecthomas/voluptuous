@@ -970,7 +970,7 @@ def test_validation_performance():
     This test comes to make sure the validation complexity of dictionaries is done in a linear time.
     to achieve this a custom marker is used in the scheme that counts each time it is evaluated.
     By doing so we can determine if the validation is done in linear complexity.
-    Prior to issue https://github.com/egowumpus/morphology/issues/259 this was exponential
+    Prior to issue https://github.com/nathanielford/morphology/issues/259 this was exponential
     """
     num_of_keys = 1000
 
