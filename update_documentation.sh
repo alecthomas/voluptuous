@@ -14,8 +14,8 @@ FROM_BRANCH="master"
 TO_BRANCH="gh-pages"
 
 # Needed for setting identity
-git config --global user.email "tusharmakkar08@gmail.com"  # TODO NFORD update
-git config --global user.name "Tushar Makkar"  # TODO NFORD update
+git config --global user.email "nathaniel.ford@gmail.com"
+git config --global user.name "Nathaniel Ford"
 git config --global push.default "simple"
 
 # Get the current branch

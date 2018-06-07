@@ -1,10 +1,10 @@
 # Morphology is a Python data validation library
 
 [![Build Status](https://travis-ci.org/egowumpus/morphology.png)](https://travis-ci.org/egowumpus/morphology)
-[![Coverage Status](https://coveralls.io/repos/github/egowumpus/morphology/badge.svg?branch=master)](https://coveralls.io/github/egowumpus/morphology?branch=master) [![Gitter chat](https://badges.gitter.im/egowumpus.png)](https://gitter.im/egowumpus/Lobby)
+[![Coverage Status](https://coveralls.io/repos/github/egowumpus/morphology/badge.svg?branch=master)](https://coveralls.io/github/egowumpus/morphology?branch=master) 
+[![Gitter chat](https://badges.gitter.im/egowumpus.png)](https://gitter.im/egowumpus/Lobby)
 
-Morphology is a Python data validation library. It
-is primarily intended for validating data coming into Python as JSON,
+Morphology is a Python data validation library. It is primarily intended for validating data coming into Python as JSON,
 YAML, etc.
 
 It has three goals:
@@ -14,13 +14,6 @@ It has three goals:
 3.  Provide useful error messages.
 
 ## Contact
-
-Morphology now has a mailing list! Send a mail to
-[<morphology@librelist.com>](mailto:morphology@librelist.com) to subscribe. Instructions
-will follow.
-
-You can also contact me directly via [email](mailto:alec@swapoff.org) or
-[Twitter](https://twitter.com/egowumpus).
 
 To file a bug, create a [new issue](https://github.com/egowumpus/morphology/issues/new) on GitHub with a short example of how to replicate the issue.
 
@@ -613,16 +606,14 @@ type. Need a list of dictionaries? `[{}]`
 :   Types in the schema are checked as types. Values are compared as
 values. Callables are called to validate. Simple.
 
-## Other libraries and inspirations
+## Lineage
 
-Morphology is heavily inspired by
-[Validino](http://code.google.com/p/validino/), and to a lesser extent,
-[jsonvalidator](http://code.google.com/p/jsonvalidator/) and
-[json\_schema](http://blog.sendapatch.se/category/json_schema.html).
+Morphology is an almost-direct branch of [this library](https://github.com/alecthomas/voluptuous). 
+[This issue](https://github.com/alecthomas/voluptuous/issues/287) was opened, addressing the inappropriate 
+nature of the name, but was summarily closed by the original author. Sadly, this prevents an otherwise great library 
+from being utilized in professional, inclusive settings, and the only solution was to fork it to address this specific 
+issue. It is important to recognize that Alec Thomas and the other contributers there should receive all the credit for 
+the functionality here.   
 
-[pytest-morphology](https://github.com/F-Secure/pytest-morphology) is a
-[pytest](https://github.com/pytest-dev/pytest) plugin that helps in
-using morphology validators in `assert`s.
-
-I greatly prefer the light-weight style promoted by these libraries to
-the complexity of libraries like FormEncode.
+In the future I intend to port any significant upgrades over, and will attempt to keep versions in sync such that one is
+interchangeable with the other with a simple replace-all.

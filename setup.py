@@ -33,8 +33,8 @@ setup(
     license='BSD',
     platforms=['any'],
     packages=['morphology'],
-    author='Alec Thomas',
-    author_email='alec@swapoff.org',
+    author='Nathaniel Ford',
+    author_email='nathaniel.ford@eryri.org',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
