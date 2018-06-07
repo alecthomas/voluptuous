@@ -15,6 +15,7 @@ after_success:
 deploy:
   provider: pypi
   user: nathanielford
+  skip-existing: true
   password:
     secure: KKr++ERa8+p1LEZy4gvlSD0CrzHb6Pqir1YFalB0QtiFkXCHKiaJJYWTzz9ito3WM2lvX6it7/FPvZKJpPRusatvb6AY3w+VVFELyfwYSWo63GKYrKCbZn406BFmF9qW9lGLFsOeZ+kyNNJlUw/QZe31FogMhcEuAo9kJTncMc1mvbQx3FHbYGOttTuQMJrDk/LUZVx3EI0UMrtXhil8VzsUPO9UlPoVHtyDqnlKg+wASOlpD2vwP8G8IbIBt8sCeUNB9kU9KSx/GiH8BmzYemY06IbIXd4GiXlplfczCpBlr9EbADxeJCOI4gjoz9jOH3lmVnmHyRTLs3viKiV2hEmnL0cSbuuLw0neOhnYYZB8+Fz6lyIe1V8hqfn+FfMMPZGU/FC4Sxp914fGsl/tfBI6c+E91BUoTImruoGmaI3pkYewERTCXqK/5AHMffx+p8kdkWU8LXN8lOWPaogkneLV2hAD61TNme9PB97uR9QYi6vmymxZyfMyjJnqsVnb6X6VuvTtCn2GMJnUxQzMiqyvGZYRtIabLdGmP5drBgS4/mMRUdeAv+HPx+5PbZear3pnFuVIao2ZjzRSDMgAvpDvqIFa79fDNk+u2LyWtSvXt8FKIFofGEIBJpiGNffG3MfJ2rEzMvFWCsnM4C2Sa9jL5c1oyR/Y0VNDptYPydY=
   on:
@@ -22,3 +23,4 @@ deploy:
     distributions: sdist bdist_wheel
     repo: nathanielford/morphology
     branch: production
+    python: '3.6'
