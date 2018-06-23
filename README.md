@@ -246,6 +246,59 @@ True
 
 ```
 
+### Sets and frozensets
+
+Sets and frozensets are treated as a set of valid values. Each element
+in the schema set is compared to each value in the input data:
+
+```pycon
+>>> schema = Schema({42})
+>>> schema({42}) == {42}
+True
+>>> try:
+...   schema({43})
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "invalid value in set"
+True
+>>> schema = Schema({int})
+>>> schema({1, 2, 3}) == {1, 2, 3}
+True
+>>> schema = Schema({int, str})
+>>> schema({1, 2, 'abc'}) == {1, 2, 'abc'}
+True
+>>> schema = Schema(frozenset([int]))
+>>> try:
+...   schema({3})
+...   raise AssertionError('Invalid not raised')
+... except Invalid as e:
+...   exc = e
+>>> str(exc) == 'expected a frozenset'
+True
+
+```
+
+However, an empty set (`set()`) is treated as is. If you want to specify a set
+that can contain anything, specify it as `set`:
+
+```pycon
+>>> schema = Schema(set())
+>>> try:
+...   schema({1})
+...   raise AssertionError('MultipleInvalid not raised')
+... except MultipleInvalid as e:
+...   exc = e
+>>> str(exc) == "invalid value in set"
+True
+>>> schema(set()) == set()
+True
+>>> schema = Schema(set)
+>>> schema({1, 2}) == {1, 2}
+True
+
+```
+
 ### Validation functions
 
 Validators are simple callables that raise an `Invalid` exception when

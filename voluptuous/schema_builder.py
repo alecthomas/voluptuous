@@ -286,6 +286,8 @@ class Schema(object):
             return self._compile_list(schema)
         elif isinstance(schema, tuple):
             return self._compile_tuple(schema)
+        elif isinstance(schema, (frozenset, set)):
+            return self._compile_set(schema)
         type_ = type(schema)
         if inspect.isclass(schema):
             type_ = schema
@@ -674,6 +676,46 @@ class Schema(object):
         [1]
         """
         return self._compile_sequence(schema, list)
+
+    def _compile_set(self, schema):
+        """Validate a set.
+
+        A set is an unordered collection of unique elements.
+
+        >>> validator = Schema({int})
+        >>> validator(set([42])) == set([42])
+        True
+        >>> with raises(er.Invalid, 'expected a set'):
+        ...   validator(42)
+        >>> with raises(er.MultipleInvalid, 'invalid value in set'):
+        ...   validator(set(['a']))
+        """
+        type_ = type(schema)
+        type_name = type_.__name__
+
+        def validate_set(path, data):
+            if not isinstance(data, type_):
+                raise er.Invalid('expected a %s' % type_name, path)
+
+            _compiled = [self._compile(s) for s in schema]
+            errors = []
+            for value in data:
+                for validate in _compiled:
+                    try:
+                        validate(path, value)
+                        break
+                    except er.Invalid:
+                        pass
+                else:
+                    invalid = er.Invalid('invalid value in %s' % type_name, path)
+                    errors.append(invalid)
+
+            if errors:
+                raise er.MultipleInvalid(errors)
+
+            return data
+
+        return validate_set
 
     def extend(self, schema, required=None, extra=None):
         """Create a new `Schema` by merging this and the provided `schema`.
