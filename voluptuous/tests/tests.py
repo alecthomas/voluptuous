@@ -1141,3 +1141,73 @@ def test_SomeOf_on_bounds_assertion():
 
 def test_comparing_voluptuous_object_to_str():
     assert_true(Optional('Classification') < 'Name')
+
+
+def test_set_of_integers():
+    schema = Schema({int})
+    with raises(Invalid, 'expected a set'):
+        schema(42)
+    with raises(Invalid, 'expected a set'):
+        schema(frozenset([42]))
+
+    schema(set())
+    schema(set([42]))
+    schema(set([42, 43, 44]))
+    try:
+        schema(set(['abc']))
+    except MultipleInvalid as e:
+        assert_equal(str(e), "invalid value in set")
+    else:
+        assert False, "Did not raise Invalid"
+
+
+def test_frozenset_of_integers():
+    schema = Schema(frozenset([int]))
+    with raises(Invalid, 'expected a frozenset'):
+        schema(42)
+    with raises(Invalid, 'expected a frozenset'):
+        schema(set([42]))
+
+    schema(frozenset())
+    schema(frozenset([42]))
+    schema(frozenset([42, 43, 44]))
+    try:
+        schema(frozenset(['abc']))
+    except MultipleInvalid as e:
+        assert_equal(str(e), "invalid value in frozenset")
+    else:
+        assert False, "Did not raise Invalid"
+
+
+def test_set_of_integers_and_strings():
+    schema = Schema({int, str})
+    with raises(Invalid, 'expected a set'):
+        schema(42)
+
+    schema(set())
+    schema(set([42]))
+    schema(set(['abc']))
+    schema(set([42, 'abc']))
+    try:
+        schema(set([None]))
+    except MultipleInvalid as e:
+        assert_equal(str(e), "invalid value in set")
+    else:
+        assert False, "Did not raise Invalid"
+
+
+def test_frozenset_of_integers_and_strings():
+    schema = Schema(frozenset([int, str]))
+    with raises(Invalid, 'expected a frozenset'):
+        schema(42)
+
+    schema(frozenset())
+    schema(frozenset([42]))
+    schema(frozenset(['abc']))
+    schema(frozenset([42, 'abc']))
+    try:
+        schema(frozenset([None]))
+    except MultipleInvalid as e:
+        assert_equal(str(e), "invalid value in frozenset")
+    else:
+        assert False, "Did not raise Invalid"
