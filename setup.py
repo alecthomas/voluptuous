@@ -30,6 +30,7 @@ setup(
     version=version,
     description=description,
     long_description=long_description,
+    long_description_content_type="text/markdown",
     license='BSD',
     platforms=['any'],
     packages=['morphology'],
