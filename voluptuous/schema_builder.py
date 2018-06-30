@@ -856,7 +856,6 @@ def _iterate_object(obj):
         for key in slots:
             if key != '__dict__':
                 yield (key, getattr(obj, key))
-    raise StopIteration()
 
 
 class Msg(object):
