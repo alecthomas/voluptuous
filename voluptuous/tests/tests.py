@@ -1085,6 +1085,53 @@ def test_self_validation():
     schema({"follow": {"follow": {"number": 123456}}})
 
 
+def test_any_error_has_path():
+    """https://github.com/alecthomas/voluptuous/issues/347"""
+    s = Schema({
+        Optional('q'): int,
+        Required('q2'): Any(int, msg='toto')
+    })
+    try:
+        s({'q': 'str', 'q2': 'tata'})
+    except MultipleInvalid as exc:
+        assert (
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
+            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+        )
+    else:
+        assert False, "Did not raise AnyInvalid"
+
+
+def test_all_error_has_path():
+    """https://github.com/alecthomas/voluptuous/issues/347"""
+    s = Schema({
+        Optional('q'): int,
+        Required('q2'): All([str, Length(min=10)], msg='toto'),
+    })
+    try:
+        s({'q': 'str', 'q2': 12})
+    except MultipleInvalid as exc:
+        assert (
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
+            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+        )
+    else:
+        assert False, "Did not raise AllInvalid"
+
+
+def test_match_error_has_path():
+    """https://github.com/alecthomas/voluptuous/issues/347"""
+    s = Schema({
+        Required('q2'): Match("a"),
+    })
+    try:
+        s({'q2': 12})
+    except MultipleInvalid as exc:
+        assert exc.errors[0].path == ['q2']
+    else:
+        assert False, "Did not raise MatchInvalid"
+
+
 def test_self_any():
     schema = Schema({"number": int,
                      "follow": Any(Self, "stop")})

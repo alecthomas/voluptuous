@@ -252,8 +252,10 @@ class Any(_WithSubValidators):
                     error = e
         else:
             if error:
-                raise error if self.msg is None else AnyInvalid(self.msg)
-            raise AnyInvalid(self.msg or 'no valid value found')
+                raise error if self.msg is None else AnyInvalid(
+                    self.msg, path=path)
+            raise AnyInvalid(self.msg or 'no valid value found',
+                             path=path)
 
 
 # Convenience alias
@@ -281,7 +283,7 @@ class All(_WithSubValidators):
                 else:
                     v = func(path, v)
         except Invalid as e:
-            raise e if self.msg is None else AllInvalid(self.msg)
+            raise e if self.msg is None else AllInvalid(self.msg, path=path)
         return v
 
 
