@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+**Fixes**:
+
+- [#330](https://github.com/alecthomas/voluptuous/pull/330):
+  Don't stop validation to first error in a list of objects.
+
 ## [0.11.0]
 
 **Changes**:

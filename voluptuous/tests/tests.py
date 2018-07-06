@@ -515,6 +515,25 @@ def test_list_validation_messages():
         assert False, "Did not raise Invalid"
 
 
+def test_list_error_reporting():
+
+    schema = Schema([int])
+    try:
+        schema(['foo', 'bar'])
+    except MultipleInvalid as e:
+        assert len(e.errors) == 2
+    else:
+        assert False
+
+    schema = Schema([{'id': int}])
+    try:
+        schema([{'id': 'foo'}, {'id': 'bar'}])
+    except MultipleInvalid as e:
+        assert len(e.errors) == 2
+    else:
+        assert False
+
+
 def test_nested_multiple_validation_errors():
     """ Make sure useful error messages are available """
 
