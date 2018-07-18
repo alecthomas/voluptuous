@@ -861,8 +861,13 @@ def test_datetime():
 def test_date():
     schema = Schema({"date": Date()})
     schema({"date": "2016-10-24"})
-    assert_raises(MultipleInvalid, schema, {"date": "2016-10-2"})
     assert_raises(MultipleInvalid, schema, {"date": "2016-10-24Z"})
+
+
+def test_date_custom_format():
+    schema = Schema({"date": Date("%Y%m%d")})
+    schema({"date": "20161024"})
+    assert_raises(MultipleInvalid, schema, {"date": "2016-10-24"})
 
 
 def test_ordered_dict():

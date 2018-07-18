@@ -636,15 +636,10 @@ class Date(Datetime):
     """Validate that the value matches the date format."""
 
     DEFAULT_FORMAT = '%Y-%m-%d'
-    FORMAT_DESCRIPTION = 'yyyy-mm-dd'
 
     def __call__(self, v):
         try:
             datetime.datetime.strptime(v, self.format)
-            if len(v) != len(self.FORMAT_DESCRIPTION):
-                raise DateInvalid(
-                    self.msg or 'value has invalid length'
-                                ' expected length %d (%s)' % (len(self.FORMAT_DESCRIPTION), self.FORMAT_DESCRIPTION))
         except (TypeError, ValueError):
             raise DateInvalid(
                 self.msg or 'value does not match'
