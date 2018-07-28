@@ -1,6 +1,23 @@
 # Changelog
 
-## [0.11.0]
+## [0.11.3] and [0.11.2]
+
+**Changes**:
+
+- [#349](https://github.com/alecthomas/voluptuous/pull/349): Support Python 3.7.
+- [#343](https://github.com/alecthomas/voluptuous/pull/343): Drop support for Python 3.3.
+
+**New**:
+
+- [#342](https://github.com/alecthomas/voluptuous/pull/342): Add support for sets and frozensets.
+
+**Fixes**:
+
+- [#332](https://github.com/alecthomas/voluptuous/pull/332): Fix Python 3.x compatibility for setup.py when `pypandoc` is installed.
+- [#348](https://github.com/alecthomas/voluptuous/pull/348): Include path in `AnyInvalid` errors.
+- [#351](https://github.com/alecthomas/voluptuous/pull/351): Fix `Date` behaviour when a custom format is specified.
+
+## [0.11.1] and [0.11.0]
 
 **Changes**:
 
