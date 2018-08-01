@@ -1,13 +1,14 @@
 from setuptools import setup
 
 import sys
+import io
 import os
 import atexit
 sys.path.insert(0, '.')
 version = __import__('voluptuous').__version__
 
 
-with open('README.md', encoding='utf-8') as f:
+with io.open('README.md', encoding='utf-8') as f:
     long_description = f.read()
     description = long_description.splitlines()[0].strip()
 
