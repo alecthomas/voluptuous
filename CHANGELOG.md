@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.5]
+
+- Fixed issue with opening README file in `setup.py`.
+
+## [0.11.4]
+
+- Removed use of `pypandoc` as Markdown is now supported by `setup()`.
+
 ## [0.11.3] and [0.11.2]
 
 **Changes**:
