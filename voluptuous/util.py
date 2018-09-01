@@ -1,13 +1,8 @@
 import sys
 
-try:
-    from error import LiteralInvalid, TypeInvalid, Invalid
-    from schema_builder import Schema, default_factory, raises
-    import validators
-except ImportError:
-    from .error import LiteralInvalid, TypeInvalid, Invalid
-    from .schema_builder import Schema, default_factory, raises
-    from . import validators
+from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid
+from voluptuous.schema_builder import Schema, default_factory, raises
+from voluptuous import validators
 
 __author__ = 'tusharmakkar08'
 
@@ -150,12 +145,6 @@ class Literal(object):
 
     def __repr__(self):
         return repr(self.lit)
-
-
-def to_utf8_py2(data):
-    if sys.version_info < (3,) and isinstance(data, unicode):
-        return data.encode('utf-8')
-    return data
 
 
 def u(x):
