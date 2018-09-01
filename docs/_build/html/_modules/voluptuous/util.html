@@ -43,14 +43,9 @@
   <h1>Source code for voluptuous.util</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">error</span> <span class="kn">import</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">Invalid</span>
-    <span class="kn">from</span> <span class="nn">schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>
-    <span class="kn">import</span> <span class="nn">validators</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">Invalid</span>
-    <span class="kn">from</span> <span class="nn">.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">validators</span>
+<span class="kn">from</span> <span class="nn">voluptuous.error</span> <span class="kn">import</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">Invalid</span>
+<span class="kn">from</span> <span class="nn">voluptuous.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>
+<span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="n">validators</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;tusharmakkar08&#39;</span>
 
@@ -193,12 +188,6 @@
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lit</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="to_utf8_py2"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.to_utf8_py2">[docs]</a><span class="k">def</span> <span class="nf">to_utf8_py2</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="u"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.u">[docs]</a><span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>

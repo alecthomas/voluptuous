@@ -90,6 +90,13 @@
 </dd></dl>
 
 <dl class="exception">
+<dt id="voluptuous.error.ContainsInvalid">
+<em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">ContainsInvalid</code><span class="sig-paren">(</span><em>message</em>, <em>path=None</em>, <em>error_message=None</em>, <em>error_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/error.html#ContainsInvalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.ContainsInvalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#voluptuous.error.Invalid" title="voluptuous.error.Invalid"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.error.Invalid</span></code></a></p>
+<p>List does not contain item</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="voluptuous.error.DateInvalid">
 <em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">DateInvalid</code><span class="sig-paren">(</span><em>message</em>, <em>path=None</em>, <em>error_message=None</em>, <em>error_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/error.html#DateInvalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.DateInvalid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.error.Invalid" title="voluptuous.error.Invalid"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.error.Invalid</span></code></a></p>
@@ -254,6 +261,13 @@ string.</td>
 </dd></dl>
 
 <dl class="exception">
+<dt id="voluptuous.error.NotEnoughValid">
+<em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">NotEnoughValid</code><span class="sig-paren">(</span><em>message</em>, <em>path=None</em>, <em>error_message=None</em>, <em>error_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/error.html#NotEnoughValid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.NotEnoughValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#voluptuous.error.Invalid" title="voluptuous.error.Invalid"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.error.Invalid</span></code></a></p>
+<p>The value did not pass enough validations.</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="voluptuous.error.NotInInvalid">
 <em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">NotInInvalid</code><span class="sig-paren">(</span><em>message</em>, <em>path=None</em>, <em>error_message=None</em>, <em>error_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/error.html#NotInInvalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.NotInInvalid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.error.Invalid" title="voluptuous.error.Invalid"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.error.Invalid</span></code></a></p>
@@ -309,6 +323,13 @@ string.</td>
 </dd></dl>
 
 <dl class="exception">
+<dt id="voluptuous.error.TooManyValid">
+<em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">TooManyValid</code><span class="sig-paren">(</span><em>message</em>, <em>path=None</em>, <em>error_message=None</em>, <em>error_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/error.html#TooManyValid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.TooManyValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#voluptuous.error.Invalid" title="voluptuous.error.Invalid"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.error.Invalid</span></code></a></p>
+<p>The value passed more than expected validations.</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="voluptuous.error.TrueInvalid">
 <em class="property">exception </em><code class="descclassname">voluptuous.error.</code><code class="descname">TrueInvalid</code><span class="sig-paren">(</span><em>message</em>, <em>path=None</em>, <em>error_message=None</em>, <em>error_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/error.html#TrueInvalid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.error.TrueInvalid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.error.Invalid" title="voluptuous.error.Invalid"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.error.Invalid</span></code></a></p>
@@ -357,7 +378,7 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <span id="voluptuous-schema-builder-module"></span><h2>voluptuous.schema_builder module<a class="headerlink" href="#module-voluptuous.schema_builder" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="voluptuous.schema_builder.Exclusive">
-<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Exclusive</code><span class="sig-paren">(</span><em>schema</em>, <em>group_of_exclusion</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Exclusive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Exclusive" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Exclusive</code><span class="sig-paren">(</span><em>schema</em>, <em>group_of_exclusion</em>, <em>msg=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Exclusive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Exclusive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Optional" title="voluptuous.schema_builder.Optional"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Optional</span></code></a></p>
 <p>Mark a node in the schema as exclusive.</p>
 <p>Exclusive keys inherited from Optional:</p>
@@ -406,7 +427,7 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 <em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Inclusive</code><span class="sig-paren">(</span><em>schema</em>, <em>group_of_inclusion</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Inclusive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Inclusive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Optional" title="voluptuous.schema_builder.Optional"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Optional</span></code></a></p>
 <p>Mark a node in the schema as inclusive.</p>
-<p>Exclusive keys inherited from Optional:</p>
+<p>Inclusive keys inherited from Optional:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span>
 <span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">Inclusive</span><span class="p">(</span><span class="s1">&#39;mimetype&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">):</span> <span class="nb">str</span>
@@ -451,7 +472,7 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 
 <dl class="class">
 <dt id="voluptuous.schema_builder.Marker">
-<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Marker</code><span class="sig-paren">(</span><em>schema_</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Marker" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Marker</code><span class="sig-paren">(</span><em>schema_</em>, <em>msg=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Marker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Mark nodes for special treatment.</p>
 </dd></dl>
@@ -498,7 +519,7 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 
 <dl class="class">
 <dt id="voluptuous.schema_builder.Optional">
-<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Optional</code><span class="sig-paren">(</span><em>schema</em>, <em>msg=None</em>, <em>default=...</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Optional"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Optional" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Optional</code><span class="sig-paren">(</span><em>schema</em>, <em>msg=None</em>, <em>default=...</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Optional"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Optional" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Marker" title="voluptuous.schema_builder.Marker"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Marker</span></code></a></p>
 <p>Mark a node in the schema as optional, and optionally provide a default</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
@@ -525,7 +546,7 @@ and MultipleInvalid.__str__ only provides the first error.</p>
 
 <dl class="class">
 <dt id="voluptuous.schema_builder.Remove">
-<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Remove</code><span class="sig-paren">(</span><em>schema_</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Remove" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Remove</code><span class="sig-paren">(</span><em>schema_</em>, <em>msg=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Marker" title="voluptuous.schema_builder.Marker"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Marker</span></code></a></p>
 <p>Mark a node in the schema to be removed and excluded from the validated
 output. Keys that fail validation will not raise <code class="docutils literal"><span class="pre">Invalid</span></code>. Instead, these
@@ -544,7 +565,7 @@ keys will be treated as extras.</p>
 
 <dl class="class">
 <dt id="voluptuous.schema_builder.Required">
-<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Required</code><span class="sig-paren">(</span><em>schema</em>, <em>msg=None</em>, <em>default=...</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Required"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Required" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Required</code><span class="sig-paren">(</span><em>schema</em>, <em>msg=None</em>, <em>default=...</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Required"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Required" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.schema_builder.Marker" title="voluptuous.schema_builder.Marker"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.schema_builder.Marker</span></code></a></p>
 <p>Mark a node in the schema as being required, and optionally provide a default value.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="n">Required</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">):</span> <span class="nb">str</span><span class="p">})</span>
@@ -604,7 +625,45 @@ this, unless overridden.</p>
 </table>
 </dd></dl>
 
+<dl class="classmethod">
+<dt id="voluptuous.schema_builder.Schema.infer">
+<em class="property">classmethod </em><code class="descname">infer</code><span class="sig-paren">(</span><em>data</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Schema.infer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Schema.infer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Schema from concrete data (e.g. an API response).</p>
+<p>For example, this will take a dict like:</p>
+<dl class="docutils">
+<dt>{</dt>
+<dd><p class="first">&#8216;foo&#8217;: 1,
+&#8216;bar&#8217;: {</p>
+<blockquote>
+<div>&#8216;a&#8217;: True,
+&#8216;b&#8217;: False</div></blockquote>
+<p class="last">},
+&#8216;baz&#8217;: [&#8216;purple&#8217;, &#8216;monkey&#8217;, &#8216;dishwasher&#8217;]</p>
+</dd>
+</dl>
+<p>}</p>
+<p>And return a Schema:</p>
+<dl class="docutils">
+<dt>{</dt>
+<dd><p class="first">&#8216;foo&#8217;: int,
+&#8216;bar&#8217;: {</p>
+<blockquote>
+<div>&#8216;a&#8217;: bool,
+&#8216;b&#8217;: bool</div></blockquote>
+<p class="last">},
+&#8216;baz&#8217;: [str]</p>
+</dd>
+</dl>
+<p>}</p>
+<p>Note: only very basic inference is supported.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="voluptuous.schema_builder.Self">
+<code class="descclassname">voluptuous.schema_builder.</code><code class="descname">Self</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/schema_builder.html#Self"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.schema_builder.Self" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="class">
 <dt id="voluptuous.schema_builder.Undefined">
@@ -799,11 +858,6 @@ this, unless overridden.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="voluptuous.util.to_utf8_py2">
-<code class="descclassname">voluptuous.util.</code><code class="descname">to_utf8_py2</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#to_utf8_py2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.to_utf8_py2" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="voluptuous.util.u">
 <code class="descclassname">voluptuous.util.</code><code class="descname">u</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/util.html#u"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.util.u" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -814,7 +868,7 @@ this, unless overridden.</p>
 <dl class="class">
 <dt id="voluptuous.validators.All">
 <em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">All</code><span class="sig-paren">(</span><em>*validators</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#All"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.All" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">voluptuous.validators._WithSubValidators</span></code></p>
 <p>Value must pass all validators.</p>
 <p>The output of each validator is passed as input to the next.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -845,7 +899,7 @@ this, unless overridden.</p>
 <dl class="class">
 <dt id="voluptuous.validators.Any">
 <em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Any</code><span class="sig-paren">(</span><em>*validators</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Any"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Any" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">voluptuous.validators._WithSubValidators</span></code></p>
 <p>Use the first validated value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -946,6 +1000,20 @@ will be marked as Invalid.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="voluptuous.validators.Contains">
+<em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Contains</code><span class="sig-paren">(</span><em>item</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Validate that the given schema element is in the sequence being validated.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Contains</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">[3, 2, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">ContainsInvalid</span><span class="p">,</span> <span class="s1">&#39;value is not allowed&#39;</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">s</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
 <dt id="voluptuous.validators.Date">
 <em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">Date</code><span class="sig-paren">(</span><em>format=None</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Date" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#voluptuous.validators.Datetime" title="voluptuous.validators.Datetime"><code class="xref py py-class docutils literal"><span class="pre">voluptuous.validators.Datetime</span></code></a></p>
@@ -953,11 +1021,6 @@ will be marked as Invalid.</p>
 <dl class="attribute">
 <dt id="voluptuous.validators.Date.DEFAULT_FORMAT">
 <code class="descname">DEFAULT_FORMAT</code><em class="property"> = '%Y-%m-%d'</em><a class="headerlink" href="#voluptuous.validators.Date.DEFAULT_FORMAT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="voluptuous.validators.Date.FORMAT_DESCRIPTION">
-<code class="descname">FORMAT_DESCRIPTION</code><em class="property"> = 'yyyy-mm-dd'</em><a class="headerlink" href="#voluptuous.validators.Date.FORMAT_DESCRIPTION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1163,6 +1226,28 @@ lists, dictionaries, etc. are treated as &#8220;false&#8221;:</p>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="voluptuous.validators.Maybe">
+<code class="descclassname">voluptuous.validators.</code><code class="descname">Maybe</code><span class="sig-paren">(</span><em>validator</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#Maybe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.Maybe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate that the object matches given validator or is None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>Invalid</strong> &#8211; if the value does not match the given validator and is not
+None</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">Maybe</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="gp">... </span> <span class="n">s</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="class">
 <dt id="voluptuous.validators.NotIn">
 <em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">NotIn</code><span class="sig-paren">(</span><em>container</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#NotIn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.NotIn" title="Permalink to this definition">¶</a></dt>
@@ -1253,6 +1338,45 @@ Either min or max can be excluded from the range of accepted values.</p>
 <span class="gp">... </span>                      <span class="n">Replace</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;goodbye&#39;</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;you say hello&#39;</span><span class="p">)</span>
 <span class="go">&#39;I say goodbye&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="voluptuous.validators.SomeOf">
+<em class="property">class </em><code class="descclassname">voluptuous.validators.</code><code class="descname">SomeOf</code><span class="sig-paren">(</span><em>validators</em>, <em>min_valid=None</em>, <em>max_valid=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/voluptuous/validators.html#SomeOf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#voluptuous.validators.SomeOf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">voluptuous.validators._WithSubValidators</span></code></p>
+<p>Value must pass at least some validations, determined by the given parameter.
+Optionally, number of passed validations can be capped.</p>
+<p>The output of each validator is passed as input to the next.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>min_valid</strong> &#8211; Minimum number of valid schemas.</li>
+<li><strong>validators</strong> &#8211; a list of schemas or validators to match input against</li>
+<li><strong>max_valid</strong> &#8211; Maximum number of valid schemas.</li>
+<li><strong>msg</strong> &#8211; Message to deliver to user if validation fails.</li>
+<li><strong>kwargs</strong> &#8211; All other keyword arguments are passed to the sub-Schema constructors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>NotEnoughValid</strong> &#8211; if the minimum number of validations isn&#8217;t met</li>
+<li><strong>TooManyValid</strong> &#8211; if the more validations than the given amount is met</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">SomeOf</span><span class="p">(</span><span class="n">min_valid</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">Any</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="mf">6.6</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="mf">6.6</span><span class="p">)</span>
+<span class="go">6.6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MultipleInvalid</span><span class="p">,</span> <span class="s1">&#39;value must be at most 5, not a valid value&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">validate</span><span class="p">(</span><span class="mf">6.2</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
