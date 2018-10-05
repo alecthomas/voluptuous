@@ -6,8 +6,8 @@ import sys
 from nose.tools import assert_equal, assert_false, assert_raises, assert_true
 
 from voluptuous import (
-    Schema, Required, Exclusive, Optional, Extra, Invalid, In, Remove, Literal,
-    Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
+    Schema, Required, Exclusive, Inclusive, Optional, Extra, Invalid, In, Remove,
+    Literal, Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
     Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
@@ -1034,6 +1034,9 @@ def test_description():
 
     exclusive = Exclusive('alpha', 'angles', description='Hello')
     assert exclusive.description == 'Hello'
+
+    inclusive = Inclusive('alpha', 'angles', description='Hello')
+    assert inclusive.description == 'Hello'
 
     required = Required('key', description='Hello')
     assert required.description == 'Hello'
