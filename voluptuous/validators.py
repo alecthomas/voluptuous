@@ -191,8 +191,10 @@ class _WithSubValidators(object):
 
     def __init__(self, *validators, **kwargs):
         self.validators = validators
+        print('..validators  = ', self.validators)
         self.msg = kwargs.pop('msg', None)
         self.required = kwargs.pop('required', False)
+        self.discriminant = kwargs.pop('discriminant', None)
 
     def __voluptuous_compile__(self, schema):
         self._compiled = []
@@ -202,6 +204,12 @@ class _WithSubValidators(object):
         return self._run
 
     def _run(self, path, value):
+        if self.discriminant is not None:
+            self._compiled = [
+                self.schema._compile(v)
+                for v in self.discriminant(value, self.validators)
+            ]
+
         return self._exec(self._compiled, value, path)
 
     def __call__(self, v):
@@ -242,6 +250,59 @@ class Any(_WithSubValidators):
 
     def _exec(self, funcs, v, path=None):
         error = None
+        print ('..self = ', self)
+        print ('..v = ', v)
+        print ('..funcs = ', funcs)
+        print('..path = ', path)
+
+        for func in funcs:
+            try:
+                if path is None:
+                    return func(v)
+                else:
+                    return func(path, v)
+            except Invalid as e:
+                if error is None or len(e.path) > len(error.path):
+                    error = e
+        else:
+            print ('..error = ', error)
+            if error:
+                raise error if self.msg is None else AnyInvalid(
+                    self.msg, path=path)
+            raise AnyInvalid(self.msg or 'no valid value found',
+                             path=path)
+
+
+# Convenience alias
+Or = Any
+
+class Switch(_WithSubValidators):
+#     """Use the first validated value among those selected by discrminant.
+
+#     :param msg: Message to deliver to user if validation fails.
+#     :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+#     :returns: Return value of the first validator that passes.
+
+#     >>> validate = Schema(Any('true', 'false',
+#     ...                       All(Any(int, bool), Coerce(bool))))
+#     >>> validate('true')
+#     'true'
+#     >>> validate(1)
+#     True
+#     >>> with raises(MultipleInvalid, "not a valid value"):
+#     ...   validate('moo')
+
+#     msg argument is used
+
+#     >>> validate = Schema(Any(1, 2, 3, msg="Expected 1 2 or 3"))
+#     >>> validate(1)
+#     1
+#     >>> with raises(MultipleInvalid, "Expected 1 2 or 3"):
+#     ...   validate(4)
+#     """
+
+    def _exec(self, funcs, v, path=None):
+        error = None
         for func in funcs:
             try:
                 if path is None:
@@ -259,8 +320,8 @@ class Any(_WithSubValidators):
                              path=path)
 
 
-# Convenience alias
-Or = Any
+# # Convenience alias
+# Union = Switch 
 
 
 class All(_WithSubValidators):
