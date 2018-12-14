@@ -22,6 +22,11 @@ else:
     def iteritems(d):
         return d.iteritems()
 
+if sys.version_info >= (3, 3):
+    _Mapping = collections.abc.Mapping
+else:
+    _Mapping = collections.Mapping
+
 """Schema validation for Python data structures.
 
 Given eg. a nested data structure like this:
@@ -280,7 +285,7 @@ class Schema(object):
             return schema.__voluptuous_compile__(self)
         if isinstance(schema, Object):
             return self._compile_object(schema)
-        if isinstance(schema, collections.Mapping):
+        if isinstance(schema, _Mapping):
             return self._compile_dict(schema)
         elif isinstance(schema, list):
             return self._compile_list(schema)
