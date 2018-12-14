@@ -487,7 +487,7 @@ def PathExists(v):
         raise PathInvalid("Not a Path")
 
 
-def Maybe(validator):
+def Maybe(validator, msg=None):
     """Validate that the object matches given validator or is None.
 
     :raises Invalid: if the value does not match the given validator and is not
@@ -500,7 +500,7 @@ def Maybe(validator):
     ...  s("string")
 
     """
-    return Any(None, validator)
+    return Any(None, validator, msg=msg)
 
 
 class Range(object):
