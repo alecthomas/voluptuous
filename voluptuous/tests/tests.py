@@ -624,6 +624,12 @@ def test_maybe():
     assert_raises(Invalid, s, {'foo': 'bar'})
 
 
+def test_maybe_accepts_msg():
+    s = Schema(Maybe(int, msg='int or None expected'))
+    with raises(MultipleInvalid, 'int or None expected'):
+        assert s([])
+
+
 def test_empty_list_as_exact():
     s = Schema([])
     assert_raises(Invalid, s, [1])
