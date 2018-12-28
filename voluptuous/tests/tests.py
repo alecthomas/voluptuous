@@ -13,7 +13,7 @@ from voluptuous import (
     Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
     raises)
 from voluptuous.humanize import humanize_error
-from voluptuous.util import u
+from voluptuous.util import u, Capitalize, Lower, Strip, Title, Upper
 
 
 def test_exact_sequence():
@@ -1272,3 +1272,38 @@ def test_frozenset_of_integers_and_strings():
         assert_equal(str(e), "invalid value in frozenset")
     else:
         assert False, "Did not raise Invalid"
+
+
+def test_lower_util_handles_various_inputs():
+    assert Lower(3) == "3"
+    assert Lower(u"3") == u"3"
+    assert Lower(b'\xe2\x98\x83'.decode("UTF-8")) == b'\xe2\x98\x83'.decode("UTF-8")
+    assert Lower(u"A") == u"a"
+
+
+def test_upper_util_handles_various_inputs():
+    assert Upper(3) == "3"
+    assert Upper(u"3") == u"3"
+    assert Upper(b'\xe2\x98\x83'.decode("UTF-8")) == b'\xe2\x98\x83'.decode("UTF-8")
+    assert Upper(u"a") == u"A"
+
+
+def test_capitalize_util_handles_various_inputs():
+    assert Capitalize(3) == "3"
+    assert Capitalize(u"3") == u"3"
+    assert Capitalize(b'\xe2\x98\x83'.decode("UTF-8")) == b'\xe2\x98\x83'.decode("UTF-8")
+    assert Capitalize(u"aaa aaa") == u"Aaa aaa"
+
+
+def test_title_util_handles_various_inputs():
+    assert Title(3) == "3"
+    assert Title(u"3") == u"3"
+    assert Title(b'\xe2\x98\x83'.decode("UTF-8")) == b'\xe2\x98\x83'.decode("UTF-8")
+    assert Title(u"aaa aaa") == u"Aaa Aaa"
+
+
+def test_strip_util_handles_various_inputs():
+    assert Strip(3) == "3"
+    assert Strip(u"3") == u"3"
+    assert Strip(b'\xe2\x98\x83'.decode("UTF-8")) == b'\xe2\x98\x83'.decode("UTF-8")
+    assert Strip(u" aaa ") == u"aaa"
