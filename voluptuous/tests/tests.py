@@ -372,6 +372,7 @@ def test_schema_extend():
     assert extended.schema == {'a': int, 'b': str}
     assert extended.required == base.required
     assert extended.extra == base.extra
+    assert isinstance(extended, Schema)
 
 
 def test_schema_extend_overrides():
@@ -409,6 +410,20 @@ def test_subschema_extension():
     assert_equal(base.schema, {'a': {'b': int, 'c': float}})
     assert_equal(extension, {'d': str, 'a': {'b': str, 'e': int}})
     assert_equal(extended.schema, {'a': {'b': str, 'c': float, 'e': int}, 'd': str})
+
+
+def test_schema_extend_handles_schema_subclass():
+    """Verify that Schema.extend handles a subclass of Schema"""
+    class S(Schema):
+        pass
+
+    base = S({Required('a'): int})
+    extension = {Optional('b'): str}
+    extended = base.extend(extension)
+
+    expected_schema = {Required('a'): int, Optional('b'): str}
+    assert extended.schema == expected_schema
+    assert isinstance(extended, S)
 
 
 def test_equality():
