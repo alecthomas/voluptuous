@@ -776,9 +776,10 @@ class Schema(object):
                 result[key] = value
 
         # recompile and send old object
+        result_cls = type(self)
         result_required = (required if required is not None else self.required)
         result_extra = (extra if extra is not None else self.extra)
-        return Schema(result, required=result_required, extra=result_extra)
+        return result_cls(result, required=result_required, extra=result_extra)
 
 
 def _compile_scalar(schema):
