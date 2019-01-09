@@ -192,12 +192,13 @@ class _WithSubValidators(object):
     def __init__(self, *validators, **kwargs):
         self.validators = validators
         self.msg = kwargs.pop('msg', None)
+        self.required = kwargs.pop('required', False)
 
     def __voluptuous_compile__(self, schema):
-        self._compiled = [
-            schema._compile(v)
-            for v in self.validators
-        ]
+        self._compiled = []
+        for v in self.validators:
+            schema.required = self.required
+            self._compiled.append(schema._compile(v))
         return self._run
 
     def _run(self, path, value):
