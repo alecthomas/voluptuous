@@ -1322,3 +1322,30 @@ def test_strip_util_handles_various_inputs():
     assert Strip(u"3") == u"3"
     assert Strip(b'\xe2\x98\x83'.decode("UTF-8")) == b'\xe2\x98\x83'.decode("UTF-8")
     assert Strip(u" aaa ") == u"aaa"
+
+
+def test_any_required():
+    schema = Schema(Any({'a': int}, {'b': str}, required=True))
+
+    try:
+        schema({})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "required key not provided @ data['a']")
+    else:
+        assert False, "Did not raise Invalid for MultipleInvalid"
+
+
+def test_any_required_with_subschema():
+    schema = Schema(Any({'a': Any(float, int)},
+                        {'b': int},
+                        {'c': {'aa': int}},
+                    required=True))
+
+    try:
+        schema({})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "required key not provided @ data['a']")
+    else:
+        assert False, "Did not raise Invalid for MultipleInvalid"
