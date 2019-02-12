@@ -1349,3 +1349,60 @@ def test_any_required_with_subschema():
                      "required key not provided @ data['a']")
     else:
         assert False, "Did not raise Invalid for MultipleInvalid"
+
+def test_inclusive():
+    schema = Schema({
+        Inclusive('x', 'stuff'): int,
+        Inclusive('y', 'stuff'): int,
+        })
+
+    r = schema({})
+    assert_equal(r, {})
+
+    r = schema({'x':1, 'y':2})
+    assert_equal(r, {'x':1, 'y':2})
+
+    try:
+        r = schema({'x':1})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]")
+    else:
+        assert False, "Did not raise Invalid for incomplete Inclusive group"
+
+def test_inclusive_defaults():
+    schema = Schema({
+        Inclusive('x', 'stuff', default=3): int,
+        Inclusive('y', 'stuff', default=4): int,
+        })
+
+    r = schema({})
+    assert_equal(r, {'x':3, 'y':4})
+
+    try:
+        r = schema({'x':1})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]")
+    else:
+        assert False, "Did not raise Invalid for incomplete Inclusive group with defaults"
+
+def test_exclusive():
+    schema = Schema({
+        Exclusive('x', 'stuff'): int,
+        Exclusive('y', 'stuff'): int,
+        })
+
+    r = schema({})
+    assert_equal(r, {})
+
+    r = schema({'x':1})
+    assert_equal(r, {'x':1})
+
+    try:
+        r = schema({'x':1, 'y': 2})
+    except MultipleInvalid as e:
+        assert_equal(str(e),
+                     "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]")
+    else:
+        assert False, "Did not raise Invalid for multiple values in Exclusive group"
