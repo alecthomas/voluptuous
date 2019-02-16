@@ -1128,7 +1128,7 @@ class Inclusive(Optional):
     """
 
     def __init__(self, schema, group_of_inclusion,
-                 msg=None, default=UNDEFINED, description=None):
+                 msg=None, description=None, default=UNDEFINED):
         super(Inclusive, self).__init__(schema, msg=msg,
                                         default=default,
                                         description=description)
