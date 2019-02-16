@@ -189,9 +189,9 @@ True
 
 ```
 
-### URL's
+### URLs
 
-URL's in the schema are matched by using `urlparse` library.
+URLs in the schema are matched by using `urlparse` library.
 
 ```pycon
 >>> from voluptuous import Url
