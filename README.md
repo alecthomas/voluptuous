@@ -1,7 +1,7 @@
 # Voluptuous is a Python data validation library
 
-[![Build Status](https://travis-ci.org/alecthomas/voluptuous.png)](https://travis-ci.org/alecthomas/voluptuous)
-[![Coverage Status](https://coveralls.io/repos/github/alecthomas/voluptuous/badge.svg?branch=master)](https://coveralls.io/github/alecthomas/voluptuous?branch=master) [![Gitter chat](https://badges.gitter.im/alecthomas.png)](https://gitter.im/alecthomas/Lobby)
+[![Build Status](https://travis-ci.org/alecthomas/voluptuous.svg)](https://travis-ci.org/alecthomas/voluptuous)
+[![Coverage Status](https://coveralls.io/repos/github/alecthomas/voluptuous/badge.svg?branch=master)](https://coveralls.io/github/alecthomas/voluptuous?branch=master) [![Gitter chat](https://badges.gitter.im/alecthomas.svg)](https://gitter.im/alecthomas/Lobby)
 
 Voluptuous, *despite* the name, is a Python data validation library. It
 is primarily intended for validating data coming into Python as JSON,
