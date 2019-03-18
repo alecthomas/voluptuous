@@ -61,7 +61,7 @@ example. To describe the semantics of the API more accurately, our
 schema will need to be more thoroughly defined:
 
 ```pycon
->>> from voluptuous import Required, All, Length, Range
+>>> from voluptuous import Schema, Required, All, Length, Range
 >>> schema = Schema({
 ...   Required('q'): All(str, Length(min=1)),
 ...   Required('per_page', default=5): All(int, Range(min=1, max=20)),
