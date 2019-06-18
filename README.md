@@ -322,7 +322,7 @@ validator:
 ```pycon
 >>> schema = Schema(Date())
 >>> schema('2013-03-03')
-datetime(2013, 3, 3, 0, 0)
+datetime.datetime(2013, 3, 3, 0, 0)
 >>> try:
 ...   schema('2013-03')
 ...   raise AssertionError('MultipleInvalid not raised')
