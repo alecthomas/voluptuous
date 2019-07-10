@@ -1,5 +1,23 @@
 # Changelog
 
+## Upcoming
+
+**Changes**
+
+- [#378](https://github.com/alecthomas/voluptuous/pull/378): Allow `extend()` of a `Schema` to return a subclass of a `Schema` as well.
+
+**New**:
+
+- [#364](https://github.com/alecthomas/voluptuous/pull/364): Accept `description` for `Inclusive` instances.
+- [#373](https://github.com/alecthomas/voluptuous/pull/373): Accept `msg` for `Maybe` instances.
+- [#382](https://github.com/alecthomas/voluptuous/pull/382): Added support for default values in `Inclusive` instances.
+
+**Fixes**:
+
+- [#371](https://github.com/alecthomas/voluptuous/pull/371): Fixed `DeprecationWarning` related to `collections.Mapping`.
+- [#377](https://github.com/alecthomas/voluptuous/pull/377): Preserve Unicode strings when passed to utility functions (e.g., `Lower()`, `Upper()`).
+- [#380](https://github.com/alecthomas/voluptuous/pull/380): Fixed regression with `Any` and `required` flag.
+
 ## [0.11.5]
 
 - Fixed issue with opening README file in `setup.py`.
