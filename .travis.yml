@@ -6,6 +6,7 @@ python:
 - '3.6'
 - '3.7'
 - pypy3.5
+- '3.8-dev'
 install:
 - pip install coveralls
 - pip install 'coverage<4'
