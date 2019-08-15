@@ -11,7 +11,7 @@ from voluptuous import (
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
     Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
-    raises)
+    raises, Union)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import u, Capitalize, Lower, Strip, Title, Upper
 
@@ -1406,3 +1406,27 @@ def test_exclusive():
                      "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]")
     else:
         assert False, "Did not raise Invalid for multiple values in Exclusive group"
+
+def test_any_with_discriminant():
+    schema = Schema({
+        'implementation': Union({
+            'type': 'A',
+            'a-value': str,
+        }, {
+            'type': 'B',
+            'b-value': int,
+        }, {
+            'type': 'C',
+            'c-value': bool,
+        }, discriminant=lambda value, alternatives: filter(lambda v : v['type'] == value['type'], alternatives))
+    })
+    try:
+        schema({
+            'implementation': {
+            'type': 'C',
+            'c-value': None,}  
+        })
+    except MultipleInvalid as e:
+        assert_equal(str(e),'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
+    else:
+        assert False, "Did not raise correct Invalid"
