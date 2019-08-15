@@ -274,11 +274,9 @@ class Union(_WithSubValidators):
     """Use the first validated value among those selected by discrminant.
 
     :param msg: Message to deliver to user if validation fails.
-    :param discriminant: Function to filter the values
+    :param discriminant(value, validators): Returns the filtered list of validators based on the value
     :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
     :returns: Return value of the first validator that passes.
-
-    discriminant(value, validators) is invoked in execution.
 
     >>> validate = Schema(Union({'type':'a', 'a_val':'1'},{'type':'b', 'b_val':'2'},
     ...                         discriminant=lambda val, alt: filter(
