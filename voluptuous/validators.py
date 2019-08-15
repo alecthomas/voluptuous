@@ -193,15 +193,23 @@ class _WithSubValidators(object):
         self.validators = validators
         self.msg = kwargs.pop('msg', None)
         self.required = kwargs.pop('required', False)
+        self.discriminant = kwargs.pop('discriminant', None)
 
     def __voluptuous_compile__(self, schema):
         self._compiled = []
+        self.schema = schema
         for v in self.validators:
             schema.required = self.required
             self._compiled.append(schema._compile(v))
         return self._run
 
     def _run(self, path, value):
+        if self.discriminant is not None:
+            self._compiled = [
+                self.schema._compile(v)
+                for v in self.discriminant(value, self.validators)
+            ]
+
         return self._exec(self._compiled, value, path)
 
     def __call__(self, v):
@@ -261,6 +269,49 @@ class Any(_WithSubValidators):
 
 # Convenience alias
 Or = Any
+
+class Union(_WithSubValidators):
+    """Use the first validated value among those selected by discrminant.
+
+    :param msg: Message to deliver to user if validation fails.
+    :param discriminant(value, validators): Returns the filtered list of validators based on the value
+    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+    :returns: Return value of the first validator that passes.
+
+    >>> validate = Schema(Union({'type':'a', 'a_val':'1'},{'type':'b', 'b_val':'2'},
+    ...                         discriminant=lambda val, alt: filter(
+    ...                         lambda v : v['type'] == val['type'] , alt)))
+    >>> validate({'type':'a', 'a_val':'1'}) == {'type':'a', 'a_val':'1'}
+    True
+    >>> with raises(MultipleInvalid, "not a valid value for dictionary value @ data['b_val']"):
+    ...   validate({'type':'b', 'b_val':'5'})
+
+    ```discriminant({'type':'b', 'a_val':'5'}, [{'type':'a', 'a_val':'1'},{'type':'b', 'b_val':'2'}])``` is invoked
+
+    Without the discriminant, the exception would be "extra keys not allowed @ data['b_val']"
+    """
+
+    def _exec(self, funcs, v, path=None):
+        error = None
+        for func in funcs:
+            try:
+                if path is None:
+                    return func(v)
+                else:
+                    return func(path, v)
+            except Invalid as e:
+                if error is None or len(e.path) > len(error.path):
+                    error = e
+        else:
+            if error:
+                raise error if self.msg is None else AnyInvalid(
+                    self.msg, path=path)
+            raise AnyInvalid(self.msg or 'no valid value found',
+                             path=path)
+
+
+# Convenience alias
+Switch = Union
 
 
 class All(_WithSubValidators):
