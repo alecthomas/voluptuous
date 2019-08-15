@@ -283,8 +283,8 @@ class Union(_WithSubValidators):
     >>> validate = Schema(Union({'type':'a', 'a_val':'1'},{'type':'b', 'b_val':'2'},
     ...                         discriminant=lambda val, alt: filter(
     ...                         lambda v : v['type'] == val['type'] , alt)))
-    >>> validate({'type':'a', 'a_val':'1'})
-    {'a_val': '1', 'type': 'a'}
+    >>> validate({'type':'a', 'a_val':'1'}) == {'type':'a', 'a_val':'1'}
+    True
     >>> with raises(MultipleInvalid, "not a valid value for dictionary value @ data['b_val']"):
     ...   validate({'type':'b', 'b_val':'5'})
 
