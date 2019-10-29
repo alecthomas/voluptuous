@@ -514,7 +514,7 @@ def test_repr():
     )
     assert_equal(repr(coerce_), "Coerce(int, msg='moo')")
     assert_equal(repr(all_), "All('10', Coerce(int, msg=None), msg='all msg')")
-    assert_equal(repr(maybe_int), "Any(None, %s, msg=None)" % str(int))
+    assert_equal(repr(maybe_int), "Any(%s, None, msg=None)" % str(int))
 
 
 def test_list_validation_messages():
@@ -1526,5 +1526,21 @@ def test_any_with_discriminant():
         })
     except MultipleInvalid as e:
         assert_equal(str(e), 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
+    else:
+        assert False, "Did not raise correct Invalid"
+
+def test_maybe_returns_subvalidator_error():
+    schema = Schema(Maybe(Range(1, 2)))
+
+    # The following should be valid
+    schema(None)
+    schema(1)
+    schema(2)
+
+    try:
+        # Should trigger a MultipleInvalid exception
+        schema(3)
+    except MultipleInvalid as e:
+        assert_equal(str(e), "value must be at most 2")
     else:
         assert False, "Did not raise correct Invalid"
