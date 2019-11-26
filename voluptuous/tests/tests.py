@@ -583,6 +583,19 @@ def test_range_exlcudes_nan():
     assert_raises(MultipleInvalid, s, float('nan'))
 
 
+def test_range_excludes_none():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, None)
+
+
+def test_range_excludes_unordered_object():
+    class MyObject(object):
+        pass
+
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, MyObject())
+
+
 def test_equal():
     s = Schema(Equal(1))
     s(1)
