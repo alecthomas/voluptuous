@@ -585,23 +585,30 @@ class Range(object):
         self.msg = msg
 
     def __call__(self, v):
-        if self.min_included:
-            if self.min is not None and not v >= self.min:
-                raise RangeInvalid(
-                    self.msg or 'value must be at least %s' % self.min)
-        else:
-            if self.min is not None and not v > self.min:
-                raise RangeInvalid(
-                    self.msg or 'value must be higher than %s' % self.min)
-        if self.max_included:
-            if self.max is not None and not v <= self.max:
-                raise RangeInvalid(
-                    self.msg or 'value must be at most %s' % self.max)
-        else:
-            if self.max is not None and not v < self.max:
-                raise RangeInvalid(
-                    self.msg or 'value must be lower than %s' % self.max)
-        return v
+        try:
+            if self.min_included:
+                if self.min is not None and not v >= self.min:
+                    raise RangeInvalid(
+                        self.msg or 'value must be at least %s' % self.min)
+            else:
+                if self.min is not None and not v > self.min:
+                    raise RangeInvalid(
+                        self.msg or 'value must be higher than %s' % self.min)
+            if self.max_included:
+                if self.max is not None and not v <= self.max:
+                    raise RangeInvalid(
+                        self.msg or 'value must be at most %s' % self.max)
+            else:
+                if self.max is not None and not v < self.max:
+                    raise RangeInvalid(
+                        self.msg or 'value must be lower than %s' % self.max)
+
+            return v
+
+        # Objects that lack a partial ordering, e.g. None will raise TypeError
+        except TypeError:
+            raise RangeInvalid(
+                self.msg or 'value must have a partial ordering')
 
     def __repr__(self):
         return ('Range(min=%r, max=%r, min_included=%r,'
