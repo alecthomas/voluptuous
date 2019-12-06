@@ -740,7 +740,7 @@ class Schema(object):
 
         result = self.schema.copy()
 
-        # returns the key that may have been passed as argument to Marker constructor
+        # returns the key that may have been passed as an argument to Marker constructor
         def key_literal(key):
             return (key.schema if isinstance(key, Marker) else key)
 
