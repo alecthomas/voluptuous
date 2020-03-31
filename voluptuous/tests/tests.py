@@ -16,6 +16,13 @@ from voluptuous.humanize import humanize_error
 from voluptuous.util import u, Capitalize, Lower, Strip, Title, Upper
 
 
+def test_new_required_test():
+    schema = Schema({
+        'my_key': All(int, Range(1, 20)),
+    }, required=True)
+    assert_true(schema.required)
+
+
 def test_exact_sequence():
     schema = Schema(ExactSequence([int, int]))
     try:
