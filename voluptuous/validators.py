@@ -197,10 +197,12 @@ class _WithSubValidators(object):
 
     def __voluptuous_compile__(self, schema):
         self._compiled = []
+        old_required = schema.required
         self.schema = schema
         for v in self.validators:
             schema.required = self.required
             self._compiled.append(schema._compile(v))
+        schema.required = old_required
         return self._run
 
     def _run(self, path, value):
