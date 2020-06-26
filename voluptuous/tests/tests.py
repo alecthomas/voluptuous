@@ -19,7 +19,7 @@ def test_new_required_test():
     schema = Schema({
         'my_key': All(int, Range(1, 20)),
     }, required=True)
-    assert_true(schema.required)
+    assert schema.required
 
 
 def test_exact_sequence():
@@ -568,7 +568,7 @@ def test_range_exlcudes_nan():
 
 def test_range_excludes_none():
     s = Schema(Range(min=0, max=10))
-    assert_raises(MultipleInvalid, s, None)
+    pytest.raises(MultipleInvalid, s, None)
 
 
 def test_range_excludes_unordered_object():
@@ -576,7 +576,7 @@ def test_range_excludes_unordered_object():
         pass
 
     s = Schema(Range(min=0, max=10))
-    assert_raises(MultipleInvalid, s, MyObject())
+    pytest.raises(MultipleInvalid, s, MyObject())
 
 
 def test_equal():
@@ -1414,6 +1414,6 @@ def test_any_with_discriminant():
             'c-value': None,}  
         })
     except MultipleInvalid as e:
-        assert_equal(str(e),'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
+        assert str(e) == 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']'
     else:
         assert False, "Did not raise correct Invalid"
