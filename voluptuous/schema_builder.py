@@ -589,7 +589,8 @@ class Schema(object):
 
             if errors:
                 raise er.MultipleInvalid(errors)
-
+            from collections import OrderedDict
+            data = OrderedDict(data)
             out = data.__class__()
             return base_validate(path, iteritems(data), out)
 
