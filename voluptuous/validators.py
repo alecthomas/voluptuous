@@ -724,7 +724,8 @@ class In(object):
         except TypeError:
             check = True
         if check:
-            raise InInvalid(self.msg or 'value is not allowed')
+            raise InInvalid(self.msg or 
+                            'value must be one of {}'.format(self.container))
         return v
 
     def __repr__(self):
