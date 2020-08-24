@@ -5,7 +5,7 @@
 
 **Current status.** Voluptuous is largely feature stable. There hasn't been a need to add new features in a while, but there are some bugs that should be fixed.
 
-**Why?** I no longer use Voluptuous personally (in fact I no longer regularly write Python code). Rather than leave the project in a limbo of people filing issues and wondering why they're note being worked on, I believe this notice will more clearly set expectations.
+**Why?** I no longer use Voluptuous personally (in fact I no longer regularly write Python code). Rather than leave the project in a limbo of people filing issues and wondering why they're not being worked on, I believe this notice will more clearly set expectations.
 
 # Voluptuous is a Python data validation library
 
