@@ -593,14 +593,15 @@ def test_range_inside():
 def test_range_outside():
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, 12)
+    assert_raises(MultipleInvalid, s, -1)
 
 
-def test_range_no_Upper():
+def test_range_no_upper_limit():
     s = Schema(Range(min=0))
     assert_true(123, s(123))
 
 
-def test_range_exlcudes_nan():
+def test_range_excludes_nan():
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, float('nan'))
 
@@ -638,9 +639,13 @@ def test_clamp_below():
     assert_true(1, s(-3)) 
 
 
-def test_clamp_excludes_string():
+def test_clamp_invalid():
     s = Schema(Clamp(min=1, max=10))
-    assert_raises(MultipleInvalid, s, "abc")
+    if sys.version_info.major >= 3:
+        assert_raises(MultipleInvalid, s, None)
+        assert_raises(MultipleInvalid, s, "abc")
+    else:
+        assert_true(s(None))
 
 
 def test_length_ok():
