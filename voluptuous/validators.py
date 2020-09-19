@@ -607,10 +607,10 @@ class Range(object):
 
             return v
 
-        # Objects that lack a partial ordering, e.g. None will raise TypeError
+        # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
-                self.msg or 'value must have a partial ordering')
+                self.msg or 'invalid value or type (must have a partial ordering)')
 
     def __repr__(self):
         return ('Range(min=%r, max=%r, min_included=%r,'
@@ -640,11 +640,17 @@ class Clamp(object):
         self.msg = msg
 
     def __call__(self, v):
-        if self.min is not None and v < self.min:
-            v = self.min
-        if self.max is not None and v > self.max:
-            v = self.max
-        return v
+        try:
+            if self.min is not None and v < self.min:
+                v = self.min
+            if self.max is not None and v > self.max:
+                v = self.max
+            return v
+
+        # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
+        except TypeError:
+            raise RangeInvalid(
+                self.msg or 'invalid value or type (must have a partial ordering)')    
 
     def __repr__(self):
         return 'Clamp(min=%s, max=%s)' % (self.min, self.max)
@@ -659,13 +665,19 @@ class Length(object):
         self.msg = msg
 
     def __call__(self, v):
-        if self.min is not None and len(v) < self.min:
-            raise LengthInvalid(
-                self.msg or 'length of value must be at least %s' % self.min)
-        if self.max is not None and len(v) > self.max:
-            raise LengthInvalid(
-                self.msg or 'length of value must be at most %s' % self.max)
-        return v
+        try:
+            if self.min is not None and len(v) < self.min:
+                raise LengthInvalid(
+                    self.msg or 'length of value must be at least %s' % self.min)
+            if self.max is not None and len(v) > self.max:
+                raise LengthInvalid(
+                    self.msg or 'length of value must be at most %s' % self.max)
+            return v
+
+        # Objects that havbe no length e.g. None or strings will raise TypeError
+        except TypeError:
+            raise RangeInvalid(
+                self.msg or 'invalid value or type')    
 
     def __repr__(self):
         return 'Length(min=%s, max=%s)' % (self.min, self.max)

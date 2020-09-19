@@ -11,7 +11,7 @@ from voluptuous import (
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
     Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
-    raises, Union)
+    raises, Union, Clamp)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import u, Capitalize, Lower, Strip, Title, Upper
 
@@ -585,6 +585,21 @@ def test_fix_157():
     assert_raises(MultipleInvalid, s, ['four'])
 
 
+def test_range_inside():
+    s = Schema(Range(min=0, max=10))
+    assert_true(5, s(5))
+
+
+def test_range_outside():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, 12)
+
+
+def test_range_no_Upper():
+    s = Schema(Range(min=0))
+    assert_true(123, s(123))
+
+
 def test_range_exlcudes_nan():
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, float('nan'))
@@ -595,12 +610,65 @@ def test_range_excludes_none():
     assert_raises(MultipleInvalid, s, None)
 
 
+def test_range_excludes_string():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, "abc")
+
+
 def test_range_excludes_unordered_object():
     class MyObject(object):
         pass
 
     s = Schema(Range(min=0, max=10))
     assert_raises(MultipleInvalid, s, MyObject())
+
+
+def test_clamp_inside():
+    s = Schema(Clamp(min=1, max=10))
+    assert_true(5, s(5))
+
+
+def test_clamp_above():
+    s = Schema(Clamp(min=1, max=10))
+    assert_true(10, s(12))   
+
+
+def test_clamp_below():
+    s = Schema(Clamp(min=1, max=10))
+    assert_true(1, s(-3)) 
+
+
+def test_clamp_excludes_string():
+    s = Schema(Clamp(min=1, max=10))
+    assert_raises(MultipleInvalid, s, "abc")
+
+
+def test_length_ok():
+    v1 = ['a', 'b', 'c']
+    s = Schema(Length(min=1, max=10))
+    assert_true(3, s(v1))
+    v2 = "abcde"
+    assert_true(5, s(v2))
+
+
+def test_length_too_short():
+    v1 = []
+    s = Schema(Length(min=1, max=10))
+    assert_raises(MultipleInvalid, s, v1)
+    v2 = ''
+    assert_raises(MultipleInvalid, s, v2)
+
+
+def test_length_too_long():
+    v = ['a', 'b', 'c']
+    s = Schema(Length(min=0, max=2))
+    assert_raises(MultipleInvalid, s, v) 
+
+
+def test_length_invalid():
+    v = None
+    s = Schema(Length(min=0, max=2))
+    assert_raises(MultipleInvalid, s, v) 
 
 
 def test_equal():
