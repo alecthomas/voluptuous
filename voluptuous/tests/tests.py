@@ -587,7 +587,7 @@ def test_fix_157():
 
 def test_range_inside():
     s = Schema(Range(min=0, max=10))
-    assert_true(5, s(5))
+    assert_equal(5, s(5))
 
 
 def test_range_outside():
@@ -598,7 +598,7 @@ def test_range_outside():
 
 def test_range_no_upper_limit():
     s = Schema(Range(min=0))
-    assert_true(123, s(123))
+    assert_equal(123, s(123))
 
 
 def test_range_excludes_nan():
@@ -626,17 +626,17 @@ def test_range_excludes_unordered_object():
 
 def test_clamp_inside():
     s = Schema(Clamp(min=1, max=10))
-    assert_true(5, s(5))
+    assert_equal(5, s(5))
 
 
 def test_clamp_above():
     s = Schema(Clamp(min=1, max=10))
-    assert_true(10, s(12))   
+    assert_equal(10, s(12))   
 
 
 def test_clamp_below():
     s = Schema(Clamp(min=1, max=10))
-    assert_true(1, s(-3)) 
+    assert_equal(1, s(-3)) 
 
 
 def test_clamp_invalid():
@@ -645,15 +645,15 @@ def test_clamp_invalid():
         assert_raises(MultipleInvalid, s, None)
         assert_raises(MultipleInvalid, s, "abc")
     else:
-        assert_true(s(None))
+        assert_equal(1, s(None))
 
 
 def test_length_ok():
     v1 = ['a', 'b', 'c']
     s = Schema(Length(min=1, max=10))
-    assert_true(3, s(v1))
+    assert_equal(v1, s(v1))
     v2 = "abcde"
-    assert_true(5, s(v2))
+    assert_equal(v2, s(v2))
 
 
 def test_length_too_short():
