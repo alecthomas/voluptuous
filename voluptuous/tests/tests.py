@@ -631,12 +631,12 @@ def test_clamp_inside():
 
 def test_clamp_above():
     s = Schema(Clamp(min=1, max=10))
-    assert_equal(10, s(12))   
+    assert_equal(10, s(12))
 
 
 def test_clamp_below():
     s = Schema(Clamp(min=1, max=10))
-    assert_equal(1, s(-3)) 
+    assert_equal(1, s(-3))
 
 
 def test_clamp_invalid():
@@ -667,13 +667,13 @@ def test_length_too_short():
 def test_length_too_long():
     v = ['a', 'b', 'c']
     s = Schema(Length(min=0, max=2))
-    assert_raises(MultipleInvalid, s, v) 
+    assert_raises(MultipleInvalid, s, v)
 
 
 def test_length_invalid():
     v = None
     s = Schema(Length(min=0, max=2))
-    assert_raises(MultipleInvalid, s, v) 
+    assert_raises(MultipleInvalid, s, v)
 
 
 def test_equal():
@@ -1443,6 +1443,7 @@ def test_any_required_with_subschema():
     else:
         assert False, "Did not raise Invalid for MultipleInvalid"
 
+
 def test_inclusive():
     schema = Schema({
         Inclusive('x', 'stuff'): int,
@@ -1452,16 +1453,17 @@ def test_inclusive():
     r = schema({})
     assert_equal(r, {})
 
-    r = schema({'x':1, 'y':2})
-    assert_equal(r, {'x':1, 'y':2})
+    r = schema({'x': 1, 'y': 2})
+    assert_equal(r, {'x': 1, 'y': 2})
 
     try:
-        r = schema({'x':1})
+        r = schema({'x': 1})
     except MultipleInvalid as e:
         assert_equal(str(e),
                      "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]")
     else:
         assert False, "Did not raise Invalid for incomplete Inclusive group"
+
 
 def test_inclusive_defaults():
     schema = Schema({
@@ -1470,15 +1472,16 @@ def test_inclusive_defaults():
         })
 
     r = schema({})
-    assert_equal(r, {'x':3, 'y':4})
+    assert_equal(r, {'x': 3, 'y': 4})
 
     try:
-        r = schema({'x':1})
+        r = schema({'x': 1})
     except MultipleInvalid as e:
         assert_equal(str(e),
                      "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]")
     else:
         assert False, "Did not raise Invalid for incomplete Inclusive group with defaults"
+
 
 def test_exclusive():
     schema = Schema({
@@ -1489,16 +1492,17 @@ def test_exclusive():
     r = schema({})
     assert_equal(r, {})
 
-    r = schema({'x':1})
-    assert_equal(r, {'x':1})
+    r = schema({'x': 1})
+    assert_equal(r, {'x': 1})
 
     try:
-        r = schema({'x':1, 'y': 2})
+        r = schema({'x': 1, 'y': 2})
     except MultipleInvalid as e:
         assert_equal(str(e),
                      "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]")
     else:
         assert False, "Did not raise Invalid for multiple values in Exclusive group"
+
 
 def test_any_with_discriminant():
     schema = Schema({
@@ -1511,15 +1515,16 @@ def test_any_with_discriminant():
         }, {
             'type': 'C',
             'c-value': bool,
-        }, discriminant=lambda value, alternatives: filter(lambda v : v['type'] == value['type'], alternatives))
+        }, discriminant=lambda value, alternatives: filter(lambda v: v['type'] == value['type'], alternatives))
     })
     try:
         schema({
             'implementation': {
-            'type': 'C',
-            'c-value': None,}  
+                'type': 'C',
+                'c-value': None
+            }
         })
     except MultipleInvalid as e:
-        assert_equal(str(e),'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
+        assert_equal(str(e), 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
     else:
         assert False, "Did not raise correct Invalid"
