@@ -272,6 +272,7 @@ class Any(_WithSubValidators):
 # Convenience alias
 Or = Any
 
+
 class Union(_WithSubValidators):
     """Use the first validated value among those selected by discrminant.
 
@@ -650,7 +651,7 @@ class Clamp(object):
         # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
-                self.msg or 'invalid value or type (must have a partial ordering)')    
+                self.msg or 'invalid value or type (must have a partial ordering)')
 
     def __repr__(self):
         return 'Clamp(min=%s, max=%s)' % (self.min, self.max)
@@ -677,7 +678,7 @@ class Length(object):
         # Objects that havbe no length e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
-                self.msg or 'invalid value or type')    
+                self.msg or 'invalid value or type')
 
     def __repr__(self):
         return 'Length(min=%s, max=%s)' % (self.min, self.max)
