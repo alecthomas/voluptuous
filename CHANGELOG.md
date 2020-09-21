@@ -1,8 +1,21 @@
 # Changelog
 
+## [0.12.0]
+
+**Changes**:
+- n/a
+
+**New**:
+- [#368](https://github.com/alecthomas/voluptuous/pull/368): Allow a discriminant field in validators
+
+**Fixes**:
+- [#420](https://github.com/alecthomas/voluptuous/pull/420): Fixed issue with 'required' not being set properly and added test 
+- [#414](https://github.com/alecthomas/voluptuous/pull/414): Handle incomparable values in Range
+- [#427](https://github.com/alecthomas/voluptuous/pull/427): Added additional tests for Range, Clamp and Length + catch TypeError exceptions
+
 ## [0.11.7]
 
-**Changes**
+**Changes**:
 
 - [#378](https://github.com/alecthomas/voluptuous/pull/378): Allow `extend()` of a `Schema` to return a subclass of a `Schema` as well.
 
