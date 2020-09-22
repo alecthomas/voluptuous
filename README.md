@@ -3,7 +3,7 @@
 
 **What does this mean?** I do not have time to fix issues myself. The only way fixes or new features will be added is by people submitting PRs.
 
-**Current status.** Voluptuous is largely feature stable. There hasn't been a need to add new features in a while, but there are some bugs that should be fixed.
+**Current status:** Voluptuous is largely feature stable. There hasn't been a need to add new features in a while, but there are some bugs that should be fixed.
 
 **Why?** I no longer use Voluptuous personally (in fact I no longer regularly write Python code). Rather than leave the project in a limbo of people filing issues and wondering why they're not being worked on, I believe this notice will more clearly set expectations.
 
@@ -40,6 +40,28 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 ## Changelog
 
 See [CHANGELOG.md](https://github.com/alecthomas/voluptuous/blob/master/CHANGELOG.md).
+
+## Why use Voluptuous over another validation library?
+
+**Validators are simple callables:**
+No need to subclass anything, just use a function.
+
+**Errors are simple exceptions:**
+A validator can just `raise Invalid(msg)` and expect the user to get
+useful messages.
+
+**Schemas are basic Python data structures:**
+Should your data be a dictionary of integer keys to strings?
+`{int: str}` does what you expect. List of integers, floats or
+strings? `[int, float, str]`.
+
+**Designed from the ground up for validating more than just forms:**
+Nested data structures are treated in the same way as any other
+type. Need a list of dictionaries? `[{}]`
+
+**Consistency:**
+Types in the schema are checked as types. Values are compared as
+values. Callables are called to validate. Simple.
 
 ## Show me an example
 
@@ -688,34 +710,12 @@ cross-field validator will not run:
 s({'password':'123', 'password_again': 1337})
 ```
 
-## Running tests.
+## Running tests
 
 Voluptuous is using nosetests:
 
     $ nosetests
 
-
-## Why use Voluptuous over another validation library?
-
-**Validators are simple callables**
-:   No need to subclass anything, just use a function.
-
-**Errors are simple exceptions.**
-:   A validator can just `raise Invalid(msg)` and expect the user to get
-useful messages.
-
-**Schemas are basic Python data structures.**
-:   Should your data be a dictionary of integer keys to strings?
-`{int: str}` does what you expect. List of integers, floats or
-strings? `[int, float, str]`.
-
-**Designed from the ground up for validating more than just forms.**
-:   Nested data structures are treated in the same way as any other
-type. Need a list of dictionaries? `[{}]`
-
-**Consistency.**
-:   Types in the schema are checked as types. Values are compared as
-values. Callables are called to validate. Simple.
 
 ## Other libraries and inspirations
 
