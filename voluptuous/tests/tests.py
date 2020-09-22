@@ -197,7 +197,7 @@ def test_class():
 
 
 def test_email_validation():
-    """ test with valid email """
+    """ test with valid email address """
     schema = Schema({"email": Email()})
     out_ = schema({"email": "example@example.com"})
 
@@ -205,43 +205,43 @@ def test_email_validation():
 
 
 def test_email_validation_with_none():
-    """ test with invalid None Email"""
+    """ test with invalid None email address """
     schema = Schema({"email": Email()})
     try:
         schema({"email": None})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected an Email for dictionary value @ data['email']")
+                     "expected an email address for dictionary value @ data['email']")
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_email_validation_with_empty_string():
-    """ test with empty string Email"""
+    """ test with empty string email address"""
     schema = Schema({"email": Email()})
     try:
         schema({"email": ''})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected an Email for dictionary value @ data['email']")
+                     "expected an email address for dictionary value @ data['email']")
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_email_validation_without_host():
-    """ test with empty host name in email """
+    """ test with empty host name in email address """
     schema = Schema({"email": Email()})
     try:
         schema({"email": 'a@.com'})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected an Email for dictionary value @ data['email']")
+                     "expected an email address for dictionary value @ data['email']")
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_fqdn_url_validation():
-    """ test with valid fully qualified domain name url """
+    """ test with valid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
     out_ = schema({"url": "http://example.com/"})
 
@@ -249,27 +249,27 @@ def test_fqdn_url_validation():
 
 
 def test_fqdn_url_without_domain_name():
-    """ test with invalid fully qualified domain name url """
+    """ test with invalid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": "http://localhost/"})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+                     "expected a fully qualified domain name URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_fqdnurl_validation_with_none():
-    """ test with invalid None FQDN url"""
+    """ test with invalid None FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": None})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+                     "expected a fully qualified domain name URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_fqdnurl_validation_with_empty_string():
@@ -279,9 +279,9 @@ def test_fqdnurl_validation_with_empty_string():
         schema({"url": ''})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+                     "expected a fully qualified domain name URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_fqdnurl_validation_without_host():
@@ -291,9 +291,9 @@ def test_fqdnurl_validation_without_host():
         schema({"url": 'http://'})
     except MultipleInvalid as e:
         assert_equal(str(e),
-                     "expected a Fully qualified domain name URL for dictionary value @ data['url']")
+                     "expected a fully qualified domain name URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_url_validation():
@@ -305,7 +305,7 @@ def test_url_validation():
 
 
 def test_url_validation_with_none():
-    """ test with invalid None url"""
+    """ test with invalid None URL"""
     schema = Schema({"url": Url()})
     try:
         schema({"url": None})
@@ -313,7 +313,7 @@ def test_url_validation_with_none():
         assert_equal(str(e),
                      "expected a URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_url_validation_with_empty_string():
@@ -325,7 +325,7 @@ def test_url_validation_with_empty_string():
         assert_equal(str(e),
                      "expected a URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_url_validation_without_host():
@@ -337,7 +337,7 @@ def test_url_validation_without_host():
         assert_equal(str(e),
                      "expected a URL for dictionary value @ data['url']")
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_copy_dict_undefined():
