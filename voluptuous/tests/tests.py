@@ -1528,3 +1528,17 @@ def test_any_with_discriminant():
         assert_equal(str(e), 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
     else:
         assert False, "Did not raise correct Invalid"
+
+
+def test_empty_list_raises_error_of_key_not_values():
+    """ https://github.com/alecthomas/voluptuous/issues/397 """
+    schema = Schema({
+        Required('variables', default=[]): []
+    })
+
+    try:
+        schema({'variables': ['x']})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "not a valid value for dictionary value @ data['variables']")
+    else:
+        assert False, "Did not raise correct Invalid"
