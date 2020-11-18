@@ -36,9 +36,8 @@ def test_exact_sequence():
 
 def test_required():
     """Verify that Required works."""
-    schema = Schema({Required('q'): 1})
-    # Can't use nose's raises (because we need to access the raised
-    # exception, nor assert_raises which fails with Python 2.6.9.
+    schema = Schema({Required('q'): int})
+    schema({"q": 123})
     try:
         schema({})
     except Invalid as e:
@@ -70,6 +69,12 @@ def test_in():
     """Verify that In works."""
     schema = Schema({"color": In(frozenset(["blue", "red", "yellow"]))})
     schema({"color": "blue"})
+    try:
+        schema({"color": "orange"})
+    except Invalid as e:
+        assert_equal(str(e), "value is not allowed for dictionary value @ data['color']")
+    else:
+        assert False, "Did not raise InInvalid"
 
 
 def test_not_in():
@@ -138,7 +143,7 @@ def test_extra_empty_errors():
 
 
 def test_literal():
-    """ test with Literal """
+    """ Test with Literal """
 
     schema = Schema([Literal({"a": 1}), Literal({"b": 1})])
     schema([{"a": 1}])
@@ -197,7 +202,7 @@ def test_class():
 
 
 def test_email_validation():
-    """ test with valid email address """
+    """ Test with valid email address """
     schema = Schema({"email": Email()})
     out_ = schema({"email": "example@example.com"})
 
@@ -205,7 +210,7 @@ def test_email_validation():
 
 
 def test_email_validation_with_none():
-    """ test with invalid None email address """
+    """ Test with invalid None email address """
     schema = Schema({"email": Email()})
     try:
         schema({"email": None})
@@ -217,7 +222,7 @@ def test_email_validation_with_none():
 
 
 def test_email_validation_with_empty_string():
-    """ test with empty string email address"""
+    """ Test with empty string email address"""
     schema = Schema({"email": Email()})
     try:
         schema({"email": ''})
@@ -229,7 +234,7 @@ def test_email_validation_with_empty_string():
 
 
 def test_email_validation_without_host():
-    """ test with empty host name in email address """
+    """ Test with empty host name in email address """
     schema = Schema({"email": Email()})
     try:
         schema({"email": 'a@.com'})
@@ -241,7 +246,7 @@ def test_email_validation_without_host():
 
 
 def test_fqdn_url_validation():
-    """ test with valid fully qualified domain name URL """
+    """ Test with valid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
     out_ = schema({"url": "http://example.com/"})
 
@@ -249,7 +254,7 @@ def test_fqdn_url_validation():
 
 
 def test_fqdn_url_without_domain_name():
-    """ test with invalid fully qualified domain name URL """
+    """ Test with invalid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": "http://localhost/"})
@@ -261,7 +266,7 @@ def test_fqdn_url_without_domain_name():
 
 
 def test_fqdnurl_validation_with_none():
-    """ test with invalid None FQDN URL """
+    """ Test with invalid None FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": None})
@@ -273,7 +278,7 @@ def test_fqdnurl_validation_with_none():
 
 
 def test_fqdnurl_validation_with_empty_string():
-    """ test with empty string FQDN URL """
+    """ Test with empty string FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": ''})
@@ -285,7 +290,7 @@ def test_fqdnurl_validation_with_empty_string():
 
 
 def test_fqdnurl_validation_without_host():
-    """ test with empty host FQDN URL """
+    """ Test with empty host FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": 'http://'})
@@ -297,7 +302,7 @@ def test_fqdnurl_validation_without_host():
 
 
 def test_url_validation():
-    """ test with valid URL """
+    """ Test with valid URL """
     schema = Schema({"url": Url()})
     out_ = schema({"url": "http://example.com/"})
 
@@ -305,7 +310,7 @@ def test_url_validation():
 
 
 def test_url_validation_with_none():
-    """ test with invalid None URL"""
+    """ Test with invalid None URL"""
     schema = Schema({"url": Url()})
     try:
         schema({"url": None})
@@ -317,7 +322,7 @@ def test_url_validation_with_none():
 
 
 def test_url_validation_with_empty_string():
-    """ test with empty string URL """
+    """ Test with empty string URL """
     schema = Schema({"url": Url()})
     try:
         schema({"url": ''})
@@ -329,7 +334,7 @@ def test_url_validation_with_empty_string():
 
 
 def test_url_validation_without_host():
-    """ test with empty host URL """
+    """ Test with empty host URL """
     schema = Schema({"url": Url()})
     try:
         schema({"url": 'http://'})
@@ -341,7 +346,7 @@ def test_url_validation_without_host():
 
 
 def test_copy_dict_undefined():
-    """ test with a copied dictionary """
+    """ Test with a copied dictionary """
     fields = {
         Required("foo"): int
     }
@@ -384,7 +389,6 @@ def test_schema_extend():
 
 def test_schema_extend_overrides():
     """Verify that Schema.extend can override required/extra parameters."""
-
     base = Schema({'a': int}, required=True)
     extended = base.extend({'b': str}, required=False, extra=ALLOW_EXTRA)
 
@@ -396,7 +400,6 @@ def test_schema_extend_overrides():
 
 def test_schema_extend_key_swap():
     """Verify that Schema.extend can replace keys, even when different markers are used"""
-
     base = Schema({Optional('a'): int})
     extension = {Required('a'): int}
     extended = base.extend(extension)
@@ -409,7 +412,6 @@ def test_schema_extend_key_swap():
 
 def test_subschema_extension():
     """Verify that Schema.extend adds and replaces keys in a subschema"""
-
     base = Schema({'a': {'b': int, 'c': float}})
     extension = {'d': str, 'a': {'b': str, 'e': int}}
     extended = base.extend(extension)
@@ -866,7 +868,7 @@ def test_unicode_as_key():
 
 
 def test_number_validation_with_string():
-    """ test with Number with string"""
+    """ Test with Number with string"""
     schema = Schema({"number": Number(precision=6, scale=2)})
     try:
         schema({"number": 'teststr'})
@@ -878,7 +880,7 @@ def test_number_validation_with_string():
 
 
 def test_number_validation_with_invalid_precision_invalid_scale():
-    """ test with Number with invalid precision and scale"""
+    """ Test with Number with invalid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2)})
     try:
         schema({"number": '123456.712'})
@@ -890,35 +892,35 @@ def test_number_validation_with_invalid_precision_invalid_scale():
 
 
 def test_number_validation_with_valid_precision_scale_yield_decimal_true():
-    """ test with Number with valid precision and scale"""
+    """ Test with Number with valid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=True)})
     out_ = schema({"number": '1234.00'})
     assert_equal(float(out_.get("number")), 1234.00)
 
 
 def test_number_when_precision_scale_none_yield_decimal_true():
-    """ test with Number with no precision and scale"""
+    """ Test with Number with no precision and scale"""
     schema = Schema({"number": Number(yield_decimal=True)})
     out_ = schema({"number": '12345678901234'})
     assert_equal(out_.get("number"), 12345678901234)
 
 
 def test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true():
-    """ test with Number with no precision and valid scale case 1"""
+    """ Test with Number with no precision and valid scale case 1"""
     schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789.34'})
     assert_equal(float(out_.get("number")), 123456789.34)
 
 
 def test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true():
-    """ test with Number with no precision and valid scale case 2 with zero in decimal part"""
+    """ Test with Number with no precision and valid scale case 2 with zero in decimal part"""
     schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789012.00'})
     assert_equal(float(out_.get("number")), 123456789012.00)
 
 
 def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
-    """ test with Number with no precision and invalid scale"""
+    """ Test with Number with no precision and invalid scale"""
     schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     try:
         schema({"number": '12345678901.234'})
@@ -930,14 +932,14 @@ def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
 
 
 def test_number_when_valid_precision_n_scale_none_yield_decimal_true():
-    """ test with Number with no precision and valid scale"""
+    """ Test with Number with no precision and valid scale"""
     schema = Schema({"number": Number(precision=14, yield_decimal=True)})
     out_ = schema({"number": '1234567.8901234'})
     assert_equal(float(out_.get("number")), 1234567.8901234)
 
 
 def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
-    """ test with Number with no precision and invalid scale"""
+    """ Test with Number with no precision and invalid scale"""
     schema = Schema({"number": Number(precision=14, yield_decimal=True)})
     try:
         schema({"number": '12345674.8901234'})
@@ -949,7 +951,7 @@ def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
 
 
 def test_number_validation_with_valid_precision_scale_yield_decimal_false():
-    """ test with Number with valid precision, scale and no yield_decimal"""
+    """ Test with Number with valid precision, scale and no yield_decimal"""
     schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=False)})
     out_ = schema({"number": '1234.00'})
     assert_equal(out_.get("number"), '1234.00')
@@ -1087,9 +1089,9 @@ def test_schema_infer_accepts_kwargs():
 def test_validation_performance():
     """
     This test comes to make sure the validation complexity of dictionaries is done in a linear time.
-    to achieve this a custom marker is used in the scheme that counts each time it is evaluated.
+    To achieve this a custom marker is used in the scheme that counts each time it is evaluated.
     By doing so we can determine if the validation is done in linear complexity.
-    Prior to issue https://github.com/alecthomas/voluptuous/issues/259 this was exponential
+    Prior to issue https://github.com/alecthomas/voluptuous/issues/259 this was exponential.
     """
     num_of_keys = 1000
 
