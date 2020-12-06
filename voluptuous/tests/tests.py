@@ -764,10 +764,55 @@ def test_maybe_returns_subvalidator_error():
         assert False, "Did not raise correct Invalid"
 
 
-def test_empty_list_as_exact():
+def test_schema_empty_list():
     s = Schema([])
-    assert_raises(Invalid, s, [1])
     s([])
+
+    try:
+        s([123])
+    except MultipleInvalid as e:
+        assert_equal(str(e), "not a valid value @ data[123]")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+    try:
+        s({'var': 123})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "expected a list")
+    else:
+        assert False, "Did not raise correct Invalid"    
+
+
+def test_schema_empty_dict():
+    s = Schema({})
+    s({})
+
+    try:
+        s({'var': 123})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "extra keys not allowed @ data['var']")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+    try:
+        s([123])
+    except MultipleInvalid as e:
+        assert_equal(str(e), "expected a dictionary")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+
+def test_schema_empty_dict_key():
+    """ https://github.com/alecthomas/voluptuous/pull/434 """
+    s = Schema({'var': []})
+    s({'var': []})
+
+    try:
+        s({'var': [123]})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "not a valid value for dictionary value @ data['var']")
+    else:
+        assert False, "Did not raise correct Invalid"
 
 
 def test_schema_decorator_match_with_args():
@@ -1552,19 +1597,5 @@ def test_any_with_discriminant():
         })
     except MultipleInvalid as e:
         assert_equal(str(e), 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
-    else:
-        assert False, "Did not raise correct Invalid"
-
-
-def test_empty_list_raises_error_of_key_not_values():
-    """ https://github.com/alecthomas/voluptuous/issues/397 """
-    schema = Schema({
-        Required('variables', default=[]): []
-    })
-
-    try:
-        schema({'variables': ['x']})
-    except MultipleInvalid as e:
-        assert_equal(str(e), "not a valid value for dictionary value @ data['variables']")
     else:
         assert False, "Did not raise correct Invalid"
