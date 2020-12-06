@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.1]
+
+**Changes**:
+- [#435](https://github.com/alecthomas/voluptuous/pull/435): Extended a few tests (`Required` and `In`)
+- [#425](https://github.com/alecthomas/voluptuous/pull/425): Improve error message for `In` and `NotIn`
+- [#436](https://github.com/alecthomas/voluptuous/pull/436): Add sorted() for `In` and `NotIn` + fix tests
+- [#437](https://github.com/alecthomas/voluptuous/pull/437): Grouped `Maybe` tests plus added another `Range` test
+- [#438](https://github.com/alecthomas/voluptuous/pull/438): Extend tests for `Schema` with empty list or dict
+
+**New**:
+- [#433](https://github.com/alecthomas/voluptuous/pull/433): Add Python 3.9 support
+
+**Fixes**:
+- [#431](https://github.com/alecthomas/voluptuous/pull/431): Fixed typos + made spelling more consistent
+- [#411](https://github.com/alecthomas/voluptuous/pull/411): Ensure `Maybe` propagates error information
+- [#434](https://github.com/alecthomas/voluptuous/pull/434): Remove value enumeration when validating empty list
+
 ## [0.12.0]
 
 **Changes**:
