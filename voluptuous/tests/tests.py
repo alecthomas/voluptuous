@@ -601,6 +601,13 @@ def test_range_outside():
 def test_range_no_upper_limit():
     s = Schema(Range(min=0))
     assert_equal(123, s(123))
+    assert_raises(MultipleInvalid, s, -1)
+
+
+def test_range_no_lower_limit():
+    s = Schema(Range(max=10))
+    assert_equal(-1, s(-1))
+    assert_raises(MultipleInvalid, s, 123)
 
 
 def test_range_excludes_nan():
@@ -738,6 +745,23 @@ def test_maybe_accepts_msg():
     s = Schema(Maybe(int, msg='int or None expected'))
     with raises(MultipleInvalid, 'int or None expected'):
         assert s([])
+
+
+def test_maybe_returns_subvalidator_error():
+    schema = Schema(Maybe(Range(1, 2)))
+
+    # The following should be valid
+    schema(None)
+    schema(1)
+    schema(2)
+
+    try:
+        # Should trigger a MultipleInvalid exception
+        schema(3)
+    except MultipleInvalid as e:
+        assert_equal(str(e), "value must be at most 2")
+    else:
+        assert False, "Did not raise correct Invalid"
 
 
 def test_empty_list_as_exact():
@@ -1528,21 +1552,5 @@ def test_any_with_discriminant():
         })
     except MultipleInvalid as e:
         assert_equal(str(e), 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']')
-    else:
-        assert False, "Did not raise correct Invalid"
-
-def test_maybe_returns_subvalidator_error():
-    schema = Schema(Maybe(Range(1, 2)))
-
-    # The following should be valid
-    schema(None)
-    schema(1)
-    schema(2)
-
-    try:
-        # Should trigger a MultipleInvalid exception
-        schema(3)
-    except MultipleInvalid as e:
-        assert_equal(str(e), "value must be at most 2")
     else:
         assert False, "Did not raise correct Invalid"
