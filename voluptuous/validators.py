@@ -1033,7 +1033,7 @@ class SomeOf(_WithSubValidators):
     :param kwargs: All other keyword arguments are passed to the sub-schema constructors.
 
     :raises NotEnoughValid: If the minimum number of validations isn't met.
-    :raises TooManyValid: If the more validations than the given amount is met.
+    :raises TooManyValid: If the maximum number of validations is exceeded.
 
     >>> validate = Schema(SomeOf(min_valid=2, validators=[Range(1, 5), Any(float, int), 6.6]))
     >>> validate(6.6)
