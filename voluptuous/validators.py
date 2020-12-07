@@ -555,7 +555,7 @@ def Maybe(validator, msg=None):
     ...  s("string")
 
     """
-    return Any(validator, None, msg=msg)
+    return Any(None, validator, msg=msg)
 
 
 class Range(object):
