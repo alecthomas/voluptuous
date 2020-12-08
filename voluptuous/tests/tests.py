@@ -747,7 +747,7 @@ def test_maybe_accepts_msg():
         assert s([])
 
 
-def test_maybe_returns_subvalidator_error():
+def test_maybe_returns_default_error():
     schema = Schema(Maybe(Range(1, 2)))
 
     # The following should be valid
@@ -759,7 +759,7 @@ def test_maybe_returns_subvalidator_error():
         # Should trigger a MultipleInvalid exception
         schema(3)
     except MultipleInvalid as e:
-        assert_equal(str(e), "value must be at most 2")
+        assert_equal(str(e), "not a valid value")
     else:
         assert False, "Did not raise correct Invalid"
 
