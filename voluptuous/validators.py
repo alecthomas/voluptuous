@@ -435,7 +435,7 @@ def Email(v):
             raise EmailInvalid("Invalid email address")
         user_part, domain_part = v.rsplit('@', 1)
 
-        if not (USER_REGEX.match(user_part) and DOMAIN_REGEX.match(domain_part)):
+        if not (USER_REGEX.fullmatch(user_part) and DOMAIN_REGEX.fullmatch(domain_part)):
             raise EmailInvalid("Invalid email address")
         return v
     except:
