@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.12.2]
+
+**Fixes**:
+- [#439](https://github.com/alecthomas/voluptuous/issues/439): Revert Breaking Maybe change in 0.12.1
+- [#447](https://github.com/alecthomas/voluptuous/issues/447): Fix Email Regex to not match on extra characters
+
 ## [0.12.1]
 
 **Changes**:
