@@ -4,6 +4,7 @@ import datetime
 import sys
 from functools import wraps
 from decimal import Decimal, InvalidOperation
+from enum import Enum
 
 from voluptuous.schema_builder import Schema, raises, message
 from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
@@ -95,6 +96,8 @@ class Coerce(object):
             return self.type(v)
         except (ValueError, TypeError, InvalidOperation):
             msg = self.msg or ('expected %s' % self.type_name)
+            if not self.msg and issubclass(self.type, Enum):
+                msg += " or one of %s" % str([e.value for e in self.type])[1:-1]
             raise CoerceInvalid(msg)
 
     def __repr__(self):
