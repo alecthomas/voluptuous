@@ -741,7 +741,7 @@ class In(object):
             check = True
         if check:
             raise InInvalid(self.msg or 
-                            'value must be one of {}'.format(sorted(self.container)))
+                            'value must be one of {}'.format(self.container))
         return v
 
     def __repr__(self):
@@ -762,7 +762,7 @@ class NotIn(object):
             check = True
         if check:
             raise NotInInvalid(self.msg or 
-                               'value must not be one of {}'.format(sorted(self.container)))
+                               'value must not be one of {}'.format(self.container))
         return v
 
     def __repr__(self):

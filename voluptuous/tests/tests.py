@@ -68,24 +68,26 @@ def test_iterate_candidates():
 
 def test_in():
     """Verify that In works."""
-    schema = Schema({"color": In(frozenset(["red", "blue", "yellow"]))})
+    container = frozenset(["red", "blue", "yellow"])
+    schema = Schema({"color": In(container)})
     schema({"color": "blue"})
     try:
         schema({"color": "orange"})
     except Invalid as e:
-        assert_equal(str(e), "value must be one of ['blue', 'red', 'yellow'] for dictionary value @ data['color']")
+        assert_equal(str(e), "value must be one of %s for dictionary value @ data['color']" % str(container))
     else:
         assert False, "Did not raise InInvalid"
 
 
 def test_not_in():
     """Verify that NotIn works."""
-    schema = Schema({"color": NotIn(frozenset(["red", "blue", "yellow"]))})
+    container = frozenset(["red", "blue", "yellow"])
+    schema = Schema({"color": NotIn(container)})
     schema({"color": "orange"})
     try:
         schema({"color": "blue"})
     except Invalid as e:
-        assert_equal(str(e), "value must not be one of ['blue', 'red', 'yellow'] for dictionary value @ data['color']")
+        assert_equal(str(e), "value must not be one of %s for dictionary value @ data['color']" % str(container))
     else:
         assert False, "Did not raise NotInInvalid"
 
