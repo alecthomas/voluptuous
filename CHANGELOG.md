@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.0]
+
+**Changes**:
+
+- [#450](https://github.com/alecthomas/voluptuous/pull/450): Display valid Enum values in Coerce
+
 ## [0.12.2]
 
 **Fixes**:
