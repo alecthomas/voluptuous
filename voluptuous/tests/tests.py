@@ -245,6 +245,18 @@ def test_email_validation_without_host():
     else:
         assert False, "Did not raise Invalid for empty string URL"
 
+def test_email_validation_with_bad_data():
+    """ Test with bad data in email address """
+    schema = Schema({"email": Email()})
+    for email in ('john@voluptuous.com>', 'john!@voluptuous.org!@($*!'):
+        try:
+            schema({"email": 'john@voluptuous.com>'})
+        except MultipleInvalid as e:
+            assert_equal(str(e),
+                        "expected an email address for dictionary value @ data['email']")
+        else:
+            assert False, "Did not raise Invalid for bad email " + email
+
 
 def test_fqdn_url_validation():
     """ Test with valid fully qualified domain name URL """

@@ -22,21 +22,29 @@ else:
 
 # Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py
 USER_REGEX = re.compile(
+    # start anchor, because fullmatch is not available in python 2.7
+    "(?:"
     # dot-atom
     r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+"
     r"(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*$"
     # quoted-string
     r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|'
-    r"""\\[\001-\011\013\014\016-\177])*"$)""",
+    r"""\\[\001-\011\013\014\016-\177])*"$)"""
+    # end anchor, because fullmatch is not available in python 2.7
+    r")\Z",
     re.IGNORECASE
 )
 DOMAIN_REGEX = re.compile(
+    # start anchor, because fullmatch is not available in python 2.7
+    "(?:"
     # domain
     r'(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'
     r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?$)'
     # literal form, ipv4 address (SMTP 4.1.3)
     r'|^\[(25[0-5]|2[0-4]\d|[0-1]?\d?\d)'
-    r'(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$',
+    r'(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$'
+    # end anchor, because fullmatch is not available in python 2.7
+    r")\Z",
     re.IGNORECASE)
 
 __author__ = 'tusharmakkar08'
@@ -438,7 +446,7 @@ def Email(v):
             raise EmailInvalid("Invalid email address")
         user_part, domain_part = v.rsplit('@', 1)
 
-        if not (USER_REGEX.fullmatch(user_part) and DOMAIN_REGEX.fullmatch(domain_part)):
+        if not (USER_REGEX.match(user_part) and DOMAIN_REGEX.match(domain_part)):
             raise EmailInvalid("Invalid email address")
         return v
     except:
