@@ -715,9 +715,15 @@ s({'password':'123', 'password_again': 1337})
 
 ## Running tests
 
-Voluptuous is using nosetests:
+Voluptuous is using `nosetests`:
 
-    $ nosetests
+    $ pip install nose nose-cover3 "coverage>=3.0"
+    $ nosetests --with-coverage3 --cover3-package=voluptuous --cover3-branch --verbose
+
+Please note that `nose-cover3` relies on `use_2to3` for which support was removed in `setuptools 58`.
+It may be necessary to first downgrade `setuptools` to a previous version when installing `nose-cover3`:
+
+    $ pip install "setuptools<58"
 
 
 ## Other libraries and inspirations
