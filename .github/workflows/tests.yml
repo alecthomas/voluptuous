@@ -18,6 +18,7 @@ jobs:
           - { python-version: "3.8", session: "py38" }
           - { python-version: "3.7", session: "py37" }
           - { python-version: "3.6", session: "py36" }
+          - { python-version: "2.7", session: "py27" }
 
     steps:
       - name: Check out the repository
@@ -29,6 +30,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install tox-setuptools-version
+        if: ${{ matrix.session != 'py27' }}
         run: |
           pip install tox-setuptools-version
 
