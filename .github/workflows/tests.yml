@@ -1,0 +1,39 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  tests:
+    name: ${{ matrix.session }} ${{ matrix.python-version }}
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { python-version: "3.10", session: "py310" }
+          - { python-version: "3.9", session: "py39" }
+          - { python-version: "3.8", session: "py38" }
+          - { python-version: "3.7", session: "py37" }
+          - { python-version: "3.6", session: "py36" }
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install tox-setuptools-version
+        run: |
+          pip install tox-setuptools-version
+
+      - name: Run tox
+        run: |
+          pip install tox
+          tox -e ${{ matrix.session }}
