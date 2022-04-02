@@ -449,7 +449,7 @@ def Email(v):
         if not (USER_REGEX.match(user_part) and DOMAIN_REGEX.match(domain_part)):
             raise EmailInvalid("Invalid email address")
         return v
-    except:
+    except:  # noqa: E722
         raise ValueError
 
 
@@ -468,7 +468,7 @@ def FqdnUrl(v):
         if "." not in parsed_url.netloc:
             raise UrlInvalid("must have a domain name in URL")
         return v
-    except:
+    except:  # noqa: E722
         raise ValueError
 
 
@@ -485,7 +485,7 @@ def Url(v):
     try:
         _url_validation(v)
         return v
-    except:
+    except:  # noqa: E722
         raise ValueError
 
 
@@ -748,7 +748,7 @@ class In(object):
         except TypeError:
             check = True
         if check:
-            raise InInvalid(self.msg or 
+            raise InInvalid(self.msg or
                             'value must be one of {}'.format(sorted(self.container)))
         return v
 
@@ -769,7 +769,7 @@ class NotIn(object):
         except TypeError:
             check = True
         if check:
-            raise NotInInvalid(self.msg or 
+            raise NotInInvalid(self.msg or
                                'value must not be one of {}'.format(sorted(self.container)))
         return v
 

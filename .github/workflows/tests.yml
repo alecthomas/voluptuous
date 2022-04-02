@@ -14,6 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { python-version: "3.9", session: "flake8" }
           - { python-version: "3.9", session: "py39" }
           - { python-version: "3.8", session: "py38" }
           - { python-version: "3.7", session: "py37" }
