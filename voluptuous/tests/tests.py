@@ -1617,6 +1617,7 @@ def test_any_with_discriminant():
     else:
         assert False, "Did not raise correct Invalid"
 
+
 if Enum:
     def test_coerce_enum():
         """Test Coerce Enum"""
@@ -1642,7 +1643,7 @@ if Enum:
             schema(4)
         except Invalid as e:
             assert_equal(str(e),
-                        "expected Choice or one of 1, 2, 3")
+                         "expected Choice or one of 1, 2, 3")
         else:
             assert False, "Did not raise Invalid for String"
 
@@ -1650,6 +1651,6 @@ if Enum:
             string_schema("hello")
         except Invalid as e:
             assert_equal(str(e),
-                        "expected StringChoice or one of 'easy', 'medium', 'hard'")
+                         "expected StringChoice or one of 'easy', 'medium', 'hard'")
         else:
             assert False, "Did not raise Invalid for String"
