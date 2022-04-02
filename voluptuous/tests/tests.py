@@ -497,8 +497,8 @@ def test_inequality():
 def test_inequality_negative():
     assert_false(Schema('foo') != Schema('foo'))
 
-    assert_false(Schema(['foo', 'bar', 'baz']) !=
-                 Schema(['foo', 'bar', 'baz']))
+    assert_false(Schema(['foo', 'bar', 'baz'])
+                 != Schema(['foo', 'bar', 'baz']))
 
     # Ensure two Schemas w/ two equivalent dicts initialized in a different
     # order are considered equal.
@@ -1305,8 +1305,8 @@ def test_any_error_has_path():
         s({'q': 'str', 'q2': 'tata'})
     except MultipleInvalid as exc:
         assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
-            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
+            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
         )
     else:
         assert False, "Did not raise AnyInvalid"
@@ -1322,8 +1322,8 @@ def test_all_error_has_path():
         s({'q': 'str', 'q2': 12})
     except MultipleInvalid as exc:
         assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
-            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
+            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
         )
     else:
         assert False, "Did not raise AllInvalid"

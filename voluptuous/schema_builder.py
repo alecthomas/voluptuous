@@ -308,14 +308,15 @@ class Schema(object):
 
         # Keys that may be required
         all_required_keys = set(key for key in schema
-                                if key is not Extra and
-                                ((self.required and not isinstance(key, (Optional, Remove))) or
-                                 isinstance(key, Required)))
+                                if key is not Extra
+                                and ((self.required
+                                      and not isinstance(key, (Optional, Remove)))
+                                     or isinstance(key, Required)))
 
         # Keys that may have defaults
         all_default_keys = set(key for key in schema
-                               if isinstance(key, Required) or
-                               isinstance(key, Optional))
+                               if isinstance(key, Required)
+                               or isinstance(key, Optional))
 
         _compiled_schema = {}
         for skey, svalue in iteritems(schema):
