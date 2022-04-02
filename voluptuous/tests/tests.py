@@ -248,6 +248,7 @@ def test_email_validation_without_host():
     else:
         assert False, "Did not raise Invalid for empty string URL"
 
+
 def test_email_validation_with_bad_data():
     """ Test with bad data in email address """
     schema = Schema({"email": Email()})
@@ -256,7 +257,7 @@ def test_email_validation_with_bad_data():
             schema({"email": 'john@voluptuous.com>'})
         except MultipleInvalid as e:
             assert_equal(str(e),
-                        "expected an email address for dictionary value @ data['email']")
+                         "expected an email address for dictionary value @ data['email']")
         else:
             assert False, "Did not raise Invalid for bad email " + email
 
@@ -796,7 +797,7 @@ def test_schema_empty_list():
     except MultipleInvalid as e:
         assert_equal(str(e), "expected a list")
     else:
-        assert False, "Did not raise correct Invalid"    
+        assert False, "Did not raise correct Invalid"
 
 
 def test_schema_empty_dict():
@@ -947,7 +948,7 @@ def test_unicode_as_key():
     if sys.version_info >= (3,):
         text_type = str
     else:
-        text_type = unicode
+        text_type = unicode  # noqa: F821
     schema = Schema({text_type: int})
     schema({u("foobar"): 1})
 
@@ -1533,9 +1534,9 @@ def test_any_required_with_subschema():
 
 def test_inclusive():
     schema = Schema({
-        Inclusive('x', 'stuff'): int,
-        Inclusive('y', 'stuff'): int,
-        })
+                    Inclusive('x', 'stuff'): int,
+                    Inclusive('y', 'stuff'): int,
+                    })
 
     r = schema({})
     assert_equal(r, {})
@@ -1554,9 +1555,9 @@ def test_inclusive():
 
 def test_inclusive_defaults():
     schema = Schema({
-        Inclusive('x', 'stuff', default=3): int,
-        Inclusive('y', 'stuff', default=4): int,
-        })
+                    Inclusive('x', 'stuff', default=3): int,
+                    Inclusive('y', 'stuff', default=4): int,
+                    })
 
     r = schema({})
     assert_equal(r, {'x': 3, 'y': 4})
@@ -1572,9 +1573,9 @@ def test_inclusive_defaults():
 
 def test_exclusive():
     schema = Schema({
-        Exclusive('x', 'stuff'): int,
-        Exclusive('y', 'stuff'): int,
-        })
+                    Exclusive('x', 'stuff'): int,
+                    Exclusive('y', 'stuff'): int,
+                    })
 
     r = schema({})
     assert_equal(r, {})
@@ -1616,6 +1617,7 @@ def test_any_with_discriminant():
     else:
         assert False, "Did not raise correct Invalid"
 
+
 if Enum:
     def test_coerce_enum():
         """Test Coerce Enum"""
@@ -1641,7 +1643,7 @@ if Enum:
             schema(4)
         except Invalid as e:
             assert_equal(str(e),
-                        "expected Choice or one of 1, 2, 3")
+                         "expected Choice or one of 1, 2, 3")
         else:
             assert False, "Did not raise Invalid for String"
 
@@ -1649,6 +1651,6 @@ if Enum:
             string_schema("hello")
         except Invalid as e:
             assert_equal(str(e),
-                        "expected StringChoice or one of 'easy', 'medium', 'hard'")
+                         "expected StringChoice or one of 'easy', 'medium', 'hard'")
         else:
             assert False, "Did not raise Invalid for String"
