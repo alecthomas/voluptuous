@@ -751,8 +751,8 @@ class In(object):
         except TypeError:
             check = True
         if check:
-            raise InInvalid(self.msg or
-                            'value must be one of {}'.format(sorted(self.container)))
+            raise InInvalid(self.msg
+                            or 'value must be one of {}'.format(sorted(self.container)))
         return v
 
     def __repr__(self):
@@ -772,8 +772,8 @@ class NotIn(object):
         except TypeError:
             check = True
         if check:
-            raise NotInInvalid(self.msg or
-                               'value must not be one of {}'.format(sorted(self.container)))
+            raise NotInInvalid(self.msg
+                               or 'value must not be one of {}'.format(sorted(self.container)))
         return v
 
     def __repr__(self):
