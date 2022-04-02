@@ -81,6 +81,18 @@ def test_in():
         assert False, "Did not raise InInvalid"
 
 
+def test_in_class():
+    """Verify that In works with container of data types."""
+    schema = Schema({"type": In((int, str, float))})
+    schema({"type": float})
+    try:
+        schema({"type": 42})
+    except Invalid as e:
+        assert_equal(str(e), "value must be one of [<class 'float'>, <class 'int'>, <class 'str'>] for dictionary value @ data['type']")
+    else:
+        assert False, "Did not raise InInvalid"
+
+
 def test_not_in():
     """Verify that NotIn works."""
     schema = Schema({"color": NotIn(frozenset(["red", "blue", "yellow"]))})
