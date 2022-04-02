@@ -81,7 +81,7 @@ def test_in():
         assert False, "Did not raise InInvalid"
 
 
-def test_in_class():
+def test_in_data_type_container():
     """Verify that In works with container of data types."""
     schema = Schema({"type": In((int, str, float))})
     schema({"type": float})
