@@ -91,7 +91,7 @@ def test_in_data_type_container():
         if sys.version_info.major >= 3:
             assert_equal(str(e), "value must be one of [<class 'float'>, <class 'int'>, <class 'str'>] for dictionary value @ data['type']")
         else:
-            assert_equal(str(e), "value must be one of [<type 'float'>, <type 'int'>, <type 'str'>] for dictionary value @ data['type']")    
+            assert_equal(str(e), "value must be one of [<type 'float'>, <type 'int'>, <type 'str'>] for dictionary value @ data['type']")
     else:
         assert False, "Did not raise InInvalid"
 
