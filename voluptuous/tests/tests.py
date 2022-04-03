@@ -1,6 +1,5 @@
 import collections
 import copy
-from re import S
 
 try:
     from enum import Enum
@@ -1642,7 +1641,7 @@ class MyValueClass(object):
 
 
 def test_object():
-    s = Schema(Object({'value': 1}), required=True);
+    s = Schema(Object({'value': 1}), required=True)
     s(MyValueClass(value=1))
     pytest.raises(MultipleInvalid, s, MyValueClass(value=2))
     pytest.raises(MultipleInvalid, s, 345)
