@@ -1,22 +1,24 @@
-import copy
 import collections
+import copy
+
 try:
     from enum import Enum
 except ImportError:
     Enum = None
 import os
 import sys
-import pytest
 
-from voluptuous import (
-    Schema, Required, Exclusive, Inclusive, Optional, Extra, Invalid, In, Remove,
-    Literal, Url, MultipleInvalid, LiteralInvalid, TypeInvalid, NotIn, Match, Email,
-    Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
-    validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
-    Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
-    raises, Union, Clamp)
+import pytest
+from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Clamp, Coerce,
+                        Contains, Date, Datetime, Email, Equal, ExactSequence,
+                        Exclusive, Extra, FqdnUrl, In, Inclusive, Invalid,
+                        IsDir, IsFile, Length, Literal, LiteralInvalid, Marker,
+                        Match, Maybe, MultipleInvalid, NotIn, Number, Object,
+                        Optional, PathExists, Range, Remove, Replace, Required,
+                        Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
+                        Unordered, Url, raises, validate)
 from voluptuous.humanize import humanize_error
-from voluptuous.util import u, Capitalize, Lower, Strip, Title, Upper
+from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
 
 
 def test_new_required_test():
@@ -1631,3 +1633,36 @@ if Enum:
             assert str(e) == "expected StringChoice or one of 'easy', 'medium', 'hard'"
         else:
             assert False, "Did not raise Invalid for String"
+
+
+class MyValueClass(object):
+    def __init__(self, value=None):
+        self.value = value
+
+
+def test_object():
+    s = Schema(Object({'value': 1}), required=True)
+    s(MyValueClass(value=1))
+    pytest.raises(MultipleInvalid, s, MyValueClass(value=2))
+    pytest.raises(MultipleInvalid, s, 345)
+
+
+# Python 3.7 removed the trainling comma in repr() of BaseException
+# https://bugs.python.org/issue30399
+if sys.version_info >= (3, 7):
+    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
+else:
+    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value',)"
+
+
+def test_exception():
+    s = Schema(None)
+    try:
+        s(123)
+    except MultipleInvalid as e:
+        assert repr(e) == "MultipleInvalid([{}])".format(invalid_scalar_excp_repr)
+        assert str(e.msg) == "not a valid value"
+        assert str(e.error_message) == "not a valid value"
+        assert str(e.errors) == "[{}]".format(invalid_scalar_excp_repr)
+        e.add("Test Error")
+        assert str(e.errors) == "[{}, 'Test Error']".format(invalid_scalar_excp_repr)
