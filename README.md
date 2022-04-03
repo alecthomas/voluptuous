@@ -21,9 +21,9 @@ YAML, etc.
 
 It has three goals:
 
-1.  Simplicity.
-2.  Support for complex data structures.
-3.  Provide useful error messages.
+1. Simplicity.
+2. Support for complex data structures.
+3. Provide useful error messages.
 
 ## Contact
 
@@ -71,7 +71,7 @@ values. Callables are called to validate. Simple.
 Twitter's [user search API](https://dev.twitter.com/rest/reference/get/users/search) accepts
 query URLs like:
 
-```
+```bash
 $ curl 'https://api.twitter.com/1.1/users/search.json?q=python&per_page=20&page=1'
 ```
 
@@ -84,7 +84,6 @@ To validate this we might use a schema like:
 ...   'per_page': int,
 ...   'page': int,
 ... })
-
 ```
 
 This schema very succinctly and roughly describes the data required by
@@ -101,7 +100,6 @@ schema will need to be more thoroughly defined:
 ...   Required('per_page', default=5): All(int, Range(min=1, max=20)),
 ...   'page': All(int, Range(min=0)),
 ... })
-
 ```
 
 This schema fully enforces the interface defined in Twitter's
@@ -118,7 +116,6 @@ documentation, and goes a little further for completeness.
 ...   exc = e
 >>> str(exc) == "required key not provided @ data['q']"
 True
-
 ```
 
 ...must be a string:
@@ -131,7 +128,6 @@ True
 ...   exc = e
 >>> str(exc) == "expected str for dictionary value @ data['q']"
 True
-
 ```
 
 ...and must be at least one character in length:
@@ -146,7 +142,6 @@ True
 True
 >>> schema({'q': '#topic'}) == {'q': '#topic', 'per_page': 5}
 True
-
 ```
 
 "per\_page" is a positive integer no greater than 20:
@@ -166,7 +161,6 @@ True
 ...   exc = e
 >>> str(exc) == "value must be at least 1 for dictionary value @ data['per_page']"
 True
-
 ```
 
 "page" is an integer \>= 0:
@@ -181,7 +175,6 @@ True
 "expected int for dictionary value @ data['per_page']"
 >>> schema({'q': '#topic', 'page': 1}) == {'q': '#topic', 'page': 1, 'per_page': 5}
 True
-
 ```
 
 ## Defining schemas
@@ -201,7 +194,6 @@ Literals in the schema are matched using normal equality checks:
 >>> schema = Schema('a string')
 >>> schema('a string')
 'a string'
-
 ```
 
 ### Types
@@ -220,7 +212,6 @@ is an instance of the type:
 ...   exc = e
 >>> str(exc) == "expected int"
 True
-
 ```
 
 ### URLs
@@ -239,7 +230,6 @@ URLs in the schema are matched by using `urlparse` library.
 ...   exc = e
 >>> str(exc) == "expected a URL"
 True
-
 ```
 
 ### Lists
@@ -255,7 +245,6 @@ in the schema list is compared to each value in the input data:
 [1, 1, 1]
 >>> schema(['a', 1, 'string', 1, 'string'])
 ['a', 1, 'string', 1, 'string']
-
 ```
 
 However, an empty list (`[]`) is treated as is. If you want to specify a list that can
@@ -277,7 +266,6 @@ True
 []
 >>> schema([1, 2])
 [1, 2]
-
 ```
 
 ### Sets and frozensets
@@ -310,7 +298,6 @@ True
 ...   exc = e
 >>> str(exc) == 'expected a frozenset'
 True
-
 ```
 
 However, an empty set (`set()`) is treated as is. If you want to specify a set
@@ -330,7 +317,6 @@ True
 >>> schema = Schema(set)
 >>> schema({1, 2}) == {1, 2}
 True
-
 ```
 
 ### Validation functions
@@ -350,7 +336,6 @@ validator:
 >>> from datetime import datetime
 >>> def Date(fmt='%Y-%m-%d'):
 ...   return lambda v: datetime.strptime(v, fmt)
-
 ```
 
 ```pycon
@@ -364,7 +349,6 @@ datetime.datetime(2013, 3, 3, 0, 0)
 ...   exc = e
 >>> str(exc) == "not a valid value"
 True
-
 ```
 
 In addition to simply determining if a value is valid, validators may
@@ -385,7 +369,6 @@ def Coerce(type, msg=None):
         except ValueError:
             raise Invalid(msg or ('expected %s' % type.__name__))
     return f
-
 ```
 
 This example also shows a common idiom where an optional human-readable
@@ -401,7 +384,6 @@ key-value pair in the corresponding data dictionary:
 >>> schema = Schema({1: 'one', 2: 'two'})
 >>> schema({1: 'one'})
 {1: 'one'}
-
 ```
 
 #### Extra dictionary keys
@@ -418,7 +400,6 @@ trigger exceptions:
 ...   exc = e
 >>> str(exc) == "extra keys not allowed @ data[1]"
 True
-
 ```
 
 This behaviour can be altered on a per-schema basis. To allow
@@ -430,7 +411,6 @@ additional keys use
 >>> schema = Schema({2: 3}, extra=ALLOW_EXTRA)
 >>> schema({1: 2, 2: 3})
 {1: 2, 2: 3}
-
 ```
 
 To remove additional keys use
@@ -441,7 +421,6 @@ To remove additional keys use
 >>> schema = Schema({2: 3}, extra=REMOVE_EXTRA)
 >>> schema({1: 2, 2: 3})
 {2: 3}
-
 ```
 
 It can also be overridden per-dictionary by using the catch-all marker
@@ -452,7 +431,6 @@ token `extra` as a key:
 >>> schema = Schema({1: {Extra: object}})
 >>> schema({1: {'foo': 'bar'}})
 {1: {'foo': 'bar'}}
-
 ```
 
 #### Required dictionary keys
@@ -463,7 +441,6 @@ By default, keys in the schema are not required to be in the data:
 >>> schema = Schema({1: 2, 3: 4})
 >>> schema({3: 4})
 {3: 4}
-
 ```
 
 Similarly to how extra\_ keys work, this behaviour can be overridden
@@ -478,7 +455,6 @@ per-schema:
 ...   exc = e
 >>> str(exc) == "required key not provided @ data[1]"
 True
-
 ```
 
 And per-key, with the marker token `Required(key)`:
@@ -494,7 +470,6 @@ And per-key, with the marker token `Required(key)`:
 True
 >>> schema({1: 2})
 {1: 2}
-
 ```
 
 #### Optional dictionary keys
@@ -521,13 +496,11 @@ True
 ...   exc = e
 >>> str(exc) == "extra keys not allowed @ data[4]"
 True
-
 ```
 
 ```pycon
 >>> schema({1: 2, 3: 4})
 {1: 2, 3: 4}
-
 ```
 
 ### Recursive / nested schema
@@ -539,7 +512,6 @@ You can use `voluptuous.Self` to define a nested schema:
 >>> recursive = Schema({"more": Self, "value": int})
 >>> recursive({"more": {"value": 42}, "value": 41}) == {'more': {'value': 42}, 'value': 41}
 True
-
 ```
 
 ### Extending an existing Schema
@@ -554,7 +526,6 @@ requirements. In that case you can use `Schema.extend` to create a new
 >>> person_with_age = person.extend({'age': int})
 >>> sorted(list(person_with_age.schema.keys()))
 ['age', 'name']
-
 ```
 
 The original `Schema` remains unchanged.
@@ -575,7 +546,6 @@ attribute-value pair in the corresponding object:
 >>> schema = Schema(Object({'q': 'one'}, cls=Structure))
 >>> schema(Structure(q='one'))
 <Structure(q='one')>
-
 ```
 
 ### Allow None values
@@ -589,7 +559,6 @@ To allow value to be None as well, use Any:
 >>> schema(None)
 >>> schema(5)
 5
-
 ```
 
 ## Error reporting
@@ -604,7 +573,6 @@ as an `error_message` attribute that contains the message of the original
 exception. This is especially useful when you want to catch `Invalid`
 exceptions and give some feedback to the user, for instance in the context of
 an HTTP API.
-
 
 ```pycon
 >>> def validate_email(email):
@@ -626,7 +594,6 @@ an HTTP API.
 'This email is invalid.'
 >>> exc.error_message
 'This email is invalid.'
-
 ```
 
 The `path` attribute is used during error reporting, but also during matching
@@ -641,7 +608,6 @@ To illustrate this, here is an example schema:
 
 ```pycon
 >>> schema = Schema([[2, 3], 6])
-
 ```
 
 Each value in the top-level list is matched depth-first in-order. Given
@@ -658,7 +624,6 @@ backtracking is attempted:
 ...   exc = e
 >>> str(exc) == "not a valid value @ data[0][0]"
 True
-
 ```
 
 If we pass the data `[6]`, the `6` is not a list type and so will not
@@ -668,7 +633,6 @@ to the second element in the schema, and succeed:
 ```pycon
 >>> schema([6])
 [6]
-
 ```
 
 ## Multi-field validation
@@ -685,18 +649,18 @@ def passwords_must_match(passwords):
         raise Invalid('passwords must match')
     return passwords
 
-s=Schema(All(
+schema = Schema(All(
     # First "pass" for field types
-    {'password':str, 'password_again':str},
+    {'password': str, 'password_again': str},
     # Follow up the first "pass" with your multi-field rules
     passwords_must_match
 ))
 
 # valid
-s({'password':'123', 'password_again':'123'})
+schema({'password': '123', 'password_again': '123'})
 
 # raises MultipleInvalid: passwords must match
-s({'password':'123', 'password_again':'and now for something completely different'})
+schema({'password': '123', 'password_again': 'and now for something completely different'})
 
 ```
 
@@ -707,23 +671,27 @@ its own type checking on its inputs.
 The flipside is that if the first "pass" of validation fails, your
 cross-field validator will not run:
 
-```
+```python
 # raises Invalid because password_again is not a string
 # passwords_must_match() will not run because first-pass validation already failed
-s({'password':'123', 'password_again': 1337})
+schema({'password': '123', 'password_again': 1337})
 ```
 
 ## Running tests
 
 Voluptuous is using `pytest`:
 
-    pip install pytest
-    pytest
+```bash
+$ pip install pytest
+$ pytest
+```
 
 To also include a coverage report:
 
-    pip install pytest pytest-cov coverage>=3.0
-    pytest --cov=voluptuous voluptuous/tests/
+```bash
+$ pip install pytest pytest-cov coverage>=3.0
+$ pytest --cov=voluptuous voluptuous/tests/
+```
 
 ## Other libraries and inspirations
 
