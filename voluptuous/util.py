@@ -8,7 +8,7 @@ __author__ = 'tusharmakkar08'
 
 
 def _fix_str(v):
-    if sys.version_info[0] == 2 and isinstance(v, unicode):
+    if sys.version_info[0] == 2 and isinstance(v, unicode):  # noqa: F821
         s = v
     else:
         s = str(v)
@@ -157,6 +157,6 @@ class Literal(object):
 
 def u(x):
     if sys.version_info < (3,):
-        return unicode(x)
+        return unicode(x)  # noqa: F821
     else:
         return x

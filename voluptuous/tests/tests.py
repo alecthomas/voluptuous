@@ -1,6 +1,9 @@
 import copy
 import collections
-from enum import Enum
+try:
+    from enum import Enum
+except ImportError:
+    Enum = None
 import os
 import sys
 
@@ -246,6 +249,19 @@ def test_email_validation_without_host():
         assert False, "Did not raise Invalid for empty string URL"
 
 
+def test_email_validation_with_bad_data():
+    """ Test with bad data in email address """
+    schema = Schema({"email": Email()})
+    for email in ('john@voluptuous.com>', 'john!@voluptuous.org!@($*!'):
+        try:
+            schema({"email": 'john@voluptuous.com>'})
+        except MultipleInvalid as e:
+            assert_equal(str(e),
+                         "expected an email address for dictionary value @ data['email']")
+        else:
+            assert False, "Did not raise Invalid for bad email " + email
+
+
 def test_fqdn_url_validation():
     """ Test with valid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
@@ -481,8 +497,8 @@ def test_inequality():
 def test_inequality_negative():
     assert_false(Schema('foo') != Schema('foo'))
 
-    assert_false(Schema(['foo', 'bar', 'baz']) !=
-                 Schema(['foo', 'bar', 'baz']))
+    assert_false(Schema(['foo', 'bar', 'baz'])
+                 != Schema(['foo', 'bar', 'baz']))
 
     # Ensure two Schemas w/ two equivalent dicts initialized in a different
     # order are considered equal.
@@ -781,7 +797,7 @@ def test_schema_empty_list():
     except MultipleInvalid as e:
         assert_equal(str(e), "expected a list")
     else:
-        assert False, "Did not raise correct Invalid"    
+        assert False, "Did not raise correct Invalid"
 
 
 def test_schema_empty_dict():
@@ -932,7 +948,7 @@ def test_unicode_as_key():
     if sys.version_info >= (3,):
         text_type = str
     else:
-        text_type = unicode
+        text_type = unicode  # noqa: F821
     schema = Schema({text_type: int})
     schema({u("foobar"): 1})
 
@@ -1289,8 +1305,8 @@ def test_any_error_has_path():
         s({'q': 'str', 'q2': 'tata'})
     except MultipleInvalid as exc:
         assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
-            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
+            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
         )
     else:
         assert False, "Did not raise AnyInvalid"
@@ -1306,8 +1322,8 @@ def test_all_error_has_path():
         s({'q': 'str', 'q2': 12})
     except MultipleInvalid as exc:
         assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
-            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
+            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
         )
     else:
         assert False, "Did not raise AllInvalid"
@@ -1518,9 +1534,9 @@ def test_any_required_with_subschema():
 
 def test_inclusive():
     schema = Schema({
-        Inclusive('x', 'stuff'): int,
-        Inclusive('y', 'stuff'): int,
-        })
+                    Inclusive('x', 'stuff'): int,
+                    Inclusive('y', 'stuff'): int,
+                    })
 
     r = schema({})
     assert_equal(r, {})
@@ -1539,9 +1555,9 @@ def test_inclusive():
 
 def test_inclusive_defaults():
     schema = Schema({
-        Inclusive('x', 'stuff', default=3): int,
-        Inclusive('y', 'stuff', default=4): int,
-        })
+                    Inclusive('x', 'stuff', default=3): int,
+                    Inclusive('y', 'stuff', default=4): int,
+                    })
 
     r = schema({})
     assert_equal(r, {'x': 3, 'y': 4})
@@ -1557,9 +1573,9 @@ def test_inclusive_defaults():
 
 def test_exclusive():
     schema = Schema({
-        Exclusive('x', 'stuff'): int,
-        Exclusive('y', 'stuff'): int,
-        })
+                    Exclusive('x', 'stuff'): int,
+                    Exclusive('y', 'stuff'): int,
+                    })
 
     r = schema({})
     assert_equal(r, {})
@@ -1601,38 +1617,40 @@ def test_any_with_discriminant():
     else:
         assert False, "Did not raise correct Invalid"
 
-def test_coerce_enum():
-    """Test Coerce Enum"""
-    class Choice(Enum):
-        Easy = 1
-        Medium = 2
-        Hard = 3
 
-    class StringChoice(str, Enum):
-        Easy = "easy"
-        Medium = "medium"
-        Hard = "hard"
+if Enum:
+    def test_coerce_enum():
+        """Test Coerce Enum"""
+        class Choice(Enum):
+            Easy = 1
+            Medium = 2
+            Hard = 3
 
-    schema = Schema(Coerce(Choice))
-    string_schema = Schema(Coerce(StringChoice))
+        class StringChoice(str, Enum):
+            Easy = "easy"
+            Medium = "medium"
+            Hard = "hard"
 
-    # Valid value
-    assert schema(1) == Choice.Easy
-    assert string_schema("easy") == StringChoice.Easy
+        schema = Schema(Coerce(Choice))
+        string_schema = Schema(Coerce(StringChoice))
 
-    # Invalid value
-    try:
-        schema(4)
-    except Invalid as e:
-        assert_equal(str(e),
-                     "expected Choice or one of 1, 2, 3")
-    else:
-        assert False, "Did not raise Invalid for String"
+        # Valid value
+        assert schema(1) == Choice.Easy
+        assert string_schema("easy") == StringChoice.Easy
 
-    try:
-        string_schema("hello")
-    except Invalid as e:
-        assert_equal(str(e),
-                     "expected StringChoice or one of 'easy', 'medium', 'hard'")
-    else:
-        assert False, "Did not raise Invalid for String"
+        # Invalid value
+        try:
+            schema(4)
+        except Invalid as e:
+            assert_equal(str(e),
+                         "expected Choice or one of 1, 2, 3")
+        else:
+            assert False, "Did not raise Invalid for String"
+
+        try:
+            string_schema("hello")
+        except Invalid as e:
+            assert_equal(str(e),
+                         "expected StringChoice or one of 'easy', 'medium', 'hard'")
+        else:
+            assert False, "Did not raise Invalid for String"
