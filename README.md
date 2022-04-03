@@ -715,9 +715,9 @@ s({'password':'123', 'password_again': 1337})
 
 ## Running tests
 
-Voluptuous is using nosetests:
+Voluptuous is using pytest:
 
-    $ nosetests
+    $ pytest
 
 
 ## Other libraries and inspirations
