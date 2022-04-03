@@ -974,9 +974,6 @@ class VirtualPathComponent(str):
         return self.__str__()
 
 
-# Markers.py
-
-
 class Marker(object):
     """Mark nodes for special treatment."""
 
