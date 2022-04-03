@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  tests:
+    name: Tox ${{ matrix.session }} session on Python ${{ matrix.python-version }}
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { python-version: "3.9", session: "flake8" }
+          - { python-version: "3.9", session: "py39" }
+          - { python-version: "3.8", session: "py38" }
+          - { python-version: "3.7", session: "py37" }
+          - { python-version: "3.6", session: "py36" }
+          - { python-version: "2.7", session: "py27" }
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install tox-setuptools-version
+        if: ${{ matrix.session != 'py27' }}
+        run: |
+          pip install tox-setuptools-version
+
+      - name: Run tox
+        run: |
+          pip install tox
+          tox -e ${{ matrix.session }}

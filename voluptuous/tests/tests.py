@@ -1,5 +1,9 @@
 import copy
 import collections
+try:
+    from enum import Enum
+except ImportError:
+    Enum = None
 import os
 import sys
 import pytest
@@ -10,7 +14,7 @@ from voluptuous import (
     Replace, Range, Coerce, All, Any, Length, FqdnUrl, ALLOW_EXTRA, PREVENT_EXTRA,
     validate, ExactSequence, Equal, Unordered, Number, Maybe, Datetime, Date,
     Contains, Marker, IsDir, IsFile, PathExists, SomeOf, TooManyValid, Self,
-    raises, Union)
+    raises, Union, Clamp)
 from voluptuous.humanize import humanize_error
 from voluptuous.util import u, Capitalize, Lower, Strip, Title, Upper
 
@@ -35,7 +39,8 @@ def test_exact_sequence():
 
 def test_required():
     """Verify that Required works."""
-    schema = Schema({Required('q'): 1})
+    schema = Schema({Required('q'): int})
+    schema({"q": 123})
     try:
         schema({})
     except Invalid as e:
@@ -64,18 +69,24 @@ def test_iterate_candidates():
 
 def test_in():
     """Verify that In works."""
-    schema = Schema({"color": In(frozenset(["blue", "red", "yellow"]))})
+    schema = Schema({"color": In(frozenset(["red", "blue", "yellow"]))})
     schema({"color": "blue"})
+    try:
+        schema({"color": "orange"})
+    except Invalid as e:
+        assert str(e) == "value must be one of ['blue', 'red', 'yellow'] for dictionary value @ data['color']"
+    else:
+        assert False, "Did not raise InInvalid"
 
 
 def test_not_in():
     """Verify that NotIn works."""
-    schema = Schema({"color": NotIn(frozenset(["blue", "red", "yellow"]))})
+    schema = Schema({"color": NotIn(frozenset(["red", "blue", "yellow"]))})
     schema({"color": "orange"})
     try:
         schema({"color": "blue"})
     except Invalid as e:
-        assert str(e) == "value is not allowed for dictionary value @ data['color']"
+        assert str(e) == "value must not be one of ['blue', 'red', 'yellow'] for dictionary value @ data['color']"
     else:
         assert False, "Did not raise NotInInvalid"
 
@@ -133,7 +144,7 @@ def test_extra_empty_errors():
 
 
 def test_literal():
-    """ test with Literal """
+    """ Test with Literal """
 
     schema = Schema([Literal({"a": 1}), Literal({"b": 1})])
     schema([{"a": 1}])
@@ -192,7 +203,7 @@ def test_class():
 
 
 def test_email_validation():
-    """ test with valid email """
+    """ Test with valid email address """
     schema = Schema({"email": Email()})
     out_ = schema({"email": "example@example.com"})
 
@@ -200,40 +211,53 @@ def test_email_validation():
 
 
 def test_email_validation_with_none():
-    """ test with invalid None Email"""
+    """ Test with invalid None email address """
     schema = Schema({"email": Email()})
     try:
         schema({"email": None})
     except MultipleInvalid as e:
-        assert str(e) == "expected an Email for dictionary value @ data['email']"
+        assert str(e) == "expected an email address for dictionary value @ data['email']"
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_email_validation_with_empty_string():
-    """ test with empty string Email"""
+    """ Test with empty string email address"""
     schema = Schema({"email": Email()})
     try:
         schema({"email": ''})
     except MultipleInvalid as e:
-        assert str(e) == "expected an Email for dictionary value @ data['email']"
+        assert str(e) == "expected an email address for dictionary value @ data['email']"
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_email_validation_without_host():
-    """ test with empty host name in email """
+    """ Test with empty host name in email address """
     schema = Schema({"email": Email()})
     try:
         schema({"email": 'a@.com'})
     except MultipleInvalid as e:
-        assert str(e) == "expected an Email for dictionary value @ data['email']"
+        assert str(e) == "expected an email address for dictionary value @ data['email']"
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
+
+
+def test_email_validation_with_bad_data():
+    """ Test with bad data in email address """
+    schema = Schema({"email": Email()})
+    for email in ('john@voluptuous.com>', 'john!@voluptuous.org!@($*!'):
+        try:
+            schema({"email": 'john@voluptuous.com>'})
+        except MultipleInvalid as e:
+            assert_equal(str(e),
+                         "expected an email address for dictionary value @ data['email']")
+        else:
+            assert False, "Did not raise Invalid for bad email " + email
 
 
 def test_fqdn_url_validation():
-    """ test with valid fully qualified domain name url """
+    """ Test with valid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
     out_ = schema({"url": "http://example.com/"})
 
@@ -241,51 +265,51 @@ def test_fqdn_url_validation():
 
 
 def test_fqdn_url_without_domain_name():
-    """ test with invalid fully qualified domain name url """
+    """ Test with invalid fully qualified domain name URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": "http://localhost/"})
     except MultipleInvalid as e:
-        assert str(e) == "expected a Fully qualified domain name URL for dictionary value @ data['url']"
+        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_fqdnurl_validation_with_none():
-    """ test with invalid None FQDN url"""
+    """ Test with invalid None FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": None})
     except MultipleInvalid as e:
-        assert str(e) == "expected a Fully qualified domain name URL for dictionary value @ data['url']"
+        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_fqdnurl_validation_with_empty_string():
-    """ test with empty string FQDN URL """
+    """ Test with empty string FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": ''})
     except MultipleInvalid as e:
-        assert str(e) == "expected a Fully qualified domain name URL for dictionary value @ data['url']"
+        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_fqdnurl_validation_without_host():
-    """ test with empty host FQDN URL """
+    """ Test with empty host FQDN URL """
     schema = Schema({"url": FqdnUrl()})
     try:
         schema({"url": 'http://'})
     except MultipleInvalid as e:
-        assert str(e) == "expected a Fully qualified domain name URL for dictionary value @ data['url']"
+        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_url_validation():
-    """ test with valid URL """
+    """ Test with valid URL """
     schema = Schema({"url": Url()})
     out_ = schema({"url": "http://example.com/"})
 
@@ -293,40 +317,40 @@ def test_url_validation():
 
 
 def test_url_validation_with_none():
-    """ test with invalid None url"""
+    """ Test with invalid None URL"""
     schema = Schema({"url": Url()})
     try:
         schema({"url": None})
     except MultipleInvalid as e:
         assert str(e) == "expected a URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for None url"
+        assert False, "Did not raise Invalid for None URL"
 
 
 def test_url_validation_with_empty_string():
-    """ test with empty string URL """
+    """ Test with empty string URL """
     schema = Schema({"url": Url()})
     try:
         schema({"url": ''})
     except MultipleInvalid as e:
         assert str(e) == "expected a URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_url_validation_without_host():
-    """ test with empty host URL """
+    """ Test with empty host URL """
     schema = Schema({"url": Url()})
     try:
         schema({"url": 'http://'})
     except MultipleInvalid as e:
         assert str(e) ==  "expected a URL for dictionary value @ data['url']"
     else:
-        assert False, "Did not raise Invalid for empty string url"
+        assert False, "Did not raise Invalid for empty string URL"
 
 
 def test_copy_dict_undefined():
-    """ test with a copied dictionary """
+    """ Test with a copied dictionary """
     fields = {
         Required("foo"): int
     }
@@ -369,7 +393,6 @@ def test_schema_extend():
 
 def test_schema_extend_overrides():
     """Verify that Schema.extend can override required/extra parameters."""
-
     base = Schema({'a': int}, required=True)
     extended = base.extend({'b': str}, required=False, extra=ALLOW_EXTRA)
 
@@ -381,7 +404,6 @@ def test_schema_extend_overrides():
 
 def test_schema_extend_key_swap():
     """Verify that Schema.extend can replace keys, even when different markers are used"""
-
     base = Schema({Optional('a'): int})
     extension = {Required('a'): int}
     extended = base.extend(extension)
@@ -394,7 +416,6 @@ def test_schema_extend_key_swap():
 
 def test_subschema_extension():
     """Verify that Schema.extend adds and replaces keys in a subschema"""
-
     base = Schema({'a': {'b': int, 'c': float}})
     extension = {'d': str, 'a': {'b': str, 'e': int}}
     extended = base.extend(extension)
@@ -561,7 +582,30 @@ def test_fix_157():
     pytest.raises(MultipleInvalid, s, ['four'])
 
 
-def test_range_exlcudes_nan():
+def test_range_inside():
+    s = Schema(Range(min=0, max=10))
+    assert_equal(5, s(5))
+
+
+def test_range_outside():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, 12)
+    assert_raises(MultipleInvalid, s, -1)
+
+
+def test_range_no_upper_limit():
+    s = Schema(Range(min=0))
+    assert_equal(123, s(123))
+    assert_raises(MultipleInvalid, s, -1)
+
+
+def test_range_no_lower_limit():
+    s = Schema(Range(max=10))
+    assert_equal(-1, s(-1))
+    assert_raises(MultipleInvalid, s, 123)
+
+
+def test_range_excludes_nan():
     s = Schema(Range(min=0, max=10))
     pytest.raises(MultipleInvalid, s, float('nan'))
 
@@ -571,12 +615,69 @@ def test_range_excludes_none():
     pytest.raises(MultipleInvalid, s, None)
 
 
+def test_range_excludes_string():
+    s = Schema(Range(min=0, max=10))
+    assert_raises(MultipleInvalid, s, "abc")
+
+
 def test_range_excludes_unordered_object():
     class MyObject(object):
         pass
 
     s = Schema(Range(min=0, max=10))
     pytest.raises(MultipleInvalid, s, MyObject())
+
+
+def test_clamp_inside():
+    s = Schema(Clamp(min=1, max=10))
+    assert_equal(5, s(5))
+
+
+def test_clamp_above():
+    s = Schema(Clamp(min=1, max=10))
+    assert_equal(10, s(12))
+
+
+def test_clamp_below():
+    s = Schema(Clamp(min=1, max=10))
+    assert_equal(1, s(-3))
+
+
+def test_clamp_invalid():
+    s = Schema(Clamp(min=1, max=10))
+    if sys.version_info.major >= 3:
+        assert_raises(MultipleInvalid, s, None)
+        assert_raises(MultipleInvalid, s, "abc")
+    else:
+        assert_equal(1, s(None))
+
+
+def test_length_ok():
+    v1 = ['a', 'b', 'c']
+    s = Schema(Length(min=1, max=10))
+    assert_equal(v1, s(v1))
+    v2 = "abcde"
+    assert_equal(v2, s(v2))
+
+
+def test_length_too_short():
+    v1 = []
+    s = Schema(Length(min=1, max=10))
+    assert_raises(MultipleInvalid, s, v1)
+    v2 = ''
+    assert_raises(MultipleInvalid, s, v2)
+
+
+def test_length_too_long():
+    v = ['a', 'b', 'c']
+    s = Schema(Length(min=0, max=2))
+    assert_raises(MultipleInvalid, s, v)
+
+
+def test_length_invalid():
+    v = None
+    s = Schema(Length(min=0, max=2))
+    assert_raises(MultipleInvalid, s, v)
 
 
 def test_equal():
@@ -641,10 +742,72 @@ def test_maybe_accepts_msg():
         assert s([])
 
 
-def test_empty_list_as_exact():
+def test_maybe_returns_default_error():
+    schema = Schema(Maybe(Range(1, 2)))
+
+    # The following should be valid
+    schema(None)
+    schema(1)
+    schema(2)
+
+    try:
+        # Should trigger a MultipleInvalid exception
+        schema(3)
+    except MultipleInvalid as e:
+        assert_equal(str(e), "not a valid value")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+
+def test_schema_empty_list():
     s = Schema([])
-    pytest.raises(Invalid, s, [1])
     s([])
+
+    try:
+        s([123])
+    except MultipleInvalid as e:
+        assert_equal(str(e), "not a valid value @ data[123]")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+    try:
+        s({'var': 123})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "expected a list")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+
+def test_schema_empty_dict():
+    s = Schema({})
+    s({})
+
+    try:
+        s({'var': 123})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "extra keys not allowed @ data['var']")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+    try:
+        s([123])
+    except MultipleInvalid as e:
+        assert_equal(str(e), "expected a dictionary")
+    else:
+        assert False, "Did not raise correct Invalid"
+
+
+def test_schema_empty_dict_key():
+    """ https://github.com/alecthomas/voluptuous/pull/434 """
+    s = Schema({'var': []})
+    s({'var': []})
+
+    try:
+        s({'var': [123]})
+    except MultipleInvalid as e:
+        assert_equal(str(e), "not a valid value for dictionary value @ data['var']")
+    else:
+        assert False, "Did not raise correct Invalid"
 
 
 def test_schema_decorator_match_with_args():
@@ -763,13 +926,13 @@ def test_unicode_as_key():
     if sys.version_info >= (3,):
         text_type = str
     else:
-        text_type = unicode
+        text_type = unicode  # noqa: F821
     schema = Schema({text_type: int})
     schema({u("foobar"): 1})
 
 
 def test_number_validation_with_string():
-    """ test with Number with string"""
+    """ Test with Number with string"""
     schema = Schema({"number": Number(precision=6, scale=2)})
     try:
         schema({"number": 'teststr'})
@@ -780,7 +943,7 @@ def test_number_validation_with_string():
 
 
 def test_number_validation_with_invalid_precision_invalid_scale():
-    """ test with Number with invalid precision and scale"""
+    """ Test with Number with invalid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2)})
     try:
         schema({"number": '123456.712'})
@@ -791,35 +954,35 @@ def test_number_validation_with_invalid_precision_invalid_scale():
 
 
 def test_number_validation_with_valid_precision_scale_yield_decimal_true():
-    """ test with Number with valid precision and scale"""
+    """ Test with Number with valid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=True)})
     out_ = schema({"number": '1234.00'})
     assert float(out_.get("number")) == 1234.00
 
 
 def test_number_when_precision_scale_none_yield_decimal_true():
-    """ test with Number with no precision and scale"""
+    """ Test with Number with no precision and scale"""
     schema = Schema({"number": Number(yield_decimal=True)})
     out_ = schema({"number": '12345678901234'})
     assert out_.get("number") == 12345678901234
 
 
 def test_number_when_precision_none_n_valid_scale_case1_yield_decimal_true():
-    """ test with Number with no precision and valid scale case 1"""
+    """ Test with Number with no precision and valid scale case 1"""
     schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789.34'})
     assert float(out_.get("number")) == 123456789.34
 
 
 def test_number_when_precision_none_n_valid_scale_case2_yield_decimal_true():
-    """ test with Number with no precision and valid scale case 2 with zero in decimal part"""
+    """ Test with Number with no precision and valid scale case 2 with zero in decimal part"""
     schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     out_ = schema({"number": '123456789012.00'})
     assert float(out_.get("number")) == 123456789012.00
 
 
 def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
-    """ test with Number with no precision and invalid scale"""
+    """ Test with Number with no precision and invalid scale"""
     schema = Schema({"number": Number(scale=2, yield_decimal=True)})
     try:
         schema({"number": '12345678901.234'})
@@ -830,14 +993,14 @@ def test_number_when_precision_none_n_invalid_scale_yield_decimal_true():
 
 
 def test_number_when_valid_precision_n_scale_none_yield_decimal_true():
-    """ test with Number with no precision and valid scale"""
+    """ Test with Number with no precision and valid scale"""
     schema = Schema({"number": Number(precision=14, yield_decimal=True)})
     out_ = schema({"number": '1234567.8901234'})
     assert float(out_.get("number")) == 1234567.8901234
 
 
 def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
-    """ test with Number with no precision and invalid scale"""
+    """ Test with Number with no precision and invalid scale"""
     schema = Schema({"number": Number(precision=14, yield_decimal=True)})
     try:
         schema({"number": '12345674.8901234'})
@@ -848,7 +1011,7 @@ def test_number_when_invalid_precision_n_scale_none_yield_decimal_true():
 
 
 def test_number_validation_with_valid_precision_scale_yield_decimal_false():
-    """ test with Number with valid precision, scale and no yield_decimal"""
+    """ Test with Number with valid precision, scale and no yield_decimal"""
     schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=False)})
     out_ = schema({"number": '1234.00'})
     assert out_.get("number") == '1234.00'
@@ -986,9 +1149,9 @@ def test_schema_infer_accepts_kwargs():
 def test_validation_performance():
     """
     This test comes to make sure the validation complexity of dictionaries is done in a linear time.
-    to achieve this a custom marker is used in the scheme that counts each time it is evaluated.
+    To achieve this a custom marker is used in the scheme that counts each time it is evaluated.
     By doing so we can determine if the validation is done in linear complexity.
-    Prior to issue https://github.com/alecthomas/voluptuous/issues/259 this was exponential
+    Prior to issue https://github.com/alecthomas/voluptuous/issues/259 this was exponential.
     """
     num_of_keys = 1000
 
@@ -1116,8 +1279,8 @@ def test_any_error_has_path():
         s({'q': 'str', 'q2': 'tata'})
     except MultipleInvalid as exc:
         assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
-            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
+            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
         )
     else:
         assert False, "Did not raise AnyInvalid"
@@ -1133,8 +1296,8 @@ def test_all_error_has_path():
         s({'q': 'str', 'q2': 12})
     except MultipleInvalid as exc:
         assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2']) or
-            (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
+            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
+            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
         )
     else:
         assert False, "Did not raise AllInvalid"
@@ -1340,11 +1503,12 @@ def test_any_required_with_subschema():
     else:
         assert False, "Did not raise Invalid for MultipleInvalid"
 
+
 def test_inclusive():
     schema = Schema({
-        Inclusive('x', 'stuff'): int,
-        Inclusive('y', 'stuff'): int,
-        })
+                    Inclusive('x', 'stuff'): int,
+                    Inclusive('y', 'stuff'): int,
+                    })
 
     r = schema({})
     assert r == {}
@@ -1353,33 +1517,35 @@ def test_inclusive():
     assert r == {'x':1, 'y':2}
 
     try:
-        r = schema({'x':1})
+        r = schema({'x': 1})
     except MultipleInvalid as e:
         assert str(e) == "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]"
     else:
         assert False, "Did not raise Invalid for incomplete Inclusive group"
 
+
 def test_inclusive_defaults():
     schema = Schema({
-        Inclusive('x', 'stuff', default=3): int,
-        Inclusive('y', 'stuff', default=4): int,
-        })
+                    Inclusive('x', 'stuff', default=3): int,
+                    Inclusive('y', 'stuff', default=4): int,
+                    })
 
     r = schema({})
     assert r == {'x':3, 'y':4}
 
     try:
-        r = schema({'x':1})
+        r = schema({'x': 1})
     except MultipleInvalid as e:
         assert str(e) == "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]"
     else:
         assert False, "Did not raise Invalid for incomplete Inclusive group with defaults"
 
+
 def test_exclusive():
     schema = Schema({
-        Exclusive('x', 'stuff'): int,
-        Exclusive('y', 'stuff'): int,
-        })
+                    Exclusive('x', 'stuff'): int,
+                    Exclusive('y', 'stuff'): int,
+                    })
 
     r = schema({})
     assert r == {}
@@ -1388,11 +1554,12 @@ def test_exclusive():
     assert r == {'x':1}
 
     try:
-        r = schema({'x':1, 'y': 2})
+        r = schema({'x': 1, 'y': 2})
     except MultipleInvalid as e:
         assert str(e) == "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]"
     else:
         assert False, "Did not raise Invalid for multiple values in Exclusive group"
+
 
 def test_any_with_discriminant():
     schema = Schema({
@@ -1405,15 +1572,52 @@ def test_any_with_discriminant():
         }, {
             'type': 'C',
             'c-value': bool,
-        }, discriminant=lambda value, alternatives: filter(lambda v : v['type'] == value['type'], alternatives))
+        }, discriminant=lambda value, alternatives: filter(lambda v: v['type'] == value['type'], alternatives))
     })
     try:
         schema({
             'implementation': {
-            'type': 'C',
-            'c-value': None,}  
+                'type': 'C',
+                'c-value': None
+            }
         })
     except MultipleInvalid as e:
         assert str(e) == 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']'
     else:
         assert False, "Did not raise correct Invalid"
+
+
+if Enum:
+    def test_coerce_enum():
+        """Test Coerce Enum"""
+        class Choice(Enum):
+            Easy = 1
+            Medium = 2
+            Hard = 3
+
+        class StringChoice(str, Enum):
+            Easy = "easy"
+            Medium = "medium"
+            Hard = "hard"
+
+        schema = Schema(Coerce(Choice))
+        string_schema = Schema(Coerce(StringChoice))
+
+        # Valid value
+        assert schema(1) == Choice.Easy
+        assert string_schema("easy") == StringChoice.Easy
+
+        # Invalid value
+        try:
+            schema(4)
+        except Invalid as e:
+            assert str(e) == "expected Choice or one of 1, 2, 3")
+        else:
+            assert False, "Did not raise Invalid for String"
+
+        try:
+            string_schema("hello")
+        except Invalid as e:
+            assert str(e) == "expected StringChoice or one of 'easy', 'medium', 'hard'")
+        else:
+            assert False, "Did not raise Invalid for String"

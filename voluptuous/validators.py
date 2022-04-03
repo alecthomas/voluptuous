@@ -4,6 +4,10 @@ import datetime
 import sys
 from functools import wraps
 from decimal import Decimal, InvalidOperation
+try:
+    from enum import Enum
+except ImportError:
+    Enum = None
 
 from voluptuous.schema_builder import Schema, raises, message
 from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
@@ -21,21 +25,29 @@ else:
 
 # Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py
 USER_REGEX = re.compile(
+    # start anchor, because fullmatch is not available in python 2.7
+    "(?:"
     # dot-atom
     r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+"
     r"(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*$"
     # quoted-string
     r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|'
-    r"""\\[\001-\011\013\014\016-\177])*"$)""",
+    r"""\\[\001-\011\013\014\016-\177])*"$)"""
+    # end anchor, because fullmatch is not available in python 2.7
+    r")\Z",
     re.IGNORECASE
 )
 DOMAIN_REGEX = re.compile(
+    # start anchor, because fullmatch is not available in python 2.7
+    "(?:"
     # domain
     r'(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'
     r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?$)'
     # literal form, ipv4 address (SMTP 4.1.3)
     r'|^\[(25[0-5]|2[0-4]\d|[0-1]?\d?\d)'
-    r'(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$',
+    r'(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$'
+    # end anchor, because fullmatch is not available in python 2.7
+    r")\Z",
     re.IGNORECASE)
 
 __author__ = 'tusharmakkar08'
@@ -95,6 +107,8 @@ class Coerce(object):
             return self.type(v)
         except (ValueError, TypeError, InvalidOperation):
             msg = self.msg or ('expected %s' % self.type_name)
+            if not self.msg and Enum and issubclass(self.type, Enum):
+                msg += " or one of %s" % str([e.value for e in self.type])[1:-1]
             raise CoerceInvalid(msg)
 
     def __repr__(self):
@@ -229,7 +243,7 @@ class Any(_WithSubValidators):
     """Use the first validated value.
 
     :param msg: Message to deliver to user if validation fails.
-    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+    :param kwargs: All other keyword arguments are passed to the sub-schema constructors.
     :returns: Return value of the first validator that passes.
 
     >>> validate = Schema(Any('true', 'false',
@@ -272,12 +286,13 @@ class Any(_WithSubValidators):
 # Convenience alias
 Or = Any
 
+
 class Union(_WithSubValidators):
-    """Use the first validated value among those selected by discrminant.
+    """Use the first validated value among those selected by discriminant.
 
     :param msg: Message to deliver to user if validation fails.
-    :param discriminant(value, validators): Returns the filtered list of validators based on the value
-    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+    :param discriminant(value, validators): Returns the filtered list of validators based on the value.
+    :param kwargs: All other keyword arguments are passed to the sub-schema constructors.
     :returns: Return value of the first validator that passes.
 
     >>> validate = Schema(Union({'type':'a', 'a_val':'1'},{'type':'b', 'b_val':'2'},
@@ -322,7 +337,7 @@ class All(_WithSubValidators):
     The output of each validator is passed as input to the next.
 
     :param msg: Message to deliver to user if validation fails.
-    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+    :param kwargs: All other keyword arguments are passed to the sub-schema constructors.
 
     >>> validate = Schema(All('10', Coerce(int)))
     >>> validate('10')
@@ -351,13 +366,13 @@ class Match(object):
     >>> validate = Schema(Match(r'^0x[A-F0-9]+$'))
     >>> validate('0x123EF4')
     '0x123EF4'
-    >>> with raises(MultipleInvalid, "does not match regular expression"):
+    >>> with raises(MultipleInvalid, 'does not match regular expression ^0x[A-F0-9]+$'):
     ...   validate('123EF4')
 
     >>> with raises(MultipleInvalid, 'expected string or buffer'):
     ...   validate(123)
 
-    Pattern may also be a _compiled regular expression:
+    Pattern may also be a compiled regular expression:
 
     >>> validate = Schema(Match(re.compile(r'0x[A-F0-9]+', re.I)))
     >>> validate('0x123ef4')
@@ -376,7 +391,7 @@ class Match(object):
         except TypeError:
             raise MatchInvalid("expected string or buffer")
         if not match:
-            raise MatchInvalid(self.msg or 'does not match regular expression')
+            raise MatchInvalid(self.msg or 'does not match regular expression {}'.format(self.pattern.pattern))
         return v
 
     def __repr__(self):
@@ -415,38 +430,38 @@ def _url_validation(v):
     return parsed
 
 
-@message('expected an Email', cls=EmailInvalid)
+@message('expected an email address', cls=EmailInvalid)
 def Email(v):
-    """Verify that the value is an Email or not.
+    """Verify that the value is an email address or not.
 
     >>> s = Schema(Email())
-    >>> with raises(MultipleInvalid, 'expected an Email'):
+    >>> with raises(MultipleInvalid, 'expected an email address'):
     ...   s("a.com")
-    >>> with raises(MultipleInvalid, 'expected an Email'):
+    >>> with raises(MultipleInvalid, 'expected an email address'):
     ...   s("a@.com")
-    >>> with raises(MultipleInvalid, 'expected an Email'):
+    >>> with raises(MultipleInvalid, 'expected an email address'):
     ...   s("a@.com")
     >>> s('t@x.com')
     't@x.com'
     """
     try:
         if not v or "@" not in v:
-            raise EmailInvalid("Invalid Email")
+            raise EmailInvalid("Invalid email address")
         user_part, domain_part = v.rsplit('@', 1)
 
         if not (USER_REGEX.match(user_part) and DOMAIN_REGEX.match(domain_part)):
-            raise EmailInvalid("Invalid Email")
+            raise EmailInvalid("Invalid email address")
         return v
-    except:
+    except:  # noqa: E722
         raise ValueError
 
 
-@message('expected a Fully qualified domain name URL', cls=UrlInvalid)
+@message('expected a fully qualified domain name URL', cls=UrlInvalid)
 def FqdnUrl(v):
-    """Verify that the value is a Fully qualified domain name URL.
+    """Verify that the value is a fully qualified domain name URL.
 
     >>> s = Schema(FqdnUrl())
-    >>> with raises(MultipleInvalid, 'expected a Fully qualified domain name URL'):
+    >>> with raises(MultipleInvalid, 'expected a fully qualified domain name URL'):
     ...   s("http://localhost/")
     >>> s('http://w3.org')
     'http://w3.org'
@@ -456,7 +471,7 @@ def FqdnUrl(v):
         if "." not in parsed_url.netloc:
             raise UrlInvalid("must have a domain name in URL")
         return v
-    except:
+    except:  # noqa: E722
         raise ValueError
 
 
@@ -473,18 +488,18 @@ def Url(v):
     try:
         _url_validation(v)
         return v
-    except:
+    except:  # noqa: E722
         raise ValueError
 
 
-@message('not a file', cls=FileInvalid)
+@message('Not a file', cls=FileInvalid)
 @truth
 def IsFile(v):
     """Verify the file exists.
 
     >>> os.path.basename(IsFile()(__file__)).startswith('validators.py')
     True
-    >>> with raises(FileInvalid, 'not a file'):
+    >>> with raises(FileInvalid, 'Not a file'):
     ...   IsFile()("random_filename_goes_here.py")
     >>> with raises(FileInvalid, 'Not a file'):
     ...   IsFile()(None)
@@ -499,7 +514,7 @@ def IsFile(v):
         raise FileInvalid('Not a file')
 
 
-@message('not a directory', cls=DirInvalid)
+@message('Not a directory', cls=DirInvalid)
 @truth
 def IsDir(v):
     """Verify the directory exists.
@@ -544,8 +559,8 @@ def PathExists(v):
 def Maybe(validator, msg=None):
     """Validate that the object matches given validator or is None.
 
-    :raises Invalid: if the value does not match the given validator and is not
-        None
+    :raises Invalid: If the value does not match the given validator and is not
+        None.
 
     >>> s = Schema(Maybe(int))
     >>> s(10)
@@ -607,10 +622,10 @@ class Range(object):
 
             return v
 
-        # Objects that lack a partial ordering, e.g. None will raise TypeError
+        # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
-                self.msg or 'value must have a partial ordering')
+                self.msg or 'invalid value or type (must have a partial ordering)')
 
     def __repr__(self):
         return ('Range(min=%r, max=%r, min_included=%r,'
@@ -640,11 +655,17 @@ class Clamp(object):
         self.msg = msg
 
     def __call__(self, v):
-        if self.min is not None and v < self.min:
-            v = self.min
-        if self.max is not None and v > self.max:
-            v = self.max
-        return v
+        try:
+            if self.min is not None and v < self.min:
+                v = self.min
+            if self.max is not None and v > self.max:
+                v = self.max
+            return v
+
+        # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
+        except TypeError:
+            raise RangeInvalid(
+                self.msg or 'invalid value or type (must have a partial ordering)')
 
     def __repr__(self):
         return 'Clamp(min=%s, max=%s)' % (self.min, self.max)
@@ -659,13 +680,19 @@ class Length(object):
         self.msg = msg
 
     def __call__(self, v):
-        if self.min is not None and len(v) < self.min:
-            raise LengthInvalid(
-                self.msg or 'length of value must be at least %s' % self.min)
-        if self.max is not None and len(v) > self.max:
-            raise LengthInvalid(
-                self.msg or 'length of value must be at most %s' % self.max)
-        return v
+        try:
+            if self.min is not None and len(v) < self.min:
+                raise LengthInvalid(
+                    self.msg or 'length of value must be at least %s' % self.min)
+            if self.max is not None and len(v) > self.max:
+                raise LengthInvalid(
+                    self.msg or 'length of value must be at most %s' % self.max)
+            return v
+
+        # Objects that havbe no length e.g. None or strings will raise TypeError
+        except TypeError:
+            raise RangeInvalid(
+                self.msg or 'invalid value or type')
 
     def __repr__(self):
         return 'Length(min=%s, max=%s)' % (self.min, self.max)
@@ -724,7 +751,8 @@ class In(object):
         except TypeError:
             check = True
         if check:
-            raise InInvalid(self.msg or 'value is not allowed')
+            raise InInvalid(self.msg
+                            or 'value must be one of {}'.format(sorted(self.container)))
         return v
 
     def __repr__(self):
@@ -744,7 +772,8 @@ class NotIn(object):
         except TypeError:
             check = True
         if check:
-            raise NotInInvalid(self.msg or 'value is not allowed')
+            raise NotInInvalid(self.msg
+                               or 'value must not be one of {}'.format(sorted(self.container)))
         return v
 
     def __repr__(self):
@@ -783,7 +812,7 @@ class ExactSequence(object):
     the validators.
 
     :param msg: Message to deliver to user if validation fails.
-    :param kwargs: All other keyword arguments are passed to the sub-Schema
+    :param kwargs: All other keyword arguments are passed to the sub-schema
         constructors.
 
     >>> from voluptuous import Schema, ExactSequence
@@ -948,7 +977,7 @@ class Unordered(object):
 class Number(object):
     """
     Verify the number of digits that are present in the number(Precision),
-    and the decimal places(Scale)
+    and the decimal places(Scale).
 
     :raises Invalid: If the value does not match the provided Precision and Scale.
 
@@ -1012,13 +1041,13 @@ class SomeOf(_WithSubValidators):
     The output of each validator is passed as input to the next.
 
     :param min_valid: Minimum number of valid schemas.
-    :param validators: a list of schemas or validators to match input against
+    :param validators: List of schemas or validators to match input against.
     :param max_valid: Maximum number of valid schemas.
     :param msg: Message to deliver to user if validation fails.
-    :param kwargs: All other keyword arguments are passed to the sub-Schema constructors.
+    :param kwargs: All other keyword arguments are passed to the sub-schema constructors.
 
-    :raises NotEnoughValid: if the minimum number of validations isn't met
-    :raises TooManyValid: if the more validations than the given amount is met
+    :raises NotEnoughValid: If the minimum number of validations isn't met.
+    :raises TooManyValid: If the maximum number of validations is exceeded.
 
     >>> validate = Schema(SomeOf(min_valid=2, validators=[Range(1, 5), Any(float, int), 6.6]))
     >>> validate(6.6)
