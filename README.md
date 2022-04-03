@@ -715,10 +715,15 @@ s({'password':'123', 'password_again': 1337})
 
 ## Running tests
 
-Voluptuous is using pytest:
+Voluptuous is using `pytest`:
 
-    $ pytest
+    pip install pytest
+    pytest
 
+To also include a coverage report:
+
+    pip install pytest pytest-cov coverage>=3.0
+    pytest --cov=voluptuous voluptuous/tests/
 
 ## Other libraries and inspirations
 
