@@ -1647,14 +1647,22 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
+# Python 3.7 removed the trainling comma in repr() of BaseException
+# https://bugs.python.org/issue30399
+if sys.version_info >= (3, 7):
+    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
+else:
+    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value',)"
+
+
 def test_exception():
     s = Schema(None)
     try:
         s(123)
     except MultipleInvalid as e:
-        assert repr(e) == "MultipleInvalid([ScalarInvalid('not a valid value')])"
+        assert repr(e) == "MultipleInvalid([{}])".format(invalid_scalar_excp_repr)
         assert str(e.msg) == "not a valid value"
         assert str(e.error_message) == "not a valid value"
-        assert str(e.errors) == "[ScalarInvalid('not a valid value')]"
+        assert str(e.errors) == "[{}]".format(invalid_scalar_excp_repr)
         e.add("Test Error")
-        assert str(e.errors) == "[ScalarInvalid('not a valid value'), 'Test Error']"
+        assert str(e.errors) == "[{}, 'Test Error']".format(invalid_scalar_excp_repr)
