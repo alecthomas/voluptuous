@@ -21,7 +21,7 @@ jobs:
           - { python-version: "3.7", session: "py37" }
           - { python-version: "3.6", session: "py36" }
           - { python-version: "2.7", session: "py27" }
-♧
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
