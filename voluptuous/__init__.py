@@ -5,5 +5,5 @@ from voluptuous.validators import *
 from voluptuous.util import *
 from voluptuous.error import *
 
-__version__ = '0.13.0'
+__version__ = '0.13.1'
 __author__ = 'alecthomas'

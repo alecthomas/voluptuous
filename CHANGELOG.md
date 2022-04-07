@@ -1,15 +1,30 @@
 # Changelog
 
+## [0.13.1]
+
+**Fixes**:
+
+- [#439](https://github.com/alecthomas/voluptuous/pull/454): Ignore `Enum` if it is unavailable
+- [#456](https://github.com/alecthomas/voluptuous/pull/456): Fix email regex match for Python 2.7
+
+**New**:
+
+- [#457](https://github.com/alecthomas/voluptuous/pull/457): Enable github actions
+- [#462](https://github.com/alecthomas/voluptuous/pull/462): Convert codebase to adhere to `flake8` W504 (PEP 8)
+- [#459](https://github.com/alecthomas/voluptuous/pull/459): Enable `flake8` in github actions
+- [#464](https://github.com/alecthomas/voluptuous/pull/464): `pytest` migration + enable Python 3.10
+
 ## [0.13.0]
 
 **Changes**:
 
-- [#450](https://github.com/alecthomas/voluptuous/pull/450): Display valid Enum values in Coerce
+- [#450](https://github.com/alecthomas/voluptuous/pull/450): Display valid `Enum` values in `Coerce`
 
 ## [0.12.2]
 
 **Fixes**:
-- [#439](https://github.com/alecthomas/voluptuous/issues/439): Revert Breaking Maybe change in 0.12.1
+
+- [#439](https://github.com/alecthomas/voluptuous/issues/439): Revert Breaking `Maybe` change in 0.12.1
 - [#447](https://github.com/alecthomas/voluptuous/issues/447): Fix Email Regex to not match on extra characters
 
 ## [0.12.1]
