@@ -416,7 +416,14 @@ class Schema(object):
 
                     break
                 else:
-                    if remove_key:
+                    # KSK: Added the first two lines on 29 May 2022
+                    # Without them, when a Invalid error is raised from a key,
+                    # the message from the error is ignored and the error is
+                    # reported as an unknown key.  With this error, the error is
+                    # reported as raised.
+                    if error:
+                        errors.append(error)
+                    elif remove_key:
                         # remove key
                         continue
                     elif self.extra == ALLOW_EXTRA:
