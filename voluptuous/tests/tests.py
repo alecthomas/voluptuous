@@ -1599,6 +1599,41 @@ def test_any_with_discriminant():
         assert False, "Did not raise correct Invalid"
 
 
+def test_key1():
+    def as_int(a):
+        return int(a)
+
+    schema = Schema({as_int: str})
+    try:
+        schema({
+            '1': 'one',
+            'two': '2',
+        })
+    except MultipleInvalid as e:
+        assert str(e) == "not a valid value @ data['two']"
+    else:
+        assert False, "Did not raise correct Invalid"
+
+
+def test_key2():
+    def as_int(a):
+        try:
+            return int(a)
+        except ValueError:
+            raise Invalid('expecting a number')
+
+    schema = Schema({as_int: str})
+    try:
+        schema({
+            '1': 'one',
+            'two': '2',
+        })
+    except MultipleInvalid as e:
+        assert str(e) == "expecting a number @ data['two']"
+    else:
+        assert False, "Did not raise correct Invalid"
+
+
 if Enum:
     def test_coerce_enum():
         """Test Coerce Enum"""
