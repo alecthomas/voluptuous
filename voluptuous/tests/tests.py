@@ -1608,9 +1608,13 @@ def test_key1():
         schema({
             '1': 'one',
             'two': '2',
+            '3': 'three',
+            'four': '4',
         })
     except MultipleInvalid as e:
-        assert str(e) == "not a valid value @ data['two']"
+        assert len(e.errors) == 2
+        assert str(e.errors[0]) == "not a valid value @ data['two']"
+        assert str(e.errors[1]) == "not a valid value @ data['four']"
     else:
         assert False, "Did not raise correct Invalid"
 

@@ -358,7 +358,6 @@ class Schema(object):
                     # key, insert it.
                     key_value_map[key.schema] = key.default()
 
-            error = None
             errors = []
             for key, value in key_value_map.items():
                 key_path = path + [key]
@@ -369,6 +368,7 @@ class Schema(object):
 
                 # compare each given key/value against all compiled key/values
                 # schema key, (compiled key, compiled value)
+                error = None
                 for skey, (ckey, cvalue) in relevant_candidates:
                     try:
                         new_key = ckey(key_path, key)
