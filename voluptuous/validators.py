@@ -689,7 +689,7 @@ class Length(object):
                     self.msg or 'length of value must be at most %s' % self.max)
             return v
 
-        # Objects that havbe no length e.g. None or strings will raise TypeError
+        # Objects that have no length e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
                 self.msg or 'invalid value or type')
@@ -845,7 +845,7 @@ class ExactSequence(object):
 class Unique(object):
     """Ensure an iterable does not contain duplicate items.
 
-    Only iterables convertable to a set are supported (native types and
+    Only iterables convertible to a set are supported (native types and
     objects with correct __eq__).
 
     JSON does not support set, so they need to be presented as arrays.

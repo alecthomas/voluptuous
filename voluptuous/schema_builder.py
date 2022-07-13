@@ -866,7 +866,7 @@ def _compile_itemsort():
         for i, check_ in priority:
             if check_(key_):
                 return i
-        # values have hightest priorities
+        # values have highest priorities
         return 0
 
     return item_priority
