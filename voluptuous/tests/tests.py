@@ -115,7 +115,7 @@ def test_remove():
     # remove keys by type
     schema = Schema({"weight": float,
                      "amount": int,
-                     # remvove str keys with int values
+                     # remove str keys with int values
                      Remove(str): int,
                      # keep str keys with str values
                      str: str})
@@ -1647,7 +1647,7 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
-# Python 3.7 removed the trainling comma in repr() of BaseException
+# Python 3.7 removed the trailing comma in repr() of BaseException
 # https://bugs.python.org/issue30399
 if sys.version_info >= (3, 7):
     invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
