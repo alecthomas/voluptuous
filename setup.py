@@ -19,7 +19,7 @@ setup(
     description=description,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    license='BSD',
+    license='BSD-3-Clause',
     platforms=['any'],
     packages=['voluptuous'],
     author='Alec Thomas',
