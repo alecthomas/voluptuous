@@ -238,6 +238,9 @@ class _WithSubValidators(object):
             self.msg
         )
 
+    def _exec(self, funcs, v, path=None):
+        raise NotImplementedError()
+
 
 class Any(_WithSubValidators):
     """Use the first validated value.
@@ -823,9 +826,9 @@ class ExactSequence(object):
     ('hourly_report', 10, [], [])
     """
 
-    def __init__(self, validators, **kwargs):
+    def __init__(self, validators, msg=None, **kwargs):
         self.validators = validators
-        self.msg = kwargs.pop('msg', None)
+        self.msg = msg
         self._schemas = [Schema(val, **kwargs) for val in validators]
 
     def __call__(self, v):

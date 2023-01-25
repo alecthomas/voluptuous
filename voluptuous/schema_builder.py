@@ -1009,7 +1009,7 @@ class Marker(object):
         return self.schema == other
 
     def __ne__(self, other):
-        return not(self.schema == other)
+        return not (self.schema == other)
 
 
 class Optional(Marker):
