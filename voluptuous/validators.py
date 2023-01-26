@@ -1035,7 +1035,7 @@ class Number(object):
     def __repr__(self):
         return ('Number(precision=%s, scale=%s, msg=%s)' % (self.precision, self.scale, self.msg))
 
-    def _get_precision_scale(self, number):
+    def _get_precision_scale(self, number) -> typing.Tuple[int, int, Decimal]:
         """
         :param number:
         :return: tuple(precision, scale, decimal_number)

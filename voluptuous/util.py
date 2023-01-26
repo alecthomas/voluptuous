@@ -78,7 +78,7 @@ class DefaultTo(object):
     []
     """
 
-    def __init__(self, default_value, msg: str | None=None) -> None:
+    def __init__(self, default_value, msg: str | None = None) -> None:
         self.default_value = default_factory(default_value)
         self.msg = msg
 

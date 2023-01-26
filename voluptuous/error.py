@@ -48,15 +48,15 @@ class MultipleInvalid(Invalid):
         return 'MultipleInvalid(%r)' % self.errors
 
     @property
-    def msg(self):
+    def msg(self) -> str:
         return self.errors[0].msg
 
     @property
-    def path(self):
+    def path(self) -> typing.List[str]:
         return self.errors[0].path
 
     @property
-    def error_message(self):
+    def error_message(self) -> str:
         return self.errors[0].error_message
 
     def add(self, error: Invalid) -> None:

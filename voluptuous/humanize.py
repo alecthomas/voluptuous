@@ -9,7 +9,7 @@ MAX_VALIDATION_ERROR_ITEM_LENGTH = 500
 
 IndexT = typing.TypeVar("IndexT")
 
-def _nested_getitem(data: typing.Dict[IndexT, typing.Any], path: typing.List[IndexT]):
+def _nested_getitem(data: typing.Dict[IndexT, typing.Any], path: typing.List[IndexT]) -> typing.Any | None:
     for item_index in path:
         try:
             data = data[item_index]
@@ -37,7 +37,7 @@ def humanize_error(data, validation_error: Invalid, max_sub_error_length: int = 
         return '%s. Got %s' % (validation_error, offending_item_summary)
 
 
-def validate_with_humanized_errors(data, schema: Schema, max_sub_error_length: int = MAX_VALIDATION_ERROR_ITEM_LENGTH):
+def validate_with_humanized_errors(data, schema: Schema, max_sub_error_length: int = MAX_VALIDATION_ERROR_ITEM_LENGTH) -> typing.Any:
     try:
         return schema(data)
     except (Invalid, MultipleInvalid) as e:
