@@ -1,11 +1,15 @@
 from voluptuous import Invalid, MultipleInvalid
 from voluptuous.error import Error
+from voluptuous.schema_builder import Schema
+import typing
 
 
 MAX_VALIDATION_ERROR_ITEM_LENGTH = 500
 
 
-def _nested_getitem(data, path):
+IndexT = typing.TypeVar("IndexT")
+
+def _nested_getitem(data: typing.Dict[IndexT, typing.Any], path: typing.List[IndexT]):
     for item_index in path:
         try:
             data = data[item_index]
@@ -16,7 +20,7 @@ def _nested_getitem(data, path):
     return data
 
 
-def humanize_error(data, validation_error, max_sub_error_length=MAX_VALIDATION_ERROR_ITEM_LENGTH):
+def humanize_error(data, validation_error: Invalid, max_sub_error_length: int = MAX_VALIDATION_ERROR_ITEM_LENGTH) -> str:
     """ Provide a more helpful + complete validation error message than that provided automatically
     Invalid and MultipleInvalid do not include the offending value in error messages,
     and MultipleInvalid.__str__ only provides the first error.
@@ -33,7 +37,7 @@ def humanize_error(data, validation_error, max_sub_error_length=MAX_VALIDATION_E
         return '%s. Got %s' % (validation_error, offending_item_summary)
 
 
-def validate_with_humanized_errors(data, schema, max_sub_error_length=MAX_VALIDATION_ERROR_ITEM_LENGTH):
+def validate_with_humanized_errors(data, schema: Schema, max_sub_error_length: int = MAX_VALIDATION_ERROR_ITEM_LENGTH):
     try:
         return schema(data)
     except (Invalid, MultipleInvalid) as e:

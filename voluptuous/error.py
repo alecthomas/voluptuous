@@ -1,3 +1,4 @@
+import typing
 
 class Error(Exception):
     """Base validation exception."""
@@ -17,17 +18,17 @@ class Invalid(Error):
 
     """
 
-    def __init__(self, message, path=None, error_message=None, error_type=None):
+    def __init__(self, message: str, path: typing.List[str] | None = None, error_message: str | None = None, error_type: str | None = None) -> None:
         Error.__init__(self, message)
         self.path = path or []
         self.error_message = error_message or message
         self.error_type = error_type
 
     @property
-    def msg(self):
+    def msg(self) -> str:
         return self.args[0]
 
-    def __str__(self):
+    def __str__(self) -> str:
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) \
             if self.path else ''
         output = Exception.__str__(self)
@@ -35,15 +36,15 @@ class Invalid(Error):
             output += ' for ' + self.error_type
         return output + path
 
-    def prepend(self, path):
+    def prepend(self, path: typing.List[str]) -> None:
         self.path = path + self.path
 
 
 class MultipleInvalid(Invalid):
-    def __init__(self, errors=None):
+    def __init__(self, errors: typing.List[Invalid] | None = None) -> None:
         self.errors = errors[:] if errors else []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'MultipleInvalid(%r)' % self.errors
 
     @property
@@ -58,13 +59,13 @@ class MultipleInvalid(Invalid):
     def error_message(self):
         return self.errors[0].error_message
 
-    def add(self, error):
+    def add(self, error: Invalid) -> None:
         self.errors.append(error)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.errors[0])
 
-    def prepend(self, path):
+    def prepend(self, path: typing.List[str]) -> None:
         for error in self.errors:
             error.prepend(path)
 

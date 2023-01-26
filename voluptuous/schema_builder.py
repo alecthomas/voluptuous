@@ -7,6 +7,9 @@ from contextlib import contextmanager
 
 import itertools
 from voluptuous import error as er
+from collections.abc import Generator
+import typing
+from voluptuous.error import Error
 
 if sys.version_info >= (3,):
     long = int
@@ -127,18 +130,21 @@ class Undefined(object):
 UNDEFINED = Undefined()
 
 
-def Self():
+def Self() -> None:
     raise er.SchemaError('"Self" should never be called')
 
 
-def default_factory(value):
+DefaultFactory = typing.Union[Undefined, typing.Callable[[], typing.Any]]
+
+
+def default_factory(value) -> DefaultFactory:
     if value is UNDEFINED or callable(value):
         return value
     return lambda: value
 
 
 @contextmanager
-def raises(exc, msg=None, regex=None):
+def raises(exc, msg: str | None=None, regex: re.Pattern | None=None) -> Generator[None, None, None]:
     try:
         yield
     except exc as e:
@@ -148,7 +154,7 @@ def raises(exc, msg=None, regex=None):
             assert re.search(regex, str(e)), '%r does not match %r' % (str(e), regex)
 
 
-def Extra(_):
+def Extra(_) -> None:
     """Allow keys in the data that are not present in the schema."""
     raise er.SchemaError('"Extra" should never be called')
 
@@ -156,6 +162,8 @@ def Extra(_):
 # As extra() is never called there's no way to catch references to the
 # deprecated object, so we just leave an alias here instead.
 extra = Extra
+
+Schemable = typing.Union[dict, list, type, typing.Callable]
 
 
 class Schema(object):
@@ -186,7 +194,7 @@ class Schema(object):
         PREVENT_EXTRA: 'PREVENT_EXTRA',
     }
 
-    def __init__(self, schema, required=False, extra=PREVENT_EXTRA):
+    def __init__(self, schema: Schemable, required: bool=False, extra: int=PREVENT_EXTRA) -> None:
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
@@ -723,7 +731,7 @@ class Schema(object):
 
         return validate_set
 
-    def extend(self, schema, required=None, extra=None):
+    def extend(self, schema: dict, required: bool | None=None, extra: int | None=None):
         """Create a new `Schema` by merging this and the provided `schema`.
 
         Neither this `Schema` nor the provided `schema` are modified. The
@@ -936,7 +944,7 @@ class Msg(object):
     ...   assert isinstance(e.errors[0], er.RangeInvalid)
     """
 
-    def __init__(self, schema, msg, cls=None):
+    def __init__(self, schema: dict, msg: str, cls: typing.Type[Error] | None=None) -> None:
         if cls and not issubclass(cls, er.Invalid):
             raise er.SchemaError("Msg can only use subclases of"
                                  " Invalid as custom class")
@@ -961,7 +969,7 @@ class Msg(object):
 class Object(dict):
     """Indicate that we should work with attributes, not keys."""
 
-    def __init__(self, schema, cls=UNDEFINED):
+    def __init__(self, schema, cls: object=UNDEFINED) -> None:
         self.cls = cls
         super(Object, self).__init__(schema)
 
@@ -977,7 +985,7 @@ class VirtualPathComponent(str):
 class Marker(object):
     """Mark nodes for special treatment."""
 
-    def __init__(self, schema_, msg=None, description=None):
+    def __init__(self, schema_: dict, msg: str | None=None, description: str | None=None) -> None:
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
@@ -1035,7 +1043,7 @@ class Optional(Marker):
     {'key2': 'value'}
     """
 
-    def __init__(self, schema, msg=None, default=UNDEFINED, description=None):
+    def __init__(self, schema: dict, msg: str | None=None, default=UNDEFINED, description: str | None=None) -> None:
         super(Optional, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1077,7 +1085,7 @@ class Exclusive(Optional):
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
     """
 
-    def __init__(self, schema, group_of_exclusion, msg=None, description=None):
+    def __init__(self, schema: dict, group_of_exclusion: str, msg: str | None=None, description: str | None=None) -> None:
         super(Exclusive, self).__init__(schema, msg=msg,
                                         description=description)
         self.group_of_exclusion = group_of_exclusion
@@ -1125,8 +1133,8 @@ class Inclusive(Optional):
     True
     """
 
-    def __init__(self, schema, group_of_inclusion,
-                 msg=None, description=None, default=UNDEFINED):
+    def __init__(self, schema: dict, group_of_inclusion: str,
+                 msg: str | None=None, description: str | None=None, default=UNDEFINED) -> None:
         super(Inclusive, self).__init__(schema, msg=msg,
                                         default=default,
                                         description=description)
@@ -1148,7 +1156,7 @@ class Required(Marker):
     {'key': []}
     """
 
-    def __init__(self, schema, msg=None, default=UNDEFINED, description=None):
+    def __init__(self, schema: dict, msg: str | None=None, default=UNDEFINED, description: str | None=None) -> None:
         super(Required, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1169,7 +1177,7 @@ class Remove(Marker):
     [1, 2, 3, 5, '7']
     """
 
-    def __call__(self, v):
+    def __call__(self, v: object):
         super(Remove, self).__call__(v)
         return self.__class__
 
@@ -1180,7 +1188,7 @@ class Remove(Marker):
         return object.__hash__(self)
 
 
-def message(default=None, cls=None):
+def message(default: str | None=None, cls: typing.Type[Error] | None=None):
     """Convenience decorator to allow functions to provide a message.
 
     Set a default message:

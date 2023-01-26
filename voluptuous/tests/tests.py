@@ -1,10 +1,13 @@
 import collections
 import copy
+import typing
 
+Enum: typing.Union[type, None]
 try:
     from enum import Enum
 except ImportError:
     Enum = None
+
 import os
 import sys
 
