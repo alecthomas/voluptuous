@@ -100,7 +100,7 @@ class Coerce(object):
         ...   validate('foo')
     """
 
-    def __init__(self, type: type, msg: str | None = None) -> None:
+    def __init__(self, type: type, msg: typing.Optional[str] = None) -> None:
         self.type = type
         self.msg = msg
         self.type_name = type.__name__
@@ -241,7 +241,7 @@ class _WithSubValidators(object):
             self.msg
         )
 
-    def _exec(self, funcs: typing.Iterable, v, path: typing.List[str] | None = None):
+    def _exec(self, funcs: typing.Iterable, v, path: typing.Optional[typing.List[str]] = None):
         raise NotImplementedError()
 
 
@@ -385,7 +385,7 @@ class Match(object):
     '0x123ef4'
     """
 
-    def __init__(self, pattern: re.Pattern | str, msg: str | None = None) -> None:
+    def __init__(self, pattern: typing.Union[re.Pattern, str], msg: typing.Optional[str] = None) -> None:
         if isinstance(pattern, basestring):
             pattern = re.compile(pattern)
         self.pattern = pattern
@@ -413,7 +413,7 @@ class Replace(object):
     'I say goodbye'
     """
 
-    def __init__(self, pattern: re.Pattern | str, substitution: str, msg: str | None = None) -> None:
+    def __init__(self, pattern: typing.Union[re.Pattern, str], substitution: str, msg: typing.Optional[str] = None) -> None:
         if isinstance(pattern, basestring):
             pattern = re.compile(pattern)
         self.pattern = pattern
@@ -562,7 +562,7 @@ def PathExists(v):
         raise PathInvalid("Not a Path")
 
 
-def Maybe(validator: typing.Callable, msg: str | None = None):
+def Maybe(validator: typing.Callable, msg: typing.Optional[str] = None):
     """Validate that the object matches given validator or is None.
 
     :raises Invalid: If the value does not match the given validator and is not
@@ -604,7 +604,7 @@ class Range(object):
 
     def __init__(self, min: NullableNumber = None, max: NullableNumber = None,
                  min_included: bool = True, max_included: bool = True,
-                 msg: str | None = None) -> None:
+                 msg: typing.Optional[str] = None) -> None:
         self.min = min
         self.max = max
         self.min_included = min_included
@@ -660,7 +660,7 @@ class Clamp(object):
     """
 
     def __init__(self, min: NullableNumber = None, max: NullableNumber = None,
-                 msg: str | None = None) -> None:
+                 msg: typing.Optional[str] = None) -> None:
         self.min = min
         self.max = max
         self.msg = msg
@@ -686,7 +686,7 @@ class Length(object):
     """The length of a value must be in a certain range."""
 
     def __init__(self, min: NullableNumber = None, max: NullableNumber = None,
-                 msg: str | None = None) -> None:
+                 msg: typing.Optional[str] = None) -> None:
         self.min = min
         self.max = max
         self.msg = msg
@@ -715,7 +715,7 @@ class Datetime(object):
 
     DEFAULT_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def __init__(self, format: str | None = None, msg: str | None = None) -> None:
+    def __init__(self, format: typing.Optional[str] = None, msg: typing.Optional[str] = None) -> None:
         self.format = format or self.DEFAULT_FORMAT
         self.msg = msg
 
@@ -753,7 +753,7 @@ class Date(Datetime):
 class In(object):
     """Validate that a value is in a collection."""
 
-    def __init__(self, container: typing.Iterable, msg: str | None = None) -> None:
+    def __init__(self, container: typing.Iterable, msg: typing.Optional[str] = None) -> None:
         self.container = container
         self.msg = msg
 
@@ -774,7 +774,7 @@ class In(object):
 class NotIn(object):
     """Validate that a value is not in a collection."""
 
-    def __init__(self, container: typing.Iterable, msg: str | None = None) -> None:
+    def __init__(self, container: typing.Iterable, msg: typing.Optional[str] = None) -> None:
         self.container = container
         self.msg = msg
 
@@ -802,7 +802,7 @@ class Contains(object):
     ...   s([3, 2])
     """
 
-    def __init__(self, item, msg: str | None = None) -> None:
+    def __init__(self, item, msg: typing.Optional[str] = None) -> None:
         self.item = item
         self.msg = msg
 
@@ -835,7 +835,7 @@ class ExactSequence(object):
     ('hourly_report', 10, [], [])
     """
 
-    def __init__(self, validators: typing.Iterable[Schemable], msg: str | None = None, **kwargs) -> None:
+    def __init__(self, validators: typing.Iterable[Schemable], msg: typing.Optional[str] = None, **kwargs) -> None:
         self.validators = validators
         self.msg = msg
         self._schemas = [Schema(val, **kwargs) for val in validators]
@@ -880,7 +880,7 @@ class Unique(object):
     ...   s('aabbc')
     """
 
-    def __init__(self, msg: str | None = None) -> None:
+    def __init__(self, msg: typing.Optional[str] = None) -> None:
         self.msg = msg
 
     def __call__(self, v):
@@ -916,7 +916,7 @@ class Equal(object):
     ...     s('foo')
     """
 
-    def __init__(self, target, msg: str | None = None) -> None:
+    def __init__(self, target, msg: typing.Optional[str] = None) -> None:
         self.target = target
         self.msg = msg
 
@@ -945,7 +945,7 @@ class Unordered(object):
     """
 
     def __init__(self, validators: typing.Iterable[Schemable],
-                 msg: str | None = None, **kwargs) -> None:
+                 msg: typing.Optional[str] = None, **kwargs) -> None:
         self.validators = validators
         self.msg = msg
         self._schemas = [Schema(val, **kwargs) for val in validators]
@@ -1002,8 +1002,8 @@ class Number(object):
     Decimal('1234.01')
     """
 
-    def __init__(self, precision: int | None = None, scale: int | None = None,
-                 msg: str | None = None, yield_decimal: bool = False) -> None:
+    def __init__(self, precision: typing.Optional[int] = None, scale: typing.Optional[int] = None,
+                 msg: typing.Optional[str] = None, yield_decimal: bool = False) -> None:
         self.precision = precision
         self.scale = scale
         self.msg = msg
@@ -1079,7 +1079,7 @@ class SomeOf(_WithSubValidators):
     """
 
     def __init__(self, validators: typing.List[Schemable],
-                 min_valid: int | None = None, max_valid: int | None = None,
+                 min_valid: typing.Optional[int] = None, max_valid: typing.Optional[int] = None,
                  **kwargs) -> None:
         assert min_valid is not None or max_valid is not None, \
             'when using "%s" you should specify at least one of min_valid and max_valid' % (type(self).__name__,)

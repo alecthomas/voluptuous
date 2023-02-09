@@ -146,7 +146,7 @@ def default_factory(value) -> DefaultFactory:
 
 
 @contextmanager
-def raises(exc, msg: str | None = None, regex: re.Pattern | None = None) -> Generator[None, None, None]:
+def raises(exc, msg: typing.Optional[str] = None, regex: typing.Optional[re.Pattern] = None) -> Generator[None, None, None]:
     try:
         yield
     except exc as e:
@@ -733,7 +733,7 @@ class Schema(object):
 
         return validate_set
 
-    def extend(self, schema: dict, required: bool | None = None, extra: int | None = None) -> Schema:
+    def extend(self, schema: dict, required: typing.Optional[bool] = None, extra: typing.Optional[int] = None) -> Schema:
         """Create a new `Schema` by merging this and the provided `schema`.
 
         Neither this `Schema` nor the provided `schema` are modified. The
@@ -947,7 +947,7 @@ class Msg(object):
     ...   assert isinstance(e.errors[0], er.RangeInvalid)
     """
 
-    def __init__(self, schema: dict, msg: str, cls: typing.Type[Error] | None = None) -> None:
+    def __init__(self, schema: dict, msg: str, cls: typing.Optional[typing.Type[Error]] = None) -> None:
         if cls and not issubclass(cls, er.Invalid):
             raise er.SchemaError("Msg can only use subclases of"
                                  " Invalid as custom class")
@@ -988,7 +988,7 @@ class VirtualPathComponent(str):
 class Marker(object):
     """Mark nodes for special treatment."""
 
-    def __init__(self, schema_: dict, msg: str | None = None, description: str | None = None) -> None:
+    def __init__(self, schema_: dict, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
@@ -1046,7 +1046,7 @@ class Optional(Marker):
     {'key2': 'value'}
     """
 
-    def __init__(self, schema: dict, msg: str | None = None, default=UNDEFINED, description: str | None = None) -> None:
+    def __init__(self, schema: dict, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
         super(Optional, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1088,7 +1088,7 @@ class Exclusive(Optional):
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
     """
 
-    def __init__(self, schema: dict, group_of_exclusion: str, msg: str | None = None, description: str | None = None) -> None:
+    def __init__(self, schema: dict, group_of_exclusion: str, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
         super(Exclusive, self).__init__(schema, msg=msg,
                                         description=description)
         self.group_of_exclusion = group_of_exclusion
@@ -1137,7 +1137,7 @@ class Inclusive(Optional):
     """
 
     def __init__(self, schema: dict, group_of_inclusion: str,
-                 msg: str | None = None, description: str | None = None, default=UNDEFINED) -> None:
+                 msg: typing.Optional[str] = None, description: typing.Optional[str] = None, default=UNDEFINED) -> None:
         super(Inclusive, self).__init__(schema, msg=msg,
                                         default=default,
                                         description=description)
@@ -1159,7 +1159,7 @@ class Required(Marker):
     {'key': []}
     """
 
-    def __init__(self, schema: dict, msg: str | None = None, default=UNDEFINED, description: str | None = None) -> None:
+    def __init__(self, schema: dict, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
         super(Required, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1191,7 +1191,7 @@ class Remove(Marker):
         return object.__hash__(self)
 
 
-def message(default: str | None = None, cls: typing.Type[Error] | None = None) -> typing.Callable:
+def message(default: typing.Optional[str] = None, cls: typing.Optional[typing.Type[Error]] = None) -> typing.Callable:
     """Convenience decorator to allow functions to provide a message.
 
     Set a default message:

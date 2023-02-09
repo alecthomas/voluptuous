@@ -78,7 +78,7 @@ class DefaultTo(object):
     []
     """
 
-    def __init__(self, default_value, msg: str | None = None) -> None:
+    def __init__(self, default_value, msg: typing.Optional[str] = None) -> None:
         self.default_value = default_factory(default_value)
         self.msg = msg
 
@@ -123,7 +123,7 @@ class Set(object):
     ...   s([set([1, 2]), set([3, 4])])
     """
 
-    def __init__(self, msg: str | None = None) -> None:
+    def __init__(self, msg: typing.Optional[str] = None) -> None:
         self.msg = msg
 
     def __call__(self, v):
@@ -142,7 +142,7 @@ class Literal(object):
     def __init__(self, lit) -> None:
         self.lit = lit
 
-    def __call__(self, value, msg: str | None = None):
+    def __call__(self, value, msg: typing.Optional[str] = None):
         if self.lit != value:
             raise LiteralInvalid(
                 msg or '%s not match for %s' % (value, self.lit)

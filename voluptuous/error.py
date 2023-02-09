@@ -18,7 +18,7 @@ class Invalid(Error):
 
     """
 
-    def __init__(self, message: str, path: typing.List[str] | None = None, error_message: str | None = None, error_type: str | None = None) -> None:
+    def __init__(self, message: str, path: typing.Optional[typing.List[str]] = None, error_message: typing.Optional[str] = None, error_type: typing.Optional[str] = None) -> None:
         Error.__init__(self, message)
         self.path = path or []
         self.error_message = error_message or message
@@ -41,7 +41,7 @@ class Invalid(Error):
 
 
 class MultipleInvalid(Invalid):
-    def __init__(self, errors: typing.List[Invalid] | None = None) -> None:
+    def __init__(self, errors: typing.Optional[typing.List[Invalid]] = None) -> None:
         self.errors = errors[:] if errors else []
 
     def __repr__(self) -> str:
