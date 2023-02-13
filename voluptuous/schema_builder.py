@@ -196,7 +196,7 @@ class Schema(object):
         PREVENT_EXTRA: 'PREVENT_EXTRA',
     }
 
-    def __init__(self, schema: Schemable, required: bool=False, extra: int=PREVENT_EXTRA) -> None:
+    def __init__(self, schema: Schemable, required: bool = False, extra: int = PREVENT_EXTRA) -> None:
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
@@ -972,7 +972,7 @@ class Msg(object):
 class Object(dict):
     """Indicate that we should work with attributes, not keys."""
 
-    def __init__(self, schema, cls: object=UNDEFINED) -> None:
+    def __init__(self, schema, cls: object = UNDEFINED) -> None:
         self.cls = cls
         super(Object, self).__init__(schema)
 

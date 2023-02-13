@@ -1,5 +1,6 @@
 import typing
 
+
 class Error(Exception):
     """Base validation exception."""
 

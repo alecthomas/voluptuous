@@ -1,3 +1,11 @@
+from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
+                              AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
+                              RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
+                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
+                              TooManyValid)
+
+# F401: flake8 complains about 'raises' not being used, but it is used in doctests
+from voluptuous.schema_builder import Schema, raises, message, Schemable  # noqa: F401
 import os
 import re
 import datetime
@@ -12,12 +20,6 @@ try:
 except ImportError:
     Enum = None
 
-from voluptuous.schema_builder import Schema, raises, message, Schemable
-from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
-                              AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
-                              RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
-                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
-                              TooManyValid)
 
 if sys.version_info >= (3,):
     import urllib.parse as urlparse

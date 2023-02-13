@@ -22,7 +22,7 @@ setup(
     license='BSD-3-Clause',
     platforms=['any'],
     packages=['voluptuous'],
-    package_data= {
+    package_data={
         'voluptuous': ['py.typed'],
     },
     author='Alec Thomas',

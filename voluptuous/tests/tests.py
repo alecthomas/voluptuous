@@ -1,3 +1,16 @@
+from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
+from voluptuous.humanize import humanize_error
+from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Clamp, Coerce,
+                        Contains, Date, Datetime, Email, Equal, ExactSequence,
+                        Exclusive, Extra, FqdnUrl, In, Inclusive, Invalid,
+                        IsDir, IsFile, Length, Literal, LiteralInvalid, Marker,
+                        Match, Maybe, MultipleInvalid, NotIn, Number, Object,
+                        Optional, PathExists, Range, Remove, Replace, Required,
+                        Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
+                        Unordered, Url, raises, validate)
+import pytest
+import sys
+import os
 import collections
 import copy
 import typing
@@ -7,21 +20,6 @@ try:
     from enum import Enum
 except ImportError:
     Enum = None
-
-import os
-import sys
-
-import pytest
-from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Clamp, Coerce,
-                        Contains, Date, Datetime, Email, Equal, ExactSequence,
-                        Exclusive, Extra, FqdnUrl, In, Inclusive, Invalid,
-                        IsDir, IsFile, Length, Literal, LiteralInvalid, Marker,
-                        Match, Maybe, MultipleInvalid, NotIn, Number, Object,
-                        Optional, PathExists, Range, Remove, Replace, Required,
-                        Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
-                        Unordered, Url, raises, validate)
-from voluptuous.humanize import humanize_error
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
 
 
 def test_new_required_test():

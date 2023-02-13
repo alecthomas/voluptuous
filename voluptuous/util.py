@@ -1,9 +1,10 @@
 import sys
 
-from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid
-from voluptuous.schema_builder import Schema, default_factory, raises
-from voluptuous import validators
-from voluptuous.schema_builder import DefaultFactory
+# F401: "imported but unused"
+from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid  # noqa: F401
+from voluptuous.schema_builder import Schema, default_factory, raises  # noqa: F401
+from voluptuous import validators  # noqa: F401
+from voluptuous.schema_builder import DefaultFactory  # noqa: F401
 import typing
 
 __author__ = 'tusharmakkar08'
