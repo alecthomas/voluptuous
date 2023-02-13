@@ -1,20 +1,25 @@
+from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
+                              AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
+                              RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
+                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
+                              TooManyValid)
+
+# F401: flake8 complains about 'raises' not being used, but it is used in doctests
+from voluptuous.schema_builder import Schema, raises, message, Schemable  # noqa: F401
 import os
 import re
 import datetime
 import sys
 from functools import wraps
 from decimal import Decimal, InvalidOperation
+import typing
+
+Enum: typing.Union[type, None]
 try:
     from enum import Enum
 except ImportError:
     Enum = None
 
-from voluptuous.schema_builder import Schema, raises, message
-from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
-                              AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
-                              RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
-                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
-                              TooManyValid)
 
 if sys.version_info >= (3,):
     import urllib.parse as urlparse
@@ -53,7 +58,7 @@ DOMAIN_REGEX = re.compile(
 __author__ = 'tusharmakkar08'
 
 
-def truth(f):
+def truth(f: typing.Callable) -> typing.Callable:
     """Convenience decorator to convert truth functions into validators.
 
         >>> @truth
@@ -97,7 +102,7 @@ class Coerce(object):
         ...   validate('foo')
     """
 
-    def __init__(self, type, msg=None):
+    def __init__(self, type: type, msg: typing.Optional[str] = None) -> None:
         self.type = type
         self.msg = msg
         self.type_name = type.__name__
@@ -203,13 +208,13 @@ class _WithSubValidators(object):
     sub-validators are compiled by the parent `Schema`.
     """
 
-    def __init__(self, *validators, **kwargs):
+    def __init__(self, *validators, msg=None, required=False, discriminant=None, **kwargs) -> None:
         self.validators = validators
-        self.msg = kwargs.pop('msg', None)
-        self.required = kwargs.pop('required', False)
-        self.discriminant = kwargs.pop('discriminant', None)
+        self.msg = msg
+        self.required = required
+        self.discriminant = discriminant
 
-    def __voluptuous_compile__(self, schema):
+    def __voluptuous_compile__(self, schema: Schema) -> typing.Callable:
         self._compiled = []
         old_required = schema.required
         self.schema = schema
@@ -219,7 +224,7 @@ class _WithSubValidators(object):
         schema.required = old_required
         return self._run
 
-    def _run(self, path, value):
+    def _run(self, path: typing.List[str], value):
         if self.discriminant is not None:
             self._compiled = [
                 self.schema._compile(v)
@@ -237,6 +242,9 @@ class _WithSubValidators(object):
             ", ".join(repr(v) for v in self.validators),
             self.msg
         )
+
+    def _exec(self, funcs: typing.Iterable, v, path: typing.Optional[typing.List[str]] = None):
+        raise NotImplementedError()
 
 
 class Any(_WithSubValidators):
@@ -379,7 +387,7 @@ class Match(object):
     '0x123ef4'
     """
 
-    def __init__(self, pattern, msg=None):
+    def __init__(self, pattern: typing.Union[re.Pattern, str], msg: typing.Optional[str] = None) -> None:
         if isinstance(pattern, basestring):
             pattern = re.compile(pattern)
         self.pattern = pattern
@@ -407,7 +415,7 @@ class Replace(object):
     'I say goodbye'
     """
 
-    def __init__(self, pattern, substitution, msg=None):
+    def __init__(self, pattern: typing.Union[re.Pattern, str], substitution: str, msg: typing.Optional[str] = None) -> None:
         if isinstance(pattern, basestring):
             pattern = re.compile(pattern)
         self.pattern = pattern
@@ -423,7 +431,7 @@ class Replace(object):
                                             self.msg)
 
 
-def _url_validation(v):
+def _url_validation(v: str) -> urlparse.ParseResult:
     parsed = urlparse.urlparse(v)
     if not parsed.scheme or not parsed.netloc:
         raise UrlInvalid("must have a URL scheme and host")
@@ -556,7 +564,7 @@ def PathExists(v):
         raise PathInvalid("Not a Path")
 
 
-def Maybe(validator, msg=None):
+def Maybe(validator: typing.Callable, msg: typing.Optional[str] = None):
     """Validate that the object matches given validator or is None.
 
     :raises Invalid: If the value does not match the given validator and is not
@@ -570,6 +578,9 @@ def Maybe(validator, msg=None):
 
     """
     return Any(None, validator, msg=msg)
+
+
+NullableNumber = typing.Union[int, float, None]
 
 
 class Range(object):
@@ -593,8 +604,9 @@ class Range(object):
     ...   Schema(Range(max=10, max_included=False))(20)
     """
 
-    def __init__(self, min=None, max=None, min_included=True,
-                 max_included=True, msg=None):
+    def __init__(self, min: NullableNumber = None, max: NullableNumber = None,
+                 min_included: bool = True, max_included: bool = True,
+                 msg: typing.Optional[str] = None) -> None:
         self.min = min
         self.max = max
         self.min_included = min_included
@@ -649,7 +661,8 @@ class Clamp(object):
     0
     """
 
-    def __init__(self, min=None, max=None, msg=None):
+    def __init__(self, min: NullableNumber = None, max: NullableNumber = None,
+                 msg: typing.Optional[str] = None) -> None:
         self.min = min
         self.max = max
         self.msg = msg
@@ -674,7 +687,8 @@ class Clamp(object):
 class Length(object):
     """The length of a value must be in a certain range."""
 
-    def __init__(self, min=None, max=None, msg=None):
+    def __init__(self, min: NullableNumber = None, max: NullableNumber = None,
+                 msg: typing.Optional[str] = None) -> None:
         self.min = min
         self.max = max
         self.msg = msg
@@ -703,7 +717,7 @@ class Datetime(object):
 
     DEFAULT_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def __init__(self, format=None, msg=None):
+    def __init__(self, format: typing.Optional[str] = None, msg: typing.Optional[str] = None) -> None:
         self.format = format or self.DEFAULT_FORMAT
         self.msg = msg
 
@@ -741,7 +755,7 @@ class Date(Datetime):
 class In(object):
     """Validate that a value is in a collection."""
 
-    def __init__(self, container, msg=None):
+    def __init__(self, container: typing.Iterable, msg: typing.Optional[str] = None) -> None:
         self.container = container
         self.msg = msg
 
@@ -762,7 +776,7 @@ class In(object):
 class NotIn(object):
     """Validate that a value is not in a collection."""
 
-    def __init__(self, container, msg=None):
+    def __init__(self, container: typing.Iterable, msg: typing.Optional[str] = None) -> None:
         self.container = container
         self.msg = msg
 
@@ -790,7 +804,7 @@ class Contains(object):
     ...   s([3, 2])
     """
 
-    def __init__(self, item, msg=None):
+    def __init__(self, item, msg: typing.Optional[str] = None) -> None:
         self.item = item
         self.msg = msg
 
@@ -823,9 +837,9 @@ class ExactSequence(object):
     ('hourly_report', 10, [], [])
     """
 
-    def __init__(self, validators, **kwargs):
+    def __init__(self, validators: typing.Iterable[Schemable], msg: typing.Optional[str] = None, **kwargs) -> None:
         self.validators = validators
-        self.msg = kwargs.pop('msg', None)
+        self.msg = msg
         self._schemas = [Schema(val, **kwargs) for val in validators]
 
     def __call__(self, v):
@@ -868,7 +882,7 @@ class Unique(object):
     ...   s('aabbc')
     """
 
-    def __init__(self, msg=None):
+    def __init__(self, msg: typing.Optional[str] = None) -> None:
         self.msg = msg
 
     def __call__(self, v):
@@ -904,7 +918,7 @@ class Equal(object):
     ...     s('foo')
     """
 
-    def __init__(self, target, msg=None):
+    def __init__(self, target, msg: typing.Optional[str] = None) -> None:
         self.target = target
         self.msg = msg
 
@@ -932,7 +946,8 @@ class Unordered(object):
     [1, 'foo']
     """
 
-    def __init__(self, validators, msg=None, **kwargs):
+    def __init__(self, validators: typing.Iterable[Schemable],
+                 msg: typing.Optional[str] = None, **kwargs) -> None:
         self.validators = validators
         self.msg = msg
         self._schemas = [Schema(val, **kwargs) for val in validators]
@@ -989,7 +1004,8 @@ class Number(object):
     Decimal('1234.01')
     """
 
-    def __init__(self, precision=None, scale=None, msg=None, yield_decimal=False):
+    def __init__(self, precision: typing.Optional[int] = None, scale: typing.Optional[int] = None,
+                 msg: typing.Optional[str] = None, yield_decimal: bool = False) -> None:
         self.precision = precision
         self.scale = scale
         self.msg = msg
@@ -1021,7 +1037,7 @@ class Number(object):
     def __repr__(self):
         return ('Number(precision=%s, scale=%s, msg=%s)' % (self.precision, self.scale, self.msg))
 
-    def _get_precision_scale(self, number):
+    def _get_precision_scale(self, number) -> typing.Tuple[int, int, Decimal]:
         """
         :param number:
         :return: tuple(precision, scale, decimal_number)
@@ -1031,7 +1047,13 @@ class Number(object):
         except InvalidOperation:
             raise Invalid(self.msg or 'Value must be a number enclosed with string')
 
-        return (len(decimal_num.as_tuple().digits), -(decimal_num.as_tuple().exponent), decimal_num)
+        exp = decimal_num.as_tuple().exponent
+        if isinstance(exp, int):
+            return (len(decimal_num.as_tuple().digits), -exp, decimal_num)
+        else:
+            # TODO: handle infinity and NaN
+            # raise Invalid(self.msg or 'Value has no precision')
+            raise TypeError("infinity and NaN have no precision")
 
 
 class SomeOf(_WithSubValidators):
@@ -1058,7 +1080,9 @@ class SomeOf(_WithSubValidators):
     ...     validate(6.2)
     """
 
-    def __init__(self, validators, min_valid=None, max_valid=None, **kwargs):
+    def __init__(self, validators: typing.List[Schemable],
+                 min_valid: typing.Optional[int] = None, max_valid: typing.Optional[int] = None,
+                 **kwargs) -> None:
         assert min_valid is not None or max_valid is not None, \
             'when using "%s" you should specify at least one of min_valid and max_valid' % (type(self).__name__,)
         self.min_valid = min_valid or 0

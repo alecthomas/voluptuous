@@ -1,13 +1,16 @@
 import sys
 
-from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid
-from voluptuous.schema_builder import Schema, default_factory, raises
-from voluptuous import validators
+# F401: "imported but unused"
+from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid  # noqa: F401
+from voluptuous.schema_builder import Schema, default_factory, raises  # noqa: F401
+from voluptuous import validators  # noqa: F401
+from voluptuous.schema_builder import DefaultFactory  # noqa: F401
+import typing
 
 __author__ = 'tusharmakkar08'
 
 
-def _fix_str(v):
+def _fix_str(v: str) -> str:
     if sys.version_info[0] == 2 and isinstance(v, unicode):  # noqa: F821
         s = v
     else:
@@ -15,7 +18,7 @@ def _fix_str(v):
     return s
 
 
-def Lower(v):
+def Lower(v: str) -> str:
     """Transform a string to lower case.
 
     >>> s = Schema(Lower)
@@ -25,7 +28,7 @@ def Lower(v):
     return _fix_str(v).lower()
 
 
-def Upper(v):
+def Upper(v: str) -> str:
     """Transform a string to upper case.
 
     >>> s = Schema(Upper)
@@ -35,7 +38,7 @@ def Upper(v):
     return _fix_str(v).upper()
 
 
-def Capitalize(v):
+def Capitalize(v: str) -> str:
     """Capitalise a string.
 
     >>> s = Schema(Capitalize)
@@ -45,7 +48,7 @@ def Capitalize(v):
     return _fix_str(v).capitalize()
 
 
-def Title(v):
+def Title(v: str) -> str:
     """Title case a string.
 
     >>> s = Schema(Title)
@@ -55,7 +58,7 @@ def Title(v):
     return _fix_str(v).title()
 
 
-def Strip(v):
+def Strip(v: str) -> str:
     """Strip whitespace from a string.
 
     >>> s = Schema(Strip)
@@ -76,7 +79,7 @@ class DefaultTo(object):
     []
     """
 
-    def __init__(self, default_value, msg=None):
+    def __init__(self, default_value, msg: typing.Optional[str] = None) -> None:
         self.default_value = default_factory(default_value)
         self.msg = msg
 
@@ -99,7 +102,7 @@ class SetTo(object):
     42
     """
 
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         self.value = default_factory(value)
 
     def __call__(self, v):
@@ -121,7 +124,7 @@ class Set(object):
     ...   s([set([1, 2]), set([3, 4])])
     """
 
-    def __init__(self, msg=None):
+    def __init__(self, msg: typing.Optional[str] = None) -> None:
         self.msg = msg
 
     def __call__(self, v):
@@ -137,10 +140,10 @@ class Set(object):
 
 
 class Literal(object):
-    def __init__(self, lit):
+    def __init__(self, lit) -> None:
         self.lit = lit
 
-    def __call__(self, value, msg=None):
+    def __call__(self, value, msg: typing.Optional[str] = None):
         if self.lit != value:
             raise LiteralInvalid(
                 msg or '%s not match for %s' % (value, self.lit)
@@ -155,7 +158,7 @@ class Literal(object):
         return repr(self.lit)
 
 
-def u(x):
+def u(x: str) -> str:
     if sys.version_info < (3,):
         return unicode(x)  # noqa: F821
     else:
