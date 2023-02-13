@@ -8,7 +8,6 @@ version = __import__('voluptuous').__version__
 
 with io.open('README.md', encoding='utf-8') as f:
     long_description = f.read()
-    description = long_description.splitlines()[0].strip()
 
 
 setup(
@@ -16,7 +15,7 @@ setup(
     url='https://github.com/alecthomas/voluptuous',
     download_url='https://pypi.python.org/pypi/voluptuous',
     version=version,
-    description=description,
+    description='Python data validation library',
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='BSD-3-Clause',
