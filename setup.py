@@ -8,7 +8,7 @@ version = __import__('voluptuous').__version__
 
 with io.open('README.md', encoding='utf-8') as f:
     long_description = f.read()
-    description = long_description.splitlines()[0].strip()
+    description = "Voluptuous is a Python data validation library"
 
 
 setup(
