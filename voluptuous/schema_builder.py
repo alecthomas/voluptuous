@@ -165,7 +165,7 @@ def Extra(_) -> None:
 # deprecated object, so we just leave an alias here instead.
 extra = Extra
 
-Schemable = typing.Union[dict, list, type, typing.Callable]
+Schemable = typing.Union[dict, list, str, type, typing.Callable]
 
 
 class Schema(object):
@@ -947,7 +947,7 @@ class Msg(object):
     ...   assert isinstance(e.errors[0], er.RangeInvalid)
     """
 
-    def __init__(self, schema: dict, msg: str, cls: typing.Optional[typing.Type[Error]] = None) -> None:
+    def __init__(self, schema: Schemable, msg: str, cls: typing.Optional[typing.Type[Error]] = None) -> None:
         if cls and not issubclass(cls, er.Invalid):
             raise er.SchemaError("Msg can only use subclases of"
                                  " Invalid as custom class")
@@ -1046,7 +1046,7 @@ class Optional(Marker):
     {'key2': 'value'}
     """
 
-    def __init__(self, schema: dict, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
+    def __init__(self, schema: Schemable, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
         super(Optional, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1088,7 +1088,7 @@ class Exclusive(Optional):
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
     """
 
-    def __init__(self, schema: dict, group_of_exclusion: str, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
+    def __init__(self, schema: Schemable, group_of_exclusion: str, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
         super(Exclusive, self).__init__(schema, msg=msg,
                                         description=description)
         self.group_of_exclusion = group_of_exclusion
@@ -1136,7 +1136,7 @@ class Inclusive(Optional):
     True
     """
 
-    def __init__(self, schema: dict, group_of_inclusion: str,
+    def __init__(self, schema: Schemable, group_of_inclusion: str,
                  msg: typing.Optional[str] = None, description: typing.Optional[str] = None, default=UNDEFINED) -> None:
         super(Inclusive, self).__init__(schema, msg=msg,
                                         default=default,
@@ -1159,7 +1159,7 @@ class Required(Marker):
     {'key': []}
     """
 
-    def __init__(self, schema: dict, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
+    def __init__(self, schema: Schemable, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
         super(Required, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
