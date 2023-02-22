@@ -118,9 +118,6 @@ def _isnamedtuple(obj):
     return isinstance(obj, tuple) and hasattr(obj, '_fields')
 
 
-primitive_types = (str, unicode, bool, int, float)
-
-
 class Undefined(object):
     def __nonzero__(self):
         return False
@@ -165,7 +162,15 @@ def Extra(_) -> None:
 # deprecated object, so we just leave an alias here instead.
 extra = Extra
 
-Schemable = typing.Union[dict, list, str, type, typing.Callable]
+primitive_types = (bool, bytes, int, long, str, unicode, float, complex)
+
+Schemable = typing.Union[
+    Extra, 'Schema', 'Object',
+    _Mapping,
+    list, tuple, frozenset, set,
+    bool, bytes, int, long, str, unicode, float, complex,
+    type, object, dict, type(None), typing.Callable
+]
 
 
 class Schema(object):
@@ -306,8 +311,7 @@ class Schema(object):
         type_ = type(schema)
         if inspect.isclass(schema):
             type_ = schema
-        if type_ in (bool, bytes, int, long, str, unicode, float, complex, object,
-                     list, dict, type(None)) or callable(schema):
+        if type_ in (*primitive_types, object, list, dict, type(None)) or callable(schema):
             return _compile_scalar(schema)
         raise er.SchemaError('unsupported schema data type %r' %
                              type(schema).__name__)
@@ -733,7 +737,7 @@ class Schema(object):
 
         return validate_set
 
-    def extend(self, schema: dict, required: typing.Optional[bool] = None, extra: typing.Optional[int] = None) -> Schema:
+    def extend(self, schema: Schemable, required: typing.Optional[bool] = None, extra: typing.Optional[int] = None) -> Schema:
         """Create a new `Schema` by merging this and the provided `schema`.
 
         Neither this `Schema` nor the provided `schema` are modified. The
@@ -972,7 +976,7 @@ class Msg(object):
 class Object(dict):
     """Indicate that we should work with attributes, not keys."""
 
-    def __init__(self, schema, cls: object = UNDEFINED) -> None:
+    def __init__(self, schema: typing.Any, cls: object = UNDEFINED) -> None:
         self.cls = cls
         super(Object, self).__init__(schema)
 
@@ -988,7 +992,7 @@ class VirtualPathComponent(str):
 class Marker(object):
     """Mark nodes for special treatment."""
 
-    def __init__(self, schema_: dict, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
+    def __init__(self, schema_: Schemable, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
@@ -1180,8 +1184,8 @@ class Remove(Marker):
     [1, 2, 3, 5, '7']
     """
 
-    def __call__(self, v: object):
-        super(Remove, self).__call__(v)
+    def __call__(self, schema: Schemable):
+        super(Remove, self).__call__(schema)
         return self.__class__
 
     def __repr__(self):
