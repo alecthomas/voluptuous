@@ -1,14 +1,5 @@
-import collections
-import copy
-
-try:
-    from enum import Enum
-except ImportError:
-    Enum = None
-import os
-import sys
-
-import pytest
+from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
+from voluptuous.humanize import humanize_error
 from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Clamp, Coerce,
                         Contains, Date, Datetime, Email, Equal, ExactSequence,
                         Exclusive, Extra, FqdnUrl, In, Inclusive, Invalid,
@@ -17,8 +8,18 @@ from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Clamp, Coerce,
                         Optional, PathExists, Range, Remove, Replace, Required,
                         Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
                         Unordered, Url, raises, validate)
-from voluptuous.humanize import humanize_error
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
+import pytest
+import sys
+import os
+import collections
+import copy
+import typing
+
+Enum: typing.Union[type, None]
+try:
+    from enum import Enum
+except ImportError:
+    Enum = None
 
 
 def test_new_required_test():
@@ -115,7 +116,7 @@ def test_remove():
     # remove keys by type
     schema = Schema({"weight": float,
                      "amount": int,
-                     # remvove str keys with int values
+                     # remove str keys with int values
                      Remove(str): int,
                      # keep str keys with str values
                      str: str})
@@ -1690,7 +1691,7 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
-# Python 3.7 removed the trainling comma in repr() of BaseException
+# Python 3.7 removed the trailing comma in repr() of BaseException
 # https://bugs.python.org/issue30399
 if sys.version_info >= (3, 7):
     invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
