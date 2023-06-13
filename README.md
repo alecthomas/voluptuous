@@ -40,6 +40,16 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
+## Contribution to Documentation
+
+Documentation is built using `Sphinx`. You can install it by
+
+    pip install -r requirements.txt
+
+For building `sphinx-apidoc` from scratch you need to set PYTHONPATH to `voluptuous/voluptuous` repository.
+
+The documentation is provided [here.](http://alecthomas.github.io/voluptuous/)
+
 ## Changelog
 
 See [CHANGELOG.md](https://github.com/alecthomas/voluptuous/blob/master/CHANGELOG.md).
@@ -706,3 +716,4 @@ using voluptuous validators in `assert`s.
 
 I greatly prefer the light-weight style promoted by these libraries to
 the complexity of libraries like FormEncode.
+
