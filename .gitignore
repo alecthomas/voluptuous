@@ -15,7 +15,6 @@ MANIFEST
 .idea
 venv
 .nojekyll
-docs/_build
 .vscode/
 .venv
 .pytest_cache
