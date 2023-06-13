@@ -2,15 +2,12 @@ from setuptools import setup
 
 import sys
 import io
-import os
-import atexit
 sys.path.insert(0, '.')
 version = __import__('voluptuous').__version__
 
 
 with io.open('README.md', encoding='utf-8') as f:
     long_description = f.read()
-    description = long_description.splitlines()[0].strip()
 
 
 setup(
@@ -18,12 +15,15 @@ setup(
     url='https://github.com/alecthomas/voluptuous',
     download_url='https://pypi.python.org/pypi/voluptuous',
     version=version,
-    description=description,
+    description='Python data validation library',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    license='BSD',
+    license='BSD-3-Clause',
     platforms=['any'],
     packages=['voluptuous'],
+    package_data={
+        'voluptuous': ['py.typed'],
+    },
     author='Alec Thomas',
     author_email='alec@swapoff.org',
     classifiers=[
@@ -36,5 +36,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ]
 )

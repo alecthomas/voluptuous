@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections
 import inspect
 import re
@@ -7,6 +9,9 @@ from contextlib import contextmanager
 
 import itertools
 from voluptuous import error as er
+from collections.abc import Generator
+import typing
+from voluptuous.error import Error
 
 if sys.version_info >= (3,):
     long = int
@@ -21,6 +26,11 @@ else:
 
     def iteritems(d):
         return d.iteritems()
+
+if sys.version_info >= (3, 3):
+    _Mapping = collections.abc.Mapping
+else:
+    _Mapping = collections.Mapping
 
 """Schema validation for Python data structures.
 
@@ -108,9 +118,6 @@ def _isnamedtuple(obj):
     return isinstance(obj, tuple) and hasattr(obj, '_fields')
 
 
-primitive_types = (str, unicode, bool, int, float)
-
-
 class Undefined(object):
     def __nonzero__(self):
         return False
@@ -122,18 +129,21 @@ class Undefined(object):
 UNDEFINED = Undefined()
 
 
-def Self():
+def Self() -> None:
     raise er.SchemaError('"Self" should never be called')
 
 
-def default_factory(value):
+DefaultFactory = typing.Union[Undefined, typing.Callable[[], typing.Any]]
+
+
+def default_factory(value) -> DefaultFactory:
     if value is UNDEFINED or callable(value):
         return value
     return lambda: value
 
 
 @contextmanager
-def raises(exc, msg=None, regex=None):
+def raises(exc, msg: typing.Optional[str] = None, regex: typing.Optional[re.Pattern] = None) -> Generator[None, None, None]:
     try:
         yield
     except exc as e:
@@ -143,7 +153,7 @@ def raises(exc, msg=None, regex=None):
             assert re.search(regex, str(e)), '%r does not match %r' % (str(e), regex)
 
 
-def Extra(_):
+def Extra(_) -> None:
     """Allow keys in the data that are not present in the schema."""
     raise er.SchemaError('"Extra" should never be called')
 
@@ -151,6 +161,16 @@ def Extra(_):
 # As extra() is never called there's no way to catch references to the
 # deprecated object, so we just leave an alias here instead.
 extra = Extra
+
+primitive_types = (bool, bytes, int, long, str, unicode, float, complex)
+
+Schemable = typing.Union[
+    Extra, 'Schema', 'Object',
+    _Mapping,
+    list, tuple, frozenset, set,
+    bool, bytes, int, long, str, unicode, float, complex,
+    type, object, dict, type(None), typing.Callable
+]
 
 
 class Schema(object):
@@ -181,7 +201,7 @@ class Schema(object):
         PREVENT_EXTRA: 'PREVENT_EXTRA',
     }
 
-    def __init__(self, schema, required=False, extra=PREVENT_EXTRA):
+    def __init__(self, schema: Schemable, required: bool = False, extra: int = PREVENT_EXTRA) -> None:
         """Create a new Schema.
 
         :param schema: Validation schema. See :module:`voluptuous` for details.
@@ -202,7 +222,7 @@ class Schema(object):
         self._compiled = self._compile(schema)
 
     @classmethod
-    def infer(cls, data, **kwargs):
+    def infer(cls, data, **kwargs) -> Schema:
         """Create a Schema from concrete data (e.g. an API response).
 
         For example, this will take a dict like:
@@ -280,7 +300,7 @@ class Schema(object):
             return schema.__voluptuous_compile__(self)
         if isinstance(schema, Object):
             return self._compile_object(schema)
-        if isinstance(schema, collections.Mapping):
+        if isinstance(schema, _Mapping):
             return self._compile_dict(schema)
         elif isinstance(schema, list):
             return self._compile_list(schema)
@@ -291,8 +311,7 @@ class Schema(object):
         type_ = type(schema)
         if inspect.isclass(schema):
             type_ = schema
-        if type_ in (bool, bytes, int, long, str, unicode, float, complex, object,
-                     list, dict, type(None)) or callable(schema):
+        if type_ in (*primitive_types, object, list, dict, type(None)) or callable(schema):
             return _compile_scalar(schema)
         raise er.SchemaError('unsupported schema data type %r' %
                              type(schema).__name__)
@@ -303,14 +322,15 @@ class Schema(object):
 
         # Keys that may be required
         all_required_keys = set(key for key in schema
-                                if key is not Extra and
-                                ((self.required and not isinstance(key, (Optional, Remove))) or
-                                 isinstance(key, Required)))
+                                if key is not Extra
+                                and ((self.required
+                                      and not isinstance(key, (Optional, Remove)))
+                                     or isinstance(key, Required)))
 
         # Keys that may have defaults
         all_default_keys = set(key for key in schema
-                               if isinstance(key, Required) or
-                               isinstance(key, Optional))
+                               if isinstance(key, Required)
+                               or isinstance(key, Optional))
 
         _compiled_schema = {}
         for skey, svalue in iteritems(schema):
@@ -352,7 +372,6 @@ class Schema(object):
                     # key, insert it.
                     key_value_map[key.schema] = key.default()
 
-            error = None
             errors = []
             for key, value in key_value_map.items():
                 key_path = path + [key]
@@ -363,6 +382,7 @@ class Schema(object):
 
                 # compare each given key/value against all compiled key/values
                 # schema key, (compiled key, compiled value)
+                error = None
                 for skey, (ckey, cvalue) in relevant_candidates:
                     try:
                         new_key = ckey(key_path, key)
@@ -410,7 +430,9 @@ class Schema(object):
 
                     break
                 else:
-                    if remove_key:
+                    if error:
+                        errors.append(error)
+                    elif remove_key:
                         # remove key
                         continue
                     elif self.extra == ALLOW_EXTRA:
@@ -610,11 +632,11 @@ class Schema(object):
             if not isinstance(data, seq_type):
                 raise er.SequenceTypeInvalid('expected a %s' % seq_type_name, path)
 
-            # Empty seq schema, allow any data.
+            # Empty seq schema, reject any data.
             if not schema:
                 if data:
                     raise er.MultipleInvalid([
-                        er.ValueInvalid('not a valid value', [value]) for value in data
+                        er.ValueInvalid('not a valid value', path if path else data)
                     ])
                 return data
 
@@ -717,7 +739,7 @@ class Schema(object):
 
         return validate_set
 
-    def extend(self, schema, required=None, extra=None):
+    def extend(self, schema: Schemable, required: typing.Optional[bool] = None, extra: typing.Optional[int] = None) -> Schema:
         """Create a new `Schema` by merging this and the provided `schema`.
 
         Neither this `Schema` nor the provided `schema` are modified. The
@@ -732,10 +754,11 @@ class Schema(object):
         """
 
         assert type(self.schema) == dict and type(schema) == dict, 'Both schemas must be dictionary-based'
+        assert isinstance(self.schema, dict)
 
         result = self.schema.copy()
 
-        # returns the key that may have been passed as arugment to Marker constructor
+        # returns the key that may have been passed as an argument to Marker constructor
         def key_literal(key):
             return (key.schema if isinstance(key, Marker) else key)
 
@@ -771,9 +794,10 @@ class Schema(object):
                 result[key] = value
 
         # recompile and send old object
+        result_cls = type(self)
         result_required = (required if required is not None else self.required)
         result_extra = (extra if extra is not None else self.extra)
-        return Schema(result, required=result_required, extra=result_extra)
+        return result_cls(result, required=result_required, extra=result_extra)
 
 
 def _compile_scalar(schema):
@@ -809,7 +833,7 @@ def _compile_scalar(schema):
         def validate_callable(path, data):
             try:
                 return schema(data)
-            except ValueError as e:
+            except ValueError:
                 raise er.ValueInvalid('not a valid value', path)
             except er.Invalid as e:
                 e.prepend(path)
@@ -859,7 +883,7 @@ def _compile_itemsort():
         for i, check_ in priority:
             if check_(key_):
                 return i
-        # values have hightest priorities
+        # values have highest priorities
         return 0
 
     return item_priority
@@ -929,7 +953,7 @@ class Msg(object):
     ...   assert isinstance(e.errors[0], er.RangeInvalid)
     """
 
-    def __init__(self, schema, msg, cls=None):
+    def __init__(self, schema: Schemable, msg: str, cls: typing.Optional[typing.Type[Error]] = None) -> None:
         if cls and not issubclass(cls, er.Invalid):
             raise er.SchemaError("Msg can only use subclases of"
                                  " Invalid as custom class")
@@ -954,7 +978,7 @@ class Msg(object):
 class Object(dict):
     """Indicate that we should work with attributes, not keys."""
 
-    def __init__(self, schema, cls=UNDEFINED):
+    def __init__(self, schema: typing.Any, cls: object = UNDEFINED) -> None:
         self.cls = cls
         super(Object, self).__init__(schema)
 
@@ -967,13 +991,10 @@ class VirtualPathComponent(str):
         return self.__str__()
 
 
-# Markers.py
-
-
 class Marker(object):
     """Mark nodes for special treatment."""
 
-    def __init__(self, schema_, msg=None, description=None):
+    def __init__(self, schema_: Schemable, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
         self.schema = schema_
         self._schema = Schema(schema_)
         self.msg = msg
@@ -1005,7 +1026,7 @@ class Marker(object):
         return self.schema == other
 
     def __ne__(self, other):
-        return not(self.schema == other)
+        return not (self.schema == other)
 
 
 class Optional(Marker):
@@ -1031,7 +1052,7 @@ class Optional(Marker):
     {'key2': 'value'}
     """
 
-    def __init__(self, schema, msg=None, default=UNDEFINED, description=None):
+    def __init__(self, schema: Schemable, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
         super(Optional, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1073,7 +1094,7 @@ class Exclusive(Optional):
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
     """
 
-    def __init__(self, schema, group_of_exclusion, msg=None, description=None):
+    def __init__(self, schema: Schemable, group_of_exclusion: str, msg: typing.Optional[str] = None, description: typing.Optional[str] = None) -> None:
         super(Exclusive, self).__init__(schema, msg=msg,
                                         description=description)
         self.group_of_exclusion = group_of_exclusion
@@ -1121,8 +1142,11 @@ class Inclusive(Optional):
     True
     """
 
-    def __init__(self, schema, group_of_inclusion, msg=None):
-        super(Inclusive, self).__init__(schema, msg=msg)
+    def __init__(self, schema: Schemable, group_of_inclusion: str,
+                 msg: typing.Optional[str] = None, description: typing.Optional[str] = None, default=UNDEFINED) -> None:
+        super(Inclusive, self).__init__(schema, msg=msg,
+                                        default=default,
+                                        description=description)
         self.group_of_inclusion = group_of_inclusion
 
 
@@ -1141,7 +1165,7 @@ class Required(Marker):
     {'key': []}
     """
 
-    def __init__(self, schema, msg=None, default=UNDEFINED, description=None):
+    def __init__(self, schema: Schemable, msg: typing.Optional[str] = None, default=UNDEFINED, description: typing.Optional[str] = None) -> None:
         super(Required, self).__init__(schema, msg=msg,
                                        description=description)
         self.default = default_factory(default)
@@ -1162,8 +1186,8 @@ class Remove(Marker):
     [1, 2, 3, 5, '7']
     """
 
-    def __call__(self, v):
-        super(Remove, self).__call__(v)
+    def __call__(self, schema: Schemable):
+        super(Remove, self).__call__(schema)
         return self.__class__
 
     def __repr__(self):
@@ -1173,7 +1197,7 @@ class Remove(Marker):
         return object.__hash__(self)
 
 
-def message(default=None, cls=None):
+def message(default: typing.Optional[str] = None, cls: typing.Optional[typing.Type[Error]] = None) -> typing.Callable:
     """Convenience decorator to allow functions to provide a message.
 
     Set a default message:
@@ -1244,7 +1268,7 @@ def _merge_args_with_kwargs(args_dict, kwargs_dict):
     return ret
 
 
-def validate(*a, **kw):
+def validate(*a, **kw) -> typing.Callable:
     """Decorator for validating arguments of a function against a given schema.
 
     Set restrictions for arguments:

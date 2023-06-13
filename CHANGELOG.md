@@ -1,5 +1,80 @@
 # Changelog
 
+## [0.13.1]
+
+**Fixes**:
+
+- [#439](https://github.com/alecthomas/voluptuous/pull/454): Ignore `Enum` if it is unavailable
+- [#456](https://github.com/alecthomas/voluptuous/pull/456): Fix email regex match for Python 2.7
+
+**New**:
+
+- [#457](https://github.com/alecthomas/voluptuous/pull/457): Enable github actions
+- [#462](https://github.com/alecthomas/voluptuous/pull/462): Convert codebase to adhere to `flake8` W504 (PEP 8)
+- [#459](https://github.com/alecthomas/voluptuous/pull/459): Enable `flake8` in github actions
+- [#464](https://github.com/alecthomas/voluptuous/pull/464): `pytest` migration + enable Python 3.10
+
+## [0.13.0]
+
+**Changes**:
+
+- [#450](https://github.com/alecthomas/voluptuous/pull/450): Display valid `Enum` values in `Coerce`
+
+## [0.12.2]
+
+**Fixes**:
+
+- [#439](https://github.com/alecthomas/voluptuous/issues/439): Revert Breaking `Maybe` change in 0.12.1
+- [#447](https://github.com/alecthomas/voluptuous/issues/447): Fix Email Regex to not match on extra characters
+
+## [0.12.1]
+
+**Changes**:
+- [#435](https://github.com/alecthomas/voluptuous/pull/435): Extended a few tests (`Required` and `In`)
+- [#425](https://github.com/alecthomas/voluptuous/pull/425): Improve error message for `In` and `NotIn`
+- [#436](https://github.com/alecthomas/voluptuous/pull/436): Add sorted() for `In` and `NotIn` + fix tests
+- [#437](https://github.com/alecthomas/voluptuous/pull/437): Grouped `Maybe` tests plus added another `Range` test
+- [#438](https://github.com/alecthomas/voluptuous/pull/438): Extend tests for `Schema` with empty list or dict
+
+**New**:
+- [#433](https://github.com/alecthomas/voluptuous/pull/433): Add Python 3.9 support
+
+**Fixes**:
+- [#431](https://github.com/alecthomas/voluptuous/pull/431): Fixed typos + made spelling more consistent
+- [#411](https://github.com/alecthomas/voluptuous/pull/411): Ensure `Maybe` propagates error information
+- [#434](https://github.com/alecthomas/voluptuous/pull/434): Remove value enumeration when validating empty list
+
+## [0.12.0]
+
+**Changes**:
+- n/a
+
+**New**:
+- [#368](https://github.com/alecthomas/voluptuous/pull/368): Allow a discriminant field in validators
+
+**Fixes**:
+- [#420](https://github.com/alecthomas/voluptuous/pull/420): Fixed issue with 'required' not being set properly and added test 
+- [#414](https://github.com/alecthomas/voluptuous/pull/414): Handle incomparable values in Range
+- [#427](https://github.com/alecthomas/voluptuous/pull/427): Added additional tests for Range, Clamp and Length + catch TypeError exceptions
+
+## [0.11.7]
+
+**Changes**:
+
+- [#378](https://github.com/alecthomas/voluptuous/pull/378): Allow `extend()` of a `Schema` to return a subclass of a `Schema` as well.
+
+**New**:
+
+- [#364](https://github.com/alecthomas/voluptuous/pull/364): Accept `description` for `Inclusive` instances.
+- [#373](https://github.com/alecthomas/voluptuous/pull/373): Accept `msg` for `Maybe` instances.
+- [#382](https://github.com/alecthomas/voluptuous/pull/382): Added support for default values in `Inclusive` instances.
+
+**Fixes**:
+
+- [#371](https://github.com/alecthomas/voluptuous/pull/371): Fixed `DeprecationWarning` related to `collections.Mapping`.
+- [#377](https://github.com/alecthomas/voluptuous/pull/377): Preserve Unicode strings when passed to utility functions (e.g., `Lower()`, `Upper()`).
+- [#380](https://github.com/alecthomas/voluptuous/pull/380): Fixed regression with `Any` and `required` flag.
+
 ## [0.11.5]
 
 - Fixed issue with opening README file in `setup.py`.
