@@ -12,8 +12,9 @@
 [![image](https://img.shields.io/pypi/v/voluptuous.svg)](https://python.org/pypi/voluptuous)
 [![image](https://img.shields.io/pypi/l/voluptuous.svg)](https://python.org/pypi/voluptuous)
 [![image](https://img.shields.io/pypi/pyversions/voluptuous.svg)](https://python.org/pypi/voluptuous)
-[![Build Status](https://travis-ci.org/alecthomas/voluptuous.svg)](https://travis-ci.org/alecthomas/voluptuous)
-[![Coverage Status](https://coveralls.io/repos/github/alecthomas/voluptuous/badge.svg?branch=master)](https://coveralls.io/github/alecthomas/voluptuous?branch=master) [![Gitter chat](https://badges.gitter.im/alecthomas.svg)](https://gitter.im/alecthomas/Lobby)
+[![Test status](https://github.com/alecthomas/voluptuous/actions/workflows/tests.yml/badge.svg)](https://github.com/alecthomas/voluptuous/actions/workflows/tests.yml)
+[![Coverage status](https://coveralls.io/repos/github/alecthomas/voluptuous/badge.svg?branch=master)](https://coveralls.io/github/alecthomas/voluptuous?branch=master)
+[![Gitter chat](https://badges.gitter.im/alecthomas.svg)](https://gitter.im/alecthomas/Lobby)
 
 Voluptuous, *despite* the name, is a Python data validation library. It
 is primarily intended for validating data coming into Python as JSON,
@@ -39,6 +40,16 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 ## Documentation
 
 The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
+
+## Contribution to Documentation
+
+Documentation is built using `Sphinx`. You can install it by
+
+    pip install -r requirements.txt
+
+For building `sphinx-apidoc` from scratch you need to set PYTHONPATH to `voluptuous/voluptuous` repository.
+
+The documentation is provided [here.](http://alecthomas.github.io/voluptuous/)
 
 ## Changelog
 
@@ -706,3 +717,4 @@ using voluptuous validators in `assert`s.
 
 I greatly prefer the light-weight style promoted by these libraries to
 the complexity of libraries like FormEncode.
+
