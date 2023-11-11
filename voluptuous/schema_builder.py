@@ -753,8 +753,7 @@ class Schema(object):
         :param extra: if set, overrides `extra` of this `Schema`
         """
 
-        assert type(self.schema) == dict and type(schema) == dict, 'Both schemas must be dictionary-based'
-        assert isinstance(self.schema, dict)
+        assert isinstance(self.schema, dict) and isinstance(schema, dict), 'Both schemas must be dictionary-based'
 
         result = self.schema.copy()
 
@@ -779,7 +778,7 @@ class Schema(object):
 
                 # if both are dictionaries, we need to extend recursively
                 # create the new extended sub schema, then remove the old key and add the new one
-                if type(result_value) == dict and type(value) == dict:
+                if isinstance(result_value, dict) and isinstance(value, dict):
                     new_value = Schema(result_value).extend(value).schema
                     del result[result_key]
                     result[key] = new_value

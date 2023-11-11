@@ -21,8 +21,8 @@ class Invalid(Error):
 
     def __init__(self, message: str, path: typing.Optional[typing.List[str]] = None, error_message: typing.Optional[str] = None, error_type: typing.Optional[str] = None) -> None:
         Error.__init__(self, message)
-        self.path_value = path or []
-        self.error_message_value = error_message or message
+        self._path = path or []
+        self._error_message = error_message or message
         self.error_type = error_type
 
     @property
@@ -31,11 +31,11 @@ class Invalid(Error):
 
     @property
     def path(self) -> typing.List[str]:
-        return self.path_value
+        return self._path
 
     @property
     def error_message(self) -> str:
-        return self.error_message_value
+        return self._error_message
 
     def __str__(self) -> str:
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) \
@@ -46,7 +46,7 @@ class Invalid(Error):
         return output + path
 
     def prepend(self, path: typing.List[str]) -> None:
-        self.path_value = path + self.path_value
+        self._path = path + self.path
 
 
 class MultipleInvalid(Invalid):
