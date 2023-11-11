@@ -165,11 +165,11 @@ extra = Extra
 primitive_types = (bool, bytes, int, long, str, unicode, float, complex)
 
 Schemable = typing.Union[
-    Extra, 'Schema', 'Object',
+    'Schema', 'Object',
     _Mapping,
     list, tuple, frozenset, set,
     bool, bytes, int, long, str, unicode, float, complex,
-    type, object, dict, type(None), typing.Callable
+    type, object, dict, None, typing.Callable
 ]
 
 
