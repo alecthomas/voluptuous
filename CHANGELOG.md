@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.14.0]
+
+**Fixes**:
+* [#470](https://github.com/alecthomas/voluptuous/pull/470): Fix a few code comment typos
+* [#472](https://github.com/alecthomas/voluptuous/pull/472): Change to SPDX conform license string
+
+
+**New**:
+* [#475](https://github.com/alecthomas/voluptuous/pull/475): Add typing information
+* [#478](https://github.com/alecthomas/voluptuous/pull/478): Fix new type hint of schemas, for example for `Required('key')`
+* [#486](https://github.com/alecthomas/voluptuous/pull/486): Fix new type hints and enable `mypy`
+* [#479](https://github.com/alecthomas/voluptuous/pull/479): Allow error reporting on keys
+
+**Changes**:
+* [#476](https://github.com/alecthomas/voluptuous/pull/476): Set static PyPI project description
+* [#482](https://github.com/alecthomas/voluptuous/pull/482): Remove Travis build status badge
+
 ## [0.13.1]
 
 **Fixes**:
