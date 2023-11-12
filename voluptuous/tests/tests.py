@@ -167,7 +167,7 @@ def test_literal():
     except MultipleInvalid as e:
         assert str(e) == "{'b': 1} not match for {'a': 1}"
         assert len(e.errors) == 1
-        assert type(e.errors[0]) == LiteralInvalid
+        assert isinstance(e.errors[0], LiteralInvalid)
     else:
         assert False, "Did not raise Invalid"
 
@@ -184,7 +184,7 @@ def test_class():
     except MultipleInvalid as e:
         assert str(e) == "expected C1"
         assert len(e.errors) == 1
-        assert type(e.errors[0]) == TypeInvalid
+        assert isinstance(e.errors[0], TypeInvalid)
     else:
         assert False, "Did not raise Invalid"
 
@@ -200,7 +200,7 @@ def test_class():
     except MultipleInvalid as e:
         assert str(e) == "expected C2"
         assert len(e.errors) == 1
-        assert type(e.errors[0]) == TypeInvalid
+        assert isinstance(e.errors[0], TypeInvalid)
     else:
         assert False, "Did not raise Invalid"
 
