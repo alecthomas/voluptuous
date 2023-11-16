@@ -1,5 +1,8 @@
 # Changelog
 
+**Fixes**:
+* [#492](https://github.com/alecthomas/voluptuous/pull/492): Fixed minimum Python version to >=3.6
+
 ## [0.14.0]
 
 **Fixes**:
@@ -70,7 +73,7 @@
 - [#368](https://github.com/alecthomas/voluptuous/pull/368): Allow a discriminant field in validators
 
 **Fixes**:
-- [#420](https://github.com/alecthomas/voluptuous/pull/420): Fixed issue with 'required' not being set properly and added test 
+- [#420](https://github.com/alecthomas/voluptuous/pull/420): Fixed issue with 'required' not being set properly and added test
 - [#414](https://github.com/alecthomas/voluptuous/pull/414): Handle incomparable values in Range
 - [#427](https://github.com/alecthomas/voluptuous/pull/427): Added additional tests for Range, Clamp and Length + catch TypeError exceptions
 

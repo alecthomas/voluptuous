@@ -2,7 +2,6 @@ language: python
 sudo: true
 dist: xenial
 python:
-- '2.7'
 - '3.6'
 - '3.7'
 - '3.8'
