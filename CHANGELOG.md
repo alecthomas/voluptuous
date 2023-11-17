@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.14.1]
+
+**Changes**:
+* [#487](https://github.com/alecthomas/voluptuous/pull/487): Add pytest.ini and tox.ini to sdist
+* [#494](https://github.com/alecthomas/voluptuous/pull/494): Add `python_requires` so package installers know requirement is >= 3.7
+
 ## [0.14.0]
 
 **Fixes**:
