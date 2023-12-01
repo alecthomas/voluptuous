@@ -311,7 +311,7 @@ class Schema(object):
         type_ = type(schema)
         if inspect.isclass(schema):
             type_ = schema
-        if type_ in (*primitive_types, object, list, dict, type(None)) or callable(schema):
+        if type_ in (*primitive_types, object, type(None)) or callable(schema):
             return _compile_scalar(schema)
         raise er.SchemaError('unsupported schema data type %r' %
                              type(schema).__name__)
