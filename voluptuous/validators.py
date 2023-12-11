@@ -224,7 +224,7 @@ class _WithSubValidators(object):
         schema.required = old_required
         return self._run
 
-    def _run(self, path: typing.List[str], value):
+    def _run(self, path: typing.List[typing.Union[str, int]], value):
         if self.discriminant is not None:
             self._compiled = [
                 self.schema._compile(v)
@@ -243,7 +243,7 @@ class _WithSubValidators(object):
             self.msg
         )
 
-    def _exec(self, funcs: typing.Iterable, v, path: typing.Optional[typing.List[str]] = None):
+    def _exec(self, funcs: typing.Iterable, v, path: typing.Optional[typing.List[typing.Union[str, int]]] = None):
         raise NotImplementedError()
 
 
