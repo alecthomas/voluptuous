@@ -7,7 +7,7 @@ import typing
 MAX_VALIDATION_ERROR_ITEM_LENGTH = 500
 
 
-def _nested_getitem(data: typing.Any, path: typing.List[typing.Union[str, int]]) -> typing.Optional[typing.Any]:
+def _nested_getitem(data: typing.Any, path: typing.List[typing.Hashable]) -> typing.Optional[typing.Any]:
     for item_index in path:
         try:
             data = data[item_index]

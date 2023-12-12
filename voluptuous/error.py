@@ -22,7 +22,7 @@ class Invalid(Error):
     def __init__(
         self,
         message: str,
-        path: typing.Optional[typing.List[typing.Union[str, int]]] = None,
+        path: typing.Optional[typing.List[typing.Hashable]] = None,
         error_message: typing.Optional[str] = None,
         error_type: typing.Optional[str] = None
     ) -> None:
@@ -36,7 +36,7 @@ class Invalid(Error):
         return self.args[0]
 
     @property
-    def path(self) -> typing.List[typing.Union[str, int]]:
+    def path(self) -> typing.List[typing.Hashable]:
         return self._path
 
     @property
@@ -51,7 +51,7 @@ class Invalid(Error):
             output += ' for ' + self.error_type
         return output + path
 
-    def prepend(self, path: typing.List[typing.Union[str, int]]) -> None:
+    def prepend(self, path: typing.List[typing.Hashable]) -> None:
         self._path = path + self.path
 
 
@@ -67,7 +67,7 @@ class MultipleInvalid(Invalid):
         return self.errors[0].msg
 
     @property
-    def path(self) -> typing.List[typing.Union[str, int]]:
+    def path(self) -> typing.List[typing.Hashable]:
         return self.errors[0].path
 
     @property
@@ -80,7 +80,7 @@ class MultipleInvalid(Invalid):
     def __str__(self) -> str:
         return str(self.errors[0])
 
-    def prepend(self, path: typing.List[typing.Union[str, int]]) -> None:
+    def prepend(self, path: typing.List[typing.Hashable]) -> None:
         for error in self.errors:
             error.prepend(path)
 
