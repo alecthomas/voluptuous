@@ -102,7 +102,7 @@ class Coerce(object):
         ...   validate('foo')
     """
 
-    def __init__(self, type: type | typing.Callable, msg: typing.Optional[str] = None) -> None:
+    def __init__(self, type: typing.Union[type, typing.Callable], msg: typing.Optional[str] = None) -> None:
         self.type = type
         self.msg = msg
         self.type_name = type.__name__
