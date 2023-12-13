@@ -151,6 +151,8 @@ def raises(exc, msg: typing.Optional[str] = None, regex: typing.Optional[re.Patt
             assert str(e) == msg, '%r != %r' % (str(e), msg)
         if regex is not None:
             assert re.search(regex, str(e)), '%r does not match %r' % (str(e), regex)
+    else:
+        raise AssertionError(f"Did not raise exception {exc.__name__}")
 
 
 def Extra(_) -> None:
