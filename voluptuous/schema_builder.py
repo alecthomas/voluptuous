@@ -13,25 +13,6 @@ from collections.abc import Generator
 import typing
 from voluptuous.error import Error
 
-if sys.version_info >= (3,):
-    long = int
-    unicode = str
-    basestring = str
-    ifilter = filter
-
-    def iteritems(d):
-        return d.items()
-else:
-    from itertools import ifilter
-
-    def iteritems(d):
-        return d.iteritems()
-
-if sys.version_info >= (3, 3):
-    _Mapping = collections.abc.Mapping
-else:
-    _Mapping = collections.Mapping
-
 """Schema validation for Python data structures.
 
 Given eg. a nested data structure like this:
@@ -164,13 +145,13 @@ def Extra(_) -> None:
 # deprecated object, so we just leave an alias here instead.
 extra = Extra
 
-primitive_types = (bool, bytes, int, long, str, unicode, float, complex)
+primitive_types = (bool, bytes, int, str, float, complex)
 
 Schemable = typing.Union[
     'Schema', 'Object',
-    _Mapping,
+    collections.abc.Mapping,
     list, tuple, frozenset, set,
-    bool, bytes, int, long, str, unicode, float, complex,
+    bool, bytes, int, str, float, complex,
     type, object, dict, None, typing.Callable
 ]
 
@@ -189,9 +170,9 @@ class Schema(object):
 
     For Example:
 
-            >>> v = Schema({Required('a'): unicode})
-            >>> v1 = Schema({Required('a'): unicode})
-            >>> v2 = Schema({Required('b'): unicode})
+            >>> v = Schema({Required('a'): str})
+            >>> v1 = Schema({Required('a'): str})
+            >>> v2 = Schema({Required('b'): str})
             >>> assert v == v1
             >>> assert v != v2
 
@@ -256,7 +237,7 @@ class Schema(object):
                 if len(value) == 0:
                     return dict
                 return {k: value_to_schema_type(v)
-                        for k, v in iteritems(value)}
+                        for k, v in value.items()}
             if isinstance(value, list):
                 if len(value) == 0:
                     return list
@@ -302,7 +283,7 @@ class Schema(object):
             return schema.__voluptuous_compile__(self)
         if isinstance(schema, Object):
             return self._compile_object(schema)
-        if isinstance(schema, _Mapping):
+        if isinstance(schema, collections.abc.Mapping):
             return self._compile_dict(schema)
         elif isinstance(schema, list):
             return self._compile_list(schema)
@@ -335,7 +316,7 @@ class Schema(object):
                                or isinstance(key, Optional))
 
         _compiled_schema = {}
-        for skey, svalue in iteritems(schema):
+        for skey, svalue in schema.items():
             new_key = self._compile(skey)
             new_value = self._compile(svalue)
             _compiled_schema[skey] = (new_key, new_value)
@@ -479,7 +460,7 @@ class Schema(object):
             if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
                 raise er.ObjectInvalid('expected a {0!r}'.format(schema.cls), path)
             iterable = _iterate_object(data)
-            iterable = ifilter(lambda item: item[1] is not None, iterable)
+            iterable = filter(lambda item: item[1] is not None, iterable)
             out = base_validate(path, iterable, {})
             return type(data)(**out)
 
@@ -610,7 +591,7 @@ class Schema(object):
                 raise er.MultipleInvalid(errors)
 
             out = data.__class__()
-            return base_validate(path, iteritems(data), out)
+            return base_validate(path, data.items(), out)
 
         return validate_dict
 
@@ -769,7 +750,7 @@ class Schema(object):
 
         # for each item in the extension schema, replace duplicates
         # or add new keys
-        for key, value in iteritems(schema):
+        for key, value in schema.items():
 
             # if the key is already in the dictionary, we need to replace it
             # transform key to literal before checking presence
@@ -898,7 +879,7 @@ def _iterate_mapping_candidates(schema):
     # Without this, Extra might appear first in the iterator, and fail to
     # validate a key even though it's a Required that has its own validation,
     # generating a false positive.
-    return sorted(iteritems(schema), key=_sort_item)
+    return sorted(schema.items(), key=_sort_item)
 
 
 def _iterate_object(obj):
@@ -913,7 +894,7 @@ def _iterate_object(obj):
         # maybe we have named tuple here?
         if hasattr(obj, '_asdict'):
             d = obj._asdict()
-    for item in iteritems(d):
+    for item in d.items():
         yield item
     try:
         slots = obj.__slots__
@@ -1078,15 +1059,15 @@ class Exclusive(Optional):
     >>> msg = 'Please, use only one type of authentication at the same time.'
     >>> schema = Schema({
     ... Exclusive('classic', 'auth', msg=msg):{
-    ...     Required('email'): basestring,
-    ...     Required('password'): basestring
+    ...     Required('email'): str,
+    ...     Required('password'): str
     ...     },
     ... Exclusive('internal', 'auth', msg=msg):{
-    ...     Required('secret_key'): basestring
+    ...     Required('secret_key'): str
     ...     },
     ... Exclusive('social', 'auth', msg=msg):{
-    ...     Required('social_network'): basestring,
-    ...     Required('token'): basestring
+    ...     Required('social_network'): str,
+    ...     Required('token'): str
     ...     }
     ... })
 

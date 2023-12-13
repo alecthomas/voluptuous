@@ -1,4 +1,4 @@
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
+from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 from voluptuous.humanize import humanize_error
 from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, AllInvalid, Any, Clamp,
                         Coerce, Contains, ContainsInvalid, Date, Datetime, Email,
@@ -852,15 +852,6 @@ def test_schema_decorator_partial_unmatch_called_with_kwargs():
         return arg1
 
     pytest.raises(Invalid, fn, arg1=1, arg2="foo")
-
-
-def test_unicode_as_key():
-    if sys.version_info >= (3,):
-        text_type = str
-    else:
-        text_type = unicode  # noqa: F821
-    schema = Schema({text_type: int})
-    schema({u("foobar"): 1})
 
 
 def test_number_validation_with_string():
