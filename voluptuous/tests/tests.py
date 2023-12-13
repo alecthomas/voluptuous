@@ -1,25 +1,20 @@
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper, u
+from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 from voluptuous.humanize import humanize_error
-from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Clamp, Coerce,
-                        Contains, Date, Datetime, Email, Equal, ExactSequence,
-                        Exclusive, Extra, FqdnUrl, In, Inclusive, Invalid,
-                        IsDir, IsFile, Length, Literal, LiteralInvalid, Marker,
-                        Match, Maybe, MultipleInvalid, NotIn, Number, Object,
+from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, AllInvalid, Any, Clamp,
+                        Coerce, Contains, ContainsInvalid, Date, Datetime, Email,
+                        EmailInvalid, Equal, ExactSequence, Exclusive, Extra,
+                        FqdnUrl, In, InInvalid, Inclusive, Invalid, IsDir, IsFile,
+                        Length, Literal, LiteralInvalid, Marker, Match, MatchInvalid,
+                        Maybe, MultipleInvalid, NotIn, NotInInvalid, Number, Object,
                         Optional, PathExists, Range, Remove, Replace, Required,
                         Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
-                        Unordered, Url, raises, validate)
+                        Unordered, Url, UrlInvalid, raises, validate)
 import pytest
+from enum import Enum
 import sys
 import os
 import collections
 import copy
-import typing
-
-Enum: typing.Union[type, None]
-try:
-    from enum import Enum
-except ImportError:
-    Enum = None
 
 
 def test_new_required_test():
@@ -31,12 +26,8 @@ def test_new_required_test():
 
 def test_exact_sequence():
     schema = Schema(ExactSequence([int, int]))
-    try:
+    with raises(Invalid):
         schema([1, 2, 3])
-    except Invalid:
-        assert True
-    else:
-        assert False, "Did not raise Invalid"
     assert schema([1, 2]) == [1, 2]
 
 
@@ -44,12 +35,8 @@ def test_required():
     """Verify that Required works."""
     schema = Schema({Required('q'): int})
     schema({"q": 123})
-    try:
+    with raises(Invalid, "required key not provided @ data['q']"):
         schema({})
-    except Invalid as e:
-        assert str(e) == "required key not provided @ data['q']"
-    else:
-        assert False, "Did not raise Invalid"
 
 
 def test_extra_with_required():
@@ -74,34 +61,36 @@ def test_in():
     """Verify that In works."""
     schema = Schema({"color": In(frozenset(["red", "blue", "yellow"]))})
     schema({"color": "blue"})
-    try:
+    with pytest.raises(
+        MultipleInvalid,
+        match=r"value must be one of \['blue', 'red', 'yellow'\] for dictionary value @ data\['color'\]"
+    ) as ctx:
         schema({"color": "orange"})
-    except Invalid as e:
-        assert str(e) == "value must be one of ['blue', 'red', 'yellow'] for dictionary value @ data['color']"
-    else:
-        assert False, "Did not raise InInvalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], InInvalid)
 
 
 def test_not_in():
     """Verify that NotIn works."""
     schema = Schema({"color": NotIn(frozenset(["red", "blue", "yellow"]))})
     schema({"color": "orange"})
-    try:
+    with pytest.raises(
+        MultipleInvalid,
+        match=r"value must not be one of \['blue', 'red', 'yellow'\] for dictionary value @ data\['color'\]"
+    ) as ctx:
         schema({"color": "blue"})
-    except Invalid as e:
-        assert str(e) == "value must not be one of ['blue', 'red', 'yellow'] for dictionary value @ data['color']"
-    else:
-        assert False, "Did not raise NotInInvalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], NotInInvalid)
 
 
 def test_contains():
     """Verify contains validation method."""
     schema = Schema({'color': Contains('red')})
     schema({'color': ['blue', 'red', 'yellow']})
-    try:
+    with pytest.raises(MultipleInvalid, match=r"value is not allowed for dictionary value @ data\['color'\]") as ctx:
         schema({'color': ['blue', 'yellow']})
-    except Invalid as e:
-        assert str(e) == "value is not allowed for dictionary value @ data['color']"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], ContainsInvalid)
 
 
 def test_remove():
@@ -154,55 +143,29 @@ def test_literal():
     schema([{"b": 1}])
     schema([{"a": 1}, {"b": 1}])
 
-    try:
+    with pytest.raises(MultipleInvalid, match=r"\{'c': 1\} not match for \{'b': 1\} @ data\[0\]") as ctx:
         schema([{"c": 1}])
-    except Invalid as e:
-        assert str(e) == "{'c': 1} not match for {'b': 1} @ data[0]"
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], LiteralInvalid)
 
     schema = Schema(Literal({"a": 1}))
-    try:
+    with pytest.raises(MultipleInvalid, match=r"\{'b': 1\} not match for \{'a': 1\}") as ctx:
         schema({"b": 1})
-    except MultipleInvalid as e:
-        assert str(e) == "{'b': 1} not match for {'a': 1}"
-        assert len(e.errors) == 1
-        assert isinstance(e.errors[0], LiteralInvalid)
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], LiteralInvalid)
 
 
 def test_class():
-    class C1(object):
+    class C1:
         pass
 
     schema = Schema(C1)
     schema(C1())
 
-    try:
+    with pytest.raises(MultipleInvalid, match=r"expected C1") as ctx:
         schema(None)
-    except MultipleInvalid as e:
-        assert str(e) == "expected C1"
-        assert len(e.errors) == 1
-        assert isinstance(e.errors[0], TypeInvalid)
-    else:
-        assert False, "Did not raise Invalid"
-
-    # In Python 2, this will be an old-style class (classobj instance)
-    class C2:
-        pass
-
-    schema = Schema(C2)
-    schema(C2())
-
-    try:
-        schema(None)
-    except MultipleInvalid as e:
-        assert str(e) == "expected C2"
-        assert len(e.errors) == 1
-        assert isinstance(e.errors[0], TypeInvalid)
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], TypeInvalid)
 
 
 def test_email_validation():
@@ -216,46 +179,46 @@ def test_email_validation():
 def test_email_validation_with_none():
     """ Test with invalid None email address """
     schema = Schema({"email": Email()})
-    try:
+    with pytest.raises(
+        MultipleInvalid, match=r"expected an email address for dictionary value @ data\['email'\]"
+    ) as ctx:
         schema({"email": None})
-    except MultipleInvalid as e:
-        assert str(e) == "expected an email address for dictionary value @ data['email']"
-    else:
-        assert False, "Did not raise Invalid for None URL"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], EmailInvalid)
 
 
 def test_email_validation_with_empty_string():
     """ Test with empty string email address"""
     schema = Schema({"email": Email()})
-    try:
+    with pytest.raises(
+        MultipleInvalid, match=r"expected an email address for dictionary value @ data\['email'\]"
+    ) as ctx:
         schema({"email": ''})
-    except MultipleInvalid as e:
-        assert str(e) == "expected an email address for dictionary value @ data['email']"
-    else:
-        assert False, "Did not raise Invalid for empty string URL"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], EmailInvalid)
 
 
 def test_email_validation_without_host():
     """ Test with empty host name in email address """
     schema = Schema({"email": Email()})
-    try:
+    with pytest.raises(
+        MultipleInvalid, match=r"expected an email address for dictionary value @ data\['email'\]"
+    ) as ctx:
         schema({"email": 'a@.com'})
-    except MultipleInvalid as e:
-        assert str(e) == "expected an email address for dictionary value @ data['email']"
-    else:
-        assert False, "Did not raise Invalid for empty string URL"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], EmailInvalid)
 
 
-def test_email_validation_with_bad_data():
+@pytest.mark.parametrize('input_value', ['john@voluptuous.com>', 'john!@voluptuous.org!@($*!'])
+def test_email_validation_with_bad_data(input_value: str):
     """ Test with bad data in email address """
     schema = Schema({"email": Email()})
-    for email in ('john@voluptuous.com>', 'john!@voluptuous.org!@($*!'):
-        try:
-            schema({"email": 'john@voluptuous.com>'})
-        except MultipleInvalid as e:
-            assert str(e) == "expected an email address for dictionary value @ data['email']"
-        else:
-            assert False, "Did not raise Invalid for bad email " + email
+    with pytest.raises(
+        MultipleInvalid, match=r"expected an email address for dictionary value @ data\['email'\]"
+    ) as ctx:
+        schema({"email": input_value})
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], EmailInvalid)
 
 
 def test_fqdn_url_validation():
@@ -266,48 +229,23 @@ def test_fqdn_url_validation():
     assert 'http://example.com/', out_.get("url")
 
 
-def test_fqdn_url_without_domain_name():
-    """ Test with invalid fully qualified domain name URL """
+@pytest.mark.parametrize(
+    'input_value',
+    [
+        pytest.param("http://localhost/", id="without domain name"),
+        pytest.param(None, id="None"),
+        pytest.param("", id="empty string"),
+        pytest.param("http://", id="empty host"),
+    ]
+)
+def test_fqdn_url_validation_with_bad_data(input_value):
     schema = Schema({"url": FqdnUrl()})
-    try:
-        schema({"url": "http://localhost/"})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for None URL"
-
-
-def test_fqdnurl_validation_with_none():
-    """ Test with invalid None FQDN URL """
-    schema = Schema({"url": FqdnUrl()})
-    try:
-        schema({"url": None})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for None URL"
-
-
-def test_fqdnurl_validation_with_empty_string():
-    """ Test with empty string FQDN URL """
-    schema = Schema({"url": FqdnUrl()})
-    try:
-        schema({"url": ''})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for empty string URL"
-
-
-def test_fqdnurl_validation_without_host():
-    """ Test with empty host FQDN URL """
-    schema = Schema({"url": FqdnUrl()})
-    try:
-        schema({"url": 'http://'})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a fully qualified domain name URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for empty string URL"
+    with pytest.raises(
+        MultipleInvalid, match=r"expected a fully qualified domain name URL for dictionary value @ data\['url'\]"
+    ) as ctx:
+        schema({"url": input_value})
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], UrlInvalid)
 
 
 def test_url_validation():
@@ -318,37 +256,22 @@ def test_url_validation():
     assert 'http://example.com/', out_.get("url")
 
 
-def test_url_validation_with_none():
-    """ Test with invalid None URL"""
+@pytest.mark.parametrize(
+    'input_value',
+    [
+        pytest.param(None, id="None"),
+        pytest.param("", id="empty string"),
+        pytest.param("http://", id="empty host"),
+    ]
+)
+def test_url_validation_with_bad_data(input_value):
     schema = Schema({"url": Url()})
-    try:
-        schema({"url": None})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for None URL"
-
-
-def test_url_validation_with_empty_string():
-    """ Test with empty string URL """
-    schema = Schema({"url": Url()})
-    try:
-        schema({"url": ''})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for empty string URL"
-
-
-def test_url_validation_without_host():
-    """ Test with empty host URL """
-    schema = Schema({"url": Url()})
-    try:
-        schema({"url": 'http://'})
-    except MultipleInvalid as e:
-        assert str(e) == "expected a URL for dictionary value @ data['url']"
-    else:
-        assert False, "Did not raise Invalid for empty string URL"
+    with pytest.raises(
+        MultipleInvalid, match=r"expected a URL for dictionary value @ data\['url'\]"
+    ) as ctx:
+        schema({"url": input_value})
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], UrlInvalid)
 
 
 def test_copy_dict_undefined():
@@ -530,14 +453,12 @@ def test_list_validation_messages():
 
     schema = Schema(dict(even_numbers=[All(int, is_even)]))
 
-    try:
+    with pytest.raises(MultipleInvalid, match=r"3 is not even @ data\['even_numbers'\]\[0\]") as ctx:
         schema(dict(even_numbers=[3]))
-    except Invalid as e:
-        assert len(e.errors) == 1
-        assert str(e.errors[0]) == "3 is not even @ data['even_numbers'][0]"
-        assert str(e) == "3 is not even @ data['even_numbers'][0]"
-    else:
-        assert False, "Did not raise Invalid"
+
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], Invalid)
+    assert str(ctx.value.errors[0]) == "3 is not even @ data['even_numbers'][0]"
 
 
 def test_nested_multiple_validation_errors():
@@ -548,17 +469,14 @@ def test_nested_multiple_validation_errors():
             raise Invalid('%i is not even' % value)
         return value
 
-    schema = Schema(dict(even_numbers=All([All(int, is_even)],
-                                          Length(min=1))))
+    schema = Schema(dict(even_numbers=All([All(int, is_even)], Length(min=1))))
 
-    try:
+    with pytest.raises(MultipleInvalid, match=r"3 is not even @ data\['even_numbers'\]\[0\]") as ctx:
         schema(dict(even_numbers=[3]))
-    except Invalid as e:
-        assert len(e.errors) == 1
-        assert str(e.errors[0]) == "3 is not even @ data['even_numbers'][0]"
-        assert str(e) == "3 is not even @ data['even_numbers'][0]"
-    else:
-        assert False, "Did not raise Invalid"
+
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], Invalid)
+    assert str(ctx.value.errors[0]) == "3 is not even @ data['even_numbers'][0]"
 
 
 def test_humanize_error():
@@ -570,18 +488,19 @@ def test_humanize_error():
         'a': int,
         'b': [str]
     })
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         schema(data)
-    except MultipleInvalid as e:
-        assert humanize_error(data, e) == "expected int for dictionary value @ data['a']. Got 'not an int'\nexpected str @ data['b'][0]. Got 123"
-    else:
-        assert False, 'Did not raise MultipleInvalid'
+    assert len(ctx.value.errors) == 2
+    assert humanize_error(data, ctx.value) == (
+        "expected int for dictionary value @ data['a']. Got 'not an int'\nexpected str @ data['b'][0]. Got 123"
+    )
 
 
 def test_fix_157():
     s = Schema(All([Any('one', 'two', 'three')]), Length(min=1))
     assert ['one'] == s(['one'])
-    pytest.raises(MultipleInvalid, s, ['four'])
+    with pytest.raises(MultipleInvalid):
+        s(['four'])
 
 
 def test_range_inside():
@@ -935,15 +854,6 @@ def test_schema_decorator_partial_unmatch_called_with_kwargs():
     pytest.raises(Invalid, fn, arg1=1, arg2="foo")
 
 
-def test_unicode_as_key():
-    if sys.version_info >= (3,):
-        text_type = str
-    else:
-        text_type = unicode  # noqa: F821
-    schema = Schema({text_type: int})
-    schema({u("foobar"): 1})
-
-
 def test_number_validation_with_string():
     """ Test with Number with string"""
     schema = Schema({"number": Number(precision=6, scale=2)})
@@ -1244,7 +1154,7 @@ def test_SomeOf_min_validation():
         validator('a')
 
     with raises(MultipleInvalid, 'no uppercase letters, no lowercase letters'):
-        validator('wqs2!#s111')
+        validator('1232!#4111')
 
     with raises(MultipleInvalid, 'no lowercase letters, no symbols'):
         validator('3A34SDEF5')
@@ -1266,18 +1176,12 @@ def test_SomeOf_max_validation():
 def test_self_validation():
     schema = Schema({"number": int,
                      "follow": Self})
-    try:
+    with raises(MultipleInvalid):
         schema({"number": "abc"})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
-    try:
+
+    with raises(MultipleInvalid):
         schema({"follow": {"number": '123456.712'}})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
+
     schema({"follow": {"number": 123456}})
     schema({"follow": {"follow": {"number": 123456}}})
 
@@ -1288,15 +1192,14 @@ def test_any_error_has_path():
         Optional('q'): int,
         Required('q2'): Any(int, msg='toto')
     })
-    try:
+
+    with pytest.raises(MultipleInvalid) as ctx:
         s({'q': 'str', 'q2': 'tata'})
-    except MultipleInvalid as exc:
-        assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
-            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
-        )
-    else:
-        assert False, "Did not raise AnyInvalid"
+
+    assert (
+        (ctx.value.errors[0].path == ['q'] and ctx.value.errors[1].path == ['q2'])
+        or (ctx.value.errors[1].path == ['q'] and ctx.value.errors[0].path == ['q2'])
+    )
 
 
 def test_all_error_has_path():
@@ -1305,15 +1208,18 @@ def test_all_error_has_path():
         Optional('q'): int,
         Required('q2'): All([str, Length(min=10)], msg='toto'),
     })
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         s({'q': 'str', 'q2': 12})
-    except MultipleInvalid as exc:
-        assert (
-            (exc.errors[0].path == ['q'] and exc.errors[1].path == ['q2'])
-            or (exc.errors[1].path == ['q'] and exc.errors[0].path == ['q2'])
-        )
-    else:
-        assert False, "Did not raise AllInvalid"
+
+    assert len(ctx.value.errors) == 2
+    assert (
+        (isinstance(ctx.value.errors[0], TypeInvalid) and isinstance(ctx.value.errors[1], AllInvalid))
+        or (isinstance(ctx.value.errors[1], TypeInvalid) and isinstance(ctx.value.errors[0], AllInvalid))
+    )
+    assert (
+        (ctx.value.errors[0].path == ['q'] and ctx.value.errors[1].path == ['q2'])
+        or (ctx.value.errors[1].path == ['q'] and ctx.value.errors[0].path == ['q2'])
+    )
 
 
 def test_match_error_has_path():
@@ -1321,12 +1227,11 @@ def test_match_error_has_path():
     s = Schema({
         Required('q2'): Match("a"),
     })
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         s({'q2': 12})
-    except MultipleInvalid as exc:
-        assert exc.errors[0].path == ['q2']
-    else:
-        assert False, "Did not raise MatchInvalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], MatchInvalid)
+    assert ctx.value.errors[0].path == ['q2']
 
 
 def test_path_with_string():
@@ -1402,18 +1307,14 @@ def test_path_with_arbitrary_hashable_dict_key():
 def test_self_any():
     schema = Schema({"number": int,
                      "follow": Any(Self, "stop")})
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         schema({"number": "abc"})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
-    try:
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], TypeInvalid)
+
+    with raises(MultipleInvalid):
         schema({"follow": {"number": '123456.712'}})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
+
     schema({"follow": {"number": 123456}})
     schema({"follow": {"follow": {"number": 123456}}})
     schema({"follow": {"follow": {"number": 123456, "follow": "stop"}}})
@@ -1425,27 +1326,24 @@ def test_self_all():
                                    Schema({"extra_number": int},
                                           extra=ALLOW_EXTRA))},
                     extra=ALLOW_EXTRA)
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         schema({"number": "abc"})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
-    try:
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], TypeInvalid)
+
+    with pytest.raises(MultipleInvalid) as ctx:
         schema({"follow": {"number": '123456.712'}})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], TypeInvalid)
+
     schema({"follow": {"number": 123456}})
     schema({"follow": {"follow": {"number": 123456}}})
     schema({"follow": {"number": 123456, "extra_number": 123}})
-    try:
+
+    with pytest.raises(MultipleInvalid) as ctx:
         schema({"follow": {"number": 123456, "extra_number": "123"}})
-    except MultipleInvalid:
-        pass
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], TypeInvalid)
 
 
 def test_SomeOf_on_bounds_assertion():
@@ -1467,12 +1365,9 @@ def test_set_of_integers():
     schema(set())
     schema(set([42]))
     schema(set([42, 43, 44]))
-    try:
+    with pytest.raises(MultipleInvalid, match="invalid value in set") as ctx:
         schema(set(['abc']))
-    except MultipleInvalid as e:
-        assert str(e) == "invalid value in set"
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
 
 
 def test_frozenset_of_integers():
@@ -1485,12 +1380,10 @@ def test_frozenset_of_integers():
     schema(frozenset())
     schema(frozenset([42]))
     schema(frozenset([42, 43, 44]))
-    try:
+
+    with pytest.raises(MultipleInvalid, match="invalid value in frozenset") as ctx:
         schema(frozenset(['abc']))
-    except MultipleInvalid as e:
-        assert str(e) == "invalid value in frozenset"
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
 
 
 def test_set_of_integers_and_strings():
@@ -1502,12 +1395,10 @@ def test_set_of_integers_and_strings():
     schema(set([42]))
     schema(set(['abc']))
     schema(set([42, 'abc']))
-    try:
+
+    with pytest.raises(MultipleInvalid, match="invalid value in set") as ctx:
         schema(set([None]))
-    except MultipleInvalid as e:
-        assert str(e) == "invalid value in set"
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
 
 
 def test_frozenset_of_integers_and_strings():
@@ -1519,12 +1410,10 @@ def test_frozenset_of_integers_and_strings():
     schema(frozenset([42]))
     schema(frozenset(['abc']))
     schema(frozenset([42, 'abc']))
-    try:
+
+    with pytest.raises(MultipleInvalid, match="invalid value in frozenset") as ctx:
         schema(frozenset([None]))
-    except MultipleInvalid as e:
-        assert str(e) == "invalid value in frozenset"
-    else:
-        assert False, "Did not raise Invalid"
+    assert len(ctx.value.errors) == 1
 
 
 def test_lower_util_handles_various_inputs():
@@ -1565,12 +1454,8 @@ def test_strip_util_handles_various_inputs():
 def test_any_required():
     schema = Schema(Any({'a': int}, {'b': str}, required=True))
 
-    try:
+    with raises(MultipleInvalid, "required key not provided @ data['a']"):
         schema({})
-    except MultipleInvalid as e:
-        assert str(e) == "required key not provided @ data['a']"
-    else:
-        assert False, "Did not raise Invalid for MultipleInvalid"
 
 
 def test_any_required_with_subschema():
@@ -1579,12 +1464,8 @@ def test_any_required_with_subschema():
                         {'c': {'aa': int}},
                     required=True))
 
-    try:
+    with raises(MultipleInvalid, "required key not provided @ data['a']"):
         schema({})
-    except MultipleInvalid as e:
-        assert str(e) == "required key not provided @ data['a']"
-    else:
-        assert False, "Did not raise Invalid for MultipleInvalid"
 
 
 def test_inclusive():
@@ -1599,12 +1480,8 @@ def test_inclusive():
     r = schema({'x': 1, 'y': 2})
     assert r == {'x': 1, 'y': 2}
 
-    try:
-        r = schema({'x': 1})
-    except MultipleInvalid as e:
-        assert str(e) == "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]"
-    else:
-        assert False, "Did not raise Invalid for incomplete Inclusive group"
+    with raises(MultipleInvalid, "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]"):
+        schema({'x': 1})
 
 
 def test_inclusive_defaults():
@@ -1616,12 +1493,8 @@ def test_inclusive_defaults():
     r = schema({})
     assert r == {'x': 3, 'y': 4}
 
-    try:
+    with raises(MultipleInvalid, "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]"):
         r = schema({'x': 1})
-    except MultipleInvalid as e:
-        assert str(e) == "some but not all values in the same group of inclusion 'stuff' @ data[<stuff>]"
-    else:
-        assert False, "Did not raise Invalid for incomplete Inclusive group with defaults"
 
 
 def test_exclusive():
@@ -1636,12 +1509,8 @@ def test_exclusive():
     r = schema({'x': 1})
     assert r == {'x': 1}
 
-    try:
+    with raises(MultipleInvalid, "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]"):
         r = schema({'x': 1, 'y': 2})
-    except MultipleInvalid as e:
-        assert str(e) == "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]"
-    else:
-        assert False, "Did not raise Invalid for multiple values in Exclusive group"
 
 
 def test_any_with_discriminant():
@@ -1657,17 +1526,13 @@ def test_any_with_discriminant():
             'c-value': bool,
         }, discriminant=lambda value, alternatives: filter(lambda v: v['type'] == value['type'], alternatives))
     })
-    try:
+    with raises(MultipleInvalid, "expected bool for dictionary value @ data['implementation']['c-value']"):
         schema({
             'implementation': {
                 'type': 'C',
                 'c-value': None
             }
         })
-    except MultipleInvalid as e:
-        assert str(e) == 'expected bool for dictionary value @ data[\'implementation\'][\'c-value\']'
-    else:
-        assert False, "Did not raise correct Invalid"
 
 
 def test_key1():
@@ -1675,19 +1540,17 @@ def test_key1():
         return int(a)
 
     schema = Schema({as_int: str})
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         schema({
             '1': 'one',
             'two': '2',
             '3': 'three',
             'four': '4',
         })
-    except MultipleInvalid as e:
-        assert len(e.errors) == 2
-        assert str(e.errors[0]) == "not a valid value @ data['two']"
-        assert str(e.errors[1]) == "not a valid value @ data['four']"
-    else:
-        assert False, "Did not raise correct Invalid"
+
+    assert len(ctx.value.errors) == 2
+    assert str(ctx.value.errors[0]) == "not a valid value @ data['two']"
+    assert str(ctx.value.errors[1]) == "not a valid value @ data['four']"
 
 
 def test_key2():
@@ -1698,55 +1561,43 @@ def test_key2():
             raise Invalid('expecting a number')
 
     schema = Schema({as_int: str})
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         schema({
             '1': 'one',
             'two': '2',
             '3': 'three',
             'four': '4',
         })
-    except MultipleInvalid as e:
-        assert len(e.errors) == 2
-        assert str(e.errors[0]) == "expecting a number @ data['two']"
-        assert str(e.errors[1]) == "expecting a number @ data['four']"
-    else:
-        assert False, "Did not raise correct Invalid"
+    assert len(ctx.value.errors) == 2
+    assert str(ctx.value.errors[0]) == "expecting a number @ data['two']"
+    assert str(ctx.value.errors[1]) == "expecting a number @ data['four']"
 
 
-if Enum:
-    def test_coerce_enum():
-        """Test Coerce Enum"""
-        class Choice(Enum):
-            Easy = 1
-            Medium = 2
-            Hard = 3
+def test_coerce_enum():
+    """Test Coerce Enum"""
+    class Choice(Enum):
+        Easy = 1
+        Medium = 2
+        Hard = 3
 
-        class StringChoice(str, Enum):
-            Easy = "easy"
-            Medium = "medium"
-            Hard = "hard"
+    class StringChoice(str, Enum):
+        Easy = "easy"
+        Medium = "medium"
+        Hard = "hard"
 
-        schema = Schema(Coerce(Choice))
-        string_schema = Schema(Coerce(StringChoice))
+    schema = Schema(Coerce(Choice))
+    string_schema = Schema(Coerce(StringChoice))
 
-        # Valid value
-        assert schema(1) == Choice.Easy
-        assert string_schema("easy") == StringChoice.Easy
+    # Valid value
+    assert schema(1) == Choice.Easy
+    assert string_schema("easy") == StringChoice.Easy
 
-        # Invalid value
-        try:
-            schema(4)
-        except Invalid as e:
-            assert str(e) == "expected Choice or one of 1, 2, 3"
-        else:
-            assert False, "Did not raise Invalid for String"
+    # Invalid value
+    with raises(Invalid, "expected Choice or one of 1, 2, 3"):
+        schema(4)
 
-        try:
-            string_schema("hello")
-        except Invalid as e:
-            assert str(e) == "expected StringChoice or one of 'easy', 'medium', 'hard'"
-        else:
-            assert False, "Did not raise Invalid for String"
+    with raises(Invalid, "expected StringChoice or one of 'easy', 'medium', 'hard'"):
+        string_schema("hello")
 
 
 class MyValueClass(object):
@@ -1761,22 +1612,15 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
-# Python 3.7 removed the trailing comma in repr() of BaseException
-# https://bugs.python.org/issue30399
-if sys.version_info >= (3, 7):
-    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
-else:
-    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value',)"
-
-
 def test_exception():
     s = Schema(None)
-    try:
+    with pytest.raises(MultipleInvalid) as ctx:
         s(123)
-    except MultipleInvalid as e:
-        assert repr(e) == "MultipleInvalid([{}])".format(invalid_scalar_excp_repr)
-        assert str(e.msg) == "not a valid value"
-        assert str(e.error_message) == "not a valid value"
-        assert str(e.errors) == "[{}]".format(invalid_scalar_excp_repr)
-        e.add("Test Error")
-        assert str(e.errors) == "[{}, 'Test Error']".format(invalid_scalar_excp_repr)
+
+    invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
+    assert repr(ctx.value) == f"MultipleInvalid([{invalid_scalar_excp_repr}])"
+    assert str(ctx.value.msg) == "not a valid value"
+    assert str(ctx.value.error_message) == "not a valid value"
+    assert str(ctx.value.errors) == f"[{invalid_scalar_excp_repr}]"
+    ctx.value.add("Test Error")
+    assert str(ctx.value.errors) == f"[{invalid_scalar_excp_repr}, 'Test Error']"

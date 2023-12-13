@@ -1,5 +1,3 @@
-import sys
-
 # F401: "imported but unused"
 from voluptuous.error import LiteralInvalid, TypeInvalid, Invalid  # noqa: F401
 from voluptuous.schema_builder import Schema, default_factory, raises  # noqa: F401
@@ -10,14 +8,6 @@ import typing
 __author__ = 'tusharmakkar08'
 
 
-def _fix_str(v: str) -> str:
-    if sys.version_info[0] == 2 and isinstance(v, unicode):  # noqa: F821
-        s = v
-    else:
-        s = str(v)
-    return s
-
-
 def Lower(v: str) -> str:
     """Transform a string to lower case.
 
@@ -25,7 +15,7 @@ def Lower(v: str) -> str:
     >>> s('HI')
     'hi'
     """
-    return _fix_str(v).lower()
+    return str(v).lower()
 
 
 def Upper(v: str) -> str:
@@ -35,7 +25,7 @@ def Upper(v: str) -> str:
     >>> s('hi')
     'HI'
     """
-    return _fix_str(v).upper()
+    return str(v).upper()
 
 
 def Capitalize(v: str) -> str:
@@ -45,7 +35,7 @@ def Capitalize(v: str) -> str:
     >>> s('hello world')
     'Hello world'
     """
-    return _fix_str(v).capitalize()
+    return str(v).capitalize()
 
 
 def Title(v: str) -> str:
@@ -55,7 +45,7 @@ def Title(v: str) -> str:
     >>> s('hello world')
     'Hello World'
     """
-    return _fix_str(v).title()
+    return str(v).title()
 
 
 def Strip(v: str) -> str:
@@ -65,7 +55,7 @@ def Strip(v: str) -> str:
     >>> s('  hello world  ')
     'hello world'
     """
-    return _fix_str(v).strip()
+    return str(v).strip()
 
 
 class DefaultTo(object):
@@ -156,10 +146,3 @@ class Literal(object):
 
     def __repr__(self):
         return repr(self.lit)
-
-
-def u(x: str) -> str:
-    if sys.version_info < (3,):
-        return unicode(x)  # noqa: F821
-    else:
-        return x
