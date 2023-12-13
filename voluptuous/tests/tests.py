@@ -1329,6 +1329,76 @@ def test_match_error_has_path():
         assert False, "Did not raise MatchInvalid"
 
 
+def test_path_with_string():
+    """Most common dict use with strings as keys"""
+    s = Schema({'string_key': int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({'string_key': 'str'})
+    assert ctx.value.errors[0].path == ['string_key']
+
+
+def test_path_with_list_index():
+    """Position of the offending list index included in path as int"""
+    s = Schema({'string_key': [int]})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({'string_key': [123, 'should be int']})
+    assert ctx.value.errors[0].path == ['string_key', 1]
+
+
+def test_path_with_tuple_index():
+    """Position of the offending tuple index included in path as int"""
+    s = Schema({'string_key': (int,)})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({'string_key': (123, 'should be int')})
+    assert ctx.value.errors[0].path == ['string_key', 1]
+
+
+def test_path_with_integer_dict_key():
+    """Not obvious case with dict having not strings, but integers as keys"""
+    s = Schema({1337: int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({1337: 'should be int'})
+    assert ctx.value.errors[0].path == [1337]
+
+
+def test_path_with_float_dict_key():
+    """Not obvious case with dict having not strings, but floats as keys"""
+    s = Schema({13.37: int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({13.37: 'should be int'})
+    assert ctx.value.errors[0].path == [13.37]
+
+
+def test_path_with_tuple_dict_key():
+    """Not obvious case with dict having not strings, but tuples as keys"""
+    s = Schema({('fancy', 'key'): int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({('fancy', 'key'): 'should be int'})
+    assert ctx.value.errors[0].path == [('fancy', 'key')]
+
+
+def test_path_with_arbitrary_hashable_dict_key():
+    """Not obvious case with dict having not strings, but arbitrary hashable objects as keys"""
+
+    class HashableObjectWhichWillBeKeyInDict:
+        def __hash__(self):
+            return 1337  # dummy hash, used only for illustration
+
+    s = Schema({HashableObjectWhichWillBeKeyInDict: [int]})
+
+    hashable_obj_provided_in_input = HashableObjectWhichWillBeKeyInDict()
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        s({hashable_obj_provided_in_input: [0, 1, 'should be int']})
+    assert ctx.value.errors[0].path == [hashable_obj_provided_in_input, 2]
+
+
 def test_self_any():
     schema = Schema({"number": int,
                      "follow": Any(Self, "stop")})
