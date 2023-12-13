@@ -19,7 +19,6 @@ jobs:
           - { python-version: "3.10", session: "py310" }
           - { python-version: "3.9",  session: "py39" }
           - { python-version: "3.8",  session: "py38" }
-          - { python-version: "3.7",  session: "py37" }
 
     steps:
       - name: Check out the repository
