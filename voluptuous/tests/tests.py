@@ -1627,9 +1627,9 @@ def test_exception():
         s(123)
 
     invalid_scalar_excp_repr = "ScalarInvalid('not a valid value')"
-    assert repr(ctx.value) == "MultipleInvalid([{}])".format(invalid_scalar_excp_repr)
+    assert repr(ctx.value) == f"MultipleInvalid([{invalid_scalar_excp_repr}])"
     assert str(ctx.value.msg) == "not a valid value"
     assert str(ctx.value.error_message) == "not a valid value"
-    assert str(ctx.value.errors) == "[{}]".format(invalid_scalar_excp_repr)
+    assert str(ctx.value.errors) == f"[{invalid_scalar_excp_repr}]"
     ctx.value.add("Test Error")
-    assert str(ctx.value.errors) == "[{}, 'Test Error']".format(invalid_scalar_excp_repr)
+    assert str(ctx.value.errors) == f"[{invalid_scalar_excp_repr}, 'Test Error']"
