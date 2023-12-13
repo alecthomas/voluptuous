@@ -1328,6 +1328,7 @@ def test_match_error_has_path():
     else:
         assert False, "Did not raise MatchInvalid"
 
+
 def test_path_with_string():
     """Most common dict use with strings as keys"""
     s = Schema({'string_key': int})
@@ -1335,6 +1336,7 @@ def test_path_with_string():
     with pytest.raises(MultipleInvalid) as ctx:
         s({'string_key': 'str'})
     assert ctx.value.errors[0].path == ['string_key']
+
 
 def test_path_with_list_index():
     """Position of the offending list index included in path as int"""
@@ -1344,6 +1346,7 @@ def test_path_with_list_index():
         s({'string_key': [123, 'should be int']})
     assert ctx.value.errors[0].path == ['string_key', 1]
 
+
 def test_path_with_tuple_index():
     """Position of the offending tuple index included in path as int"""
     s = Schema({'string_key': (int,)})
@@ -1351,6 +1354,7 @@ def test_path_with_tuple_index():
     with pytest.raises(MultipleInvalid) as ctx:
         s({'string_key': (123, 'should be int')})
     assert ctx.value.errors[0].path == ['string_key', 1]
+
 
 def test_path_with_integer_dict_key():
     """Not obvious case with dict having not strings, but integers as keys"""
@@ -1360,6 +1364,7 @@ def test_path_with_integer_dict_key():
         s({1337: 'should be int'})
     assert ctx.value.errors[0].path == [1337]
 
+
 def test_path_with_float_dict_key():
     """Not obvious case with dict having not strings, but floats as keys"""
     s = Schema({13.37: int})
@@ -1368,6 +1373,7 @@ def test_path_with_float_dict_key():
         s({13.37: 'should be int'})
     assert ctx.value.errors[0].path == [13.37]
 
+
 def test_path_with_tuple_dict_key():
     """Not obvious case with dict having not strings, but tuples as keys"""
     s = Schema({('fancy', 'key'): int})
@@ -1375,6 +1381,7 @@ def test_path_with_tuple_dict_key():
     with pytest.raises(MultipleInvalid) as ctx:
         s({('fancy', 'key'): 'should be int'})
     assert ctx.value.errors[0].path == [('fancy', 'key')]
+
 
 def test_path_with_arbitrary_hashable_dict_key():
     """Not obvious case with dict having not strings, but arbitrary hashable objects as keys"""
