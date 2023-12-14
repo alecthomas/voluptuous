@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+python_files = "tests.py"
+testpaths = "voluptuous/tests"
+addopts = "--doctest-glob=*.md -v"
