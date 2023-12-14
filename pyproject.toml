@@ -2,6 +2,10 @@
 target-version = ["py38", "py39", "py310", "py311", "py312"]
 skip-string-normalization = true
 
+[tool.isort]
+skip_gitignore = true
+profile = "black"
+
 [tool.mypy]
 python_version = "3.8"
 
