@@ -1,3 +1,4 @@
+# fmt: off
 import collections
 import copy
 import os
@@ -17,6 +18,8 @@ from voluptuous import (
 )
 from voluptuous.humanize import humanize_error
 from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
+
+# fmt: on
 
 
 def test_new_required_test():

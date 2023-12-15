@@ -1,9 +1,11 @@
+# fmt: off
 import typing
 
 from voluptuous import Invalid, MultipleInvalid
 from voluptuous.error import Error
 from voluptuous.schema_builder import Schema
 
+# fmt: on
 
 MAX_VALIDATION_ERROR_ITEM_LENGTH = 500
 

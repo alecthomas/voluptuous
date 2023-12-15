@@ -1,3 +1,4 @@
+# fmt: off
 from __future__ import annotations
 
 import collections
@@ -12,6 +13,8 @@ from functools import wraps
 
 from voluptuous import error as er
 from voluptuous.error import Error
+
+# fmt: on
 
 """Schema validation for Python data structures.
 
@@ -147,6 +150,7 @@ extra = Extra
 
 primitive_types = (bool, bytes, int, str, float, complex)
 
+# fmt: off
 Schemable = typing.Union[
     'Schema', 'Object',
     collections.abc.Mapping,
@@ -154,6 +158,7 @@ Schemable = typing.Union[
     bool, bytes, int, str, float, complex,
     type, object, dict, None, typing.Callable
 ]
+# fmt: on
 
 
 class Schema(object):

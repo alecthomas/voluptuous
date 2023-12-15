@@ -1,3 +1,4 @@
+# fmt: off
 import datetime
 import os
 import re
@@ -16,6 +17,8 @@ from voluptuous.error import (
 
 # F401: flake8 complains about 'raises' not being used, but it is used in doctests
 from voluptuous.schema_builder import Schema, Schemable, message, raises  # noqa: F401
+
+# fmt: on
 
 
 Enum: typing.Union[type, None]

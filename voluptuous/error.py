@@ -1,4 +1,7 @@
+# fmt: off
 import typing
+
+# fmt: on
 
 
 class Error(Exception):
