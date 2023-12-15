@@ -5,6 +5,7 @@ skip-string-normalization = true
 [tool.isort]
 skip_gitignore = true
 profile = "black"
+multi_line_output = 5
 
 [tool.mypy]
 python_version = "3.8"
