@@ -1,20 +1,22 @@
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
-from voluptuous.humanize import humanize_error
-from voluptuous import (ALLOW_EXTRA, PREVENT_EXTRA, All, AllInvalid, Any, Clamp,
-                        Coerce, Contains, ContainsInvalid, Date, Datetime, Email,
-                        EmailInvalid, Equal, ExactSequence, Exclusive, Extra,
-                        FqdnUrl, In, InInvalid, Inclusive, Invalid, IsDir, IsFile,
-                        Length, Literal, LiteralInvalid, Marker, Match, MatchInvalid,
-                        Maybe, MultipleInvalid, NotIn, NotInInvalid, Number, Object,
-                        Optional, PathExists, Range, Remove, Replace, Required,
-                        Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
-                        Unordered, Url, UrlInvalid, raises, validate)
-import pytest
-from enum import Enum
-import sys
-import os
 import collections
 import copy
+import os
+import sys
+from enum import Enum
+
+import pytest
+
+from voluptuous import (
+    ALLOW_EXTRA, PREVENT_EXTRA, All, AllInvalid, Any, Clamp, Coerce, Contains,
+    ContainsInvalid, Date, Datetime, Email, EmailInvalid, Equal, ExactSequence,
+    Exclusive, Extra, FqdnUrl, In, Inclusive, InInvalid, Invalid, IsDir, IsFile, Length,
+    Literal, LiteralInvalid, Marker, Match, MatchInvalid, Maybe, MultipleInvalid, NotIn,
+    NotInInvalid, Number, Object, Optional, PathExists, Range, Remove, Replace,
+    Required, Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union, Unordered, Url,
+    UrlInvalid, raises, validate,
+)
+from voluptuous.humanize import humanize_error
+from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 
 def test_new_required_test():

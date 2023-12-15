@@ -1,7 +1,8 @@
+import io
+import sys
+
 from setuptools import setup
 
-import sys
-import io
 sys.path.insert(0, '.')
 version = __import__('voluptuous').__version__
 

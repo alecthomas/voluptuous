@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import collections
 import inspect
-import re
-from functools import wraps
-import sys
-from contextlib import contextmanager
-
 import itertools
-from voluptuous import error as er
-from collections.abc import Generator
+import re
+import sys
 import typing
+from collections.abc import Generator
+from contextlib import contextmanager
+from functools import wraps
+
+from voluptuous import error as er
 from voluptuous.error import Error
 
 """Schema validation for Python data structures.

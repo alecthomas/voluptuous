@@ -1,18 +1,22 @@
-from voluptuous.error import (MultipleInvalid, CoerceInvalid, TrueInvalid, FalseInvalid, BooleanInvalid, Invalid,
-                              AnyInvalid, AllInvalid, MatchInvalid, UrlInvalid, EmailInvalid, FileInvalid, DirInvalid,
-                              RangeInvalid, PathInvalid, ExactSequenceInvalid, LengthInvalid, DatetimeInvalid,
-                              DateInvalid, InInvalid, TypeInvalid, NotInInvalid, ContainsInvalid, NotEnoughValid,
-                              TooManyValid)
-
-# F401: flake8 complains about 'raises' not being used, but it is used in doctests
-from voluptuous.schema_builder import Schema, raises, message, Schemable  # noqa: F401
+import datetime
 import os
 import re
-import datetime
 import sys
-from functools import wraps
-from decimal import Decimal, InvalidOperation
 import typing
+from decimal import Decimal, InvalidOperation
+from functools import wraps
+
+from voluptuous.error import (
+    AllInvalid, AnyInvalid, BooleanInvalid, CoerceInvalid, ContainsInvalid, DateInvalid,
+    DatetimeInvalid, DirInvalid, EmailInvalid, ExactSequenceInvalid, FalseInvalid,
+    FileInvalid, InInvalid, Invalid, LengthInvalid, MatchInvalid, MultipleInvalid,
+    NotEnoughValid, NotInInvalid, PathInvalid, RangeInvalid, TooManyValid, TrueInvalid,
+    TypeInvalid, UrlInvalid,
+)
+
+# F401: flake8 complains about 'raises' not being used, but it is used in doctests
+from voluptuous.schema_builder import Schema, Schemable, message, raises  # noqa: F401
+
 
 Enum: typing.Union[type, None]
 try:
