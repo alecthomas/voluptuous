@@ -27,7 +27,7 @@ class Invalid(Error):
         message: str,
         path: typing.Optional[typing.List[typing.Hashable]] = None,
         error_message: typing.Optional[str] = None,
-        error_type: typing.Optional[str] = None
+        error_type: typing.Optional[str] = None,
     ) -> None:
         Error.__init__(self, message)
         self._path = path or []
@@ -47,8 +47,7 @@ class Invalid(Error):
         return self._error_message
 
     def __str__(self) -> str:
-        path = ' @ data[%s]' % ']['.join(map(repr, self.path)) \
-            if self.path else ''
+        path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = Exception.__str__(self)
         if self.error_type:
             output += ' for ' + self.error_type
@@ -210,9 +209,11 @@ class ExactSequenceInvalid(Invalid):
 
 class NotEnoughValid(Invalid):
     """The value did not pass enough validations."""
+
     pass
 
 
 class TooManyValid(Invalid):
     """The value passed more than expected validations."""
+
     pass
