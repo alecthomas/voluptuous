@@ -1,7 +1,8 @@
+import io
+import sys
+
 from setuptools import setup
 
-import sys
-import io
 sys.path.insert(0, '.')
 version = __import__('voluptuous').__version__
 
@@ -38,5 +39,5 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
-    ]
+    ],
 )
