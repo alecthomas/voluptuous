@@ -79,15 +79,50 @@ def test_in():
     assert isinstance(ctx.value.errors[0], InInvalid)
 
 
+def test_in_unsortable_container():
+    """Verify that In works with unsortable container."""
+    schema = Schema({"type": In((int, str, float))})
+    schema({"type": float})
+    with pytest.raises(
+        MultipleInvalid,
+        match=(
+            r"value must be one of \[<class 'float'>, <class 'int'>, <class 'str'>\] for dictionary value "
+            r"@ data\['type'\]"
+        ),
+    ) as ctx:
+        schema({"type": 42})
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], InInvalid)
+
+
 def test_not_in():
     """Verify that NotIn works."""
     schema = Schema({"color": NotIn(frozenset(["red", "blue", "yellow"]))})
     schema({"color": "orange"})
     with pytest.raises(
         MultipleInvalid,
-        match=r"value must not be one of \['blue', 'red', 'yellow'\] for dictionary value @ data\['color'\]",
+        match=(
+            r"value must not be one of \['blue', 'red', 'yellow'\] for dictionary "
+            r"value @ data\['color'\]"
+        ),
     ) as ctx:
         schema({"color": "blue"})
+    assert len(ctx.value.errors) == 1
+    assert isinstance(ctx.value.errors[0], NotInInvalid)
+
+
+def test_not_in_unsortable_container():
+    """Verify that NotIn works with unsortable container."""
+    schema = Schema({"type": NotIn((int, str, float))})
+    schema({"type": 42})
+    with pytest.raises(
+        MultipleInvalid,
+        match=(
+            r"value must not be one of \[<class 'float'>, <class 'int'>, "
+            r"<class 'str'>\] for dictionary value @ data\['type'\]"
+        ),
+    ) as ctx:
+        schema({"type": str})
     assert len(ctx.value.errors) == 1
     assert isinstance(ctx.value.errors[0], NotInInvalid)
 

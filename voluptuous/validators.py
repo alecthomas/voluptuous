@@ -821,9 +821,15 @@ class In(object):
         except TypeError:
             check = True
         if check:
-            raise InInvalid(
-                self.msg or 'value must be one of {}'.format(sorted(self.container))
-            )
+            try:
+                raise InInvalid(
+                    self.msg or f'value must be one of {sorted(self.container)}'
+                )
+            except TypeError:
+                raise InInvalid(
+                    self.msg
+                    or f'value must be one of {sorted(self.container, key=str)}'
+                )
         return v
 
     def __repr__(self):
@@ -845,9 +851,15 @@ class NotIn(object):
         except TypeError:
             check = True
         if check:
-            raise NotInInvalid(
-                self.msg or 'value must not be one of {}'.format(sorted(self.container))
-            )
+            try:
+                raise NotInInvalid(
+                    self.msg or f'value must not be one of {sorted(self.container)}'
+                )
+            except TypeError:
+                raise NotInInvalid(
+                    self.msg
+                    or f'value must not be one of {sorted(self.container, key=str)}'
+                )
         return v
 
     def __repr__(self):
