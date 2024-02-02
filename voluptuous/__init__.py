@@ -8,5 +8,5 @@ from voluptuous.error import *  # isort: skip
 
 # fmt: on
 
-__version__ = '0.14.1'
+__version__ = '0.14.2'
 __author__ = 'alecthomas'
