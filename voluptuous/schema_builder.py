@@ -1022,7 +1022,7 @@ class VirtualPathComponent(str):
 class Marker(object):
     """Mark nodes for special treatment.
 
-    `description` is an optional field, unused by Voluptuous itself, but can be used
+    `description` is an optional field, unused by Voluptuous itself, but can be
     introspected by any external tool, for example to generate schema documentation.
     """
 
