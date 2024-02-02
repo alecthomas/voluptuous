@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.14.2]
+
+**New**:
+* [#507](https://github.com/alecthomas/voluptuous/pull/507): docs: document description field of Marker
+
+**Fixes**:
+* [#506](https://github.com/alecthomas/voluptuous/pull/506): fix: allow unsortable containers in In and NotIn validators (fixes [#451](https://github.com/alecthomas/voluptuous/issues/451)) (bug introduced in 0.12.1)
+* [#488](https://github.com/alecthomas/voluptuous/pull/488): fix(typing): fix type hint for Coerce type param (bug introduced in 0.14.0)
+* [#497](https://github.com/alecthomas/voluptuous/pull/497): fix(typing): allow path to be a list of strings, integers or any other hashables (bug introduced in 0.14.0)
+
+**Changes**:
+* [#499](https://github.com/alecthomas/voluptuous/pull/499): support: drop support for python 3.7
+* [#501](https://github.com/alecthomas/voluptuous/pull/501): support: run tests on python 3.11
+* [#502](https://github.com/alecthomas/voluptuous/pull/502): support: run tests on python 3.12
+* [#495](https://github.com/alecthomas/voluptuous/pull/495): refactor: drop duplicated type checks in Schema._compile
+* [#500](https://github.com/alecthomas/voluptuous/pull/500): refactor: fix few tests, use pytest.raises, extend raises helper
+* [#503](https://github.com/alecthomas/voluptuous/pull/503): refactor: Add linters configuration, reformat whole code
+
 ## [0.14.1]
 
 **Changes**:
