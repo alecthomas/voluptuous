@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>voluptuous.util &#8212; voluptuous 0.13.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>voluptuous.util &#8212; voluptuous 0.14.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=0dc20415"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -29,75 +30,89 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.util</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span></span><span class="c1"># F401: &quot;imported but unused&quot;</span>
+<span class="c1"># fmt: off</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 
-<span class="kn">from</span> <span class="nn">voluptuous.error</span> <span class="kn">import</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span><span class="p">,</span> <span class="n">Invalid</span>
-<span class="kn">from</span> <span class="nn">voluptuous.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>
-<span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="n">validators</span>
+<span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="n">validators</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span> <span class="nn">voluptuous.error</span> <span class="kn">import</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">LiteralInvalid</span><span class="p">,</span> <span class="n">TypeInvalid</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span> <span class="nn">voluptuous.schema_builder</span> <span class="kn">import</span> <span class="n">DefaultFactory</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span> <span class="nn">voluptuous.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">,</span> <span class="n">raises</span>  <span class="c1"># noqa: F401</span>
+
+<span class="c1"># fmt: on</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;tusharmakkar08&#39;</span>
 
 
-<span class="k">def</span> <span class="nf">_fix_str</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">unicode</span><span class="p">):</span>  <span class="c1"># noqa: F821</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">v</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">s</span>
-
-
-<div class="viewcode-block" id="Lower"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Lower">[docs]</a><span class="k">def</span> <span class="nf">Lower</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Transform a string to lower case.</span>
+<div class="viewcode-block" id="Lower">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Lower">[docs]</a>
+<span class="k">def</span> <span class="nf">Lower</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a string to lower case.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(Lower)</span>
 <span class="sd">    &gt;&gt;&gt; s(&#39;HI&#39;)</span>
 <span class="sd">    &#39;hi&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_fix_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Upper"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Upper">[docs]</a><span class="k">def</span> <span class="nf">Upper</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Transform a string to upper case.</span>
+
+<div class="viewcode-block" id="Upper">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Upper">[docs]</a>
+<span class="k">def</span> <span class="nf">Upper</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a string to upper case.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(Upper)</span>
 <span class="sd">    &gt;&gt;&gt; s(&#39;hi&#39;)</span>
 <span class="sd">    &#39;HI&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_fix_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Capitalize"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Capitalize">[docs]</a><span class="k">def</span> <span class="nf">Capitalize</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Capitalise a string.</span>
+
+<div class="viewcode-block" id="Capitalize">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Capitalize">[docs]</a>
+<span class="k">def</span> <span class="nf">Capitalize</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Capitalise a string.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(Capitalize)</span>
 <span class="sd">    &gt;&gt;&gt; s(&#39;hello world&#39;)</span>
 <span class="sd">    &#39;Hello world&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_fix_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Title"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Title">[docs]</a><span class="k">def</span> <span class="nf">Title</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Title case a string.</span>
+
+<div class="viewcode-block" id="Title">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Title">[docs]</a>
+<span class="k">def</span> <span class="nf">Title</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Title case a string.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(Title)</span>
 <span class="sd">    &gt;&gt;&gt; s(&#39;hello world&#39;)</span>
 <span class="sd">    &#39;Hello World&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_fix_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Strip"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Strip">[docs]</a><span class="k">def</span> <span class="nf">Strip</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Strip whitespace from a string.</span>
+
+<div class="viewcode-block" id="Strip">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Strip">[docs]</a>
+<span class="k">def</span> <span class="nf">Strip</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Strip whitespace from a string.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(Strip)</span>
 <span class="sd">    &gt;&gt;&gt; s(&#39;  hello world  &#39;)</span>
 <span class="sd">    &#39;hello world&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_fix_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="DefaultTo"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.DefaultTo">[docs]</a><span class="k">class</span> <span class="nc">DefaultTo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sets a value to default_value if none provided.</span>
+
+<div class="viewcode-block" id="DefaultTo">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.DefaultTo">[docs]</a>
+<span class="k">class</span> <span class="nc">DefaultTo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets a value to default_value if none provided.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(DefaultTo(42))</span>
 <span class="sd">    &gt;&gt;&gt; s(None)</span>
@@ -107,7 +122,7 @@
 <span class="sd">    []</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_value</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_value</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="n">default_value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
 
@@ -120,8 +135,11 @@
         <span class="k">return</span> <span class="s1">&#39;DefaultTo(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_value</span><span class="p">(),)</span></div>
 
 
-<div class="viewcode-block" id="SetTo"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.SetTo">[docs]</a><span class="k">class</span> <span class="nc">SetTo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set a value, ignoring any previous value.</span>
+
+<div class="viewcode-block" id="SetTo">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.SetTo">[docs]</a>
+<span class="k">class</span> <span class="nc">SetTo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a value, ignoring any previous value.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(validators.Any(int, SetTo(42)))</span>
 <span class="sd">    &gt;&gt;&gt; s(2)</span>
@@ -130,7 +148,7 @@
 <span class="sd">    42</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
@@ -140,8 +158,11 @@
         <span class="k">return</span> <span class="s1">&#39;SetTo(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(),)</span></div>
 
 
-<div class="viewcode-block" id="Set"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Set">[docs]</a><span class="k">class</span> <span class="nc">Set</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert a list into a set.</span>
+
+<div class="viewcode-block" id="Set">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Set">[docs]</a>
+<span class="k">class</span> <span class="nc">Set</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a list into a set.</span>
 
 <span class="sd">    &gt;&gt;&gt; s = Schema(Set())</span>
 <span class="sd">    &gt;&gt;&gt; s([]) == set([])</span>
@@ -152,30 +173,30 @@
 <span class="sd">    ...   s([set([1, 2]), set([3, 4])])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">set_v</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">TypeInvalid</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;cannot be presented as set: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">TypeInvalid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;cannot be presented as set: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">set_v</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;Set()&#39;</span></div>
 
 
-<div class="viewcode-block" id="Literal"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Literal">[docs]</a><span class="k">class</span> <span class="nc">Literal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lit</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Literal">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.Literal">[docs]</a>
+<span class="k">class</span> <span class="nc">Literal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lit</span> <span class="o">=</span> <span class="n">lit</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">LiteralInvalid</span><span class="p">(</span>
-                <span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not match for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LiteralInvalid</span><span class="p">(</span><span class="n">msg</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not match for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lit</span>
 
@@ -185,12 +206,6 @@
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lit</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="u"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.util.u">[docs]</a><span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
-        <span class="k">return</span> <span class="n">unicode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">x</span></div>
 </pre></div>
 
           </div>
@@ -218,6 +233,9 @@
 
 
 <h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">voluptuous</a></li>
+</ul>
 
 
 <hr />
@@ -260,11 +278,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2023, Alec Thomas.
+      &#169;2024, Alec Thomas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
     </div>
 

@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>voluptuous.humanize &#8212; voluptuous 0.13.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>voluptuous.humanize &#8212; voluptuous 0.14.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=0dc20415"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -29,14 +30,21 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.humanize</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">MultipleInvalid</span>
-<span class="kn">from</span> <span class="nn">voluptuous.error</span> <span class="kn">import</span> <span class="n">Error</span>
+<span></span><span class="c1"># fmt: off</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 
+<span class="kn">from</span> <span class="nn">voluptuous</span> <span class="kn">import</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">MultipleInvalid</span>
+<span class="kn">from</span> <span class="nn">voluptuous.error</span> <span class="kn">import</span> <span class="n">Error</span>
+<span class="kn">from</span> <span class="nn">voluptuous.schema_builder</span> <span class="kn">import</span> <span class="n">Schema</span>
+
+<span class="c1"># fmt: on</span>
 
 <span class="n">MAX_VALIDATION_ERROR_ITEM_LENGTH</span> <span class="o">=</span> <span class="mi">500</span>
 
 
-<span class="k">def</span> <span class="nf">_nested_getitem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_nested_getitem</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Hashable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
     <span class="k">for</span> <span class="n">item_index</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">item_index</span><span class="p">]</span>
@@ -47,28 +55,44 @@
     <span class="k">return</span> <span class="n">data</span>
 
 
-<div class="viewcode-block" id="humanize_error"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.humanize.humanize_error">[docs]</a><span class="k">def</span> <span class="nf">humanize_error</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validation_error</span><span class="p">,</span> <span class="n">max_sub_error_length</span><span class="o">=</span><span class="n">MAX_VALIDATION_ERROR_ITEM_LENGTH</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Provide a more helpful + complete validation error message than that provided automatically</span>
+<div class="viewcode-block" id="humanize_error">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.humanize.humanize_error">[docs]</a>
+<span class="k">def</span> <span class="nf">humanize_error</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">validation_error</span><span class="p">:</span> <span class="n">Invalid</span><span class="p">,</span>
+    <span class="n">max_sub_error_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MAX_VALIDATION_ERROR_ITEM_LENGTH</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide a more helpful + complete validation error message than that provided automatically</span>
 <span class="sd">    Invalid and MultipleInvalid do not include the offending value in error messages,</span>
 <span class="sd">    and MultipleInvalid.__str__ only provides the first error.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">validation_error</span><span class="p">,</span> <span class="n">MultipleInvalid</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span>
-            <span class="n">humanize_error</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sub_error</span><span class="p">,</span> <span class="n">max_sub_error_length</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">sub_error</span> <span class="ow">in</span> <span class="n">validation_error</span><span class="o">.</span><span class="n">errors</span>
-        <span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">humanize_error</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sub_error</span><span class="p">,</span> <span class="n">max_sub_error_length</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">sub_error</span> <span class="ow">in</span> <span class="n">validation_error</span><span class="o">.</span><span class="n">errors</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">offending_item_summary</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">_nested_getitem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validation_error</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">offending_item_summary</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_sub_error_length</span><span class="p">:</span>
-            <span class="n">offending_item_summary</span> <span class="o">=</span> <span class="n">offending_item_summary</span><span class="p">[:</span><span class="n">max_sub_error_length</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span>
+            <span class="n">offending_item_summary</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">offending_item_summary</span><span class="p">[:</span> <span class="n">max_sub_error_length</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">. Got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">validation_error</span><span class="p">,</span> <span class="n">offending_item_summary</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="validate_with_humanized_errors"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.humanize.validate_with_humanized_errors">[docs]</a><span class="k">def</span> <span class="nf">validate_with_humanized_errors</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">max_sub_error_length</span><span class="o">=</span><span class="n">MAX_VALIDATION_ERROR_ITEM_LENGTH</span><span class="p">):</span>
+
+<div class="viewcode-block" id="validate_with_humanized_errors">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.humanize.validate_with_humanized_errors">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_with_humanized_errors</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">max_sub_error_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MAX_VALIDATION_ERROR_ITEM_LENGTH</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">schema</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">Invalid</span><span class="p">,</span> <span class="n">MultipleInvalid</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">Error</span><span class="p">(</span><span class="n">humanize_error</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">max_sub_error_length</span><span class="p">))</span></div>
+
 </pre></div>
 
           </div>
@@ -96,6 +120,9 @@
 
 
 <h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">voluptuous</a></li>
+</ul>
 
 
 <hr />
@@ -138,11 +165,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2023, Alec Thomas.
+      &#169;2024, Alec Thomas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
     </div>
 

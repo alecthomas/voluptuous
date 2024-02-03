@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'voluptuous'
-copyright = '2023, Alec Thomas'
+copyright = '2024, Alec Thomas'
 author = 'Alec Thomas'
 release = __import__('voluptuous').__version__
 

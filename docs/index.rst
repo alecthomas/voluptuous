@@ -39,6 +39,10 @@ Content
 
    modules
 
+Document version:
+|version|
+|release|
+
 Indices and tables
 ==================
 

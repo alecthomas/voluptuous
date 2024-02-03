@@ -1,1 +1,2 @@
-Sphinx==1.4.4
+Sphinx>=7.2.0
+Alabaster>=0.7.13

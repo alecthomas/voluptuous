@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>voluptuous.error &#8212; voluptuous 0.13.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>voluptuous.error &#8212; voluptuous 0.14.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=0dc20415"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -29,17 +30,30 @@
           <div class="body" role="main">
             
   <h1>Source code for voluptuous.error</h1><div class="highlight"><pre>
-<span></span>
-<div class="viewcode-block" id="Error"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.Error">[docs]</a><span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base validation exception.&quot;&quot;&quot;</span></div>
+<span></span><span class="c1"># fmt: off</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="c1"># fmt: on</span>
 
 
-<div class="viewcode-block" id="SchemaError"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.SchemaError">[docs]</a><span class="k">class</span> <span class="nc">SchemaError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;An error was encountered in the schema.&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="Error">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.Error">[docs]</a>
+<span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base validation exception.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="Invalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.Invalid">[docs]</a><span class="k">class</span> <span class="nc">Invalid</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The data was invalid.</span>
+
+<div class="viewcode-block" id="SchemaError">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.SchemaError">[docs]</a>
+<span class="k">class</span> <span class="nc">SchemaError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An error was encountered in the schema.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Invalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.Invalid">[docs]</a>
+<span class="k">class</span> <span class="nc">Invalid</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The data was invalid.</span>
 
 <span class="sd">    :attr msg: The error message.</span>
 <span class="sd">    :attr path: The path to the error, as a list of keys in the source data.</span>
@@ -48,186 +62,310 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Hashable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">error_message</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">error_type</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Error</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error_message</span> <span class="o">=</span> <span class="n">error_message</span> <span class="ow">or</span> <span class="n">message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_error_message</span> <span class="o">=</span> <span class="n">error_message</span> <span class="ow">or</span> <span class="n">message</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error_type</span> <span class="o">=</span> <span class="n">error_type</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">msg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">msg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39; @ data[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="s1">&#39;][&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span> \
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Hashable</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">error_message</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_error_message</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39; @ data[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="s1">&#39;][&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
         <span class="n">output</span> <span class="o">=</span> <span class="ne">Exception</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_type</span><span class="p">:</span>
             <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39; for &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_type</span>
         <span class="k">return</span> <span class="n">output</span> <span class="o">+</span> <span class="n">path</span>
 
-<div class="viewcode-block" id="Invalid.prepend"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.Invalid.prepend">[docs]</a>    <span class="k">def</span> <span class="nf">prepend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span></div></div>
+<div class="viewcode-block" id="Invalid.prepend">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.Invalid.prepend">[docs]</a>
+    <span class="k">def</span> <span class="nf">prepend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Hashable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MultipleInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MultipleInvalid">[docs]</a><span class="k">class</span> <span class="nc">MultipleInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MultipleInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MultipleInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">MultipleInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Invalid</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">errors</span><span class="p">[:]</span> <span class="k">if</span> <span class="n">errors</span> <span class="k">else</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;MultipleInvalid(</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">msg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">msg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">msg</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Hashable</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">path</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">error_message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">error_message</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">error_message</span>
 
-<div class="viewcode-block" id="MultipleInvalid.add"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MultipleInvalid.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipleInvalid.add">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MultipleInvalid.add">[docs]</a>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">Invalid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-<div class="viewcode-block" id="MultipleInvalid.prepend"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MultipleInvalid.prepend">[docs]</a>    <span class="k">def</span> <span class="nf">prepend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="MultipleInvalid.prepend">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MultipleInvalid.prepend">[docs]</a>
+    <span class="k">def</span> <span class="nf">prepend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Hashable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">error</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div></div>
+            <span class="n">error</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="RequiredFieldInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.RequiredFieldInvalid">[docs]</a><span class="k">class</span> <span class="nc">RequiredFieldInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Required field was missing.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="RequiredFieldInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.RequiredFieldInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">RequiredFieldInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Required field was missing.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ObjectInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ObjectInvalid">[docs]</a><span class="k">class</span> <span class="nc">ObjectInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value we found was not an object.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="ObjectInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ObjectInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">ObjectInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value we found was not an object.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="DictInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DictInvalid">[docs]</a><span class="k">class</span> <span class="nc">DictInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value found was not a dict.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="DictInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DictInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">DictInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value found was not a dict.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ExclusiveInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ExclusiveInvalid">[docs]</a><span class="k">class</span> <span class="nc">ExclusiveInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;More than one value found in exclusion group.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="ExclusiveInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ExclusiveInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">ExclusiveInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;More than one value found in exclusion group.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="InclusiveInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.InclusiveInvalid">[docs]</a><span class="k">class</span> <span class="nc">InclusiveInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Not all values found in inclusion group.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="InclusiveInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.InclusiveInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">InclusiveInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Not all values found in inclusion group.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="SequenceTypeInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.SequenceTypeInvalid">[docs]</a><span class="k">class</span> <span class="nc">SequenceTypeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The type found is not a sequence type.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="SequenceTypeInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.SequenceTypeInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">SequenceTypeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type found is not a sequence type.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="TypeInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.TypeInvalid">[docs]</a><span class="k">class</span> <span class="nc">TypeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value was not of required type.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="TypeInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.TypeInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">TypeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value was not of required type.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ValueInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ValueInvalid">[docs]</a><span class="k">class</span> <span class="nc">ValueInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value was found invalid by evaluation function.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="ValueInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ValueInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">ValueInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value was found invalid by evaluation function.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ContainsInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ContainsInvalid">[docs]</a><span class="k">class</span> <span class="nc">ContainsInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;List does not contain item&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="ContainsInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ContainsInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">ContainsInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List does not contain item&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ScalarInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ScalarInvalid">[docs]</a><span class="k">class</span> <span class="nc">ScalarInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Scalars did not match.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="ScalarInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ScalarInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">ScalarInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scalars did not match.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="CoerceInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.CoerceInvalid">[docs]</a><span class="k">class</span> <span class="nc">CoerceInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Impossible to coerce value to type.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="CoerceInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.CoerceInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">CoerceInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Impossible to coerce value to type.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="AnyInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.AnyInvalid">[docs]</a><span class="k">class</span> <span class="nc">AnyInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value did not pass any validator.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="AnyInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.AnyInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">AnyInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value did not pass any validator.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="AllInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.AllInvalid">[docs]</a><span class="k">class</span> <span class="nc">AllInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value did not pass all validators.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="AllInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.AllInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">AllInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value did not pass all validators.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="MatchInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MatchInvalid">[docs]</a><span class="k">class</span> <span class="nc">MatchInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value does not match the given regular expression.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="MatchInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.MatchInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">MatchInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value does not match the given regular expression.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="RangeInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.RangeInvalid">[docs]</a><span class="k">class</span> <span class="nc">RangeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not in given range.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="RangeInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.RangeInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">RangeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not in given range.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="TrueInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.TrueInvalid">[docs]</a><span class="k">class</span> <span class="nc">TrueInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not True.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="TrueInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.TrueInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">TrueInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not True.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="FalseInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.FalseInvalid">[docs]</a><span class="k">class</span> <span class="nc">FalseInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not False.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="FalseInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.FalseInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">FalseInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not False.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="BooleanInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.BooleanInvalid">[docs]</a><span class="k">class</span> <span class="nc">BooleanInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a boolean.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="BooleanInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.BooleanInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">BooleanInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a boolean.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="UrlInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.UrlInvalid">[docs]</a><span class="k">class</span> <span class="nc">UrlInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a URL.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="UrlInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.UrlInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">UrlInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a URL.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="EmailInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.EmailInvalid">[docs]</a><span class="k">class</span> <span class="nc">EmailInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not an email address.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="EmailInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.EmailInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">EmailInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not an email address.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="FileInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.FileInvalid">[docs]</a><span class="k">class</span> <span class="nc">FileInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a file.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="FileInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.FileInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">FileInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a file.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="DirInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DirInvalid">[docs]</a><span class="k">class</span> <span class="nc">DirInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a directory.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="DirInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DirInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">DirInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a directory.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="PathInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.PathInvalid">[docs]</a><span class="k">class</span> <span class="nc">PathInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a path.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="PathInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.PathInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">PathInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a path.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="LiteralInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.LiteralInvalid">[docs]</a><span class="k">class</span> <span class="nc">LiteralInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The literal values do not match.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="LiteralInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.LiteralInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">LiteralInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The literal values do not match.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="LengthInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.LengthInvalid">[docs]</a><span class="k">class</span> <span class="nc">LengthInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LengthInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.LengthInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">LengthInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="DatetimeInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DatetimeInvalid">[docs]</a><span class="k">class</span> <span class="nc">DatetimeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a formatted datetime string.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="DatetimeInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DatetimeInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">DatetimeInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a formatted datetime string.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="DateInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DateInvalid">[docs]</a><span class="k">class</span> <span class="nc">DateInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value is not a formatted date string.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="DateInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.DateInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">DateInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value is not a formatted date string.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="InInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.InInvalid">[docs]</a><span class="k">class</span> <span class="nc">InInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.InInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">InInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="NotInInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.NotInInvalid">[docs]</a><span class="k">class</span> <span class="nc">NotInInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NotInInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.NotInInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">NotInInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="ExactSequenceInvalid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ExactSequenceInvalid">[docs]</a><span class="k">class</span> <span class="nc">ExactSequenceInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ExactSequenceInvalid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.ExactSequenceInvalid">[docs]</a>
+<span class="k">class</span> <span class="nc">ExactSequenceInvalid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="NotEnoughValid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.NotEnoughValid">[docs]</a><span class="k">class</span> <span class="nc">NotEnoughValid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value did not pass enough validations.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NotEnoughValid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.NotEnoughValid">[docs]</a>
+<span class="k">class</span> <span class="nc">NotEnoughValid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value did not pass enough validations.&quot;&quot;&quot;</span>
+
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="TooManyValid"><a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.TooManyValid">[docs]</a><span class="k">class</span> <span class="nc">TooManyValid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The value passed more than expected validations.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TooManyValid">
+<a class="viewcode-back" href="../../voluptuous.html#voluptuous.error.TooManyValid">[docs]</a>
+<span class="k">class</span> <span class="nc">TooManyValid</span><span class="p">(</span><span class="n">Invalid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The value passed more than expected validations.&quot;&quot;&quot;</span>
+
     <span class="k">pass</span></div>
+
 </pre></div>
 
           </div>
@@ -255,6 +393,9 @@
 
 
 <h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">voluptuous</a></li>
+</ul>
 
 
 <hr />
@@ -297,11 +438,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2023, Alec Thomas.
+      &#169;2024, Alec Thomas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
     </div>
 
