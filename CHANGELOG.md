@@ -1,5 +1,49 @@
 # Changelog
 
+<<<<<<< HEAD
+=======
+## [0.14.2]
+
+**New**:
+* [#507](https://github.com/alecthomas/voluptuous/pull/507): docs: document description field of Marker
+
+**Fixes**:
+* [#506](https://github.com/alecthomas/voluptuous/pull/506): fix: allow unsortable containers in In and NotIn validators (fixes [#451](https://github.com/alecthomas/voluptuous/issues/451)) (bug introduced in 0.12.1)
+* [#488](https://github.com/alecthomas/voluptuous/pull/488): fix(typing): fix type hint for Coerce type param (bug introduced in 0.14.0)
+* [#497](https://github.com/alecthomas/voluptuous/pull/497): fix(typing): allow path to be a list of strings, integers or any other hashables (bug introduced in 0.14.0)
+
+**Changes**:
+* [#499](https://github.com/alecthomas/voluptuous/pull/499): support: drop support for python 3.7
+* [#501](https://github.com/alecthomas/voluptuous/pull/501): support: run tests on python 3.11
+* [#502](https://github.com/alecthomas/voluptuous/pull/502): support: run tests on python 3.12
+* [#495](https://github.com/alecthomas/voluptuous/pull/495): refactor: drop duplicated type checks in Schema._compile
+* [#500](https://github.com/alecthomas/voluptuous/pull/500): refactor: fix few tests, use pytest.raises, extend raises helper
+* [#503](https://github.com/alecthomas/voluptuous/pull/503): refactor: Add linters configuration, reformat whole code
+
+## [0.14.1]
+
+**Changes**:
+* [#487](https://github.com/alecthomas/voluptuous/pull/487): Add pytest.ini and tox.ini to sdist
+* [#494](https://github.com/alecthomas/voluptuous/pull/494): Add `python_requires` so package installers know requirement is >= 3.7
+
+## [0.14.0]
+
+**Fixes**:
+* [#470](https://github.com/alecthomas/voluptuous/pull/470): Fix a few code comment typos
+* [#472](https://github.com/alecthomas/voluptuous/pull/472): Change to SPDX conform license string
+
+
+**New**:
+* [#475](https://github.com/alecthomas/voluptuous/pull/475): Add typing information
+* [#478](https://github.com/alecthomas/voluptuous/pull/478): Fix new type hint of schemas, for example for `Required('key')`
+* [#486](https://github.com/alecthomas/voluptuous/pull/486): Fix new type hints and enable `mypy`
+* [#479](https://github.com/alecthomas/voluptuous/pull/479): Allow error reporting on keys
+
+**Changes**:
+* [#476](https://github.com/alecthomas/voluptuous/pull/476): Set static PyPI project description
+* [#482](https://github.com/alecthomas/voluptuous/pull/482): Remove Travis build status badge
+
+>>>>>>> master
 ## [0.13.1]
 
 **Fixes**:

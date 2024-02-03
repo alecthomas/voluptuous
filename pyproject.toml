@@ -1,0 +1,18 @@
+[tool.black]
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+skip-string-normalization = true
+
+[tool.isort]
+skip_gitignore = true
+profile = "black"
+multi_line_output = 5
+
+[tool.mypy]
+python_version = "3.8"
+
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+python_files = "tests.py"
+testpaths = "voluptuous/tests"
+addopts = "--doctest-glob=*.md -v"
