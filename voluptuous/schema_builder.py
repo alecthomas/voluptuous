@@ -1093,7 +1093,7 @@ class Optional(Marker):
         self,
         schema: Schemable,
         msg: typing.Optional[str] = None,
-        default=UNDEFINED,
+        default: typeing.Any = UNDEFINED,
         description: typing.Optional[str] = None,
     ) -> None:
         super(Optional, self).__init__(schema, msg=msg, description=description)
@@ -1195,7 +1195,7 @@ class Inclusive(Optional):
         group_of_inclusion: str,
         msg: typing.Optional[str] = None,
         description: typing.Optional[str] = None,
-        default=UNDEFINED,
+        default: typeing.Any = UNDEFINED,
     ) -> None:
         super(Inclusive, self).__init__(
             schema, msg=msg, default=default, description=description
