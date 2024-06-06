@@ -1222,7 +1222,7 @@ class Required(Marker):
         self,
         schema: Schemable,
         msg: typing.Optional[str] = None,
-        default=UNDEFINED,
+        default: typing.Any = UNDEFINED,
         description: typing.Optional[str] = None,
     ) -> None:
         super(Required, self).__init__(schema, msg=msg, description=description)
