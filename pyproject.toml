@@ -1,5 +1,5 @@
 [tool.black]
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py39", "py310", "py311", "py312"]
 skip-string-normalization = true
 
 [tool.isort]
@@ -8,7 +8,7 @@ profile = "black"
 multi_line_output = 5
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 
 warn_unused_ignores = true
 
