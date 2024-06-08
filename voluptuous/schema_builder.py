@@ -1038,7 +1038,7 @@ class Marker(object):
         self._schema = Schema(schema_)
         self.msg = msg
         self.description = description
-        self.__hash__ = cache(lambda: hash(schema_))
+        self.__hash__ = cache(lambda: hash(schema_))  # type: ignore[method-assign]
 
     def __call__(self, v):
         try:
@@ -1251,7 +1251,7 @@ class Remove(Marker):
         description: typing.Optional[str] = None,
     ) -> None:
         super().__init__(schema_, msg, description)
-        self.__hash__ = cache(lambda: object.__hash__(self))
+        self.__hash__ = cache(lambda: object.__hash__(self))  # type: ignore[method-assign]
 
     def __call__(self, schema: Schemable):
         super(Remove, self).__call__(schema)
