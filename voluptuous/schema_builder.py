@@ -1244,15 +1244,21 @@ class Remove(Marker):
     [1, 2, 3, 5, '7']
     """
 
+    def __init__(
+        self,
+        schema_: Schemable,
+        msg: typing.Optional[str] = None,
+        description: typing.Optional[str] = None,
+    ) -> None:
+        super().__init__(schema_, msg, description)
+        self.__hash__ = lru_cache(maxsize=None)(lambda: object.__hash__(self))
+
     def __call__(self, schema: Schemable):
         super(Remove, self).__call__(schema)
         return self.__class__
 
     def __repr__(self):
         return "Remove(%r)" % (self.schema,)
-
-    def __hash__(self):
-        return object.__hash__(self)
 
 
 def message(
