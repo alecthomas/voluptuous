@@ -9,7 +9,7 @@ import sys
 import typing
 from collections.abc import Generator
 from contextlib import contextmanager
-from functools import wraps
+from functools import lru_cache, wraps
 
 from voluptuous import error as er
 from voluptuous.error import Error
@@ -1026,6 +1026,8 @@ class Marker(object):
     introspected by any external tool, for example to generate schema documentation.
     """
 
+    __slots__ = ('schema', '_schema', 'msg', 'description', '__hash__')
+
     def __init__(
         self,
         schema_: Schemable,
@@ -1036,6 +1038,7 @@ class Marker(object):
         self._schema = Schema(schema_)
         self.msg = msg
         self.description = description
+        self.__hash__ = lru_cache(maxsize=None)(lambda: hash(schema_))
 
     def __call__(self, v):
         try:
@@ -1055,9 +1058,6 @@ class Marker(object):
         if isinstance(other, Marker):
             return self.schema < other.schema
         return self.schema < other
-
-    def __hash__(self):
-        return hash(self.schema)
 
     def __eq__(self, other):
         return self.schema == other
