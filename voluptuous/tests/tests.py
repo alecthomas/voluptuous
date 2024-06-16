@@ -1072,6 +1072,7 @@ def test_marker_hashable():
     assert definition.get('y') == float
     assert Required('x') == Required('x')
     assert Required('x') != Required('y')
+    assert hash(Required('x').schema) == hash(Required('x'))
     # Remove markers are not hashable
     assert definition.get('j') is None
 
