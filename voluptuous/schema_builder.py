@@ -435,11 +435,11 @@ class Schema(object):
 
                     break
                 else:
-                    if error:
-                        errors.append(error)
-                    elif remove_key:
+                    if remove_key:
                         # remove key
                         continue
+                    elif error:
+                        errors.append(error)
                     elif self.extra == ALLOW_EXTRA:
                         out[key] = value
                     elif self.extra != REMOVE_EXTRA:
