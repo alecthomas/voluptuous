@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.15.0]
+
+**Fixes**:
+
+* [#512](https://github.com/alecthomas/voluptuous/pull/512): Add Any type to defaults
+* [#513](https://github.com/alecthomas/voluptuous/pull/513): Only calculate hash once for Marker objects
+  
+**Changes**:
+
+* [#514](https://github.com/alecthomas/voluptuous/pull/514): Remove python 3.8 support
+
 ## [0.14.2]
 
 **New**:
