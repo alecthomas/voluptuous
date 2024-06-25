@@ -615,9 +615,6 @@ def Maybe(validator: typing.Callable, msg: typing.Optional[str] = None):
     return Any(None, validator, msg=msg)
 
 
-NullableNumber = typing.Union[int, float, None]
-
-
 class Range(object):
     """Limit a value to a range.
 
