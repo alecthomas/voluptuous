@@ -594,7 +594,7 @@ def PathExists(v):
         raise PathInvalid("Not a Path")
 
 
-def Maybe(validator: typing.Callable, msg: typing.Optional[str] = None):
+def Maybe(validator, msg: typing.Optional[str] = None):
     """Validate that the object matches given validator or is None.
 
     :raises Invalid: If the value does not match the given validator and is not
