@@ -162,8 +162,10 @@ Schemable = typing.Union[
 ]
 # fmt: on
 
+_SchemableT = typing.TypeVar("_SchemableT", bound=Schemable)
 
-class Schema(object):
+
+class Schema(typing.Generic[_SchemableT]):
     """A validation schema.
 
     The schema is a Python tree-like structure where nodes are pattern
@@ -192,7 +194,7 @@ class Schema(object):
     }
 
     def __init__(
-        self, schema: Schemable, required: bool = False, extra: int = PREVENT_EXTRA
+        self, schema: _SchemableT, required: bool = False, extra: int = PREVENT_EXTRA
     ) -> None:
         """Create a new Schema.
 
@@ -812,7 +814,7 @@ class Schema(object):
                 result[key] = value
 
         # recompile and send old object
-        result_cls = type(self)
+        result_cls = typing.cast("type[Schema[dict]]", type(self))
         result_required = required if required is not None else self.required
         result_extra = extra if extra is not None else self.extra
         return result_cls(result, required=result_required, extra=result_extra)
