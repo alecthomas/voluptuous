@@ -1,4 +1,6 @@
 # fmt: off
+from __future__ import annotations
+
 import datetime
 import os
 import re
@@ -17,6 +19,9 @@ from voluptuous.error import (
 
 # F401: flake8 complains about 'raises' not being used, but it is used in doctests
 from voluptuous.schema_builder import Schema, Schemable, message, raises  # noqa: F401
+
+if typing.TYPE_CHECKING:
+    from _typeshed import SupportsAllComparisons
 
 # fmt: on
 
@@ -636,8 +641,8 @@ class Range(object):
 
     def __init__(
         self,
-        min: NullableNumber = None,
-        max: NullableNumber = None,
+        min: SupportsAllComparisons | None = None,
+        max: SupportsAllComparisons | None = None,
         min_included: bool = True,
         max_included: bool = True,
         msg: typing.Optional[str] = None,
@@ -705,8 +710,8 @@ class Clamp(object):
 
     def __init__(
         self,
-        min: NullableNumber = None,
-        max: NullableNumber = None,
+        min: SupportsAllComparisons | None = None,
+        max: SupportsAllComparisons | None = None,
         msg: typing.Optional[str] = None,
     ) -> None:
         self.min = min
@@ -736,8 +741,8 @@ class Length(object):
 
     def __init__(
         self,
-        min: NullableNumber = None,
-        max: NullableNumber = None,
+        min: SupportsAllComparisons | None = None,
+        max: SupportsAllComparisons | None = None,
         msg: typing.Optional[str] = None,
     ) -> None:
         self.min = min
