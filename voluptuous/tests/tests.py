@@ -176,6 +176,29 @@ def test_remove():
     assert out_ == [1, 2, 1.0, 4]
 
 
+def test_remove_with_error():
+    def starts_with_dot(key: str) -> str:
+        """Check if key starts with dot."""
+        if not key.startswith("."):
+            raise Invalid("Key does not start with .")
+        return key
+
+    def does_not_start_with_dot(key: str) -> str:
+        """Check if key does not start with dot."""
+        if key.startswith("."):
+            raise Invalid("Key starts with .")
+        return key
+
+    schema = Schema(
+        {
+            Remove(All(str, starts_with_dot)): object,
+            does_not_start_with_dot: Any(None),
+        }
+    )
+    out_ = schema({".remove": None, "ok": None})
+    assert ".remove" not in out_ and "ok" in out_
+
+
 def test_extra_empty_errors():
     schema = Schema({'a': {Extra: object}}, required=True)
     schema({'a': {}})
@@ -1072,6 +1095,7 @@ def test_marker_hashable():
     assert definition.get('y') == float
     assert Required('x') == Required('x')
     assert Required('x') != Required('y')
+    assert hash(Required('x').schema) == hash(Required('x'))
     # Remove markers are not hashable
     assert definition.get('j') is None
 
