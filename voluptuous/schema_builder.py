@@ -1032,7 +1032,7 @@ class Marker(object):
         self,
         schema_: Schemable,
         msg: typing.Optional[str] = None,
-        description: typing.Optional[str] = None,
+        description: typing.Any | None = None,
     ) -> None:
         self.schema = schema_
         self._schema = Schema(schema_)
@@ -1094,7 +1094,7 @@ class Optional(Marker):
         schema: Schemable,
         msg: typing.Optional[str] = None,
         default: typing.Any = UNDEFINED,
-        description: typing.Optional[str] = None,
+        description: typing.Any | None = None,
     ) -> None:
         super(Optional, self).__init__(schema, msg=msg, description=description)
         self.default = default_factory(default)
@@ -1141,7 +1141,7 @@ class Exclusive(Optional):
         schema: Schemable,
         group_of_exclusion: str,
         msg: typing.Optional[str] = None,
-        description: typing.Optional[str] = None,
+        description: typing.Any | None = None,
     ) -> None:
         super(Exclusive, self).__init__(schema, msg=msg, description=description)
         self.group_of_exclusion = group_of_exclusion
@@ -1194,7 +1194,7 @@ class Inclusive(Optional):
         schema: Schemable,
         group_of_inclusion: str,
         msg: typing.Optional[str] = None,
-        description: typing.Optional[str] = None,
+        description: typing.Any | None = None,
         default: typing.Any = UNDEFINED,
     ) -> None:
         super(Inclusive, self).__init__(
@@ -1223,7 +1223,7 @@ class Required(Marker):
         schema: Schemable,
         msg: typing.Optional[str] = None,
         default: typing.Any = UNDEFINED,
-        description: typing.Optional[str] = None,
+        description: typing.Any | None = None,
     ) -> None:
         super(Required, self).__init__(schema, msg=msg, description=description)
         self.default = default_factory(default)
@@ -1248,7 +1248,7 @@ class Remove(Marker):
         self,
         schema_: Schemable,
         msg: typing.Optional[str] = None,
-        description: typing.Optional[str] = None,
+        description: typing.Any | None = None,
     ) -> None:
         super().__init__(schema_, msg, description)
         self.__hash__ = cache(lambda: object.__hash__(self))  # type: ignore[method-assign]
