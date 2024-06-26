@@ -208,7 +208,7 @@ class Schema(object):
             - Any value other than the above defaults to
               :const:`~voluptuous.PREVENT_EXTRA`
         """
-        self.schema = schema
+        self.schema: typing.Any = schema
         self.required = required
         self.extra = int(extra)  # ensure the value is an integer
         self._compiled = self._compile(schema)
@@ -1034,7 +1034,7 @@ class Marker(object):
         msg: typing.Optional[str] = None,
         description: typing.Any | None = None,
     ) -> None:
-        self.schema = schema_
+        self.schema: typing.Any = schema_
         self._schema = Schema(schema_)
         self.msg = msg
         self.description = description
