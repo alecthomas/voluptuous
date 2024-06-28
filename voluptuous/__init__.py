@@ -73,6 +73,7 @@ Validate like so:
     ...                  'Users': {'snmp_community': 'monkey'}}}}
     True
 """
+
 # flake8: noqa
 # fmt: off
 from voluptuous.schema_builder import *
