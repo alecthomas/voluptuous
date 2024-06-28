@@ -1,4 +1,3 @@
-
 # fmt: off
 from __future__ import annotations
 
@@ -363,10 +362,10 @@ class Schema(object):
                     if remove_key:
                         # remove key
                         continue
-                    elif error:
-                        errors.append(error)
                     elif self.extra == ALLOW_EXTRA:
                         out[key] = value
+                    elif error:
+                        errors.append(error)
                     elif self.extra != REMOVE_EXTRA:
                         errors.append(er.Invalid('extra keys not allowed', key_path))
                         # else REMOVE_EXTRA: ignore the key so it's removed from output
