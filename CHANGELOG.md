@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.15.2]
+
+**Fixes**:
+
+* [522](https://github.com/alecthomas/voluptuous/pull/522) Fix regression with ALLOW_EXTRA and `Any` validator
+
+## [0.15.1]
+
+**Fixes**:
+
+* [515](https://github.com/alecthomas/voluptuous/pull/515) Fix `Remove` not removing keys that do not validate
+* [516](https://github.com/alecthomas/voluptuous/pull/516) Improve validator typing to allow non-number formats for min and max
+* [517](https://github.com/alecthomas/voluptuous/pull/517) Remove `Maybe` validator typing
+* [518](https://github.com/alecthomas/voluptuous/pull/518) Use typing.Container for `In` validator
+* [519](https://github.com/alecthomas/voluptuous/pull/519) Don't enforce type for unused description attribute
+* [521](https://github.com/alecthomas/voluptuous/pull/521) Type schema attribute as `Any`
+
 ## [0.15.0]
 
 **Fixes**:
