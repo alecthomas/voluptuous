@@ -1704,6 +1704,23 @@ def test_key2():
     assert str(ctx.value.errors[1]) == "expecting a number @ data['four']"
 
 
+def test_key3():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+        extra=ALLOW_EXTRA,
+    )
+    schema(
+        {
+            "name": "one",
+            "domain": "two",
+            "additional_key": "extra",
+        }
+    )
+
+
 def test_coerce_enum():
     """Test Coerce Enum"""
 
