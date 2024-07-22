@@ -812,7 +812,9 @@ class In(object):
     """Validate that a value is in a collection."""
 
     def __init__(
-        self, container: typing.Container, msg: typing.Optional[str] = None
+        self,
+        container: typing.Container | typing.Iterable,
+        msg: typing.Optional[str] = None,
     ) -> None:
         self.container = container
         self.msg = msg
