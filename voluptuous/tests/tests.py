@@ -1712,6 +1712,7 @@ def test_any_with_extra_allow():
         },
         extra=ALLOW_EXTRA,
     )
+
     result = schema(
         {
             "name": "one",
@@ -1719,6 +1720,7 @@ def test_any_with_extra_allow():
             "additional_key": "extra",
         }
     )
+
     assert result == {
         "name": "one",
         "domain": "two",
@@ -1734,6 +1736,7 @@ def test_any_with_extra_remove():
         },
         extra=REMOVE_EXTRA,
     )
+
     result = schema(
         {
             "name": "one",
@@ -1741,6 +1744,7 @@ def test_any_with_extra_remove():
             "additional_key": "extra",
         }
     )
+
     assert result == {
         "name": "one",
         "domain": "two",
@@ -1755,6 +1759,7 @@ def test_any_with_extra_prevent():
         },
         extra=PREVENT_EXTRA,
     )
+
     with pytest.raises(MultipleInvalid) as ctx:
         schema(
             {
@@ -1763,6 +1768,7 @@ def test_any_with_extra_prevent():
                 "additional_key": "extra",
             }
         )
+
     assert len(ctx.value.errors) == 1
     assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
 
@@ -1774,6 +1780,7 @@ def test_any_with_extra_none():
             "domain": str,
         },
     )
+
     with pytest.raises(MultipleInvalid) as ctx:
         schema(
             {
@@ -1782,8 +1789,30 @@ def test_any_with_extra_none():
                 "additional_key": "extra",
             }
         )
+
     assert len(ctx.value.errors) == 1
     assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
+
+
+def test_error_reporting_on_keys():
+
+    def validate(arg: str) -> str:
+        if arg == "29 February 2021":
+            raise ValueError("not a leap year")
+        return "2020-02-29"
+
+    data = {
+        "29 February 2020": "...",
+        "29 February 2021": "...",
+    }
+
+    schema = Schema({validate: str})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(data)
+
+    assert len(ctx.value.errors) == 1
+    assert str(ctx.value.errors[0]) == "not a valid value @ data['29 February 2021']"
 
 
 def test_coerce_enum():
