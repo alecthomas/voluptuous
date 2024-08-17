@@ -366,7 +366,7 @@ class Schema(object):
                         out[key] = value
                     elif self.extra == REMOVE_EXTRA:
                         #  ignore the key so it's removed from output
-                        pass
+                        continue
                     elif error:
                         errors.append(error)
                     else:
