@@ -1712,13 +1712,18 @@ def test_any_with_extra_allow():
         },
         extra=ALLOW_EXTRA,
     )
-    schema(
+    result = schema(
         {
             "name": "one",
             "domain": "two",
             "additional_key": "extra",
         }
     )
+    assert result == {
+        "name": "one",
+        "domain": "two",
+        "additional_key": "extra",
+    }
 
 
 def test_any_with_extra_remove():
@@ -1729,13 +1734,17 @@ def test_any_with_extra_remove():
         },
         extra=REMOVE_EXTRA,
     )
-    schema(
+    result = schema(
         {
             "name": "one",
             "domain": "two",
             "additional_key": "extra",
         }
     )
+    assert result == {
+        "name": "one",
+        "domain": "two",
+    }
 
 
 def test_any_with_extra_prevent():
