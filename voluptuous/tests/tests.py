@@ -8,7 +8,7 @@ from enum import Enum
 import pytest
 
 from voluptuous import (
-    ALLOW_EXTRA, PREVENT_EXTRA, All, AllInvalid, Any, Clamp, Coerce, Contains,
+    ALLOW_EXTRA, PREVENT_EXTRA, REMOVE_EXTRA, All, AllInvalid, Any, Clamp, Coerce, Contains,
     ContainsInvalid, Date, Datetime, Email, EmailInvalid, Equal, ExactSequence,
     Exclusive, Extra, FqdnUrl, In, Inclusive, InInvalid, Invalid, IsDir, IsFile, Length,
     Literal, LiteralInvalid, Marker, Match, MatchInvalid, Maybe, MultipleInvalid, NotIn,
@@ -1711,6 +1711,23 @@ def test_key3():
             "domain": str,
         },
         extra=ALLOW_EXTRA,
+    )
+    schema(
+        {
+            "name": "one",
+            "domain": "two",
+            "additional_key": "extra",
+        }
+    )
+
+
+def test_key4():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+        extra=REMOVE_EXTRA,
     )
     schema(
         {
