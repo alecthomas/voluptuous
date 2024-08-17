@@ -1801,15 +1801,15 @@ def test_error_reporting_on_keys():
             raise ValueError("not a leap year")
         return "2020-02-29"
 
-    data = {
-        "29 February 2020": "...",
-        "29 February 2021": "...",
-    }
-
     schema = Schema({validate: str})
 
     with pytest.raises(MultipleInvalid) as ctx:
-        schema(data)
+        schema(
+            {
+                "29 February 2020": "...",
+                "29 February 2021": "...",
+            }
+        )
 
     assert len(ctx.value.errors) == 1
     assert str(ctx.value.errors[0]) == "not a valid value @ data['29 February 2021']"
