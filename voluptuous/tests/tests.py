@@ -1704,7 +1704,7 @@ def test_key2():
     assert str(ctx.value.errors[1]) == "expecting a number @ data['four']"
 
 
-def test_key3():
+def test_any_with_extra_allow():
     schema = Schema(
         {
             Any("name", "area"): str,
@@ -1721,7 +1721,7 @@ def test_key3():
     )
 
 
-def test_key4():
+def test_any_with_extra_remove():
     schema = Schema(
         {
             Any("name", "area"): str,
@@ -1736,6 +1736,45 @@ def test_key4():
             "additional_key": "extra",
         }
     )
+
+
+def test_any_with_extra_prevent():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+        extra=PREVENT_EXTRA,
+    )
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(
+            {
+                "name": "one",
+                "domain": "two",
+                "additional_key": "extra",
+            }
+        )
+    assert len(ctx.value.errors) == 1
+    assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
+
+
+def test_any_with_extra_none():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+    )
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(
+            {
+                "name": "one",
+                "domain": "two",
+                "additional_key": "extra",
+            }
+        )
+    assert len(ctx.value.errors) == 1
+    assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
 
 
 def test_coerce_enum():
