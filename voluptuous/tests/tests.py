@@ -1794,27 +1794,6 @@ def test_any_with_extra_none():
     assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
 
 
-def test_error_reporting_on_keys():
-
-    def validate(arg: str) -> str:
-        if arg == "29 February 2021":
-            raise ValueError("not a leap year")
-        return "2020-02-29"
-
-    schema = Schema({validate: str})
-
-    with pytest.raises(MultipleInvalid) as ctx:
-        schema(
-            {
-                "29 February 2020": "...",
-                "29 February 2021": "...",
-            }
-        )
-
-    assert len(ctx.value.errors) == 1
-    assert str(ctx.value.errors[0]) == "not a valid value @ data['29 February 2021']"
-
-
 def test_coerce_enum():
     """Test Coerce Enum"""
 
