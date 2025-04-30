@@ -8,7 +8,7 @@ from enum import Enum
 import pytest
 
 from voluptuous import (
-    ALLOW_EXTRA, PREVENT_EXTRA, All, AllInvalid, Any, Clamp, Coerce, Contains,
+    ALLOW_EXTRA, PREVENT_EXTRA, REMOVE_EXTRA, All, AllInvalid, Any, Clamp, Coerce, Contains,
     ContainsInvalid, Date, Datetime, Email, EmailInvalid, Equal, ExactSequence,
     Exclusive, Extra, FqdnUrl, In, Inclusive, InInvalid, Invalid, IsDir, IsFile, Length,
     Literal, LiteralInvalid, Marker, Match, MatchInvalid, Maybe, MultipleInvalid, NotIn,
@@ -1704,7 +1704,7 @@ def test_key2():
     assert str(ctx.value.errors[1]) == "expecting a number @ data['four']"
 
 
-def test_key3():
+def test_any_with_extra_allow():
     schema = Schema(
         {
             Any("name", "area"): str,
@@ -1712,13 +1712,86 @@ def test_key3():
         },
         extra=ALLOW_EXTRA,
     )
-    schema(
+
+    result = schema(
         {
             "name": "one",
             "domain": "two",
             "additional_key": "extra",
         }
     )
+
+    assert result == {
+        "name": "one",
+        "domain": "two",
+        "additional_key": "extra",
+    }
+
+
+def test_any_with_extra_remove():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+        extra=REMOVE_EXTRA,
+    )
+
+    result = schema(
+        {
+            "name": "one",
+            "domain": "two",
+            "additional_key": "extra",
+        }
+    )
+
+    assert result == {
+        "name": "one",
+        "domain": "two",
+    }
+
+
+def test_any_with_extra_prevent():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+        extra=PREVENT_EXTRA,
+    )
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(
+            {
+                "name": "one",
+                "domain": "two",
+                "additional_key": "extra",
+            }
+        )
+
+    assert len(ctx.value.errors) == 1
+    assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
+
+
+def test_any_with_extra_none():
+    schema = Schema(
+        {
+            Any("name", "area"): str,
+            "domain": str,
+        },
+    )
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(
+            {
+                "name": "one",
+                "domain": "two",
+                "additional_key": "extra",
+            }
+        )
+
+    assert len(ctx.value.errors) == 1
+    assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
 
 
 def test_coerce_enum():

@@ -364,11 +364,13 @@ class Schema(object):
                         continue
                     elif self.extra == ALLOW_EXTRA:
                         out[key] = value
+                    elif self.extra == REMOVE_EXTRA:
+                        #  ignore the key so it's removed from output
+                        continue
                     elif error:
                         errors.append(error)
-                    elif self.extra != REMOVE_EXTRA:
+                    else:
                         errors.append(er.Invalid('extra keys not allowed', key_path))
-                        # else REMOVE_EXTRA: ignore the key so it's removed from output
 
             # for any required keys left that weren't found and don't have defaults:
             for key in required_keys:
