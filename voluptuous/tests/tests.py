@@ -8,13 +8,13 @@ from enum import Enum
 import pytest
 
 from voluptuous import (
-    ALLOW_EXTRA, PREVENT_EXTRA, REMOVE_EXTRA, All, AllInvalid, Any, Clamp, Coerce, Contains,
-    ContainsInvalid, Date, Datetime, Email, EmailInvalid, Equal, ExactSequence,
-    Exclusive, Extra, FqdnUrl, In, Inclusive, InInvalid, Invalid, IsDir, IsFile, Length,
-    Literal, LiteralInvalid, Marker, Match, MatchInvalid, Maybe, MultipleInvalid, NotIn,
-    NotInInvalid, Number, Object, Optional, PathExists, Range, Remove, Replace,
-    Required, Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union, Unordered, Url,
-    UrlInvalid, raises, validate,
+    ALLOW_EXTRA, PREVENT_EXTRA, REMOVE_EXTRA, All, AllInvalid, Any, Clamp, Coerce,
+    Contains, ContainsInvalid, Date, Datetime, Email, EmailInvalid, Equal,
+    ExactSequence, Exclusive, Extra, FqdnUrl, In, Inclusive, InInvalid, Invalid, IsDir,
+    IsFile, Length, Literal, LiteralInvalid, Marker, Match, MatchInvalid, Maybe,
+    MultipleInvalid, NotIn, NotInInvalid, Number, Object, Optional, PathExists, Range,
+    Remove, Replace, Required, Schema, Self, SomeOf, TooManyValid, TypeInvalid, Union,
+    Unordered, Url, UrlInvalid, raises, validate,
 )
 from voluptuous.humanize import humanize_error
 from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
@@ -1884,7 +1884,7 @@ def test_humanize_error_with_nested_getitem_typeerror():
 
 def test_humanize_error_with_long_error_message():
     """Test humanize_error with long error message that gets truncated (line 45)."""
-    from voluptuous.humanize import humanize_error, MAX_VALIDATION_ERROR_ITEM_LENGTH
+    from voluptuous.humanize import MAX_VALIDATION_ERROR_ITEM_LENGTH, humanize_error
 
     # Create a very long string that will be truncated
     long_string = "x" * (MAX_VALIDATION_ERROR_ITEM_LENGTH + 10)
@@ -1912,7 +1912,7 @@ def test_validate_with_humanized_errors_success():
 
 def test_validate_with_humanized_errors_failure():
     """Test validate_with_humanized_errors with validation failure (line 54-57)."""
-    from voluptuous.humanize import validate_with_humanized_errors, Error
+    from voluptuous.humanize import Error, validate_with_humanized_errors
 
     schema = Schema({'a': int, 'b': str})
     data = {'a': 'not an int', 'b': 123}
@@ -1929,7 +1929,7 @@ def test_validate_with_humanized_errors_failure():
 
 def test_validate_with_humanized_errors_custom_max_length():
     """Test validate_with_humanized_errors with custom max_sub_error_length."""
-    from voluptuous.humanize import validate_with_humanized_errors, Error
+    from voluptuous.humanize import Error, validate_with_humanized_errors
 
     schema = Schema({'a': int})
     data = {'a': 'not an int'}
@@ -1975,7 +1975,7 @@ def test_humanize_error_with_single_invalid():
 
 def test_humanize_error_with_none_data():
     """Test humanize_error with None data."""
-    from voluptuous.humanize import humanize_error, _nested_getitem
+    from voluptuous.humanize import _nested_getitem, humanize_error
 
     # Test _nested_getitem with None data
     result = _nested_getitem(None, ['a'])
