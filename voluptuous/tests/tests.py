@@ -1846,3 +1846,147 @@ def test_exception():
     assert str(ctx.value.errors) == f"[{invalid_scalar_excp_repr}]"
     ctx.value.add("Test Error")
     assert str(ctx.value.errors) == f"[{invalid_scalar_excp_repr}, 'Test Error']"
+
+
+# Additional tests for humanize.py module to improve coverage
+def test_humanize_error_with_nested_getitem_keyerror():
+    """Test _nested_getitem with KeyError (line 19-22)."""
+    from voluptuous.humanize import _nested_getitem
+
+    # Test KeyError handling
+    data = {'a': {'b': 1}}
+    path = ['a', 'c']  # 'c' doesn't exist in {'b': 1}
+    result = _nested_getitem(data, path)
+    assert result is None
+
+
+def test_humanize_error_with_nested_getitem_indexerror():
+    """Test _nested_getitem with IndexError (line 19-22)."""
+    from voluptuous.humanize import _nested_getitem
+
+    # Test IndexError handling
+    data = {'a': [1, 2, 3]}
+    path = ['a', 5]  # Index 5 doesn't exist in [1, 2, 3]
+    result = _nested_getitem(data, path)
+    assert result is None
+
+
+def test_humanize_error_with_nested_getitem_typeerror():
+    """Test _nested_getitem with TypeError (line 19-22)."""
+    from voluptuous.humanize import _nested_getitem
+
+    # Test TypeError handling - data is not subscriptable
+    data = 42  # int is not subscriptable
+    path = ['a']
+    result = _nested_getitem(data, path)
+    assert result is None
+
+
+def test_humanize_error_with_long_error_message():
+    """Test humanize_error with long error message that gets truncated (line 45)."""
+    from voluptuous.humanize import humanize_error, MAX_VALIDATION_ERROR_ITEM_LENGTH
+
+    # Create a very long string that will be truncated
+    long_string = "x" * (MAX_VALIDATION_ERROR_ITEM_LENGTH + 10)
+    data = {'a': long_string}
+    schema = Schema({'a': int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(data)
+
+    error_message = humanize_error(data, ctx.value, max_sub_error_length=50)
+    assert "..." in error_message
+    assert len(error_message.split("Got ")[1]) <= 53  # 50 + 3 for "..."
+
+
+def test_validate_with_humanized_errors_success():
+    """Test validate_with_humanized_errors with successful validation (line 54-57)."""
+    from voluptuous.humanize import validate_with_humanized_errors
+
+    schema = Schema({'a': int, 'b': str})
+    data = {'a': 42, 'b': 'hello'}
+
+    result = validate_with_humanized_errors(data, schema)
+    assert result == data
+
+
+def test_validate_with_humanized_errors_failure():
+    """Test validate_with_humanized_errors with validation failure (line 54-57)."""
+    from voluptuous.humanize import validate_with_humanized_errors, Error
+
+    schema = Schema({'a': int, 'b': str})
+    data = {'a': 'not an int', 'b': 123}
+
+    with pytest.raises(Error) as ctx:
+        validate_with_humanized_errors(data, schema)
+
+    error_message = str(ctx.value)
+    assert "expected int for dictionary value @ data['a']" in error_message
+    assert "expected str for dictionary value @ data['b']" in error_message
+    assert "Got 'not an int'" in error_message
+    assert "Got 123" in error_message
+
+
+def test_validate_with_humanized_errors_custom_max_length():
+    """Test validate_with_humanized_errors with custom max_sub_error_length."""
+    from voluptuous.humanize import validate_with_humanized_errors, Error
+
+    schema = Schema({'a': int})
+    data = {'a': 'not an int'}
+
+    with pytest.raises(Error) as ctx:
+        validate_with_humanized_errors(data, schema, max_sub_error_length=10)
+
+    error_message = str(ctx.value)
+    assert "..." in error_message  # Should be truncated
+
+
+def test_humanize_error_with_multiple_invalid():
+    """Test humanize_error with MultipleInvalid containing multiple errors."""
+    from voluptuous.humanize import humanize_error
+
+    schema = Schema({'a': int, 'b': str, 'c': [int]})
+    data = {'a': 'not an int', 'b': 123, 'c': ['not an int']}
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(data)
+
+    error_message = humanize_error(data, ctx.value)
+    # Should contain all three error messages
+    assert "expected int for dictionary value @ data['a']" in error_message
+    assert "expected str for dictionary value @ data['b']" in error_message
+    assert "expected int @ data['c'][0]" in error_message
+
+
+def test_humanize_error_with_single_invalid():
+    """Test humanize_error with single Invalid error."""
+    from voluptuous.humanize import humanize_error
+
+    schema = Schema({'a': int})
+    data = {'a': 'not an int'}
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(data)
+
+    error_message = humanize_error(data, ctx.value)
+    assert "expected int for dictionary value @ data['a']" in error_message
+    assert "Got 'not an int'" in error_message
+
+
+def test_humanize_error_with_none_data():
+    """Test humanize_error with None data."""
+    from voluptuous.humanize import humanize_error, _nested_getitem
+
+    # Test _nested_getitem with None data
+    result = _nested_getitem(None, ['a'])
+    assert result is None
+
+    # Test humanize_error with None data
+    schema = Schema({'a': int})
+    data = None
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(data)
+
+    error_message = humanize_error(data, ctx.value)
+    assert "expected a dictionary" in error_message
