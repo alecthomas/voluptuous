@@ -249,10 +249,12 @@ class Schema(object):
         )
 
         # Keys that may have defaults
-        all_default_keys = set(
-            key
-            for key in schema
-            if isinstance(key, Required) or isinstance(key, Optional)
+        all_default_keys = tuple(
+            {
+                key: None
+                for key in schema
+                if isinstance(key, Required) or isinstance(key, Optional)
+            }.keys()
         )
 
         _compiled_schema = {}
