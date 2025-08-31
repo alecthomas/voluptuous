@@ -1,7 +1,5 @@
 """Tests for JSON Schema export functionality."""
 
-import pytest
-
 from voluptuous import (
     All,
     Any,

@@ -4,12 +4,9 @@ This module provides functionality to convert voluptuous schemas to JSON Schema 
 enabling integration with modern IDEs and validation tools that support JSON Schema.
 """
 
-import inspect
-import typing
 from collections.abc import Mapping, Sequence
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Union
 
-from voluptuous import validators as v
 from voluptuous.schema_builder import (
     Extra,
     Marker,
@@ -49,7 +46,7 @@ class JsonSchemaConverter:
         Returns:
             A dictionary representing the JSON Schema
         """
-        json_schema = {
+        json_schema: Dict[str, Any] = {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
         }
@@ -62,9 +59,10 @@ class JsonSchemaConverter:
             json_schema.update(converted)
         else:
             # If it's not a dict, wrap it appropriately
+            wrapped_schema = self._wrap_non_object_schema(converted)
             json_schema = {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                **self._wrap_non_object_schema(converted),
+                **wrapped_schema,
             }
 
         # Add definitions if any were created
@@ -149,8 +147,8 @@ class JsonSchemaConverter:
         return {"type": type_mapping.get(type_class, "string")}
 
     def _convert_mapping(self, mapping: Mapping) -> Dict[str, Any]:
-        """Convert a mapping (dictionary) schema to JSON Schema object."""
-        json_schema = {
+        """Convert a mapping (dictionary) schema to a JSON Schema object."""
+        json_schema: Dict[str, Any] = {
             "type": "object",
             "properties": {},
             "additionalProperties": False,
@@ -186,8 +184,8 @@ class JsonSchemaConverter:
                                 json_schema["properties"][prop_name][
                                     "default"
                                 ] = default_value
-                        except:
-                            # If default factory fails, skip adding default
+                        except (TypeError, ValueError, AttributeError):
+                            # If the default factory fails, skip adding default
                             pass
                     else:
                         # Only add if the default value is JSON serializable
@@ -236,7 +234,7 @@ class JsonSchemaConverter:
         }
 
     def _convert_set(self, set_schema: Union[set, frozenset]) -> Dict[str, Any]:
-        """Convert a set schema to JSON Schema array with unique items."""
+        """Convert a set schema to a JSON Schema array with unique items."""
         if not set_schema:
             return {"type": "array", "uniqueItems": True, "maxItems": 0}
 
@@ -248,9 +246,9 @@ class JsonSchemaConverter:
         """Convert a Marker instance to its underlying schema."""
         return self._convert_schema_element(marker.schema)
 
-    def _convert_callable(self, func: callable) -> Dict[str, Any]:
+    def _convert_callable(self, func: Callable[..., Any]) -> Dict[str, Any]:
         """Convert a callable validator to JSON Schema."""
-        # For generic callables, we can't determine much about the expected type
+        # For generic callables, we can determine little about the expected type
         # This is a limitation of the conversion process
         return {
             "description": f"Custom validator: {getattr(func, '__name__', 'anonymous')}"
@@ -278,9 +276,9 @@ class JsonSchemaConverter:
 
     # Validator-specific conversion methods
 
-    def _convert_range(self, range_validator: v.Range) -> Dict[str, Any]:
+    def _convert_range(self, range_validator: Any) -> Dict[str, Any]:
         """Convert Range validator to JSON Schema numeric constraints."""
-        schema = {"type": "number"}
+        schema: Dict[str, Any] = {"type": "number"}
 
         if hasattr(range_validator, 'min') and range_validator.min is not None:
             if getattr(range_validator, 'min_included', True):
@@ -296,9 +294,9 @@ class JsonSchemaConverter:
 
         return schema
 
-    def _convert_length(self, length_validator: v.Length) -> Dict[str, Any]:
+    def _convert_length(self, length_validator: Any) -> Dict[str, Any]:
         """Convert Length validator to JSON Schema string/array length constraints."""
-        schema = {}
+        schema: Dict[str, Any] = {}
 
         if hasattr(length_validator, 'min') and length_validator.min is not None:
             schema["minLength"] = length_validator.min
@@ -308,7 +306,7 @@ class JsonSchemaConverter:
 
         return schema
 
-    def _convert_all(self, all_validator: v.All) -> Dict[str, Any]:
+    def _convert_all(self, all_validator: Any) -> Dict[str, Any]:
         """Convert All validator to JSON Schema allOf constraint."""
         if not hasattr(all_validator, 'validators'):
             return {}
@@ -326,7 +324,7 @@ class JsonSchemaConverter:
         else:
             return {}
 
-    def _convert_any(self, any_validator: v.Any) -> Dict[str, Any]:
+    def _convert_any(self, any_validator: Any) -> Dict[str, Any]:
         """Convert Any validator to JSON Schema anyOf constraint."""
         if not hasattr(any_validator, 'validators'):
             return {}
@@ -344,46 +342,51 @@ class JsonSchemaConverter:
         else:
             return {}
 
-    def _convert_in(self, in_validator: v.In) -> Dict[str, Any]:
+    def _convert_in(self, in_validator: Any) -> Dict[str, Any]:
         """Convert In validator to JSON Schema enum constraint."""
         if hasattr(in_validator, 'container'):
-            return {"enum": list(in_validator.container)}
+            # Handle both Container and Iterable types
+            container = in_validator.container
+            if hasattr(container, '__iter__'):
+                return {"enum": list(container)}
         return {}
 
-    def _convert_match(self, match_validator: v.Match) -> Dict[str, Any]:
+    def _convert_match(self, match_validator: Any) -> Dict[str, Any]:
         """Convert Match validator to JSON Schema pattern constraint."""
         if hasattr(match_validator, 'pattern'):
             pattern = match_validator.pattern
             if hasattr(pattern, 'pattern'):  # compiled regex
                 pattern = pattern.pattern
-            return {"type": "string", "pattern": pattern}
+            return {"type": "string", "pattern": str(pattern)}
         return {"type": "string"}
 
-    def _convert_email(self, email_validator: v.Email) -> Dict[str, Any]:
+    def _convert_email(self, email_validator: Any) -> Dict[str, Any]:
         """Convert Email validator to JSON Schema email format."""
         return {"type": "string", "format": "email"}
 
-    def _convert_url(self, url_validator: v.Url) -> Dict[str, Any]:
+    def _convert_url(self, url_validator: Any) -> Dict[str, Any]:
         """Convert Url validator to JSON Schema uri format."""
         return {"type": "string", "format": "uri"}
 
-    def _convert_date(self, date_validator: v.Date) -> Dict[str, Any]:
+    def _convert_date(self, date_validator: Any) -> Dict[str, Any]:
         """Convert Date validator to JSON Schema date format."""
         return {"type": "string", "format": "date"}
 
-    def _convert_datetime(self, datetime_validator: v.Datetime) -> Dict[str, Any]:
+    def _convert_datetime(self, datetime_validator: Any) -> Dict[str, Any]:
         """Convert Datetime validator to JSON Schema date-time format."""
         return {"type": "string", "format": "date-time"}
 
-    def _convert_coerce(self, coerce_validator: v.Coerce) -> Dict[str, Any]:
-        """Convert Coerce validator based on target type."""
+    def _convert_coerce(self, coerce_validator: Any) -> Dict[str, Any]:
+        """Convert Coerce validator based on a target type."""
         if hasattr(coerce_validator, 'type'):
-            return self._convert_primitive_type(coerce_validator.type)
+            coerce_type = coerce_validator.type
+            if isinstance(coerce_type, type):
+                return self._convert_primitive_type(coerce_type)
         return {}
 
-    def _convert_clamp(self, clamp_validator: v.Clamp) -> Dict[str, Any]:
+    def _convert_clamp(self, clamp_validator: Any) -> Dict[str, Any]:
         """Convert Clamp validator to Range-like constraints."""
-        schema = {"type": "number"}
+        schema: Dict[str, Any] = {"type": "number"}
 
         if hasattr(clamp_validator, 'min') and clamp_validator.min is not None:
             schema["minimum"] = clamp_validator.min
@@ -393,9 +396,7 @@ class JsonSchemaConverter:
 
         return schema
 
-    def _convert_exactsequence(
-        self, exact_validator: v.ExactSequence
-    ) -> Dict[str, Any]:
+    def _convert_exactsequence(self, exact_validator: Any) -> Dict[str, Any]:
         """Convert ExactSequence validator to JSON Schema with exact items."""
         if hasattr(exact_validator, 'validators'):
             items_schemas = [
