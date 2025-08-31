@@ -80,6 +80,32 @@ from voluptuous.schema_builder import *
 from voluptuous.util import *
 from voluptuous.validators import *
 
+# Dataclasses support (Python 3.7+)
+try:
+    from voluptuous.dataclasses_support import (
+        DataclassSchema,
+        create_dataclass_schema,
+        is_dataclass,
+    )
+except ImportError:
+    # Dataclasses not available, define dummy functions
+    import typing
+
+    class DataclassSchema:  # type: ignore
+        def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+            raise ImportError("Dataclasses support requires Python 3.7+")
+
+    def create_dataclass_schema(
+        dataclass_type: typing.Type[typing.Any],
+        additional_constraints: typing.Optional[typing.Dict[str, typing.Any]] = None,
+        required: bool = False,
+        extra: typing.Any = None
+    ) -> "Schema":
+        raise ImportError("Dataclasses support requires Python 3.7+")
+
+    def is_dataclass(obj: typing.Any) -> bool:
+        return False
+
 from voluptuous.error import *  # isort: skip
 
 # fmt: on

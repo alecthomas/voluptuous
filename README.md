@@ -688,6 +688,115 @@ cross-field validator will not run:
 schema({'password': '123', 'password_again': 1337})
 ```
 
+## Dataclasses Support
+
+*Requires Python 3.7+ for dataclasses support.*
+
+Voluptuous provides built-in support for Python dataclasses, allowing you to automatically create schemas from dataclass definitions with optional additional validation constraints.
+
+### Basic Dataclass Schema
+
+```python
+from dataclasses import dataclass
+from voluptuous import DataclassSchema
+
+@dataclass
+class Person:
+    name: str
+    age: int
+    active: bool = True
+
+# Create schema from dataclass
+schema = DataclassSchema(Person)
+
+# Validate and create dataclass instance
+result = schema({'name': 'John Doe', 'age': 30, 'active': False})
+# Returns: Person(name='John Doe', age=30, active=False)
+```
+
+### Dataclass with Additional Constraints
+
+You can add validation constraints on top of the basic type checking:
+
+```python
+from voluptuous import DataclassSchema, All, Length, Range, Email
+
+@dataclass
+class User:
+    username: str
+    email: str
+    age: int = 18
+
+# Add validation constraints
+schema = DataclassSchema(User, {
+    'username': All(str, Length(min=3, max=20)),
+    'email': Email(),
+    'age': Range(min=13, max=120)
+})
+
+result = schema({
+    'username': 'john_doe',
+    'email': 'john@example.com',
+    'age': 25
+})
+# Returns: User(username='john_doe', email='john@example.com', age=25)
+```
+
+### Nested Dataclass Validation
+
+Dataclass schemas can be nested for complex data structures:
+
+```python
+@dataclass
+class Address:
+    street: str
+    city: str
+    zipcode: str
+
+@dataclass
+class Person:
+    name: str
+    address: dict  # Will be validated as Address
+
+address_schema = DataclassSchema(Address)
+person_schema = DataclassSchema(Person, {
+    'address': address_schema
+})
+
+result = person_schema({
+    'name': 'Alice',
+    'address': {
+        'street': '123 Main St',
+        'city': 'Anytown',
+        'zipcode': '12345'
+    }
+})
+# Returns: Person with nested Address dataclass instance
+```
+
+### Alternative Function API
+
+You can also use the `create_dataclass_schema` function:
+
+```python
+from voluptuous import create_dataclass_schema
+
+schema = create_dataclass_schema(Person, {
+    'name': Length(min=1, max=100),
+    'age': Range(min=0, max=150)
+})
+```
+
+### Key Features
+
+- **Automatic type validation** from dataclass field annotations
+- **Default value support** including `default_factory` functions
+- **Seamless integration** with existing voluptuous validators
+- **Type annotation handling** for `List[T]`, `Optional[T]`, etc.
+- **Full backward compatibility** with existing voluptuous schemas
+
+For more examples, see `examples/dataclasses_example.py`.
+
 ## Running tests
 
 Voluptuous is using `pytest`:
