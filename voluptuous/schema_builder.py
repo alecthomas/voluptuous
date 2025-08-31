@@ -209,6 +209,23 @@ class Schema(object):
             raise er.MultipleInvalid([e])
             # return self.validate([], self.schema, data)
 
+    def to_json_schema(self) -> typing.Dict[str, typing.Any]:
+        """Convert this voluptuous schema to JSON Schema format.
+
+        Returns:
+            A dictionary representing the JSON Schema equivalent of this schema.
+
+        Example:
+            >>> from voluptuous import Schema, Required, Range
+            >>> schema = Schema({Required('name'): str, 'age': Range(min=0, max=120)})
+            >>> json_schema = schema.to_json_schema()
+            >>> json_schema['type']
+            'object'
+        """
+        from voluptuous.json_schema import JsonSchemaConverter
+        converter = JsonSchemaConverter(self)
+        return converter.convert()
+
     def _compile(self, schema):
         if schema is Extra:
             return lambda _, v: v
