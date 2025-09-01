@@ -2193,7 +2193,7 @@ def test_required_complex_key_value_validation():
 def test_complex_required_keys_with_specific_value_validation():
     """Test complex required keys combined with specific value validation for brightness range."""
     schema = Schema({
-        Required(Any('color', 'temperature', 'brightness')): str,
+        Required(Any('color', 'temperature', 'brightness')): object,
         'brightness': All(Coerce(int), Range(min=0, max=100)),  # Additional validation for brightness specifically
         'device_id': str
     })
@@ -2208,7 +2208,7 @@ def test_complex_required_keys_with_specific_value_validation():
     
     # Valid - brightness provided and within range
     result = schema({'brightness': '50', 'device_id': 'light1'})
-    assert result == {'brightness': 50, 'device_id': 'light1'} 
+    assert result == {'brightness': 50, 'device_id': 'light1'}
     
     # Invalid - brightness provided but out of range (255 > 100)
     # Should NOT get "required field missing" error, but should get range error
@@ -2224,5 +2224,95 @@ def test_complex_required_keys_with_specific_value_validation():
     with pytest.raises(MultipleInvalid) as exc_info:
         schema({'device_id': 'light1'})
     assert "at least one of ['color', 'temperature', 'brightness'] is required" in str(exc_info.value)
+
+
+def test_required_anyof_keys_with_types():
+    """Test lighting control schema with complex required keys and individual optional keys."""
+    # Schema using object to accept any value type for the complex requirement
+    schema = Schema({
+        # This represents the Required(Any(...)) constraint - at least one lighting attribute required
+        # Using object means "presence only" - any value type is accepted
+        Required(Any("color", "temperature", "brightness")): object,
+
+        # These represent individual optional_slots with specific types
+        Optional("color"): str,
+        Optional("temperature"): int,
+        Optional("brightness"): int,
+
+        # Other standard slots
+        Optional("name"): str,
+        Optional("area"): str,
+        Optional("floor"): str,
+    })
+    
+    # Valid - only color provided (satisfies complex requirement)
+    result = schema({"color": "red"})
+    assert result == {"color": "red"}
+    
+    # Valid - only temperature provided (satisfies complex requirement)
+    result = schema({"temperature": 3000})
+    assert result == {"temperature": 3000}
+    
+    # Valid - only brightness provided (satisfies complex requirement)
+    result = schema({"brightness": 80})
+    assert result == {"brightness": 80}
+    
+    # Valid - multiple lighting attributes + optional fields
+    result = schema({
+        "color": "blue",
+        "temperature": 2700,
+        "brightness": 75,
+        "name": "living room light",
+        "area": "living room"
+    })
+    assert result == {
+        "color": "blue",
+        "temperature": 2700,
+        "brightness": 75,
+        "name": "living room light",
+        "area": "living room"
+    }
+    
+    # Valid - mixed types work because complex requirement accepts any type
+    result = schema({
+        "color": "green",      # str for complex requirement
+        "temperature": 3000,   # int for optional validation
+        "brightness": 50,      # int for optional validation
+        "name": "kitchen light"
+    })
+    assert result == {
+        "color": "green",
+        "temperature": 3000,
+        "brightness": 50,
+        "name": "kitchen light"
+    }
+    
+    # Invalid - no required lighting attributes provided
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({"name": "bedroom light", "area": "bedroom"})
+    
+    error_msg = str(exc_info.value)
+    assert "at least one of ['color', 'temperature', 'brightness'] is required" in error_msg
+    
+    # Invalid - wrong type for optional field
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({
+            "color": "red",        # satisfies complex requirement
+            "temperature": "hot"   # should be int, not str for optional temperature
+        })
+    
+    error_msg = str(exc_info.value)
+    assert "expected int" in error_msg
+    
+    # Invalid - wrong type for optional field
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({
+            "brightness": 75,  # satisfies complex requirement
+            "name": 456       # should be str, not int
+        })
+    
+    error_msg = str(exc_info.value)
+    assert "expected str" in error_msg
+
 
 
