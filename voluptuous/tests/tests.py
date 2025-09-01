@@ -2190,3 +2190,39 @@ def test_required_complex_key_value_validation():
     assert "expected str" in error_msg
 
 
+def test_complex_required_keys_with_specific_value_validation():
+    """Test complex required keys combined with specific value validation for brightness range."""
+    schema = Schema({
+        Required(Any('color', 'temperature', 'brightness')): str,
+        'brightness': All(Coerce(int), Range(min=0, max=100)),  # Additional validation for brightness specifically
+        'device_id': str
+    })
+    
+    # Valid - color provided, no brightness validation needed
+    result = schema({'color': 'red', 'device_id': 'light1'})
+    assert result == {'color': 'red', 'device_id': 'light1'}
+    
+    # Valid - temperature provided, no brightness validation needed
+    result = schema({'temperature': '3000K', 'device_id': 'light1'})
+    assert result == {'temperature': '3000K', 'device_id': 'light1'}
+    
+    # Valid - brightness provided and within range
+    result = schema({'brightness': '50', 'device_id': 'light1'})
+    assert result == {'brightness': 50, 'device_id': 'light1'} 
+    
+    # Invalid - brightness provided but out of range (255 > 100)
+    # Should NOT get "required field missing" error, but should get range error
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({'brightness': '255', 'device_id': 'light1'})
+    
+    # Verify it's a range error, not a missing required field error
+    error_msg = str(exc_info.value)
+    assert "required" not in error_msg.lower()  # No "required field missing" error
+    assert "value must be at most 100" in error_msg  # Range validation error
+    
+    # Invalid - no lighting attributes provided
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({'device_id': 'light1'})
+    assert "at least one of ['color', 'temperature', 'brightness'] is required" in str(exc_info.value)
+
+
