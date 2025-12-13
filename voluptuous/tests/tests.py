@@ -2041,120 +2041,126 @@ def test_humanize_error_with_none_data():
 
 def test_required_complex_key_any():
     """Test Required with Any validator for multiple possible keys"""
-    schema = Schema({
-        Required(Any("color", "temperature", "brightness")): str,
-        "device_id": str
-    })
-    
+    schema = Schema(
+        {Required(Any("color", "temperature", "brightness")): str, "device_id": str}
+    )
+
     # Should pass - defines one of the required keys
     result = schema({"color": "red", "device_id": "light1"})
     assert result == {"color": "red", "device_id": "light1"}
-    
+
     # Should pass - defines several of the required keys
     result = schema({"color": "blue", "brightness": "50%", "device_id": "light1"})
     assert result == {"color": "blue", "brightness": "50%", "device_id": "light1"}
-    
+
     # Should fail - has none of the required keys
     with pytest.raises(MultipleInvalid) as ctx:
         schema({"device_id": "light1"})
-    
+
     error_msg = str(ctx.value)
-    assert "at least one of ['color', 'temperature', 'brightness'] is required" in error_msg
+    assert (
+        "at least one of ['color', 'temperature', 'brightness'] is required"
+        in error_msg
+    )
 
 
 def test_required_complex_key_custom_message():
     """Test Required with Any validator and custom error message"""
-    schema = Schema({
-        Required(Any("color", "temperature", "brightness"),
-                msg="Please specify a lighting attribute"): str,
-        "device_id": str
-    })
-    
+    schema = Schema(
+        {
+            Required(
+                Any("color", "temperature", "brightness"),
+                msg="Please specify a lighting attribute",
+            ): str,
+            "device_id": str,
+        }
+    )
+
     # Should pass
     schema({"color": "red", "device_id": "light1"})
-    
+
     # Should fail with custom message
     with pytest.raises(MultipleInvalid) as ctx:
         schema({"device_id": "light1"})
-    
+
     error_msg = str(ctx.value)
     assert "Please specify a lighting attribute" in error_msg
 
 
 def test_required_complex_key_mixed_types():
     """Test Required with Any validator containing mixed key types"""
-    schema = Schema({
-        Required(Any("string_key", 123, 45.6)): str,
-        "other": int
-    })
-    
+    schema = Schema({Required(Any("string_key", 123, 45.6)): str, "other": int})
+
     # Should work with string key
     result = schema({"string_key": "value", "other": 1})
     assert result == {"string_key": "value", "other": 1}
-    
+
     # Should work with int key
     result = schema({123: "value", "other": 1})
     assert result == {123: "value", "other": 1}
-    
+
     # Should work with float key
     result = schema({45.6: "value", "other": 1})
     assert result == {45.6: "value", "other": 1}
-    
+
     # Should fail with none present
     with pytest.raises(MultipleInvalid) as ctx:
         schema({"other": 1})
-    
+
     error_msg = str(ctx.value)
     assert "at least one of ['string_key', 123, 45.6] is required" in error_msg
 
 
 def test_required_complex_key_multiple_complex_requirements():
     """Test multiple Required complex keys in same schema"""
-    schema = Schema({
-        Required(Any("color", "hue")): str,
-        Required(Any("brightness", "intensity")): str,
-        "device": str
-    })
-    
+    schema = Schema(
+        {
+            Required(Any("color", "hue")): str,
+            Required(Any("brightness", "intensity")): str,
+            "device": str,
+        }
+    )
+
     # Should pass with one from each group
     result = schema({"color": "red", "brightness": "high", "device": "light"})
     assert result == {"color": "red", "brightness": "high", "device": "light"}
-    
+
     # Should fail if missing on any group
     with pytest.raises(MultipleInvalid) as ctx:
         schema({"brightness": "high", "device": "light"})
-    
+
     error_msg = str(ctx.value)
     assert "at least one of ['color', 'hue'] is required" in error_msg
 
 
 def test_required_complex_key_value_validation():
     """Test that value validation still works with complex required keys"""
-    schema = Schema({
-        Required(Any("color", "temperature")): str,
-        "device": str
-    })
-    
+    schema = Schema({Required(Any("color", "temperature")): str, "device": str})
+
     # Should pass with valid string value
     result = schema({"color": "red", "device": "light"})
     assert result == {"color": "red", "device": "light"}
-    
+
     # Should fail with invalid value type
     with pytest.raises(MultipleInvalid) as ctx:
         schema({"color": 123, "device": "light"})  # color should be str, not int
-    
+
     error_msg = str(ctx.value)
     assert "expected str" in error_msg
 
 
 def test_complex_required_keys_with_specific_value_validation():
     """Test complex required keys combined with specific value validation for brightness range."""
-    schema = Schema({
-        Required(Any('color', 'temperature', 'brightness')): object,
-        'brightness': All(Coerce(int), Range(min=0, max=100)),  # Additional validation for brightness specifically
-        'device_id': str
-    })
-    
+    schema = Schema(
+        {
+            Required(Any('color', 'temperature', 'brightness')): object,
+            'brightness': All(
+                Coerce(int), Range(min=0, max=100)
+            ),  # Additional validation for brightness specifically
+            'device_id': str,
+        }
+    )
+
     # Valid - color provided, no brightness validation needed
     result = schema({'color': 'red', 'device_id': 'light1'})
     assert result == {'color': 'red', 'device_id': 'light1'}
@@ -2163,7 +2169,7 @@ def test_complex_required_keys_with_specific_value_validation():
     # Should NOT get "required field missing" error, but should get range error
     with pytest.raises(MultipleInvalid) as exc_info:
         schema({'brightness': '255', 'device_id': 'light1'})
-    
+
     # Verify it's a range error, not a missing required field error
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error

@@ -250,7 +250,8 @@ class Schema(object):
 
         # Complex required keys that need special validation
         complex_required_keys = set(
-            key for key in all_required_keys
+            key
+            for key in all_required_keys
             if isinstance(key, Required) and key.is_complex_key
         )
 
@@ -306,10 +307,13 @@ class Schema(object):
                     key_value_map[key.schema] = key.default()
 
             errors = []
-            
+
             # Check complex required keys - at least one candidate key must be present
             for complex_key in complex_required_keys:
-                if not any(candidate in key_value_map for candidate in complex_key.candidate_keys):
+                if not any(
+                    candidate in key_value_map
+                    for candidate in complex_key.candidate_keys
+                ):
                     msg = (
                         complex_key.msg
                         if hasattr(complex_key, 'msg') and complex_key.msg
@@ -1161,9 +1165,9 @@ class Required(Marker):
     >>> schema = Schema({Required('key', default=list): list})
     >>> schema({})
     {'key': []}
-    
+
     Complex key validation - at least one of the specified keys must be present:
-    
+
     >>> from voluptuous.validators import Any
     >>> schema = Schema({Required(Any('color', 'temperature', 'brightness')): str})
     >>> schema({'color': 'red'})  # Valid - has color
@@ -1184,21 +1188,29 @@ class Required(Marker):
         super(Required, self).__init__(schema, msg=msg, description=description)
         self.default = default_factory(default)
         self.is_complex_key = self._is_complex_key_validator(schema)
-        self.candidate_keys = self._extract_candidate_keys(schema) if self.is_complex_key else None
-    
+        self.candidate_keys = (
+            self._extract_candidate_keys(schema) if self.is_complex_key else None
+        )
+
     def _is_complex_key_validator(self, schema):
         """Check if schema is a validator that can match multiple keys."""
         # Import here to avoid circular imports
         from voluptuous.validators import Any
+
         return isinstance(schema, Any)
-    
+
     def _extract_candidate_keys(self, schema):
         """Extract possible keys from validators like Any("key1", "key2", "key3")."""
         # Import here to avoid circular imports
         from voluptuous.validators import Any
+
         if isinstance(schema, Any):
             # Extract literal values (strings, ints, etc.) from Any validators
-            return [v for v in schema.validators if isinstance(v, (str, int, float, bool, type(None)))]
+            return [
+                v
+                for v in schema.validators
+                if isinstance(v, (str, int, float, bool, type(None)))
+            ]
         return []
 
 
