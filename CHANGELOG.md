@@ -1,21 +1,36 @@
 # Changelog
 
+## [0.16.0]
+
+**New**:
+
+* [#534](https://github.com/alecthomas/voluptuous/pull/534): Support requiring `anyOf` a list of keys
+
+**Fixes**:
+
+* [#523](https://github.com/alecthomas/voluptuous/pull/523): Allow Generators for `vol.In`
+* [#524](https://github.com/alecthomas/voluptuous/pull/524): Fix bug with `Any` validator and `REMOVE_EXTRA`
+  
+**Changes**:
+
+* [#530](https://github.com/alecthomas/voluptuous/pull/530): Add comprehensive tests for `humanize.py` module
+
 ## [0.15.2]
 
 **Fixes**:
 
-* [522](https://github.com/alecthomas/voluptuous/pull/522) Fix regression with ALLOW_EXTRA and `Any` validator
+* [522](https://github.com/alecthomas/voluptuous/pull/522): Fix regression with ALLOW_EXTRA and `Any` validator
 
 ## [0.15.1]
 
 **Fixes**:
 
-* [515](https://github.com/alecthomas/voluptuous/pull/515) Fix `Remove` not removing keys that do not validate
-* [516](https://github.com/alecthomas/voluptuous/pull/516) Improve validator typing to allow non-number formats for min and max
-* [517](https://github.com/alecthomas/voluptuous/pull/517) Remove `Maybe` validator typing
-* [518](https://github.com/alecthomas/voluptuous/pull/518) Use typing.Container for `In` validator
-* [519](https://github.com/alecthomas/voluptuous/pull/519) Don't enforce type for unused description attribute
-* [521](https://github.com/alecthomas/voluptuous/pull/521) Type schema attribute as `Any`
+* [515](https://github.com/alecthomas/voluptuous/pull/515): Fix `Remove` not removing keys that do not validate
+* [516](https://github.com/alecthomas/voluptuous/pull/516): Improve validator typing to allow non-number formats for min and max
+* [517](https://github.com/alecthomas/voluptuous/pull/517): Remove `Maybe` validator typing
+* [518](https://github.com/alecthomas/voluptuous/pull/518): Use typing.Container for `In` validator
+* [519](https://github.com/alecthomas/voluptuous/pull/519): Don't enforce type for unused description attribute
+* [521](https://github.com/alecthomas/voluptuous/pull/521): Type schema attribute as `Any`
 
 ## [0.15.0]
 
@@ -57,7 +72,6 @@
 **Fixes**:
 * [#470](https://github.com/alecthomas/voluptuous/pull/470): Fix a few code comment typos
 * [#472](https://github.com/alecthomas/voluptuous/pull/472): Change to SPDX conform license string
-
 
 **New**:
 * [#475](https://github.com/alecthomas/voluptuous/pull/475): Add typing information
