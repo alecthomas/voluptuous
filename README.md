@@ -688,6 +688,79 @@ cross-field validator will not run:
 schema({'password': '123', 'password_again': 1337})
 ```
 
+## JSON Schema Export
+
+Voluptuous schemas can be exported to [JSON Schema](https://json-schema.org/) format, enabling integration with modern IDEs, API documentation tools, and other validation systems.
+
+### Basic Usage
+
+Use the `to_json_schema()` method on any Schema instance:
+
+```pycon
+>>> from voluptuous import Schema, Required, Optional, Range, Email
+>>> schema = Schema({
+...     Required('name'): str,
+...     Required('email'): Email(),
+...     Optional('age'): Range(min=0, max=150)
+... })
+>>> json_schema = schema.to_json_schema()
+>>> json_schema['type']
+'object'
+>>> json_schema['required']
+['name', 'email']
+>>> json_schema['properties']['email']['format']
+'email'
+```
+
+Alternatively, use the standalone `to_json_schema()` function:
+
+```pycon
+>>> from voluptuous import to_json_schema
+>>> json_schema = to_json_schema(Schema(str))
+>>> json_schema['type']
+'string'
+```
+
+### Supported Validators
+
+Most voluptuous validators are converted to equivalent JSON Schema constraints:
+
+- **Range**: Converted to `minimum`/`maximum` constraints
+- **Length**: Converted to `minLength`/`maxLength` for strings, `minItems`/`maxItems` for arrays
+- **Email**: Converted to `format: "email"`
+- **Url**: Converted to `format: "uri"`
+- **Date**: Converted to `format: "date"`
+- **Datetime**: Converted to `format: "date-time"`
+- **Match**: Converted to `pattern` constraint
+- **In**: Converted to `enum` constraint
+- **All**: Converted to `allOf` constraint
+- **Any**: Converted to `anyOf` constraint
+
+### Use Cases
+
+The exported JSON Schema can be used with:
+
+- **IDEs**: For YAML/JSON file validation and autocompletion
+- **API Documentation**: Tools like OpenAPI/Swagger
+- **Code Generation**: Generate types for other languages
+- **Validation Libraries**: Use with JSON Schema validators in any language
+
+### Example
+
+```pycon
+>>> from voluptuous import Schema, Required, All, Length, Range, In
+>>> api_schema = Schema({
+...     Required('endpoint'): All(str, Length(min=1)),
+...     Required('method'): In(['GET', 'POST', 'PUT', 'DELETE']),
+...     Optional('timeout'): Range(min=1, max=300),
+...     Optional('retries', default=3): Range(min=0, max=10)
+... })
+>>> json_schema = api_schema.to_json_schema()
+>>> # Use json_schema with your favorite JSON Schema validator
+```
+
+For more examples, see `examples/json_schema_export.py`.
+
 ## Running tests
 
 Voluptuous is using `pytest`:
