@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import collections
+import enum
 import inspect
 import itertools
 import re
@@ -226,6 +227,8 @@ class Schema(object):
             return self._compile_tuple(schema)
         elif isinstance(schema, (frozenset, set)):
             return self._compile_set(schema)
+        elif isinstance(schema, enum.Enum):
+            return _compile_scalar(schema)
         type_ = type(schema)
         if inspect.isclass(schema):
             type_ = schema

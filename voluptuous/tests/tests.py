@@ -1869,6 +1869,29 @@ def test_coerce_enum():
         string_schema("hello")
 
 
+def test_enum_as_schema():
+    """Test enum members can be used as scalar schemas and mapping keys."""
+
+    class Choice(Enum):
+        Easy = 1
+        Hard = 3
+
+    class StringChoice(str, Enum):
+        Easy = 'easy'
+        Hard = 'hard'
+
+    # As a scalar schema, an enum member is matched by equality.
+    schema = Schema(Choice.Easy)
+    assert schema(Choice.Easy) == Choice.Easy
+    with raises(Invalid, 'not a valid value'):
+        schema(Choice.Hard)
+
+    # As a mapping key, including default handling for missing keys.
+    dict_schema = Schema({Optional(StringChoice.Easy, default=True): bool})
+    assert dict_schema({}) == {StringChoice.Easy: True}
+    assert dict_schema({'easy': False}) == {'easy': False}
+
+
 class MyValueClass(object):
     def __init__(self, value=None):
         self.value = value
