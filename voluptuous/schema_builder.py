@@ -716,10 +716,26 @@ class Schema(object):
 
         Both schemas must be dictionary-based.
 
-        :param schema: dictionary to extend this `Schema` with
+        :param schema: dictionary, or Schema wrapping a dictionary, to extend
+            this `Schema` with
         :param required: if set, overrides `required` of this `Schema`
         :param extra: if set, overrides `extra` of this `Schema`
         """
+
+        result_required = required if required is not None else self.required
+        result_extra = extra if extra is not None else self.extra
+
+        if isinstance(schema, Schema):
+            if schema.extra != result_extra:
+                raise er.SchemaError(
+                    'Schema.extend() cannot preserve extra from the extension '
+                    'Schema when it differs from the resulting Schema extra. '
+                    'Pass child_schema.schema explicitly if you only want raw '
+                    'dict merge semantics.'
+                )
+            schema = self._normalize_schema_extension(
+                schema.schema, schema.required, result_required
+            )
 
         assert isinstance(self.schema, dict) and isinstance(
             schema, dict
@@ -762,9 +778,27 @@ class Schema(object):
 
         # recompile and send old object
         result_cls = type(self)
-        result_required = required if required is not None else self.required
-        result_extra = extra if extra is not None else self.extra
         return result_cls(result, required=result_required, extra=result_extra)
+
+    @staticmethod
+    def _normalize_schema_extension(
+        schema: Schemable, schema_required: bool, result_required: bool
+    ) -> Schemable:
+        if not isinstance(schema, dict):
+            return schema
+
+        result = {}
+        for key, value in schema.items():
+            normalized_key = key
+            if key is not Extra and not isinstance(key, Marker):
+                if schema_required:
+                    normalized_key = Required(key)
+                elif result_required:
+                    normalized_key = Optional(key)
+            result[normalized_key] = Schema._normalize_schema_extension(
+                value, schema_required, result_required
+            )
+        return result
 
 
 def _compile_scalar(schema):

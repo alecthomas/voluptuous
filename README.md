@@ -539,6 +539,25 @@ requirements. In that case you can use `Schema.extend` to create a new
 ['age', 'name']
 ```
 
+`Schema.extend` can also accept another dictionary-based `Schema`. In that case
+the extension schema keeps its own `required` setting:
+
+```pycon
+>>> person = Schema({'name': str}, required=True)
+>>> contact = Schema({'email': str})
+>>> person_with_contact = person.extend(contact)
+>>> person_with_contact({'name': 'Ada'})
+{'name': 'Ada'}
+>>> person_with_contact({'name': 'Ada', 'email': 'ada@example.com'})
+{'name': 'Ada', 'email': 'ada@example.com'}
+>>> required_contact = Schema({'phone': str}, required=True)
+>>> person_with_phone = person.extend(required_contact)
+>>> person_with_phone({'name': 'Ada'})
+Traceback (most recent call last):
+...
+voluptuous.error.MultipleInvalid: required key not provided @ data['phone']
+```
+
 The original `Schema` remains unchanged.
 
 ### Objects

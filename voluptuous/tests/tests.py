@@ -52,6 +52,7 @@ from voluptuous import (
     Replace,
     Required,
     Schema,
+    SchemaError,
     Self,
     SomeOf,
     TooManyValid,
@@ -441,6 +442,114 @@ def test_schema_extend():
     assert isinstance(extended, Schema)
 
 
+def test_schema_extend_with_schema_instance():
+    """Verify that Schema.extend accepts a Schema wrapping a dictionary."""
+
+    base = Schema({'a': int})
+    extension = Schema({'b': str})
+    extended = base.extend(extension)
+
+    assert base.schema == {'a': int}
+    assert extension.schema == {'b': str}
+    assert extended.schema == {'a': int, 'b': str}
+
+
+def test_schema_extend_with_required_schema_instance():
+    """Verify that Schema.extend preserves required keys from a Schema."""
+
+    base = Schema({'a': int})
+    extension = Schema({'b': str}, required=True)
+    extended = base.extend(extension)
+
+    keys = list(extended.schema)
+    assert isinstance(keys[1], Required)
+    assert keys[1].schema == 'b'
+
+    with pytest.raises(MultipleInvalid, match="required key not provided"):
+        extended({'a': 1})
+
+
+def test_schema_extend_with_optional_schema_instance_required_base():
+    """Verify that Schema.extend preserves optional keys from a Schema."""
+
+    base = Schema({'a': int}, required=True)
+    extension = Schema({'b': str}, required=False)
+    extended = base.extend(extension)
+
+    keys = list(extended.schema)
+    assert isinstance(keys[1], Optional)
+    assert keys[1].schema == 'b'
+    assert extended({'a': 1}) == {'a': 1}
+
+
+def test_schema_extend_with_schema_instance_preserves_markers():
+    """Verify that Schema.extend preserves explicit marker keys."""
+
+    required = Required('required')
+    optional = Optional('optional')
+    remove = Remove('remove')
+    extension = Schema(
+        {required: int, optional: str, remove: object, Extra: object}, required=True
+    )
+    extended = Schema({}).extend(extension)
+    keys = list(extended.schema)
+
+    assert any(key is required for key in keys)
+    assert any(key is optional for key in keys)
+    assert any(key is remove for key in keys)
+    assert any(key is Extra for key in keys)
+
+
+def test_schema_extend_with_schema_instance_preserves_nested_required():
+    """Verify that Schema.extend preserves nested required keys from a Schema."""
+
+    base = Schema({})
+    extension = Schema({'parent': {'child': int}}, required=True)
+    extended = base.extend(extension)
+
+    parent_key = list(extended.schema)[0]
+    child_key = list(extended.schema[parent_key])[0]
+    assert isinstance(parent_key, Required)
+    assert isinstance(child_key, Required)
+
+    with pytest.raises(MultipleInvalid, match="required key not provided"):
+        extended({'parent': {}})
+
+
+def test_schema_extend_with_schema_instance_preserves_nested_optional():
+    """Verify that Schema.extend preserves nested optional keys from a Schema."""
+
+    base = Schema({'a': int}, required=True)
+    extension = Schema({'parent': {'child': int}}, required=False)
+    extended = base.extend(extension)
+
+    parent_key = list(extended.schema)[1]
+    child_key = list(extended.schema[parent_key])[0]
+    assert isinstance(parent_key, Optional)
+    assert isinstance(child_key, Optional)
+    assert extended({'a': 1, 'parent': {}}) == {'a': 1, 'parent': {}}
+
+
+def test_schema_extend_with_schema_instance_rejects_extra_mismatch():
+    """Verify that Schema.extend rejects incompatible extra settings."""
+
+    base = Schema({}, extra=ALLOW_EXTRA)
+    extension = Schema({'b': str})
+
+    with pytest.raises(SchemaError, match='cannot preserve extra'):
+        base.extend(extension)
+
+
+def test_schema_extend_with_non_dictionary_schema_instance_fails():
+    """Verify that Schema.extend rejects a Schema wrapping a non-dictionary."""
+
+    base = Schema({'a': int})
+    extension = Schema([int])
+
+    with pytest.raises(AssertionError, match='Both schemas must be dictionary-based'):
+        base.extend(extension)
+
+
 def test_schema_extend_overrides():
     """Verify that Schema.extend can override required/extra parameters."""
     base = Schema({'a': int}, required=True)
@@ -483,6 +592,21 @@ def test_schema_extend_handles_schema_subclass():
 
     base = S({Required('a'): int})
     extension = {Optional('b'): str}
+    extended = base.extend(extension)
+
+    expected_schema = {Required('a'): int, Optional('b'): str}
+    assert extended.schema == expected_schema
+    assert isinstance(extended, S)
+
+
+def test_schema_extend_with_schema_instance_handles_schema_subclass():
+    """Verify that Schema.extend preserves subclass type with a Schema argument."""
+
+    class S(Schema):
+        pass
+
+    base = S({Required('a'): int})
+    extension = Schema({Optional('b'): str})
     extended = base.extend(extension)
 
     expected_schema = {Required('a'): int, Optional('b'): str}
