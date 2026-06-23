@@ -996,6 +996,21 @@ def test_number_validation_with_string():
         assert False, "Did not raise Invalid for String"
 
 
+def test_number_validation_with_non_numeric():
+    """Non-numeric input raises Invalid, like an unparsable string does."""
+    schema = Schema({"number": Number(precision=6, scale=2)})
+    for value in (None, {}, [], (), b'x'):
+        try:
+            schema({"number": value})
+        except MultipleInvalid as e:
+            assert (
+                str(e)
+                == "Value must be a number enclosed with string for dictionary value @ data['number']"
+            )
+        else:
+            assert False, "Did not raise Invalid for %r" % (value,)
+
+
 def test_number_validation_with_invalid_precision_invalid_scale():
     """Test with Number with invalid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2)})

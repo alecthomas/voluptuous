@@ -1186,7 +1186,7 @@ class Number(object):
         """
         try:
             decimal_num = Decimal(number)
-        except InvalidOperation:
+        except (InvalidOperation, TypeError, ValueError):
             raise Invalid(self.msg or 'Value must be a number enclosed with string')
 
         exp = decimal_num.as_tuple().exponent
