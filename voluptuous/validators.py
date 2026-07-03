@@ -1193,9 +1193,7 @@ class Number(object):
         if isinstance(exp, int):
             return (len(decimal_num.as_tuple().digits), -exp, decimal_num)
         else:
-            # TODO: handle infinity and NaN
-            # raise Invalid(self.msg or 'Value has no precision')
-            raise TypeError("infinity and NaN have no precision")
+            raise Invalid(self.msg or 'Value has no precision')
 
 
 class SomeOf(_WithSubValidators):

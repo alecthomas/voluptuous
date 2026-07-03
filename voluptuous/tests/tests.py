@@ -1010,6 +1010,16 @@ def test_number_validation_with_invalid_precision_invalid_scale():
         assert False, "Did not raise Invalid for String"
 
 
+def test_number_validation_with_non_finite_number():
+    schema = Schema({"number": Number(precision=6, scale=2)})
+    try:
+        schema({"number": 'Infinity'})
+    except MultipleInvalid as e:
+        assert str(e) == "Value has no precision for dictionary value @ data['number']"
+    else:
+        assert False, "Did not raise Invalid for Infinity"
+
+
 def test_number_validation_with_valid_precision_scale_yield_decimal_true():
     """Test with Number with valid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2, yield_decimal=True)})
