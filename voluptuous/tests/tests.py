@@ -1567,6 +1567,20 @@ def test_frozenset_of_integers_and_strings():
     assert len(ctx.value.errors) == 1
 
 
+def test_coerce_in_set_is_applied():
+    # A validator that transforms its input (e.g. Coerce) must have its result
+    # reflected in the returned set, mirroring list/dict schemas. Previously the
+    # returned set kept the original, un-coerced values. See issue #400.
+    assert Schema({Coerce(int)})({'1', '2'}) == {1, 2}
+
+    result = Schema(frozenset([Coerce(int)]))(frozenset({'1', '2'}))
+    assert result == frozenset({1, 2})
+    assert isinstance(result, frozenset)
+
+    # Non-transforming validators still round-trip unchanged.
+    assert Schema({int})({1, 2}) == {1, 2}
+
+
 def test_lower_util_handles_various_inputs():
     assert Lower(3) == "3"
     assert Lower(u"3") == u"3"
