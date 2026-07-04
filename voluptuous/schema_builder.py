@@ -687,10 +687,13 @@ class Schema(object):
 
             _compiled = [self._compile(s) for s in schema]
             errors = []
+            out = set()
             for value in data:
                 for validate in _compiled:
                     try:
-                        validate(path, value)
+                        cval = validate(path, value)
+                        if cval is not Remove:  # do not include Remove values
+                            out.add(cval)
                         break
                     except er.Invalid:
                         pass
@@ -701,7 +704,7 @@ class Schema(object):
             if errors:
                 raise er.MultipleInvalid(errors)
 
-            return data
+            return type_(out)
 
         return validate_set
 

@@ -10,6 +10,7 @@
 
 * [#523](https://github.com/alecthomas/voluptuous/pull/523): Allow Generators for `vol.In`
 * [#524](https://github.com/alecthomas/voluptuous/pull/524): Fix bug with `Any` validator and `REMOVE_EXTRA`
+* [#400](https://github.com/alecthomas/voluptuous/issues/400): Apply value-transforming validators (e.g. `Coerce`) to set/frozenset elements, matching list and dict schemas
   
 **Changes**:
 
