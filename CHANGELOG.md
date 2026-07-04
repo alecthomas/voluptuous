@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+**Fixes**:
+
+* [#539](https://github.com/alecthomas/voluptuous/pull/539): Raise `Invalid` instead of leaking `TypeError`/`ValueError` for non-numeric input to the `Number` validator
+
 ## [0.16.0]
 
 **New**:
