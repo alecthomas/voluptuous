@@ -95,6 +95,21 @@ def test_required():
         schema({})
 
 
+def test_required_key_error_order_is_stable():
+    """Missing-required-key errors follow schema declaration order (#484).
+
+    Previously the required keys were stored in a set, so the emitted
+    ``MultipleInvalid`` errors came out in an arbitrary, hash-seed-dependent
+    order. Using several keys makes an accidental correct ordering on the old
+    code astronomically unlikely.
+    """
+    keys = ['value1', 'value2', 'value3', 'value4', 'value5']
+    schema = Schema({Required(k): str for k in keys})
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({})
+    assert [e.path[0] for e in ctx.value.errors] == keys
+
+
 def test_extra_with_required():
     """Verify that Required does not break Extra."""
     schema = Schema({Required('toaster'): str, Extra: object})
