@@ -53,6 +53,9 @@ class Invalid(Error):
             output += ' for ' + self.error_type
         return output + path
 
+    def __repr__(self) -> str:
+        return '%s(%r)' % (self.__class__.__name__, str(self))
+
     def prepend(self, path: typing.List[typing.Hashable]) -> None:
         self._path = path + self.path
 

@@ -332,6 +332,20 @@ def test_email_validation_without_host():
     assert isinstance(ctx.value.errors[0], EmailInvalid)
 
 
+def test_invalid_repr_includes_path_and_type():
+    """`repr(Invalid)` should surface the same context as `str`, like MultipleInvalid does."""
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema({'k': int})({'k': 'x'})
+    error = ctx.value.errors[0]
+    assert isinstance(error, TypeInvalid)
+    # Previously repr fell back to the default and dropped the path/type.
+    assert (
+        repr(error) == "TypeInvalid(\"expected int for dictionary value @ data['k']\")"
+    )
+    # The nested error reprs surface in the MultipleInvalid repr too.
+    assert repr(error) in repr(ctx.value)
+
+
 @pytest.mark.parametrize(
     'input_value', ['john@voluptuous.com>', 'john!@voluptuous.org!@($*!']
 )
