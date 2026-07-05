@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tarfile
 import threading
+import typing
 import zipfile
 from enum import Enum
 from pathlib import Path
@@ -78,14 +79,17 @@ from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 # fmt: on
 
-I18N_LOCALE_DIR = Path(__file__).resolve().parent.parent / "locale"
+I18N_LOCALE_DIR = Path(__file__).resolve().parent / "fixtures" / "locale"
 I18N_REQUIRED_DE = "erforderliches feld fehlt"
 
 
 @pytest.fixture(autouse=True)
 def _restore_i18n_translator():
+    _i18n._translator.set(None)
+    _i18n.configure_i18n()
     yield
-    _i18n.set_gettext(_i18n._gettext.gettext)
+    _i18n._translator.set(None)
+    _i18n.configure_i18n()
 
 
 def test_new_required_test():
@@ -128,8 +132,8 @@ def test_configure_i18n_passes_parameters(monkeypatch, tmp_path):
 
     def fake_translation(
         domain: str,
-        localedir: str | None = None,
-        languages: list[str] | None = None,
+        localedir: typing.Optional[str] = None,
+        languages: typing.Optional[list[str]] = None,
         fallback: bool = True,
     ) -> object:
         call.update(
@@ -241,6 +245,16 @@ def test_configure_i18n_with_real_mo_file():
     _i18n.configure_i18n()
 
 
+def test_de_mo_file_contains_real_translations():
+    mo_path = I18N_LOCALE_DIR / "de" / "LC_MESSAGES" / "voluptuous.mo"
+
+    with mo_path.open("rb") as mo_file:
+        translation = _i18n._gettext.GNUTranslations(mo_file)
+
+    assert translation.gettext("required key not provided") == I18N_REQUIRED_DE
+    assert translation.gettext("value was not true") == "wert war nicht wahr"
+
+
 def test_fresh_context_and_thread_use_default_translator_after_set_gettext():
     _i18n.set_gettext(lambda message: f"localized:{message}")
     assert _i18n.gettext("value") == "localized:value"
@@ -277,13 +291,48 @@ def test_fresh_context_after_configure_i18n_uses_updated_default():
     def _collect_fresh_thread_value():
         fresh_thread_result["value"] = _i18n.gettext("required key not provided")
 
-    fresh_thread = threading.Thread(
-        target=_collect_fresh_thread_value,
-        context=contextvars.Context(),
-    )
+    fresh_context = contextvars.Context()
+
+    def _collect_in_fresh_context():
+        fresh_context.run(_collect_fresh_thread_value)
+
+    fresh_thread = threading.Thread(target=_collect_in_fresh_context)
     fresh_thread.start()
     fresh_thread.join()
     assert fresh_thread_result["value"] == translated("required key not provided")
+
+
+def test_configure_i18n_preserves_context_override_and_updates_default():
+    with _i18n.gettext_scope(lambda message: f"scoped:{message}"):
+        translated = _i18n.configure_i18n(
+            localedir=str(I18N_LOCALE_DIR),
+            languages=("de",),
+            domain="voluptuous",
+        )
+
+        assert _i18n.gettext("required key not provided") == (
+            "scoped:required key not provided"
+        )
+        assert contextvars.Context().run(
+            _i18n.gettext, "required key not provided"
+        ) == translated("required key not provided")
+
+        fresh_thread_result: dict[str, str] = {}
+        fresh_thread_context = contextvars.Context()
+
+        def _collect_fresh_thread_value():
+            fresh_thread_result["value"] = fresh_thread_context.run(
+                _i18n.gettext, "required key not provided"
+            )
+
+        fresh_thread = threading.Thread(target=_collect_fresh_thread_value)
+        fresh_thread.start()
+        fresh_thread.join()
+        assert fresh_thread_result["value"] == translated("required key not provided")
+
+    assert _i18n.gettext("required key not provided") == translated(
+        "required key not provided"
+    )
 
 
 def test_schema_created_before_locale_switch_still_translates_messages():
@@ -300,6 +349,32 @@ def test_schema_created_before_locale_switch_still_translates_messages():
     assert I18N_REQUIRED_DE in str(ctx.value)
 
 
+def test_mapping_error_type_uses_runtime_localizer():
+    schema = Schema({"name": int})
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({"name": "not-an-int"})
+
+    assert (
+        str(ctx.value)
+        == "localized:expected int for localized:dictionary value @ data['name']"
+    )
+
+
+def test_object_error_type_uses_runtime_localizer():
+    schema = Schema(Object({"value": int}, cls=MyValueClass))
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(MyValueClass(value="not-an-int"))
+
+    assert (
+        str(ctx.value)
+        == "localized:expected int for localized:object value @ data['value']"
+    )
+
+
 def test_invalid_str_path_fragment_is_not_translated():
     _i18n.set_gettext(lambda message: f"localized:{message}")
 
@@ -310,11 +385,12 @@ def test_invalid_str_path_fragment_is_not_translated():
     assert " @ data['name']" in str(ctx.value)
 
 
-def test_locale_files_included_in_sdist_and_wheel(tmp_path):
+def test_locale_fixture_does_not_ship_as_package_data(tmp_path):
     dist_dir = tmp_path / "dist"
     dist_dir.mkdir()
-    project_dir = Path(__file__).resolve().parent.parent
-    expected_path = "voluptuous/locale/de/LC_MESSAGES/voluptuous.mo"
+    project_dir = Path(__file__).resolve().parents[2]
+    production_path = "voluptuous/locale/de/LC_MESSAGES/voluptuous.mo"
+    fixture_path = "voluptuous/tests/fixtures/locale/de/LC_MESSAGES/voluptuous.mo"
 
     sdist = subprocess.run(
         [sys.executable, "setup.py", "sdist", "--dist-dir", str(dist_dir)],
@@ -340,10 +416,14 @@ def test_locale_files_included_in_sdist_and_wheel(tmp_path):
     assert wheel_files, f"no wheel found in {dist_dir}"
 
     with tarfile.open(sdist_files[0], "r:gz") as archive:
-        assert expected_path in archive.getnames()
+        archive_names = archive.getnames()
+        assert production_path not in archive_names
+        assert any(name.endswith(fixture_path) for name in archive_names)
 
     with zipfile.ZipFile(wheel_files[0]) as archive:
-        assert expected_path in archive.namelist()
+        archive_names = archive.namelist()
+        assert production_path not in archive_names
+        assert fixture_path not in archive_names
 
 
 def test_exact_sequence():

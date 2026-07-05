@@ -24,7 +24,7 @@ setup(
     packages=['voluptuous'],
     include_package_data=True,
     package_data={
-        'voluptuous': ['py.typed', 'locale/*/LC_MESSAGES/*.mo'],
+        'voluptuous': ['py.typed'],
     },
     author='Alec Thomas',
     author_email='alec@swapoff.org',
