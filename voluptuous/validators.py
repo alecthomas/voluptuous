@@ -1252,7 +1252,9 @@ class SomeOf(_WithSubValidators):
         **kwargs,
     ) -> None:
         assert min_valid is not None or max_valid is not None, (
-            'when using "%s" you should specify at least one of min_valid and max_valid'
+            gettext(
+                'when using "%s" you should specify at least one of min_valid and max_valid'
+            )
             % (type(self).__name__,)
         )
         self.min_valid = min_valid or 0
