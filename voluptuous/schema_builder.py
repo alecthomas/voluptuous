@@ -11,8 +11,8 @@ from contextlib import contextmanager
 from functools import cache, wraps
 
 from voluptuous import error as er
-from voluptuous.error import Error
 from voluptuous._i18n import gettext
+from voluptuous.error import Error
 
 # options for extra keys
 PREVENT_EXTRA = 0  # any extra key not in schema will raise an error

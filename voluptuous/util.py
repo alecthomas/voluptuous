@@ -3,10 +3,10 @@
 import typing
 
 from voluptuous import validators  # noqa: F401
+from voluptuous._i18n import gettext
 from voluptuous.error import Invalid, LiteralInvalid, TypeInvalid  # noqa: F401
 from voluptuous.schema_builder import DefaultFactory  # noqa: F401
 from voluptuous.schema_builder import Schema, default_factory, raises  # noqa: F401
-from voluptuous._i18n import gettext
 
 # fmt: on
 
