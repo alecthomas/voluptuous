@@ -412,12 +412,9 @@ def test_mapping_error_type_and_format_use_runtime_localizer():
     with pytest.raises(MultipleInvalid) as ctx:
         schema({"name": "not-an-int"})
 
-    assert (
-        str(ctx.value)
-        == (
-            "localized:localized:expected int for localized:dictionary value"
-            " @ data['name']"
-        )
+    assert str(ctx.value) == (
+        "localized:localized:expected int for localized:dictionary value"
+        " @ data['name']"
     )
 
 
