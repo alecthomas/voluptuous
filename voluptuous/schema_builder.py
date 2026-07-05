@@ -1,4 +1,3 @@
-# fmt: off
 from __future__ import annotations
 
 import collections
@@ -14,8 +13,6 @@ from functools import cache, wraps
 from voluptuous import error as er
 from voluptuous.error import Error
 from voluptuous._i18n import gettext
-
-# fmt: on
 
 # options for extra keys
 PREVENT_EXTRA = 0  # any extra key not in schema will raise an error
