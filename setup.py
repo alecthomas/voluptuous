@@ -22,8 +22,9 @@ setup(
     license='BSD-3-Clause',
     platforms=['any'],
     packages=['voluptuous'],
+    include_package_data=True,
     package_data={
-        'voluptuous': ['py.typed'],
+        'voluptuous': ['py.typed', 'locale/*/LC_MESSAGES/*.mo'],
     },
     author='Alec Thomas',
     author_email='alec@swapoff.org',
