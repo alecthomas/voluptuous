@@ -54,7 +54,11 @@ def configure_i18n(
     languages: str | Iterable[str] | None = None,
     fallback: bool = True,
 ) -> TranslateFunc:
-    """Configure module-level translation backend for voluptuous messages."""
+    """Configure module-level translation backend for voluptuous messages.
+
+    This updates the module default translator and only updates current-context
+    state when no explicit context override is active.
+    """
 
     translation = _gettext.translation(
         domain,
@@ -62,9 +66,11 @@ def configure_i18n(
         languages=_normalize_languages(languages),
         fallback=fallback,
     )
-    _default_translator = translation.gettext
-    _translator.set(_default_translator)
-    return _default_translator
+    translation_func = translation.gettext
+    _default_translator = translation_func
+    if _translator.get() is None:
+        _translator.set(translation_func)
+    return translation_func
 
 
 def gettext(message: str) -> str:
