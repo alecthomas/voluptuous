@@ -3,6 +3,7 @@ import collections
 import contextvars
 import copy
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -15,7 +16,6 @@ from pathlib import Path
 import pytest
 
 import voluptuous._i18n as _i18n
-
 from voluptuous import (
     ALLOW_EXTRA,
     PREVENT_EXTRA,
@@ -38,11 +38,11 @@ from voluptuous import (
     FqdnUrl,
     In,
     Inclusive,
-    IsTrue,
     InInvalid,
     Invalid,
     IsDir,
     IsFile,
+    IsTrue,
     Length,
     Literal,
     LiteralInvalid,
@@ -83,13 +83,16 @@ I18N_LOCALE_DIR = Path(__file__).resolve().parent / "fixtures" / "locale"
 I18N_REQUIRED_DE = "erforderliches feld fehlt"
 
 
+def _reset_i18n_translator():
+    _i18n._translator.set(None)
+    _i18n._default_translator = _i18n._gettext.gettext
+
+
 @pytest.fixture(autouse=True)
 def _restore_i18n_translator():
-    _i18n._translator.set(None)
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
     yield
-    _i18n._translator.set(None)
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
 
 
 def test_new_required_test():
@@ -107,8 +110,9 @@ def test_i18n_set_gettext():
 
     try:
         assert _i18n.gettext("value") == "localized:value"
+        assert _i18n._("value") == "localized:value"
     finally:
-        _i18n.configure_i18n()
+        _reset_i18n_translator()
 
 
 def test_configure_i18n_fallback_keeps_identity(tmp_path):
@@ -119,7 +123,45 @@ def test_configure_i18n_fallback_keeps_identity(tmp_path):
     assert translated("message") == "message"
     assert _i18n.gettext("value") == "value"
 
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
+
+
+def test_configure_i18n_without_localedir_does_not_probe_package_locale(monkeypatch):
+    call = {}
+
+    class FakeTranslations:
+        def gettext(self, message: str) -> str:
+            return f"localized({message})"
+
+    def fake_translation(
+        domain: str,
+        localedir: typing.Optional[str] = None,
+        languages: typing.Optional[list[str]] = None,
+        fallback: bool = True,
+    ) -> object:
+        call.update(
+            domain=domain,
+            localedir=localedir,
+            languages=languages,
+            fallback=fallback,
+        )
+        return FakeTranslations()
+
+    if hasattr(_i18n, "_resolve_localedir"):
+        monkeypatch.setattr(
+            _i18n,
+            "_resolve_localedir",
+            lambda localedir=None: "/unexpected/package/locale",
+        )
+    monkeypatch.setattr(_i18n._gettext, "translation", fake_translation)
+
+    translated = _i18n.configure_i18n(languages="de")
+
+    assert translated("hello") == "localized(hello)"
+    assert call["domain"] == "voluptuous"
+    assert call["localedir"] is None
+    assert call["languages"] == ["de"]
+    assert call["fallback"] is True
 
 
 def test_configure_i18n_passes_parameters(monkeypatch, tmp_path):
@@ -159,11 +201,11 @@ def test_configure_i18n_passes_parameters(monkeypatch, tmp_path):
     assert call["languages"] == ["de"]
     assert call["fallback"] is False
 
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
 
 
 def test_gettext_scope_temporary_override():
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
 
     with _i18n.gettext_scope(lambda message: f"scoped:{message}"):
         assert _i18n.gettext("value") == "scoped:value"
@@ -172,7 +214,7 @@ def test_gettext_scope_temporary_override():
 
 
 def test_gettext_scope_supports_nesting():
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
 
     with _i18n.gettext_scope(lambda message: f"outer:{message}"):
         with _i18n.gettext_scope(lambda message: f"inner:{message}"):
@@ -190,7 +232,7 @@ def test_message_decorator_uses_runtime_localizer():
         ):
             Schema(IsTrue())(False)
     finally:
-        _i18n.configure_i18n()
+        _reset_i18n_translator()
 
 
 def test_message_decorator_respects_explicit_message_override():
@@ -203,7 +245,7 @@ def test_message_decorator_respects_explicit_message_override():
         ):
             Schema(IsTrue("explicit message"))(False)
     finally:
-        _i18n.configure_i18n()
+        _reset_i18n_translator()
 
 
 def test_schema_multiple_errors_use_runtime_localizer():
@@ -229,7 +271,7 @@ def test_schema_multiple_errors_use_runtime_localizer():
             "localized:expected an email address" in error for error in error_texts
         )
     finally:
-        _i18n.configure_i18n()
+        _reset_i18n_translator()
 
 
 def test_configure_i18n_with_real_mo_file():
@@ -241,7 +283,7 @@ def test_configure_i18n_with_real_mo_file():
     assert translated("required key not provided") == I18N_REQUIRED_DE
     assert translated("value was not true") == "wert war nicht wahr"
 
-    _i18n.configure_i18n()
+    _reset_i18n_translator()
 
 
 def test_de_mo_file_contains_real_translations():
@@ -280,7 +322,10 @@ def test_fresh_context_after_configure_i18n_uses_updated_default():
         domain="voluptuous",
     )
 
-    assert _i18n.gettext("required key not provided") == "localized:required key not provided"
+    assert (
+        _i18n.gettext("required key not provided")
+        == "localized:required key not provided"
+    )
     assert contextvars.Context().run(
         _i18n.gettext, "required key not provided"
     ) == translated("required key not provided")
@@ -388,41 +433,52 @@ def test_locale_fixture_does_not_ship_as_package_data(tmp_path):
     dist_dir = tmp_path / "dist"
     dist_dir.mkdir()
     project_dir = Path(__file__).resolve().parents[2]
+    generated_metadata = (
+        project_dir / "build",
+        project_dir / "voluptuous.egg-info",
+    )
     production_path = "voluptuous/locale/de/LC_MESSAGES/voluptuous.mo"
     fixture_path = "voluptuous/tests/fixtures/locale/de/LC_MESSAGES/voluptuous.mo"
 
-    sdist = subprocess.run(
-        [sys.executable, "setup.py", "sdist", "--dist-dir", str(dist_dir)],
-        cwd=str(project_dir),
-        capture_output=True,
-        text=True,
-    )
-    if sdist.returncode != 0:
-        pytest.skip(f"sdist command unavailable: {sdist.stderr}")
+    for path in generated_metadata:
+        shutil.rmtree(path, ignore_errors=True)
 
-    wheel = subprocess.run(
-        [sys.executable, "setup.py", "bdist_wheel", "--dist-dir", str(dist_dir)],
-        cwd=str(project_dir),
-        capture_output=True,
-        text=True,
-    )
-    if wheel.returncode != 0:
-        pytest.skip(f"bdist_wheel command unavailable: {wheel.stderr}")
+    try:
+        sdist = subprocess.run(
+            [sys.executable, "setup.py", "sdist", "--dist-dir", str(dist_dir)],
+            cwd=str(project_dir),
+            capture_output=True,
+            text=True,
+        )
+        if sdist.returncode != 0:
+            pytest.skip(f"sdist command unavailable: {sdist.stderr}")
 
-    sdist_files = sorted(dist_dir.glob("voluptuous-*.tar.gz"))
-    wheel_files = sorted(dist_dir.glob("voluptuous-*.whl"))
-    assert sdist_files, f"no sdist found in {dist_dir}"
-    assert wheel_files, f"no wheel found in {dist_dir}"
+        wheel = subprocess.run(
+            [sys.executable, "setup.py", "bdist_wheel", "--dist-dir", str(dist_dir)],
+            cwd=str(project_dir),
+            capture_output=True,
+            text=True,
+        )
+        if wheel.returncode != 0:
+            pytest.skip(f"bdist_wheel command unavailable: {wheel.stderr}")
 
-    with tarfile.open(sdist_files[0], "r:gz") as archive:
-        archive_names = archive.getnames()
-        assert production_path not in archive_names
-        assert any(name.endswith(fixture_path) for name in archive_names)
+        sdist_files = sorted(dist_dir.glob("voluptuous-*.tar.gz"))
+        wheel_files = sorted(dist_dir.glob("voluptuous-*.whl"))
+        assert sdist_files, f"no sdist found in {dist_dir}"
+        assert wheel_files, f"no wheel found in {dist_dir}"
 
-    with zipfile.ZipFile(wheel_files[0]) as archive:
-        archive_names = archive.namelist()
-        assert production_path not in archive_names
-        assert fixture_path not in archive_names
+        with tarfile.open(sdist_files[0], "r:gz") as archive:
+            archive_names = archive.getnames()
+            assert production_path not in archive_names
+            assert any(name.endswith(fixture_path) for name in archive_names)
+
+        with zipfile.ZipFile(wheel_files[0]) as archive:
+            archive_names = archive.namelist()
+            assert production_path not in archive_names
+            assert fixture_path not in archive_names
+    finally:
+        for path in generated_metadata:
+            shutil.rmtree(path, ignore_errors=True)
 
 
 def test_exact_sequence():

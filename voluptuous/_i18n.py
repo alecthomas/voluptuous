@@ -1,26 +1,14 @@
 # fmt: off
 from __future__ import annotations
 
+import gettext as _gettext
+import typing
 from collections.abc import Callable, Iterable
 from contextlib import contextmanager
 from contextvars import ContextVar
-from pathlib import Path
-
-import gettext as _gettext
-import typing
 
 # Public interface for translating user-visible strings.
 TranslateFunc = Callable[[str], str]
-
-
-def _resolve_localedir(localedir: typing.Optional[str] = None) -> typing.Optional[str]:
-    if localedir is not None:
-        return localedir
-
-    package_locale_dir = Path(__file__).resolve().parent / "locale"
-    if package_locale_dir.is_dir():
-        return str(package_locale_dir)
-    return None
 
 
 def _normalize_languages(
@@ -66,7 +54,7 @@ def configure_i18n(
     global _default_translator
     translation = _gettext.translation(
         domain,
-        localedir=_resolve_localedir(localedir),
+        localedir=localedir,
         languages=_normalize_languages(languages),
         fallback=fallback,
     )
@@ -83,6 +71,11 @@ def gettext(message: str) -> str:
         translator = _default_translator
     return translator(message)
 
+
+# Backward-compatible alias for existing callers.
+_ = gettext
+
+
 @contextmanager
 def gettext_scope(translation_func: TranslateFunc):
     """Temporarily activate a translator for the current execution context."""
@@ -92,7 +85,3 @@ def gettext_scope(translation_func: TranslateFunc):
         yield
     finally:
         _translator.reset(token)
-
-
-# Initialize the default translator using the default locale chain.
-configure_i18n()
