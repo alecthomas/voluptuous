@@ -38,7 +38,7 @@ class Undefined(object):
 UNDEFINED = Undefined()
 
 
-def Self(_) -> None:
+def Self() -> None:
     raise er.SchemaError(gettext('"Self" should never be called'))
 
 
