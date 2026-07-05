@@ -111,6 +111,7 @@ def test_i18n_set_gettext():
     try:
         assert _i18n.gettext("value") == "localized:value"
         assert _i18n._("value") == "localized:value"
+        assert _i18n._translator.get() is None
     finally:
         _reset_i18n_translator()
 
@@ -313,7 +314,7 @@ def test_fresh_context_and_thread_use_default_translator_after_set_gettext():
     assert thread_result["value"] == "localized:value"
 
 
-def test_fresh_context_after_configure_i18n_uses_updated_default():
+def test_configure_i18n_replaces_set_gettext_default():
     _i18n.set_gettext(lambda message: f"localized:{message}")
 
     translated = _i18n.configure_i18n(
@@ -322,9 +323,8 @@ def test_fresh_context_after_configure_i18n_uses_updated_default():
         domain="voluptuous",
     )
 
-    assert (
-        _i18n.gettext("required key not provided")
-        == "localized:required key not provided"
+    assert _i18n.gettext("required key not provided") == translated(
+        "required key not provided"
     )
     assert contextvars.Context().run(
         _i18n.gettext, "required key not provided"

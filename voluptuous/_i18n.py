@@ -29,12 +29,11 @@ _translator: ContextVar[typing.Optional[TranslateFunc]] = ContextVar(
 def set_gettext(translation_func: TranslateFunc) -> TranslateFunc:
     """Inject a custom gettext-compatible callable used by voluptuous messages.
 
-    This updates the current context translator and the module default.
+    This updates the module default translator.
     """
 
     global _default_translator
     _default_translator = translation_func
-    _translator.set(translation_func)
     return translation_func
 
 
@@ -48,7 +47,7 @@ def configure_i18n(
     """Configure module-level translation backend for voluptuous messages.
 
     This updates the module default translator. Explicit context overrides set
-    by set_gettext() or gettext_scope() remain active for the current context.
+    by gettext_scope() remain active for the current context.
     """
 
     global _default_translator

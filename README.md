@@ -82,8 +82,8 @@ different translator without changing other contexts:
 "scoped: required key not provided @ data['name']"
 ```
 
-Use `set_gettext()` when you want to replace both the current context translator
-and the global default with a custom callable.
+Use `set_gettext()` when you want to replace the global default with a custom
+callable. Use `gettext_scope()` for temporary context-local overrides.
 
 When no translation is configured, messages stay in English.
 
