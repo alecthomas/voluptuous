@@ -371,7 +371,9 @@ class Schema(object):
                             continue
                         for err in exception_errors:
                             if len(err.path) <= len(key_path):
-                                err.error_type = invalid_msg
+                                err.error_type = (
+                                    _(invalid_msg) if invalid_msg is not None else None
+                                )
                             errors.append(err)
                         # If there is a validation error for a required
                         # key, this means that the key was provided.
@@ -432,7 +434,7 @@ class Schema(object):
             ...   validate(Structure(one='three'))
 
         """
-        base_validate = self._compile_mapping(schema, invalid_msg=_('object value'))
+        base_validate = self._compile_mapping(schema, invalid_msg='object value')
 
         def validate_object(path, data):
             if schema.cls is not UNDEFINED and not isinstance(data, schema.cls):
@@ -520,7 +522,7 @@ class Schema(object):
          "expected str for dictionary value @ data['adict']['strfield']"]
 
         """
-        base_validate = self._compile_mapping(schema, invalid_msg=_('dictionary value'))
+        base_validate = self._compile_mapping(schema, invalid_msg='dictionary value')
 
         groups_of_exclusion = {}
         groups_of_inclusion = {}

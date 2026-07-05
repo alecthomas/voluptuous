@@ -45,18 +45,38 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 Voluptuous validates all user-facing error messages through `voluptuous._i18n`.
 
-Use `configure_i18n()` to load a gettext domain (for packaged locale files) and set
-the module-wide default translator. Use `set_gettext()` for custom translator tests
-or temporary integrations. `configure_i18n()` updates the default translator and
-preserves active context-local overrides.
-
-Use `gettext_scope()` to switch translator behavior for a specific execution context:
+Use `configure_i18n()` to load gettext translations and set the module-wide
+default translator:
 
 ```pycon
->>> from voluptuous._i18n import set_gettext, gettext_scope, configure_i18n
->>> set_gettext(lambda message: f"localized: {message}")
->>> gettext_scope(lambda message: f"scoped: {message}")
+>>> from voluptuous._i18n import configure_i18n
+>>> configure_i18n(
+...     domain="voluptuous",
+...     localedir="/path/to/locale",
+...     languages=("de",),
+...     fallback=True,
+... )
 ```
+
+`domain` is the gettext domain to load, such as `voluptuous`.
+`localedir` points at a locale directory containing paths like
+`de/LC_MESSAGES/voluptuous.mo`. `languages` selects one or more locale names.
+`fallback=True` keeps untranslated messages in English instead of raising when
+catalog files are missing.
+
+`configure_i18n()` updates the global default translator. Active context-local
+overrides are preserved, so a request, task, or test can temporarily use a
+different translator without changing other contexts:
+
+```pycon
+>>> from voluptuous._i18n import gettext, gettext_scope
+>>> with gettext_scope(lambda message: f"scoped: {message}"):
+...     gettext("required key not provided")
+'scoped: required key not provided'
+```
+
+Use `set_gettext()` when you want to replace both the current context translator
+and the global default with a custom callable.
 
 When no translation is configured, messages stay in English.
 
