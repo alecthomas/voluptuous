@@ -451,7 +451,11 @@ def test_locale_fixture_does_not_ship_as_package_data(tmp_path):
             text=True,
         )
         if sdist.returncode != 0:
-            pytest.skip(f"sdist command unavailable: {sdist.stderr}")
+            pytest.fail(
+                f"sdist command failed with exit code {sdist.returncode}\n"
+                f"stdout:\n{sdist.stdout}\n"
+                f"stderr:\n{sdist.stderr}"
+            )
 
         wheel = subprocess.run(
             [sys.executable, "setup.py", "bdist_wheel", "--dist-dir", str(dist_dir)],
@@ -460,7 +464,11 @@ def test_locale_fixture_does_not_ship_as_package_data(tmp_path):
             text=True,
         )
         if wheel.returncode != 0:
-            pytest.skip(f"bdist_wheel command unavailable: {wheel.stderr}")
+            pytest.fail(
+                f"bdist_wheel command failed with exit code {wheel.returncode}\n"
+                f"stdout:\n{wheel.stdout}\n"
+                f"stderr:\n{wheel.stderr}"
+            )
 
         sdist_files = sorted(dist_dir.glob("voluptuous-*.tar.gz"))
         wheel_files = sorted(dist_dir.glob("voluptuous-*.whl"))
