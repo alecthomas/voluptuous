@@ -6,7 +6,7 @@ from voluptuous import validators  # noqa: F401
 from voluptuous.error import Invalid, LiteralInvalid, TypeInvalid  # noqa: F401
 from voluptuous.schema_builder import DefaultFactory  # noqa: F401
 from voluptuous.schema_builder import Schema, default_factory, raises  # noqa: F401
-from voluptuous._i18n import _
+from voluptuous._i18n import gettext
 
 # fmt: on
 
@@ -126,7 +126,9 @@ class Set(object):
         try:
             set_v = set(v)
         except Exception as e:
-            raise TypeInvalid(self.msg or _('cannot be presented as set: {0}').format(e))
+            raise TypeInvalid(
+                self.msg or gettext('cannot be presented as set: {0}').format(e)
+            )
         return set_v
 
     def __repr__(self):
@@ -139,7 +141,9 @@ class Literal(object):
 
     def __call__(self, value, msg: typing.Optional[str] = None):
         if self.lit != value:
-            raise LiteralInvalid(msg or _('%s not match for %s') % (value, self.lit))
+            raise LiteralInvalid(
+                msg or gettext('%s not match for %s') % (value, self.lit)
+            )
         else:
             return self.lit
 

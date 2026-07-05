@@ -83,11 +83,6 @@ def gettext(message: str) -> str:
         translator = _default_translator
     return translator(message)
 
-
-# Backward-compatible alias used by library internals.
-_ = gettext
-
-
 @contextmanager
 def gettext_scope(translation_func: TranslateFunc):
     """Temporarily activate a translator for the current execution context."""

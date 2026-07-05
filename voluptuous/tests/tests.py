@@ -107,7 +107,6 @@ def test_i18n_set_gettext():
 
     try:
         assert _i18n.gettext("value") == "localized:value"
-        assert _i18n._("value") == "localized:value"
     finally:
         _i18n.configure_i18n()
 
