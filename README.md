@@ -43,7 +43,8 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 ## Internationalization
 
-Voluptuous routes built-in validation message templates through its i18n hooks.
+Voluptuous routes built-in validation message templates and the
+`Invalid.__str__` message/error-type format through its i18n hooks.
 
 Voluptuous does not ship production translation catalogs. Use
 `configure_i18n()` to load your own gettext translations and set the
@@ -87,8 +88,8 @@ callable. Use `gettext_scope()` for temporary context-local overrides.
 
 When no translation is configured, messages stay in English.
 
-`Invalid.__str__` always renders the path fragment as
-`" @ data[...]"` (not translated) so tooling that parses error paths stays stable.
+`Invalid.__str__` always renders the path fragment as `" @ data[...]"` (not
+translated) so tooling that parses error paths stays stable.
 
 ## Contribution to Documentation
 

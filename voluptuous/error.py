@@ -1,6 +1,8 @@
 # fmt: off
 import typing
 
+from voluptuous._i18n import gettext
+
 # fmt: on
 
 
@@ -50,7 +52,10 @@ class Invalid(Error):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = Exception.__str__(self)
         if self.error_type:
-            output += ' for ' + self.error_type
+            output = gettext('%(message)s for %(error_type)s') % {
+                'message': output,
+                'error_type': self.error_type,
+            }
         return output + path
 
     def __repr__(self) -> str:
