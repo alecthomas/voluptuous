@@ -43,7 +43,7 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 ## Internationalization
 
-Voluptuous validates all user-facing error messages through `voluptuous._i18n`.
+Voluptuous validates all user-facing error messages through its i18n hooks.
 
 Voluptuous does not ship production translation catalogs. Use
 `configure_i18n()` to load your own gettext translations and set the
@@ -71,10 +71,15 @@ overrides are preserved, so a request, task, or test can temporarily use a
 different translator without changing other contexts:
 
 ```pycon
->>> from voluptuous._i18n import gettext, gettext_scope
+>>> from voluptuous import MultipleInvalid, Required, Schema, gettext_scope
+>>> schema = Schema({Required("name"): str})
 >>> with gettext_scope(lambda message: f"scoped: {message}"):
-...     gettext("required key not provided")
-'scoped: required key not provided'
+...     try:
+...         schema({})
+...     except MultipleInvalid as error:
+...         result = str(error)
+>>> result
+"scoped: required key not provided @ data['name']"
 ```
 
 Use `set_gettext()` when you want to replace both the current context translator
