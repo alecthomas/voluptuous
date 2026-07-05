@@ -43,7 +43,7 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 ## Internationalization
 
-Voluptuous validates all user-facing error messages through its i18n hooks.
+Voluptuous routes built-in validation message templates through its i18n hooks.
 
 Voluptuous does not ship production translation catalogs. Use
 `configure_i18n()` to load your own gettext translations and set the

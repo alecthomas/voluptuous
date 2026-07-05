@@ -1,4 +1,3 @@
-# fmt: off
 from __future__ import annotations
 
 import gettext as _gettext
@@ -70,10 +69,6 @@ def gettext(message: str) -> str:
     if translator is None:
         translator = _default_translator
     return translator(message)
-
-
-# Backward-compatible alias for existing callers.
-_ = gettext
 
 
 @contextmanager

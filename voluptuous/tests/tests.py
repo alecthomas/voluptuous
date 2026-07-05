@@ -110,7 +110,6 @@ def test_i18n_set_gettext():
 
     try:
         assert _i18n.gettext("value") == "localized:value"
-        assert _i18n._("value") == "localized:value"
         assert _i18n._translator.get() is None
     finally:
         _reset_i18n_translator()
@@ -504,12 +503,12 @@ def test_locale_fixture_does_not_ship_as_package_data(tmp_path):
 
         with tarfile.open(sdist_files[0], "r:gz") as archive:
             archive_names = archive.getnames()
-            assert production_path not in archive_names
+            assert not any(name.endswith(production_path) for name in archive_names)
             assert any(name.endswith(fixture_path) for name in archive_names)
 
         with zipfile.ZipFile(wheel_files[0]) as archive:
             archive_names = archive.namelist()
-            assert production_path not in archive_names
+            assert not any(name.endswith(production_path) for name in archive_names)
             assert fixture_path not in archive_names
     finally:
         for path in generated_metadata:
