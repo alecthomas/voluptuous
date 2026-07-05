@@ -6,6 +6,8 @@ from enum import Enum
 
 import pytest
 
+import voluptuous._i18n as _i18n
+
 from voluptuous import (
     ALLOW_EXTRA,
     PREVENT_EXTRA,
@@ -28,6 +30,7 @@ from voluptuous import (
     FqdnUrl,
     In,
     Inclusive,
+    IsTrue,
     InInvalid,
     Invalid,
     IsDir,
@@ -77,6 +80,137 @@ def test_new_required_test():
         required=True,
     )
     assert schema.required
+
+
+def test_i18n_set_gettext():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        assert _i18n.gettext("value") == "localized:value"
+        assert _i18n._("value") == "localized:value"
+    finally:
+        _i18n.configure_i18n()
+
+
+def test_configure_i18n_fallback_keeps_identity(tmp_path):
+    translated = _i18n.configure_i18n(
+        localedir=str(tmp_path),
+        languages=("xx",),
+    )
+    assert translated("message") == "message"
+    assert _i18n.gettext("value") == "value"
+
+    _i18n.configure_i18n()
+
+
+def test_configure_i18n_passes_parameters(monkeypatch, tmp_path):
+    call = {}
+
+    class FakeTranslations:
+        def gettext(self, message: str) -> str:
+            return f"localized({message})"
+
+    def fake_translation(
+        domain: str,
+        localedir: str | None = None,
+        languages: list[str] | None = None,
+        fallback: bool = True,
+    ) -> object:
+        call.update(
+            domain=domain,
+            localedir=localedir,
+            languages=languages,
+            fallback=fallback,
+        )
+        return FakeTranslations()
+
+    monkeypatch.setattr(_i18n._gettext, "translation", fake_translation)
+
+    translated = _i18n.configure_i18n(
+        domain="voluptuous-test",
+        localedir=str(tmp_path),
+        languages=("de",),
+        fallback=False,
+    )
+
+    assert translated("hello") == "localized(hello)"
+    assert _i18n.gettext("value") == "localized(value)"
+    assert call["domain"] == "voluptuous-test"
+    assert call["localedir"] == str(tmp_path)
+    assert call["languages"] == ["de"]
+    assert call["fallback"] is False
+
+    _i18n.configure_i18n()
+
+
+def test_gettext_scope_temporary_override():
+    _i18n.configure_i18n()
+
+    with _i18n.gettext_scope(lambda message: f"scoped:{message}"):
+        assert _i18n.gettext("value") == "scoped:value"
+
+    assert _i18n.gettext("value") == "value"
+
+
+def test_gettext_scope_supports_nesting():
+    _i18n.configure_i18n()
+
+    with _i18n.gettext_scope(lambda message: f"outer:{message}"):
+        with _i18n.gettext_scope(lambda message: f"inner:{message}"):
+            assert _i18n.gettext("value") == "inner:value"
+        assert _i18n.gettext("value") == "outer:value"
+
+
+def test_message_decorator_uses_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        with pytest.raises(
+            MultipleInvalid,
+            match="localized:value was not true",
+        ):
+            Schema(IsTrue())(False)
+    finally:
+        _i18n.configure_i18n()
+
+
+def test_message_decorator_respects_explicit_message_override():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        with pytest.raises(
+            MultipleInvalid,
+            match="explicit message",
+        ):
+            Schema(IsTrue("explicit message"))(False)
+    finally:
+        _i18n.configure_i18n()
+
+
+def test_schema_multiple_errors_use_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        schema = Schema(
+            {
+                "a": IsTrue(),
+                "b": Url(),
+                "c": Email(),
+            }
+        )
+
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({"a": False, "b": "not-an-url", "c": "bad"})
+
+        error_texts = [str(error) for error in ctx.value.errors]
+        assert len(error_texts) == 3
+        assert any("localized:value was not true" in error for error in error_texts)
+        assert any("localized:expected a URL" in error for error in error_texts)
+        assert any(
+            "localized:expected an email address" in error for error in error_texts
+        )
+    finally:
+        _i18n.configure_i18n()
 
 
 def test_exact_sequence():

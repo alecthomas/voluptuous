@@ -86,6 +86,7 @@ from voluptuous.dataclasses_support import (
 from voluptuous.schema_builder import *
 from voluptuous.util import *
 from voluptuous.validators import *
+from voluptuous._i18n import configure_i18n, gettext_scope, set_gettext
 
 from voluptuous.error import *  # isort: skip
 
