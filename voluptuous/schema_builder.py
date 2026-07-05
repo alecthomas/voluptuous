@@ -5,7 +5,6 @@ import collections
 import inspect
 import itertools
 import re
-import sys
 import typing
 from collections.abc import Generator
 from contextlib import contextmanager

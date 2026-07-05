@@ -53,7 +53,6 @@ except ImportError:
     Enum = None
 
 
-
 # Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py
 # fmt: off
 USER_REGEX = re.compile(

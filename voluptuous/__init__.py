@@ -81,11 +81,7 @@ from voluptuous.util import *
 from voluptuous.validators import *
 
 # Dataclasses support
-from voluptuous.dataclasses_support import (
-    DataclassSchema,
-    create_dataclass_schema,
-    is_dataclass,
-)
+from voluptuous.dataclasses_support import DataclassSchema, create_dataclass_schema, is_dataclass
 
 from voluptuous.error import *  # isort: skip
 
