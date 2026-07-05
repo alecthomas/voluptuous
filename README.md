@@ -45,24 +45,26 @@ The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
 Voluptuous validates all user-facing error messages through `voluptuous._i18n`.
 
-Use `configure_i18n()` to load gettext translations and set the module-wide
-default translator:
+Voluptuous does not ship production translation catalogs. Use
+`configure_i18n()` to load your own gettext translations and set the
+module-wide default translator:
 
 ```pycon
->>> from voluptuous._i18n import configure_i18n
+>>> from voluptuous import configure_i18n
 >>> configure_i18n(
-...     domain="voluptuous",
-...     localedir="/path/to/locale",
+...     domain="myapp",
+...     localedir="/path/to/myapp/locale",
 ...     languages=("de",),
 ...     fallback=True,
 ... )
 ```
 
-`domain` is the gettext domain to load, such as `voluptuous`.
+`domain` is the gettext domain to load, such as `myapp` or `voluptuous`.
 `localedir` points at a locale directory containing paths like
-`de/LC_MESSAGES/voluptuous.mo`. `languages` selects one or more locale names.
-`fallback=True` keeps untranslated messages in English instead of raising when
-catalog files are missing.
+`de/LC_MESSAGES/myapp.mo` for `domain="myapp"`, or
+`de/LC_MESSAGES/voluptuous.mo` for `domain="voluptuous"`. `languages` selects
+one or more locale names. `fallback=True` keeps untranslated messages in
+English instead of raising when catalog files are missing.
 
 `configure_i18n()` updates the global default translator. Active context-local
 overrides are preserved, so a request, task, or test can temporarily use a
