@@ -407,7 +407,7 @@ def test_schema_created_before_locale_switch_still_translates_messages():
     assert I18N_REQUIRED_DE in str(ctx.value)
 
 
-def test_mapping_error_type_uses_runtime_localizer():
+def test_mapping_error_type_and_format_use_runtime_localizer():
     schema = Schema({"name": int})
     _i18n.set_gettext(lambda message: f"localized:{message}")
 
@@ -416,7 +416,10 @@ def test_mapping_error_type_uses_runtime_localizer():
 
     assert (
         str(ctx.value)
-        == "localized:expected int for localized:dictionary value @ data['name']"
+        == (
+            "localized:localized:expected int for localized:dictionary value"
+            " @ data['name']"
+        )
     )
 
 
@@ -430,7 +433,7 @@ def test_default_mapping_error_type_uses_runtime_localizer():
 
     assert (
         str(ctx.value)
-        == "runtime:expected int for runtime:mapping value @ data['name']"
+        == "runtime:runtime:expected int for runtime:mapping value @ data['name']"
     )
 
 
@@ -443,8 +446,33 @@ def test_object_error_type_uses_runtime_localizer():
 
     assert (
         str(ctx.value)
-        == "localized:expected int for localized:object value @ data['value']"
+        == "localized:localized:expected int for localized:object value @ data['value']"
     )
+
+
+def test_invalid_str_error_type_format_defaults_to_existing_english():
+    schema = Schema({"age": int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({"age": "old"})
+
+    assert str(ctx.value) == "expected int for dictionary value @ data['age']"
+
+
+def test_invalid_str_error_type_format_is_translatable_and_reorderable():
+    schema = Schema({"age": int})
+    translations = {
+        "expected %s": "%s expected",
+        "dictionary value": "dict value",
+        "%(message)s for %(error_type)s": "%(error_type)s: %(message)s",
+    }
+
+    with _i18n.gettext_scope(lambda message: translations.get(message, message)):
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({"age": "old"})
+        rendered = str(ctx.value)
+
+    assert rendered == "dict value: int expected @ data['age']"
 
 
 def test_invalid_str_path_fragment_is_not_translated():
