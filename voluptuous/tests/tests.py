@@ -1,8 +1,15 @@
 # fmt: off
 import collections
+import contextvars
 import copy
 import os
+import subprocess
+import sys
+import tarfile
+import threading
+import zipfile
 from enum import Enum
+from pathlib import Path
 
 import pytest
 
@@ -70,6 +77,15 @@ from voluptuous.humanize import humanize_error
 from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 # fmt: on
+
+I18N_LOCALE_DIR = Path(__file__).resolve().parent.parent / "locale"
+I18N_REQUIRED_DE = "erforderliches feld fehlt"
+
+
+@pytest.fixture(autouse=True)
+def _restore_i18n_translator():
+    yield
+    _i18n.set_gettext(_i18n._gettext.gettext)
 
 
 def test_new_required_test():
@@ -211,6 +227,123 @@ def test_schema_multiple_errors_use_runtime_localizer():
         )
     finally:
         _i18n.configure_i18n()
+
+
+def test_configure_i18n_with_real_mo_file():
+    translated = _i18n.configure_i18n(
+        localedir=str(I18N_LOCALE_DIR),
+        languages=("de",),
+        domain="voluptuous",
+    )
+    assert translated("required key not provided") == I18N_REQUIRED_DE
+    assert translated("value was not true") == "wert war nicht wahr"
+
+    _i18n.configure_i18n()
+
+
+def test_fresh_context_and_thread_use_default_translator_after_set_gettext():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+    assert _i18n.gettext("value") == "localized:value"
+
+    assert contextvars.Context().run(_i18n.gettext, "value") == "localized:value"
+
+    thread_result: dict[str, str] = {}
+
+    def _collect_thread_value():
+        thread_result["value"] = _i18n.gettext("value")
+
+    thread = threading.Thread(target=_collect_thread_value)
+    thread.start()
+    thread.join()
+    assert thread_result["value"] == "localized:value"
+
+
+def test_fresh_context_after_configure_i18n_uses_updated_default():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    translated = _i18n.configure_i18n(
+        localedir=str(I18N_LOCALE_DIR),
+        languages=("de",),
+        domain="voluptuous",
+    )
+
+    assert _i18n.gettext("required key not provided") == "localized:required key not provided"
+    assert contextvars.Context().run(
+        _i18n.gettext, "required key not provided"
+    ) == translated("required key not provided")
+
+    fresh_thread_result: dict[str, str] = {}
+
+    def _collect_fresh_thread_value():
+        fresh_thread_result["value"] = _i18n.gettext("required key not provided")
+
+    fresh_thread = threading.Thread(
+        target=_collect_fresh_thread_value,
+        context=contextvars.Context(),
+    )
+    fresh_thread.start()
+    fresh_thread.join()
+    assert fresh_thread_result["value"] == translated("required key not provided")
+
+
+def test_schema_created_before_locale_switch_still_translates_messages():
+    schema = Schema({Required("name"): str})
+    _i18n.configure_i18n(
+        localedir=str(I18N_LOCALE_DIR),
+        languages=("de",),
+        domain="voluptuous",
+    )
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({})
+
+    assert I18N_REQUIRED_DE in str(ctx.value)
+
+
+def test_invalid_str_path_fragment_is_not_translated():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema({"name": int})({"name": "not-an-int"})
+
+    assert "localized:expected int" in str(ctx.value)
+    assert " @ data['name']" in str(ctx.value)
+
+
+def test_locale_files_included_in_sdist_and_wheel(tmp_path):
+    dist_dir = tmp_path / "dist"
+    dist_dir.mkdir()
+    project_dir = Path(__file__).resolve().parent.parent
+    expected_path = "voluptuous/locale/de/LC_MESSAGES/voluptuous.mo"
+
+    sdist = subprocess.run(
+        [sys.executable, "setup.py", "sdist", "--dist-dir", str(dist_dir)],
+        cwd=str(project_dir),
+        capture_output=True,
+        text=True,
+    )
+    if sdist.returncode != 0:
+        pytest.skip(f"sdist command unavailable: {sdist.stderr}")
+
+    wheel = subprocess.run(
+        [sys.executable, "setup.py", "bdist_wheel", "--dist-dir", str(dist_dir)],
+        cwd=str(project_dir),
+        capture_output=True,
+        text=True,
+    )
+    if wheel.returncode != 0:
+        pytest.skip(f"bdist_wheel command unavailable: {wheel.stderr}")
+
+    sdist_files = sorted(dist_dir.glob("voluptuous-*.tar.gz"))
+    wheel_files = sorted(dist_dir.glob("voluptuous-*.whl"))
+    assert sdist_files, f"no sdist found in {dist_dir}"
+    assert wheel_files, f"no wheel found in {dist_dir}"
+
+    with tarfile.open(sdist_files[0], "r:gz") as archive:
+        assert expected_path in archive.getnames()
+
+    with zipfile.ZipFile(wheel_files[0]) as archive:
+        assert expected_path in archive.namelist()
 
 
 def test_exact_sequence():

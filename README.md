@@ -41,6 +41,28 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
+## Internationalization
+
+Voluptuous validates all user-facing error messages through `voluptuous._i18n`.
+
+Use `configure_i18n()` to load a gettext domain (for packaged locale files) and set
+the module-wide default translator. Use `set_gettext()` for custom translator tests
+or temporary integrations. `configure_i18n()` updates the default translator and
+preserves active context-local overrides.
+
+Use `gettext_scope()` to switch translator behavior for a specific execution context:
+
+```pycon
+>>> from voluptuous._i18n import set_gettext, gettext_scope, configure_i18n
+>>> set_gettext(lambda message: f"localized: {message}")
+>>> gettext_scope(lambda message: f"scoped: {message}")
+```
+
+When no translation is configured, messages stay in English.
+
+`Invalid.__str__` always renders the path fragment as
+`" @ data[...]"` (not translated) so tooling that parses error paths stays stable.
+
 ## Contribution to Documentation
 
 Documentation is built using `Sphinx`. You can install it by
@@ -843,4 +865,3 @@ using voluptuous validators in `assert`s.
 
 I greatly prefer the light-weight style promoted by these libraries to
 the complexity of libraries like FormEncode.
-
