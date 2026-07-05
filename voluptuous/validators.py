@@ -9,6 +9,7 @@ import urllib.parse as urlparse
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
+from voluptuous._i18n import gettext
 from voluptuous.error import (
     AllInvalid,
     AnyInvalid,
@@ -39,7 +40,6 @@ from voluptuous.error import (
 
 # F401: flake8 complains about 'raises' not being used, but it is used in doctests
 from voluptuous.schema_builder import Schema, Schemable, message, raises  # noqa: F401
-from voluptuous._i18n import gettext
 
 if typing.TYPE_CHECKING:
     from _typeshed import SupportsAllComparisons
@@ -1251,12 +1251,9 @@ class SomeOf(_WithSubValidators):
         max_valid: typing.Optional[int] = None,
         **kwargs,
     ) -> None:
-        assert min_valid is not None or max_valid is not None, (
-            gettext(
-                'when using "%s" you should specify at least one of min_valid and max_valid'
-            )
-            % (type(self).__name__,)
-        )
+        assert min_valid is not None or max_valid is not None, gettext(
+            'when using "%s" you should specify at least one of min_valid and max_valid'
+        ) % (type(self).__name__,)
         self.min_valid = min_valid or 0
         self.max_valid = max_valid or len(validators)
         super(SomeOf, self).__init__(*validators, **kwargs)

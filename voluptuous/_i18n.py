@@ -20,6 +20,7 @@ def _normalize_languages(
         return [languages]
     return list(languages)
 
+
 _default_translator: TranslateFunc = _gettext.gettext
 _translator: ContextVar[typing.Optional[TranslateFunc]] = ContextVar(
     "voluptuous_gettext", default=None

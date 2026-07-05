@@ -2,9 +2,9 @@
 import typing
 
 from voluptuous import Invalid, MultipleInvalid
+from voluptuous._i18n import gettext
 from voluptuous.error import Error
 from voluptuous.schema_builder import Schema
-from voluptuous._i18n import gettext
 
 # fmt: on
 
