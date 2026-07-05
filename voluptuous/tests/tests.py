@@ -249,6 +249,19 @@ def test_message_decorator_respects_explicit_message_override():
         _reset_i18n_translator()
 
 
+def test_someof_bounds_assertion_uses_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(AssertionError) as ctx:
+        SomeOf(validators=[])
+
+    expected = (
+        'localized:when using "SomeOf" you should specify at least one of '
+        'min_valid and max_valid'
+    )
+    assert str(ctx.value) == expected
+
+
 def test_schema_multiple_errors_use_runtime_localizer():
     _i18n.set_gettext(lambda message: f"localized:{message}")
 
