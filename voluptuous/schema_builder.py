@@ -237,7 +237,7 @@ class Schema(object):
 
     def _compile_mapping(self, schema, invalid_msg=None):
         """Create validator for given mapping."""
-        invalid_msg = invalid_msg or gettext('mapping value')
+        invalid_msg = invalid_msg or 'mapping value'
 
         # Keys that may be required
         all_required_keys = set(

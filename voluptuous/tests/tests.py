@@ -406,6 +406,20 @@ def test_mapping_error_type_uses_runtime_localizer():
     )
 
 
+def test_default_mapping_error_type_uses_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"compile:{message}")
+    validate_mapping = Schema({})._compile_mapping({"name": int})
+    _i18n.set_gettext(lambda message: f"runtime:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        validate_mapping([], {"name": "not-an-int"}.items(), {})
+
+    assert (
+        str(ctx.value)
+        == "runtime:expected int for runtime:mapping value @ data['name']"
+    )
+
+
 def test_object_error_type_uses_runtime_localizer():
     schema = Schema(Object({"value": int}, cls=MyValueClass))
     _i18n.set_gettext(lambda message: f"localized:{message}")
