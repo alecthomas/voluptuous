@@ -2,7 +2,6 @@
 import collections
 import copy
 import os
-import sys
 from enum import Enum
 
 import pytest
@@ -699,13 +698,10 @@ def test_clamp_below():
 
 def test_clamp_invalid():
     s = Schema(Clamp(min=1, max=10))
-    if sys.version_info.major >= 3:
-        with pytest.raises(MultipleInvalid):
-            s(None)
-        with pytest.raises(MultipleInvalid):
-            s("abc")
-    else:
-        assert 1 == s(None)
+    with pytest.raises(MultipleInvalid):
+        s(None)
+    with pytest.raises(MultipleInvalid):
+        s("abc")
 
 
 def test_length_ok():

@@ -2,11 +2,10 @@
 
 This module provides functionality to automatically create voluptuous schemas
 from Python dataclasses, with support for additional validation constraints.
-
-Requires Python 3.7+ for dataclasses support.
 """
 
-import sys
+import dataclasses
+from dataclasses import MISSING
 from typing import Any, Dict, Optional, Type
 
 from voluptuous.schema_builder import UNDEFINED
@@ -14,24 +13,6 @@ from voluptuous.schema_builder import Optional as OptionalMarker
 from voluptuous.schema_builder import Required as RequiredMarker
 from voluptuous.schema_builder import Schema
 from voluptuous.validators import All
-
-# Check if dataclasses is available (Python 3.7+)
-if sys.version_info >= (3, 7):
-    try:
-        import dataclasses
-        from dataclasses import MISSING, Field
-
-        DATACLASSES_AVAILABLE = True
-    except ImportError:
-        DATACLASSES_AVAILABLE = False
-        dataclasses = None  # type: ignore
-        Field = None  # type: ignore
-        MISSING = None  # type: ignore
-else:
-    DATACLASSES_AVAILABLE = False
-    dataclasses = None  # type: ignore
-    Field = None  # type: ignore
-    MISSING = None  # type: ignore
 
 
 def is_dataclass(obj: Any) -> bool:
@@ -43,8 +24,6 @@ def is_dataclass(obj: Any) -> bool:
     Returns:
         True if obj is a dataclass, False otherwise
     """
-    if not DATACLASSES_AVAILABLE:
-        return False
     return dataclasses.is_dataclass(obj)
 
 
@@ -60,9 +39,6 @@ def get_dataclass_fields(dataclass_type: Type) -> Dict[str, Any]:
     Raises:
         ValueError: If the type is not a dataclass
     """
-    if not DATACLASSES_AVAILABLE:
-        raise ValueError("Dataclasses are not available (requires Python 3.7+)")
-
     if not is_dataclass(dataclass_type):
         raise ValueError(f"{dataclass_type} is not a dataclass")
 
@@ -113,9 +89,6 @@ def get_dataclass_field_defaults(dataclass_type: Type) -> Dict[str, Any]:
     Returns:
         Dictionary mapping field names to their default values
     """
-    if not DATACLASSES_AVAILABLE:
-        return {}
-
     if not is_dataclass(dataclass_type):
         return {}
 
@@ -207,9 +180,6 @@ def create_dataclass_schema(
         )
         result = schema({'name': 'John', 'age': 30})
     """
-    if not DATACLASSES_AVAILABLE:
-        raise ValueError("Dataclasses are not available (requires Python 3.7+)")
-
     if not is_dataclass(dataclass_type):
         raise ValueError(f"{dataclass_type} is not a dataclass")
 
@@ -299,9 +269,6 @@ class DataclassSchema(Schema):
             required: Whether all fields should be required by default
             extra: How to handle extra fields
         """
-        if not DATACLASSES_AVAILABLE:
-            raise ValueError("Dataclasses are not available (requires Python 3.7+)")
-
         if not is_dataclass(dataclass_type):
             raise ValueError(f"{dataclass_type} is not a dataclass")
 

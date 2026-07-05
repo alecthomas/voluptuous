@@ -690,8 +690,6 @@ schema({'password': '123', 'password_again': 1337})
 
 ## Dataclasses Support
 
-*Requires Python 3.7+ for dataclasses support.*
-
 Voluptuous provides built-in support for Python dataclasses, allowing you to automatically create schemas from dataclass definitions with optional additional validation constraints.
 
 ### Basic Dataclass Schema

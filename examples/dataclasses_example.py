@@ -4,18 +4,10 @@ Dataclasses Support Examples for Voluptuous
 
 This script demonstrates how to use the new dataclasses support functionality
 in voluptuous to automatically create schemas from Python dataclasses.
-
-Requires Python 3.7+ for dataclasses support.
 """
 
-import sys
 from dataclasses import dataclass, field
 from typing import List, Optional
-
-# Check if we have dataclasses support
-if sys.version_info < (3, 7):
-    print("This example requires Python 3.7+ for dataclasses support")
-    sys.exit(1)
 
 from voluptuous import (
     All,

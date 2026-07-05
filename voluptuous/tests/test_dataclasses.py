@@ -1,11 +1,12 @@
 """Tests for dataclasses support in voluptuous."""
 
-import sys
+from dataclasses import dataclass, field
 
 import pytest
 
 from voluptuous import (
     All,
+    DataclassSchema,
     Email,
     In,
     Length,
@@ -15,25 +16,9 @@ from voluptuous import (
     Range,
     Required,
     Schema,
+    create_dataclass_schema,
+    is_dataclass,
 )
-
-# Skip all tests if dataclasses not available
-pytestmark = pytest.mark.skipif(
-    sys.version_info < (3, 7), reason="Dataclasses require Python 3.7+"
-)
-
-# Import dataclasses and voluptuous dataclass support
-if sys.version_info >= (3, 7):
-    from dataclasses import dataclass, field
-
-    from voluptuous import DataclassSchema, create_dataclass_schema, is_dataclass
-else:
-    # Stub imports for older Python versions
-    def dataclass(cls):
-        return cls
-
-    def field(**kwargs):
-        return None
 
 
 class TestDataclassDetection:

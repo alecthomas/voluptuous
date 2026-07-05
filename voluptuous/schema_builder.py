@@ -1244,12 +1244,8 @@ def message(
 
 def _args_to_dict(func, args):
     """Returns argument names as values as key-value pairs."""
-    if sys.version_info >= (3, 0):
-        arg_count = func.__code__.co_argcount
-        arg_names = func.__code__.co_varnames[:arg_count]
-    else:
-        arg_count = func.func_code.co_argcount
-        arg_names = func.func_code.co_varnames[:arg_count]
+    arg_count = func.__code__.co_argcount
+    arg_names = func.__code__.co_varnames[:arg_count]
 
     arg_value_list = list(args)
     arguments = dict(
