@@ -4,8 +4,8 @@ from __future__ import annotations
 import datetime
 import os
 import re
-import sys
 import typing
+import urllib.parse as urlparse
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
@@ -52,13 +52,6 @@ try:
 except ImportError:
     Enum = None
 
-
-if sys.version_info >= (3,):
-    import urllib.parse as urlparse
-
-    basestring = str
-else:
-    import urlparse
 
 # Taken from https://github.com/kvesteri/validators/blob/master/validators/email.py
 # fmt: off
@@ -230,7 +223,7 @@ def Boolean(v):
     ... except MultipleInvalid as e:
     ...   assert isinstance(e.errors[0], BooleanInvalid)
     """
-    if isinstance(v, basestring):
+    if isinstance(v, str):
         v = v.lower()
         if v in ('1', 'true', 'yes', 'on', 'enable'):
             return True
@@ -433,7 +426,7 @@ class Match(object):
     def __init__(
         self, pattern: typing.Union[re.Pattern, str], msg: typing.Optional[str] = None
     ) -> None:
-        if isinstance(pattern, basestring):
+        if isinstance(pattern, str):
             pattern = re.compile(pattern)
         self.pattern = pattern
         self.msg = msg
@@ -469,7 +462,7 @@ class Replace(object):
         substitution: str,
         msg: typing.Optional[str] = None,
     ) -> None:
-        if isinstance(pattern, basestring):
+        if isinstance(pattern, str):
             pattern = re.compile(pattern)
         self.pattern = pattern
         self.substitution = substitution

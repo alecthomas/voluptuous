@@ -74,6 +74,13 @@ Validate like so:
     True
 """
 
+# Dataclasses support
+from voluptuous.dataclasses_support import (
+    DataclassSchema,
+    create_dataclass_schema,
+    is_dataclass,
+)
+
 # flake8: noqa
 # fmt: off
 from voluptuous.schema_builder import *
