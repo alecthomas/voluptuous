@@ -239,23 +239,25 @@ class Schema(object):
         """Create validator for given mapping."""
         invalid_msg = invalid_msg or 'mapping value'
 
-        # Keys that may be required
-        all_required_keys = set(
-            key
+        # Keys that may be required. A dict is used as an insertion-ordered set
+        # so that "required key not provided" errors are emitted in a stable,
+        # schema-declaration order rather than an arbitrary set order (#484).
+        all_required_keys = {
+            key: None
             for key in schema
             if key is not Extra
             and (
                 (self.required and not isinstance(key, (Optional, Remove)))
                 or isinstance(key, Required)
             )
-        )
+        }
 
         # Complex required keys that need special validation
-        complex_required_keys = set(
-            key
+        complex_required_keys = {
+            key: None
             for key in all_required_keys
             if isinstance(key, Required) and key.is_complex_key
-        )
+        }
 
         # Keys that may have defaults
         all_default_keys = set(
@@ -324,7 +326,7 @@ class Schema(object):
                     errors.append(er.RequiredFieldInvalid(msg, path + [complex_key]))
                 else:
                     # If at least one candidate key is present, mark this complex requirement as satisfied
-                    required_keys.discard(complex_key)
+                    required_keys.pop(complex_key, None)
             for key, value in key_value_map.items():
                 key_path = path + [key]
                 remove_key = False
@@ -375,12 +377,12 @@ class Schema(object):
                         # key, this means that the key was provided.
                         # Discard the required key so it does not
                         # create an additional, noisy exception.
-                        required_keys.discard(skey)
+                        required_keys.pop(skey, None)
                         break
 
                     # Key and value okay, mark as found in case it was
                     # a Required() field.
-                    required_keys.discard(skey)
+                    required_keys.pop(skey, None)
 
                     break
                 else:
