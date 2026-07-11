@@ -1145,6 +1145,21 @@ def test_number_validation_with_non_numeric():
             assert False, "Did not raise Invalid for %r" % (value,)
 
 
+def test_number_validation_with_infinity_and_nan():
+    """Non-finite input raises Invalid, not a raw TypeError."""
+    schema = Schema({"number": Number(precision=6, scale=2)})
+    for value in ('Infinity', '-Infinity', 'NaN'):
+        try:
+            schema({"number": value})
+        except MultipleInvalid as e:
+            assert (
+                str(e)
+                == "Value must be a number enclosed with string for dictionary value @ data['number']"
+            )
+        else:
+            assert False, "Did not raise Invalid for %s" % value
+
+
 def test_number_validation_with_invalid_precision_invalid_scale():
     """Test with Number with invalid precision and scale"""
     schema = Schema({"number": Number(precision=6, scale=2)})
