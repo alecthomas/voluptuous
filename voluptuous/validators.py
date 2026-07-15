@@ -469,7 +469,10 @@ class Replace(object):
         self.msg = msg
 
     def __call__(self, v):
-        return self.pattern.sub(self.substitution, v)
+        try:
+            return self.pattern.sub(self.substitution, v)
+        except TypeError:
+            raise MatchInvalid(self.msg or 'expected string or buffer')
 
     def __repr__(self):
         return 'Replace(%r, %r, msg=%r)' % (
