@@ -2975,3 +2975,14 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+def test_replace_non_string_input():
+    """Verify that Replace raises Invalid for non-string input."""
+    replace = Replace('hello', 'goodbye')
+    assert replace('hello world') == 'goodbye world'
+    for value in (42, None, ['hello']):
+        with pytest.raises(Invalid, match='expected string or buffer'):
+            replace(value)
+
+    replace2 = Replace('x', 'y', msg='must be a string')
+    with pytest.raises(Invalid, match='must be a string'):
+        replace2(123)
