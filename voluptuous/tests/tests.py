@@ -1745,6 +1745,20 @@ def test_coerce_in_set_is_applied():
     assert Schema({int})({1, 2}) == {1, 2}
 
 
+def test_coerce_callable_marks_invalid_without_msg():
+    # Coerce accepts any callable (not just a class). When such a callable
+    # raises on bad input, the value must be marked Invalid, as the docstring
+    # promises -- the Enum-message branch used to call issubclass() on the
+    # callable and leak a raw TypeError. See the class twin Coerce(int), which
+    # already behaves this way.
+    def parse_int(v):
+        return int(v)
+
+    validate = Schema(Coerce(parse_int))
+    with raises(MultipleInvalid, 'expected parse_int'):
+        validate('foo')
+
+
 def test_lower_util_handles_various_inputs():
     assert Lower(3) == "3"
     assert Lower(u"3") == u"3"
