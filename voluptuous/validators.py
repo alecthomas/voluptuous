@@ -145,7 +145,12 @@ class Coerce(object):
             return self.type(v)
         except (ValueError, TypeError, InvalidOperation):
             msg = self.msg or ('expected %s' % self.type_name)
-            if not self.msg and Enum and issubclass(self.type, Enum):
+            if (
+                not self.msg
+                and Enum
+                and isinstance(self.type, type)
+                and issubclass(self.type, Enum)
+            ):
                 msg += " or one of %s" % str([e.value for e in self.type])[1:-1]
             raise CoerceInvalid(msg)
 
