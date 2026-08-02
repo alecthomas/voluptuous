@@ -991,6 +991,25 @@ def test_schema_empty_dict():
         assert False, "Did not raise correct Invalid"
 
 
+def test_schema_accepts_mapping():
+    class QueryArgs(collections.abc.Mapping):
+        def __init__(self, data):
+            self._data = data
+
+        def __getitem__(self, key):
+            return self._data[key]
+
+        def __iter__(self):
+            return iter(self._data)
+
+        def __len__(self):
+            return len(self._data)
+
+    s = Schema({'page': Coerce(int), Optional('q', default=''): str})
+
+    assert s(QueryArgs({'page': '1'})) == {'page': 1, 'q': ''}
+
+
 def test_schema_empty_dict_key():
     """https://github.com/alecthomas/voluptuous/pull/434"""
     s = Schema({'var': []})

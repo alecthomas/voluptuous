@@ -531,7 +531,7 @@ class Schema(object):
                 g.append(node)
 
         def validate_dict(path, data):
-            if not isinstance(data, dict):
+            if not isinstance(data, collections.abc.Mapping):
                 raise er.DictInvalid('expected a dictionary', path)
 
             errors = []
@@ -572,7 +572,7 @@ class Schema(object):
             if errors:
                 raise er.MultipleInvalid(errors)
 
-            out = data.__class__()
+            out = data.__class__() if isinstance(data, dict) else {}
             return base_validate(path, data.items(), out)
 
         return validate_dict
