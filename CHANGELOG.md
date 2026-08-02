@@ -6,6 +6,7 @@
 
 * [#539](https://github.com/alecthomas/voluptuous/pull/539): Raise `Invalid` instead of leaking `TypeError`/`ValueError` for non-numeric input to the `Number` validator
 * [#542](https://github.com/alecthomas/voluptuous/pull/542): Raise `Invalid` instead of leaking a raw `TypeError` for `Infinity`/`NaN` input to the `Number` validator
+* [#299](https://github.com/alecthomas/voluptuous/issues/299): Accept `Mapping` instances, not only `dict`, when validating dictionary schemas
 
 ## [0.16.0]
 
