@@ -781,7 +781,7 @@ class Length(object):
 
         # Objects that have no length e.g. None or strings will raise TypeError
         except TypeError:
-            raise RangeInvalid(self.msg or gettext('invalid value or type'))
+            raise LengthInvalid(self.msg or gettext('invalid value or type'))
 
     def __repr__(self):
         return 'Length(min=%s, max=%s)' % (self.min, self.max)
