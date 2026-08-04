@@ -33,6 +33,7 @@ from voluptuous import (
     IsDir,
     IsFile,
     Length,
+    LengthInvalid,
     Literal,
     LiteralInvalid,
     Marker,
@@ -870,8 +871,10 @@ def test_length_too_long():
 def test_length_invalid():
     v = None
     s = Schema(Length(min=0, max=2))
-    with pytest.raises(MultipleInvalid):
+    with pytest.raises(MultipleInvalid) as ctx:
         s(v)
+    # a value with no length must be reported as a LengthInvalid, not a RangeInvalid
+    assert isinstance(ctx.value.errors[0], LengthInvalid)
 
 
 def test_equal():
