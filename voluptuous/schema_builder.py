@@ -619,7 +619,9 @@ class Schema(object):
                             out.append(cval)
                         break
                     except er.Invalid as e:
-                        if len(e.path) > len(index_path):
+                        if len(e.path) > len(index_path) and not _is_key_shape_mismatch(
+                            e, index_path
+                        ):
                             raise
                         invalid = e
                 else:
@@ -804,6 +806,45 @@ class Schema(object):
                 value, schema_required, result_required
             )
         return result
+
+
+def _is_key_shape_mismatch(invalid, index_path):
+    """Whether `invalid` reflects a dict-schema alternative whose overall
+    *shape* doesn't match the data at all, as opposed to one whose shape
+    matched but a nested value was specifically wrong.
+
+    ``validate_sequence`` tries each schema alternative for a given
+    sequence item and, by default, stops and re-raises as soon as an
+    alternative's error is reported deeper than ``index_path`` -- the
+    assumption being that a deeper path means the alternative's top-level
+    type matched and a nested detail is what's actually wrong, so
+    surfacing that specific error immediately is more helpful than
+    silently falling through to the remaining alternatives.
+
+    A dict/mapping validator breaks that assumption: it always reports
+    "extra keys not allowed" and "required key not provided" errors one
+    level deeper than the path it was given (it names the offending key),
+    even when none of the alternative's keys have anything to do with the
+    data's keys, i.e. the alternative doesn't match the data's shape at
+    all. Recognize exactly those two error kinds -- and only when they
+    occur at that one-level-deeper depth -- as shape mismatches so the
+    caller can keep trying the remaining alternatives instead of giving
+    up immediately. Any other error at that depth (e.g. a wrong value
+    for a key that *was* matched) is left alone and still aborts the
+    search, since that heuristic is correct in that case.
+    """
+    sub_errors = (
+        invalid.errors if isinstance(invalid, er.MultipleInvalid) else [invalid]
+    )
+    expected_depth = len(index_path) + 1
+    return all(
+        len(sub.path) == expected_depth
+        and (
+            isinstance(sub, er.RequiredFieldInvalid)
+            or (type(sub) is er.Invalid and sub.error_message == 'extra keys not allowed')
+        )
+        for sub in sub_errors
+    )
 
 
 def _compile_scalar(schema):
