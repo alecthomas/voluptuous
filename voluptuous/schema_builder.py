@@ -343,6 +343,14 @@ class Schema(object):
                     except er.Invalid as e:
                         if len(e.path) > len(key_path):
                             raise
+                        # This candidate key schema/validator rejected the
+                        # provided key outright -- the data's key has
+                        # nothing to do with this candidate, as opposed to
+                        # a key that matched but whose value was wrong.
+                        # Tag it so callers such as _compile_sequence's
+                        # list-of-dict-alternatives heuristic can tell the
+                        # two situations apart.
+                        e._key_shape_mismatch = True
                         if not error or len(e.path) > len(error.path):
                             error = e
                         continue
@@ -395,7 +403,9 @@ class Schema(object):
                     elif error:
                         errors.append(error)
                     else:
-                        errors.append(er.Invalid('extra keys not allowed', key_path))
+                        no_candidate_error = er.Invalid('extra keys not allowed', key_path)
+                        no_candidate_error._key_shape_mismatch = True
+                        errors.append(no_candidate_error)
 
             # for any required keys left that weren't found and don't have defaults:
             for key in required_keys:
@@ -404,7 +414,9 @@ class Schema(object):
                     if hasattr(key, 'msg') and key.msg
                     else 'required key not provided'
                 )
-                errors.append(er.RequiredFieldInvalid(msg, path + [key]))
+                missing_key_error = er.RequiredFieldInvalid(msg, path + [key])
+                missing_key_error._key_shape_mismatch = True
+                errors.append(missing_key_error)
             if errors:
                 raise er.MultipleInvalid(errors)
 
@@ -822,27 +834,31 @@ def _is_key_shape_mismatch(invalid, index_path):
     silently falling through to the remaining alternatives.
 
     A dict/mapping validator breaks that assumption: it always reports
-    "extra keys not allowed" and "required key not provided" errors one
-    level deeper than the path it was given (it names the offending key),
-    even when none of the alternative's keys have anything to do with the
-    data's keys, i.e. the alternative doesn't match the data's shape at
-    all. Recognize exactly those two error kinds -- and only when they
-    occur at that one-level-deeper depth -- as shape mismatches so the
-    caller can keep trying the remaining alternatives instead of giving
-    up immediately. Any other error at that depth (e.g. a wrong value
-    for a key that *was* matched) is left alone and still aborts the
-    search, since that heuristic is correct in that case.
+    key-related errors ("extra keys not allowed", "required key not
+    provided", or a rejection from a key validator/schema such as
+    ``In(...)`` or ``Match(...)``) one level deeper than the path it was
+    given (it names the offending key), even when none of the
+    alternative's keys have anything to do with the data's keys, i.e. the
+    alternative doesn't match the data's shape at all.
+
+    ``validate_mapping`` tags every error of that kind with
+    ``_key_shape_mismatch`` at the point it's raised/constructed (rather
+    than this function trying to reverse-engineer it from the error's
+    class or message, which can't distinguish a literal-key "extra keys
+    not allowed" from a key-validator's own -- differently classed and
+    worded -- rejection). Recognize exactly those tagged errors -- and
+    only when they occur at that one-level-deeper depth -- as shape
+    mismatches so the caller can keep trying the remaining alternatives
+    instead of giving up immediately. Any other error at that depth (e.g.
+    a wrong value for a key that *was* matched) is left alone and still
+    aborts the search, since that heuristic is correct in that case.
     """
     sub_errors = (
         invalid.errors if isinstance(invalid, er.MultipleInvalid) else [invalid]
     )
     expected_depth = len(index_path) + 1
     return all(
-        len(sub.path) == expected_depth
-        and (
-            isinstance(sub, er.RequiredFieldInvalid)
-            or (type(sub) is er.Invalid and sub.error_message == 'extra keys not allowed')
-        )
+        len(sub.path) == expected_depth and getattr(sub, '_key_shape_mismatch', False)
         for sub in sub_errors
     )
 

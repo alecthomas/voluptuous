@@ -801,6 +801,26 @@ def test_fix_142_list_of_dict_alternatives():
     schema = Schema([{Required(1): str}, {Required(2): str}])
     assert schema([{2: 'two'}]) == [{2: 'two'}]
 
+    # Dict alternatives keyed by a *key validator* (In, Match, etc.),
+    # rather than a literal key, must also fall through correctly: a
+    # rejection from the key validator itself is still a shape mismatch,
+    # not a real value error.
+    schema = Schema([{In(['a', 'b']): str}, {In(['c', 'd']): str}])
+    data = [{'a': 'x'}, {'c': 'y'}]
+    assert schema(data) == data
+
+    schema = Schema([{Match('^a'): str}, {Match('^c'): str}])
+    data = [{'aa': 'x'}, {'cc': 'y'}]
+    assert schema(data) == data
+
+    # And the same key-validator case still reports a real value error
+    # correctly instead of swallowing it.
+    schema = Schema([{In(['a', 'b']): int}, {In(['c', 'd']): str}])
+    with pytest.raises(
+        MultipleInvalid, match=r"expected int for dictionary value @ data\[0\]\['a'\]"
+    ):
+        schema([{'a': 'not an int'}, {'c': 'y'}])
+
 
 def test_range_inside():
     s = Schema(Range(min=0, max=10))
