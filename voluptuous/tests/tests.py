@@ -768,6 +768,60 @@ def test_fix_157():
         s(['four'])
 
 
+def test_fix_142_list_of_dict_alternatives():
+    """A list of dict-schema alternatives should try every alternative
+    against each item, not give up after the first alternative whose
+    keys don't match the item's shape.
+
+    https://github.com/alecthomas/voluptuous/issues/142
+    """
+    # Case 0: neither alternative matches every item on its own, but each
+    # item matches a different alternative -- this must validate.
+    schema = Schema([{1: str}, {2: str}])
+    assert schema([{1: 'one'}, {2: 'two'}]) == [{1: 'one'}, {2: 'two'}]
+
+    # Case 1: the first item *does* match the first alternative's key,
+    # but its value is the wrong type. That's a real, specific error and
+    # must be reported as such -- not swallowed in favor of trying the
+    # second alternative against the first item too.
+    schema = Schema([{1: bool}, {2: str}])
+    with pytest.raises(
+        MultipleInvalid, match=r"expected bool for dictionary value @ data\[0\]\[1\]"
+    ):
+        schema([{1: 'one'}, {2: 'two'}])
+
+    # 3+ alternatives: the fix must not be narrowly special-cased to
+    # exactly two alternatives.
+    schema = Schema([{1: str}, {2: str}, {3: str}])
+    data = [{1: 'a'}, {2: 'b'}, {3: 'c'}]
+    assert schema(data) == data
+
+    # A required key missing from an item is also a shape mismatch and
+    # should fall through to the next alternative.
+    schema = Schema([{Required(1): str}, {Required(2): str}])
+    assert schema([{2: 'two'}]) == [{2: 'two'}]
+
+    # Dict alternatives keyed by a *key validator* (In, Match, etc.),
+    # rather than a literal key, must also fall through correctly: a
+    # rejection from the key validator itself is still a shape mismatch,
+    # not a real value error.
+    schema = Schema([{In(['a', 'b']): str}, {In(['c', 'd']): str}])
+    data = [{'a': 'x'}, {'c': 'y'}]
+    assert schema(data) == data
+
+    schema = Schema([{Match('^a'): str}, {Match('^c'): str}])
+    data = [{'aa': 'x'}, {'cc': 'y'}]
+    assert schema(data) == data
+
+    # And the same key-validator case still reports a real value error
+    # correctly instead of swallowing it.
+    schema = Schema([{In(['a', 'b']): int}, {In(['c', 'd']): str}])
+    with pytest.raises(
+        MultipleInvalid, match=r"expected int for dictionary value @ data\[0\]\['a'\]"
+    ):
+        schema([{'a': 'not an int'}, {'c': 'y'}])
+
+
 def test_range_inside():
     s = Schema(Range(min=0, max=10))
     assert 5 == s(5)
