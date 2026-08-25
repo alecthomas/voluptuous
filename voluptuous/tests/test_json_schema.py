@@ -1,6 +1,8 @@
 """Tests for JSON Schema export functionality."""
 
 from voluptuous import (
+    ALLOW_EXTRA,
+    REMOVE_EXTRA,
     All,
     Any,
     Clamp,
@@ -9,6 +11,7 @@ from voluptuous import (
     Datetime,
     Email,
     ExactSequence,
+    Extra,
     In,
     Length,
     Match,
@@ -129,12 +132,12 @@ class TestArraySchemas:
         """Test array with multiple types."""
         schema = to_json_schema(Schema([str, int, bool]))
         assert schema["type"] == "array"
-        assert "prefixItems" in schema
-        assert len(schema["prefixItems"]) == 3
-        assert schema["prefixItems"][0]["type"] == "string"
-        assert schema["prefixItems"][1]["type"] == "integer"
-        assert schema["prefixItems"][2]["type"] == "boolean"
-        assert schema["items"] is False
+        assert "items" in schema
+        assert "anyOf" in schema["items"]
+        assert len(schema["items"]["anyOf"]) == 3
+        assert schema["items"]["anyOf"][0]["type"] == "string"
+        assert schema["items"]["anyOf"][1]["type"] == "integer"
+        assert schema["items"]["anyOf"][2]["type"] == "boolean"
 
     def test_set_schema(self):
         """Test set schema conversion."""
@@ -305,3 +308,149 @@ class TestEdgeCases:
         schema = to_json_schema(Schema(custom_validator))
         assert "description" in schema
         assert "custom_validator" in schema["description"]
+
+
+class TestRootSchemas:
+    """Test root schema type is not unconditionally object."""
+
+    def test_scalar_root(self):
+        """Test scalar root schema has correct type."""
+        schema = to_json_schema(Schema("hello"))
+        assert schema.get("const") == "hello"
+        assert schema.get("type") != "object"
+
+    def test_in_root(self):
+        """Test In root schema has enum, not object."""
+        schema = to_json_schema(Schema(In(["x", "y"])))
+        assert schema.get("enum") == ["x", "y"]
+        assert schema.get("type") != "object"
+
+    def test_any_root(self):
+        """Test Any root schema has anyOf, not object."""
+        schema = to_json_schema(Schema(Any(str, int)))
+        assert "anyOf" in schema
+        assert schema.get("type") != "object"
+
+    def test_all_root(self):
+        """Test All root schema has allOf, not object."""
+        schema = to_json_schema(Schema(All(str, Length(min=2))))
+        assert "allOf" in schema
+        assert schema.get("type") != "object"
+
+
+class TestExtraPolicies:
+    """Test Schema.extra and Extra key handling."""
+
+    def test_allow_extra(self):
+        """Test ALLOW_EXTRA produces additionalProperties true."""
+        schema = to_json_schema(Schema({Required("a"): int}, extra=ALLOW_EXTRA))
+        assert schema["additionalProperties"] is True
+
+    def test_remove_extra(self):
+        """Test REMOVE_EXTRA produces additionalProperties true."""
+        schema = to_json_schema(Schema({Required("a"): int}, extra=REMOVE_EXTRA))
+        assert schema["additionalProperties"] is True
+
+    def test_prevent_extra_default(self):
+        """Test default PREVENT_EXTRA produces additionalProperties false."""
+        schema = to_json_schema(Schema({Required("a"): int}))
+        assert schema["additionalProperties"] is False
+
+    def test_extra_with_value_schema(self):
+        """Test Extra key retains value schema."""
+        schema = to_json_schema(Schema({Required("a"): int, Extra: str}))
+        assert schema["additionalProperties"] == {"type": "string"}
+
+
+class TestDynamicKeys:
+    """Test validator-based mapping keys."""
+
+    def test_type_key(self):
+        """Test type key uses propertyNames."""
+        schema = to_json_schema(Schema({str: bool}))
+        assert schema["propertyNames"] == {"type": "string"}
+        assert schema["additionalProperties"] == {"type": "boolean"}
+
+    def test_int_key(self):
+        """Test int key uses propertyNames."""
+        schema = to_json_schema(Schema({int: str}))
+        assert schema["propertyNames"] == {"type": "integer"}
+        assert schema["additionalProperties"] == {"type": "string"}
+
+    def test_mixed_literal_and_dynamic(self):
+        """Test mixed literal and dynamic keys."""
+        schema = to_json_schema(Schema({"a": int, str: bool}))
+        assert "a" in schema["properties"]
+        assert schema["propertyNames"] == {"type": "string"}
+        assert schema["additionalProperties"] == {"type": "boolean"}
+
+    def test_marker_wrapped_dynamic_key(self):
+        """Test Required-wrapped dynamic key."""
+        schema = to_json_schema(Schema({Required(str): bool}))
+        assert schema["propertyNames"] == {"type": "string"}
+        assert schema["additionalProperties"] == {"type": "boolean"}
+
+
+class TestArraySchemasReview:
+    """Test array schema conversions."""
+
+    def test_heterogeneous_list(self):
+        """Test heterogeneous list uses anyOf items."""
+        schema = to_json_schema(Schema([str, int]))
+        assert schema["type"] == "array"
+        assert "items" in schema
+        assert "anyOf" in schema["items"]
+        assert len(schema["items"]["anyOf"]) == 2
+
+    def test_homogeneous_list(self):
+        """Test homogeneous list uses single items schema."""
+        schema = to_json_schema(Schema([str, str]))
+        assert schema["type"] == "array"
+        assert schema["items"] == {"type": "string"}
+
+    def test_exact_sequence_uses_prefix_items(self):
+        """Test ExactSequence uses prefixItems."""
+        schema = to_json_schema(Schema(ExactSequence([str, int])))
+        assert schema["type"] == "array"
+        assert "prefixItems" in schema
+        assert schema["items"] is False
+
+
+class TestLengthValidators:
+    """Test Length validator context awareness."""
+
+    def test_length_on_array_in_all(self):
+        """Test Length on array produces minItems/maxItems."""
+        schema = to_json_schema(Schema(All([int], Length(min=2, max=3))))
+        if "allOf" in schema:
+            for sub in schema["allOf"]:
+                if sub.get("type") == "array":
+                    assert sub.get("minItems") == 2
+                    assert sub.get("maxItems") == 3
+                    assert "minLength" not in sub
+                    assert "maxLength" not in sub
+                    return
+        if schema.get("type") == "array":
+            assert schema.get("minItems") == 2
+            assert schema.get("maxItems") == 3
+            assert "minLength" not in schema
+            assert "maxLength" not in schema
+            return
+        assert False, "Array schema with minItems/maxItems not found"
+
+    def test_length_on_string_in_all(self):
+        """Test Length on string produces minLength."""
+        schema = to_json_schema(Schema(All(str, Length(min=2))))
+        assert "allOf" in schema
+        for sub in schema["allOf"]:
+            if "minLength" in sub:
+                assert sub["minLength"] == 2
+                assert "minItems" not in sub
+                return
+        assert False, "String schema with minLength not found"
+
+    def test_length_direct_schema(self):
+        """Test direct Length schema still produces minLength."""
+        schema = to_json_schema(Schema(Length(min=2, max=3)))
+        assert schema["minLength"] == 2
+        assert schema["maxLength"] == 3
