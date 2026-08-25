@@ -2,6 +2,7 @@
 import collections
 import copy
 import os
+import re
 from enum import Enum
 
 import pytest
@@ -2375,3 +2376,32 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+def test_replace_non_string_input():
+    """Verify that Replace raises Invalid for non-string input."""
+    replace = Replace('hello', 'goodbye')
+    assert replace('hello world') == 'goodbye world'
+    for value in (42, None, ['hello']):
+        with pytest.raises(Invalid, match='expected string or buffer'):
+            replace(value)
+
+    replace2 = Replace('x', 'y', msg='must be a string')
+    with pytest.raises(Invalid, match='must be a string'):
+        replace2(123)
+
+
+def test_replace_accepts_bytes_like_input():
+    replace = Replace(re.compile(b'hello'), b'goodbye')
+    assert replace(b'hello world') == b'goodbye world'
+    assert replace(bytearray(b'hello world')) == b'goodbye world'
+    assert replace(memoryview(b'hello world')) == b'goodbye world'
+
+
+def test_replace_preserves_type_error_from_substitution():
+    def invalid_substitution(_match):
+        raise TypeError('substitution failed')
+
+    replace = Replace('hello', invalid_substitution)
+    with pytest.raises(TypeError, match='substitution failed'):
+        replace('hello world')
