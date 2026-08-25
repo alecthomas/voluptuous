@@ -81,12 +81,13 @@ from voluptuous.dataclasses_support import (
     is_dataclass,
 )
 
+from voluptuous.json_schema import to_json_schema
+
 # flake8: noqa
 # fmt: off
 from voluptuous.schema_builder import *
 from voluptuous.util import *
 from voluptuous.validators import *
-from voluptuous.json_schema import to_json_schema
 
 from voluptuous.error import *  # isort: skip
 

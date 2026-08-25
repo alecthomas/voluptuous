@@ -223,6 +223,7 @@ class Schema(object):
             'object'
         """
         from voluptuous.json_schema import JsonSchemaConverter
+
         converter = JsonSchemaConverter(self)
         return converter.convert()
 
