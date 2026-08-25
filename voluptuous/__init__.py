@@ -80,7 +80,6 @@ from voluptuous.dataclasses_support import (
     create_dataclass_schema,
     is_dataclass,
 )
-
 from voluptuous.json_schema import to_json_schema
 
 # flake8: noqa
