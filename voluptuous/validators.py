@@ -469,10 +469,13 @@ class Replace(object):
         self.msg = msg
 
     def __call__(self, v):
+        # Validate the input separately so TypeError from a callable
+        # substitution is not mistaken for an incompatible input value.
         try:
-            return self.pattern.sub(self.substitution, v)
+            self.pattern.match(v, 0, 0)
         except TypeError:
             raise MatchInvalid(self.msg or 'expected string or buffer')
+        return self.pattern.sub(self.substitution, v)
 
     def __repr__(self):
         return 'Replace(%r, %r, msg=%r)' % (

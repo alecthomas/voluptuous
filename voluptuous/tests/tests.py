@@ -2,6 +2,7 @@
 import collections
 import copy
 import os
+import re
 from enum import Enum
 
 import pytest
@@ -2388,3 +2389,19 @@ def test_replace_non_string_input():
     replace2 = Replace('x', 'y', msg='must be a string')
     with pytest.raises(Invalid, match='must be a string'):
         replace2(123)
+
+
+def test_replace_accepts_bytes_like_input():
+    replace = Replace(re.compile(b'hello'), b'goodbye')
+    assert replace(b'hello world') == b'goodbye world'
+    assert replace(bytearray(b'hello world')) == b'goodbye world'
+    assert replace(memoryview(b'hello world')) == b'goodbye world'
+
+
+def test_replace_preserves_type_error_from_substitution():
+    def invalid_substitution(_match):
+        raise TypeError('substitution failed')
+
+    replace = Replace('hello', invalid_substitution)
+    with pytest.raises(TypeError, match='substitution failed'):
+        replace('hello world')
