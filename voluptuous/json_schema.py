@@ -11,43 +11,52 @@ from typing import Any, Dict, List, Optional, Union
 
 from voluptuous import validators as v
 from voluptuous.schema_builder import (
-    Extra, Marker, Optional as OptionalMarker, Required as RequiredMarker,
-    Remove, Schema, primitive_types
+    Extra,
+    Marker,
+)
+from voluptuous.schema_builder import Optional as OptionalMarker
+from voluptuous.schema_builder import (
+    Remove,
+)
+from voluptuous.schema_builder import Required as RequiredMarker
+from voluptuous.schema_builder import (
+    Schema,
+    primitive_types,
 )
 
 
 class JsonSchemaConverter:
     """Converts voluptuous schemas to JSON Schema format.
-    
+
     This converter traverses voluptuous schema structures and generates
     equivalent JSON Schema representations that preserve validation semantics
     where possible.
     """
-    
+
     def __init__(self, schema: Schema):
         """Initialize converter with a voluptuous schema.
-        
+
         Args:
             schema: The voluptuous Schema instance to convert
         """
         self.schema = schema
         self.definitions: Dict[str, Any] = {}
         self._ref_counter = 0
-    
+
     def convert(self) -> Dict[str, Any]:
         """Convert the voluptuous schema to JSON Schema format.
-        
+
         Returns:
             A dictionary representing the JSON Schema
         """
         json_schema = {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object"
+            "type": "object",
         }
-        
+
         # Convert the main schema
         converted = self._convert_schema_element(self.schema.schema)
-        
+
         # Merge the converted schema
         if isinstance(converted, dict):
             json_schema.update(converted)
@@ -55,59 +64,61 @@ class JsonSchemaConverter:
             # If it's not a dict, wrap it appropriately
             json_schema = {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                **self._wrap_non_object_schema(converted)
+                **self._wrap_non_object_schema(converted),
             }
-        
+
         # Add definitions if any were created
         if self.definitions:
             json_schema["$defs"] = self.definitions
-            
+
         return json_schema
-    
+
     def _convert_schema_element(self, element: Any) -> Any:
         """Convert a single schema element to JSON Schema format.
-        
+
         Args:
             element: The schema element to convert
-            
+
         Returns:
             JSON Schema representation of the element
         """
         # Handle None
         if element is None:
             return {"type": "null"}
-        
+
         # Handle Extra marker
         if element is Extra:
             return True  # Allow additional properties
-        
+
         # Handle Marker classes (Required, Optional, Remove)
         if isinstance(element, Marker):
             return self._convert_marker(element)
-        
+
         # Handle primitive types
         if element in primitive_types:
             return self._convert_primitive_type(element)
-        
+
         # Handle Schema instances
         if isinstance(element, Schema):
             return self._convert_schema_element(element.schema)
-        
+
         # Handle mappings (dictionaries)
         if isinstance(element, Mapping):
             return self._convert_mapping(element)
-        
+
         # Handle sequences (lists, tuples)
         if isinstance(element, (list, tuple)):
             return self._convert_sequence(element)
-        
+
         # Handle sets
         if isinstance(element, (set, frozenset)):
             return self._convert_set(element)
-        
+
         # Handle validator classes
         if hasattr(element, '__class__') and hasattr(element.__class__, '__name__'):
-            converter_method = getattr(self, f'_convert_{element.__class__.__name__.lower()}', None)
+            converter_method = getattr(
+                self, f'_convert_{element.__class__.__name__.lower()}', None
+            )
             if converter_method:
                 return converter_method(element)
 
@@ -121,45 +132,49 @@ class JsonSchemaConverter:
                     return converter_method(element)
 
             return self._convert_callable(element)
-        
+
         # Handle literal values
         return self._convert_literal(element)
-    
+
     def _convert_primitive_type(self, type_class: type) -> Dict[str, str]:
         """Convert Python primitive types to JSON Schema types."""
         type_mapping = {
             bool: "boolean",
-            int: "integer", 
+            int: "integer",
             float: "number",
             str: "string",
             bytes: "string",  # JSON Schema doesn't have bytes, use string
-            complex: "string"  # Complex numbers as strings
+            complex: "string",  # Complex numbers as strings
         }
         return {"type": type_mapping.get(type_class, "string")}
-    
+
     def _convert_mapping(self, mapping: Mapping) -> Dict[str, Any]:
         """Convert a mapping (dictionary) schema to JSON Schema object."""
         json_schema = {
             "type": "object",
             "properties": {},
-            "additionalProperties": False
+            "additionalProperties": False,
         }
-        
+
         required_keys = []
-        
+
         for key, value in mapping.items():
             if key is Extra:
                 json_schema["additionalProperties"] = True
                 continue
-            
+
             # Handle marker keys
             if isinstance(key, RequiredMarker):
                 prop_name = str(key.schema)
                 required_keys.append(prop_name)
-                json_schema["properties"][prop_name] = self._convert_schema_element(value)
+                json_schema["properties"][prop_name] = self._convert_schema_element(
+                    value
+                )
             elif isinstance(key, OptionalMarker):
                 prop_name = str(key.schema)
-                json_schema["properties"][prop_name] = self._convert_schema_element(value)
+                json_schema["properties"][prop_name] = self._convert_schema_element(
+                    value
+                )
                 # Add default if specified
                 if hasattr(key, 'default') and key.default is not None:
                     # Handle default_factory functions
@@ -168,30 +183,36 @@ class JsonSchemaConverter:
                             default_value = key.default()
                             # Only add if the default value is JSON serializable
                             if self._is_json_serializable(default_value):
-                                json_schema["properties"][prop_name]["default"] = default_value
+                                json_schema["properties"][prop_name][
+                                    "default"
+                                ] = default_value
                         except:
                             # If default factory fails, skip adding default
                             pass
                     else:
                         # Only add if the default value is JSON serializable
                         if self._is_json_serializable(key.default):
-                            json_schema["properties"][prop_name]["default"] = key.default
+                            json_schema["properties"][prop_name][
+                                "default"
+                            ] = key.default
             elif isinstance(key, Remove):
                 # Remove markers are ignored in JSON Schema
                 continue
             else:
                 # Regular key
                 prop_name = str(key)
-                json_schema["properties"][prop_name] = self._convert_schema_element(value)
+                json_schema["properties"][prop_name] = self._convert_schema_element(
+                    value
+                )
                 # In voluptuous, regular keys are required by default if schema.required is True
                 if getattr(self.schema, 'required', False):
                     required_keys.append(prop_name)
-        
+
         if required_keys:
             json_schema["required"] = required_keys
-            
+
         return json_schema
-    
+
     def _convert_sequence(self, sequence: Sequence) -> Dict[str, Any]:
         """Convert a sequence (list/tuple) schema to JSON Schema array."""
         if not sequence:
@@ -201,47 +222,44 @@ class JsonSchemaConverter:
         items_schemas = [self._convert_schema_element(item) for item in sequence]
 
         # Check if all converted schemas are identical
-        if len(items_schemas) == 1 or all(schema == items_schemas[0] for schema in items_schemas):
+        if len(items_schemas) == 1 or all(
+            schema == items_schemas[0] for schema in items_schemas
+        ):
             # All items have the same schema - use single items schema
-            return {
-                "type": "array",
-                "items": items_schemas[0]
-            }
+            return {"type": "array", "items": items_schemas[0]}
 
         # Multiple different schemas - use prefixItems for ordered validation
         return {
             "type": "array",
             "prefixItems": items_schemas,
-            "items": False  # No additional items allowed
+            "items": False,  # No additional items allowed
         }
-    
+
     def _convert_set(self, set_schema: Union[set, frozenset]) -> Dict[str, Any]:
         """Convert a set schema to JSON Schema array with unique items."""
         if not set_schema:
             return {"type": "array", "uniqueItems": True, "maxItems": 0}
-        
+
         # Convert the single item type in the set
         item_schema = self._convert_schema_element(next(iter(set_schema)))
-        return {
-            "type": "array",
-            "items": item_schema,
-            "uniqueItems": True
-        }
-    
+        return {"type": "array", "items": item_schema, "uniqueItems": True}
+
     def _convert_marker(self, marker: Marker) -> Any:
         """Convert a Marker instance to its underlying schema."""
         return self._convert_schema_element(marker.schema)
-    
+
     def _convert_callable(self, func: callable) -> Dict[str, Any]:
         """Convert a callable validator to JSON Schema."""
         # For generic callables, we can't determine much about the expected type
         # This is a limitation of the conversion process
-        return {"description": f"Custom validator: {getattr(func, '__name__', 'anonymous')}"}
-    
+        return {
+            "description": f"Custom validator: {getattr(func, '__name__', 'anonymous')}"
+        }
+
     def _convert_literal(self, value: Any) -> Dict[str, Any]:
         """Convert a literal value to JSON Schema const."""
         return {"const": value}
-    
+
     def _wrap_non_object_schema(self, schema: Any) -> Dict[str, Any]:
         """Wrap non-object schemas appropriately."""
         if isinstance(schema, dict) and "type" in schema:
@@ -252,6 +270,7 @@ class JsonSchemaConverter:
         """Check if a value is JSON serializable."""
         try:
             import json
+
             json.dumps(value)
             return True
         except (TypeError, ValueError):
@@ -374,17 +393,21 @@ class JsonSchemaConverter:
 
         return schema
 
-    def _convert_exactsequence(self, exact_validator: v.ExactSequence) -> Dict[str, Any]:
+    def _convert_exactsequence(
+        self, exact_validator: v.ExactSequence
+    ) -> Dict[str, Any]:
         """Convert ExactSequence validator to JSON Schema with exact items."""
         if hasattr(exact_validator, 'validators'):
-            items_schemas = [self._convert_schema_element(validator)
-                           for validator in exact_validator.validators]
+            items_schemas = [
+                self._convert_schema_element(validator)
+                for validator in exact_validator.validators
+            ]
             return {
                 "type": "array",
                 "prefixItems": items_schemas,
                 "items": False,  # No additional items
                 "minItems": len(items_schemas),
-                "maxItems": len(items_schemas)
+                "maxItems": len(items_schemas),
             }
         return {"type": "array"}
 
