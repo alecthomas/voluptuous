@@ -11,6 +11,7 @@ from voluptuous.schema_builder import (
     ALLOW_EXTRA,
     PREVENT_EXTRA,
     REMOVE_EXTRA,
+    UNDEFINED,
     Extra,
     Marker,
 )
@@ -92,9 +93,23 @@ class JsonSchemaConverter:
         if element in primitive_types:
             return self._convert_primitive_type(element)
 
-        # Handle Schema instances
+        # Handle built-in container type validators (dict, list) before callable fallback
+        if element is dict:
+            return {"type": "object"}
+        if element is list:
+            return {"type": "array"}
+
+        # Handle Schema instances — retain the nested schema's own extra/required policy
         if isinstance(element, Schema):
-            return self._convert_schema_element(element.schema)
+            child_converter = JsonSchemaConverter(element)
+            # Share definition state with parent to keep a single $defs
+            child_converter.definitions = self.definitions
+            child_converter._ref_counter = self._ref_counter
+            result = child_converter._convert_schema_element(element.schema)
+            # Sync back any counter changes
+            self._ref_counter = child_converter._ref_counter
+            self.definitions = child_converter.definitions
+            return result
 
         # Handle mappings (dictionaries)
         if isinstance(element, Mapping):
@@ -153,6 +168,7 @@ class JsonSchemaConverter:
         extra_schema = None
         dynamic_key_schemas = []
         dynamic_value_schema = None
+        required_dynamic_count = 0
 
         for key, value in mapping.items():
             if key is Extra:
@@ -174,34 +190,46 @@ class JsonSchemaConverter:
             if is_dynamic_key:
                 dynamic_key_schemas.append(self._convert_schema_element(inner_key))
                 dynamic_value_schema = self._convert_schema_element(value)
+                # Preserve Required constraint for dynamic keys via minProperties
+                if isinstance(key, RequiredMarker):
+                    has_default = getattr(key, 'default', UNDEFINED) is not UNDEFINED
+                    if not has_default:
+                        required_dynamic_count += 1
                 continue
 
             if isinstance(key, RequiredMarker):
                 prop_name = str(key.schema)
-                required_keys.append(prop_name)
-                json_schema["properties"][prop_name] = self._convert_schema_element(
-                    value
-                )
+                has_default = getattr(key, 'default', UNDEFINED) is not UNDEFINED
+                if not has_default:
+                    required_keys.append(prop_name)
+                prop_schema = self._convert_schema_element(value)
+                # Emit default annotation when present and serializable
+                if has_default:
+                    try:
+                        default_value = (
+                            key.default() if callable(key.default) else key.default
+                        )
+                        if self._is_json_serializable(default_value):
+                            if isinstance(prop_schema, dict):
+                                prop_schema["default"] = default_value
+                    except (TypeError, ValueError, AttributeError):
+                        pass
+                json_schema["properties"][prop_name] = prop_schema
             elif isinstance(key, OptionalMarker):
                 prop_name = str(key.schema)
-                json_schema["properties"][prop_name] = self._convert_schema_element(
-                    value
-                )
-                if hasattr(key, 'default') and key.default is not None:
-                    if callable(key.default):
-                        try:
-                            default_value = key.default()
-                            if self._is_json_serializable(default_value):
-                                json_schema["properties"][prop_name][
-                                    "default"
-                                ] = default_value
-                        except (TypeError, ValueError, AttributeError):
-                            pass
-                    else:
-                        if self._is_json_serializable(key.default):
-                            json_schema["properties"][prop_name][
-                                "default"
-                            ] = key.default
+                prop_schema = self._convert_schema_element(value)
+                has_default = getattr(key, 'default', UNDEFINED) is not UNDEFINED
+                if has_default:
+                    try:
+                        default_value = (
+                            key.default() if callable(key.default) else key.default
+                        )
+                        if self._is_json_serializable(default_value):
+                            if isinstance(prop_schema, dict):
+                                prop_schema["default"] = default_value
+                    except (TypeError, ValueError, AttributeError):
+                        pass
+                json_schema["properties"][prop_name] = prop_schema
             elif isinstance(key, Remove):
                 continue
             else:
@@ -230,6 +258,12 @@ class JsonSchemaConverter:
                     "Dynamic keys with multiple validator patterns"
                 )
 
+        if required_dynamic_count:
+            # At least one dynamic Required key must be present -> enforce minProperties
+            json_schema["minProperties"] = max(
+                json_schema.get("minProperties", 0), required_dynamic_count
+            )
+
         if required_keys:
             json_schema["required"] = required_keys
 
@@ -255,9 +289,21 @@ class JsonSchemaConverter:
         if not set_schema:
             return {"type": "array", "uniqueItems": True, "maxItems": 0}
 
-        # Convert the single item type in the set
-        item_schema = self._convert_schema_element(next(iter(set_schema)))
-        return {"type": "array", "items": item_schema, "uniqueItems": True}
+        # Convert every validator in the set; use anyOf for heterogeneous sets
+        item_schemas = [self._convert_schema_element(item) for item in set_schema]
+        if len(item_schemas) == 1:
+            return {"type": "array", "items": item_schemas[0], "uniqueItems": True}
+        # Deduplicate identical schemas
+        unique = []
+        seen = set()
+        for s in item_schemas:
+            key = str(s)
+            if key not in seen:
+                seen.add(key)
+                unique.append(s)
+        if len(unique) == 1:
+            return {"type": "array", "items": unique[0], "uniqueItems": True}
+        return {"type": "array", "items": {"anyOf": unique}, "uniqueItems": True}
 
     def _convert_marker(self, marker: Marker) -> Any:
         """Convert a Marker instance to its underlying schema."""
@@ -403,7 +449,13 @@ class JsonSchemaConverter:
             pattern = match_validator.pattern
             if hasattr(pattern, 'pattern'):  # compiled regex
                 pattern = pattern.pattern
-            return {"type": "string", "pattern": str(pattern)}
+            pattern_str = str(pattern)
+            # Voluptuous uses re.match (anchored at start) while JSON Schema pattern is unanchored
+            if pattern_str and not pattern_str.startswith("^"):
+                # Also treat \A as start anchor; keep as-is to avoid double anchoring
+                if not pattern_str.startswith(r"\A"):
+                    pattern_str = "^" + pattern_str
+            return {"type": "string", "pattern": pattern_str}
         return {"type": "string"}
 
     def _convert_email(self, email_validator: Any) -> Dict[str, Any]:
