@@ -1,0 +1,537 @@
+"""JSON Schema export functionality for voluptuous schemas.
+
+This module provides functionality to convert voluptuous schemas to JSON Schema format,
+enabling integration with modern IDEs and validation tools that support JSON Schema.
+"""
+
+from collections.abc import Mapping, Sequence
+from typing import Any, Callable, Dict, Union
+
+from voluptuous.schema_builder import (
+    ALLOW_EXTRA,
+    PREVENT_EXTRA,
+    REMOVE_EXTRA,
+    UNDEFINED,
+    Extra,
+    Marker,
+)
+from voluptuous.schema_builder import Optional as OptionalMarker
+from voluptuous.schema_builder import (
+    Remove,
+)
+from voluptuous.schema_builder import Required as RequiredMarker
+from voluptuous.schema_builder import (
+    Schema,
+    primitive_types,
+)
+from voluptuous.validators import Length
+
+
+class JsonSchemaConverter:
+    """Converts voluptuous schemas to JSON Schema format.
+
+    This converter traverses voluptuous schema structures and generates
+    equivalent JSON Schema representations that preserve validation semantics
+    where possible.
+    """
+
+    def __init__(self, schema: Schema):
+        """Initialize converter with a voluptuous schema.
+
+        Args:
+            schema: The voluptuous Schema instance to convert
+        """
+        self.schema = schema
+        self.definitions: Dict[str, Any] = {}
+        self._ref_counter = 0
+
+    def convert(self) -> Dict[str, Any]:
+        """Convert the voluptuous schema to JSON Schema format.
+
+        Returns:
+            A dictionary representing the JSON Schema
+        """
+        converted = self._convert_schema_element(self.schema.schema)
+
+        json_schema: Dict[str, Any] = {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+        }
+
+        if isinstance(converted, dict):
+            json_schema.update(converted)
+        else:
+            wrapped_schema = self._wrap_non_object_schema(converted)
+            json_schema.update(wrapped_schema)
+
+        if self.definitions:
+            json_schema["$defs"] = self.definitions
+
+        return json_schema
+
+    def _convert_schema_element(self, element: Any) -> Any:
+        """Convert a single schema element to JSON Schema format.
+
+        Args:
+            element: The schema element to convert
+
+        Returns:
+            JSON Schema representation of the element
+        """
+        # Handle None
+        if element is None:
+            return {"type": "null"}
+
+        # Handle Extra marker
+        if element is Extra:
+            return True  # Allow additional properties
+
+        # Handle Marker classes (Required, Optional, Remove)
+        if isinstance(element, Marker):
+            return self._convert_marker(element)
+
+        # Handle primitive types
+        if element in primitive_types:
+            return self._convert_primitive_type(element)
+
+        # Handle built-in container type validators (dict, list) before callable fallback
+        if element is dict:
+            return {"type": "object"}
+        if element is list:
+            return {"type": "array"}
+
+        # Handle Schema instances — retain the nested schema's own extra/required policy
+        if isinstance(element, Schema):
+            child_converter = JsonSchemaConverter(element)
+            # Share definition state with parent to keep a single $defs
+            child_converter.definitions = self.definitions
+            child_converter._ref_counter = self._ref_counter
+            result = child_converter._convert_schema_element(element.schema)
+            # Sync back any counter changes
+            self._ref_counter = child_converter._ref_counter
+            self.definitions = child_converter.definitions
+            return result
+
+        # Handle mappings (dictionaries)
+        if isinstance(element, Mapping):
+            return self._convert_mapping(element)
+
+        # Handle sequences (lists, tuples)
+        if isinstance(element, (list, tuple)):
+            return self._convert_sequence(element)
+
+        # Handle sets
+        if isinstance(element, (set, frozenset)):
+            return self._convert_set(element)
+
+        # Handle validator classes
+        if hasattr(element, '__class__') and hasattr(element.__class__, '__name__'):
+            converter_method = getattr(
+                self, f'_convert_{element.__class__.__name__.lower()}', None
+            )
+            if converter_method:
+                return converter_method(element)
+
+        # Handle callable validators (including decorated functions like Email, Url)
+        if callable(element):
+            # Check if it's a known validator function by name
+            func_name = getattr(element, '__name__', '').lower()
+            if func_name:
+                converter_method = getattr(self, f'_convert_{func_name}', None)
+                if converter_method:
+                    return converter_method(element)
+
+            return self._convert_callable(element)
+
+        # Handle literal values
+        return self._convert_literal(element)
+
+    def _convert_primitive_type(self, type_class: type) -> Dict[str, str]:
+        """Convert Python primitive types to JSON Schema types."""
+        type_mapping = {
+            bool: "boolean",
+            int: "integer",
+            float: "number",
+            str: "string",
+            bytes: "string",  # JSON Schema doesn't have bytes, use string
+            complex: "string",  # Complex numbers as strings
+        }
+        return {"type": type_mapping.get(type_class, "string")}
+
+    def _convert_mapping(self, mapping: Mapping) -> Dict[str, Any]:
+        """Convert a mapping (dictionary) schema to a JSON Schema object."""
+        json_schema: Dict[str, Any] = {
+            "type": "object",
+            "properties": {},
+        }
+
+        required_keys = []
+        extra_schema = None
+        dynamic_key_schemas = []
+        dynamic_value_schema = None
+        required_dynamic_count = 0
+
+        for key, value in mapping.items():
+            if key is Extra:
+                extra_schema = self._convert_schema_element(value)
+                continue
+
+            # Unwrap marker to inspect inner key
+            if isinstance(key, (RequiredMarker, OptionalMarker)):
+                inner_key = key.schema
+                if isinstance(inner_key, Marker):
+                    inner_key = inner_key.schema
+            else:
+                inner_key = key
+
+            is_dynamic_key = isinstance(inner_key, type) or (
+                callable(inner_key) and not isinstance(inner_key, str)
+            )
+
+            if is_dynamic_key:
+                dynamic_key_schemas.append(self._convert_schema_element(inner_key))
+                dynamic_value_schema = self._convert_schema_element(value)
+                # Preserve Required constraint for dynamic keys via minProperties
+                if isinstance(key, RequiredMarker):
+                    has_default = getattr(key, 'default', UNDEFINED) is not UNDEFINED
+                    if not has_default:
+                        required_dynamic_count += 1
+                continue
+
+            if isinstance(key, RequiredMarker):
+                prop_name = str(key.schema)
+                has_default = getattr(key, 'default', UNDEFINED) is not UNDEFINED
+                if not has_default:
+                    required_keys.append(prop_name)
+                prop_schema = self._convert_schema_element(value)
+                # Emit default annotation when present and serializable
+                if has_default:
+                    try:
+                        default_value = (
+                            key.default() if callable(key.default) else key.default
+                        )
+                        if self._is_json_serializable(default_value):
+                            if isinstance(prop_schema, dict):
+                                prop_schema["default"] = default_value
+                    except (TypeError, ValueError, AttributeError):
+                        pass
+                json_schema["properties"][prop_name] = prop_schema
+            elif isinstance(key, OptionalMarker):
+                prop_name = str(key.schema)
+                prop_schema = self._convert_schema_element(value)
+                has_default = getattr(key, 'default', UNDEFINED) is not UNDEFINED
+                if has_default:
+                    try:
+                        default_value = (
+                            key.default() if callable(key.default) else key.default
+                        )
+                        if self._is_json_serializable(default_value):
+                            if isinstance(prop_schema, dict):
+                                prop_schema["default"] = default_value
+                    except (TypeError, ValueError, AttributeError):
+                        pass
+                json_schema["properties"][prop_name] = prop_schema
+            elif isinstance(key, Remove):
+                continue
+            else:
+                prop_name = str(key)
+                json_schema["properties"][prop_name] = self._convert_schema_element(
+                    value
+                )
+                if getattr(self.schema, 'required', False):
+                    required_keys.append(prop_name)
+
+        if extra_schema is not None:
+            json_schema["additionalProperties"] = extra_schema
+        elif dynamic_value_schema is not None:
+            json_schema["additionalProperties"] = dynamic_value_schema
+        else:
+            extra = getattr(self.schema, 'extra', PREVENT_EXTRA)
+            json_schema["additionalProperties"] = extra in (ALLOW_EXTRA, REMOVE_EXTRA)
+
+        if dynamic_key_schemas:
+            if len(dynamic_key_schemas) == 1:
+                json_schema["propertyNames"] = dynamic_key_schemas[0]
+            else:
+                json_schema["propertyNames"] = {"anyOf": dynamic_key_schemas}
+                json_schema["additionalProperties"] = True
+                json_schema["description"] = (
+                    "Dynamic keys with multiple validator patterns"
+                )
+
+        if required_dynamic_count:
+            # At least one dynamic Required key must be present -> enforce minProperties
+            json_schema["minProperties"] = max(
+                json_schema.get("minProperties", 0), required_dynamic_count
+            )
+
+        if required_keys:
+            json_schema["required"] = required_keys
+
+        return json_schema
+
+    def _convert_sequence(self, sequence: Sequence) -> Dict[str, Any]:
+        """Convert a sequence (list/tuple) schema to JSON Schema array."""
+        if not sequence:
+            return {"type": "array", "maxItems": 0}
+
+        # Convert all items to schemas first
+        items_schemas = [self._convert_schema_element(item) for item in sequence]
+
+        if len(items_schemas) == 1 or all(
+            schema == items_schemas[0] for schema in items_schemas
+        ):
+            return {"type": "array", "items": items_schemas[0]}
+
+        return {"type": "array", "items": {"anyOf": items_schemas}}
+
+    def _convert_set(self, set_schema: Union[set, frozenset]) -> Dict[str, Any]:
+        """Convert a set schema to a JSON Schema array with unique items."""
+        if not set_schema:
+            return {"type": "array", "uniqueItems": True, "maxItems": 0}
+
+        # Convert every validator in the set; use anyOf for heterogeneous sets
+        item_schemas = [self._convert_schema_element(item) for item in set_schema]
+        if len(item_schemas) == 1:
+            return {"type": "array", "items": item_schemas[0], "uniqueItems": True}
+        # Deduplicate identical schemas
+        unique = []
+        seen = set()
+        for s in item_schemas:
+            key = str(s)
+            if key not in seen:
+                seen.add(key)
+                unique.append(s)
+        if len(unique) == 1:
+            return {"type": "array", "items": unique[0], "uniqueItems": True}
+        return {"type": "array", "items": {"anyOf": unique}, "uniqueItems": True}
+
+    def _convert_marker(self, marker: Marker) -> Any:
+        """Convert a Marker instance to its underlying schema."""
+        return self._convert_schema_element(marker.schema)
+
+    def _convert_callable(self, func: Callable[..., Any]) -> Dict[str, Any]:
+        """Convert a callable validator to JSON Schema."""
+        # For generic callables, we can determine little about the expected type
+        # This is a limitation of the conversion process
+        return {
+            "description": f"Custom validator: {getattr(func, '__name__', 'anonymous')}"
+        }
+
+    def _convert_literal(self, value: Any) -> Dict[str, Any]:
+        """Convert a literal value to JSON Schema const."""
+        return {"const": value}
+
+    def _wrap_non_object_schema(self, schema: Any) -> Dict[str, Any]:
+        """Wrap non-object schemas appropriately."""
+        if isinstance(schema, dict) and "type" in schema:
+            return schema
+        return {"type": "string", "description": "Complex schema"}
+
+    def _is_json_serializable(self, value: Any) -> bool:
+        """Check if a value is JSON serializable."""
+        try:
+            import json
+
+            json.dumps(value)
+            return True
+        except (TypeError, ValueError):
+            return False
+
+    # Validator-specific conversion methods
+
+    def _convert_range(self, range_validator: Any) -> Dict[str, Any]:
+        """Convert Range validator to JSON Schema numeric constraints."""
+        schema: Dict[str, Any] = {"type": "number"}
+
+        if hasattr(range_validator, 'min') and range_validator.min is not None:
+            if getattr(range_validator, 'min_included', True):
+                schema["minimum"] = range_validator.min
+            else:
+                schema["exclusiveMinimum"] = range_validator.min
+
+        if hasattr(range_validator, 'max') and range_validator.max is not None:
+            if getattr(range_validator, 'max_included', True):
+                schema["maximum"] = range_validator.max
+            else:
+                schema["exclusiveMaximum"] = range_validator.max
+
+        return schema
+
+    def _convert_length(self, length_validator: Any) -> Dict[str, Any]:
+        """Convert Length validator to JSON Schema string/array length constraints."""
+        schema: Dict[str, Any] = {}
+
+        if hasattr(length_validator, 'min') and length_validator.min is not None:
+            schema["minLength"] = length_validator.min
+
+        if hasattr(length_validator, 'max') and length_validator.max is not None:
+            schema["maxLength"] = length_validator.max
+
+        return schema
+
+    def _convert_all(self, all_validator: Any) -> Dict[str, Any]:
+        """Convert All validator to JSON Schema allOf constraint."""
+        if not hasattr(all_validator, 'validators'):
+            return {}
+
+        length_validators = [
+            v for v in all_validator.validators if isinstance(v, Length)
+        ]
+        other_validators = [
+            v for v in all_validator.validators if not isinstance(v, Length)
+        ]
+
+        schemas = [self._convert_schema_element(v) for v in other_validators]
+
+        if length_validators:
+            array_schema = self._find_array_schema(schemas)
+            if array_schema is not None:
+                for lv in length_validators:
+                    if hasattr(lv, 'min') and lv.min is not None:
+                        array_schema["minItems"] = lv.min
+                    if hasattr(lv, 'max') and lv.max is not None:
+                        array_schema["maxItems"] = lv.max
+            else:
+                for lv in length_validators:
+                    schemas.append(self._convert_schema_element(lv))
+
+        if len(schemas) == 1:
+            return schemas[0]
+        elif len(schemas) > 1:
+            return {"allOf": schemas}
+        else:
+            return {}
+
+    def _find_array_schema(self, schemas: list) -> Union[Dict[str, Any], None]:
+        """Recursively search schemas for an array schema."""
+        for schema in schemas:
+            if not isinstance(schema, dict):
+                continue
+            if schema.get("type") == "array":
+                return schema
+            for key in ("allOf", "anyOf", "oneOf"):
+                if key in schema and isinstance(schema[key], list):
+                    found = self._find_array_schema(schema[key])
+                    if found is not None:
+                        return found
+        return None
+
+    def _convert_any(self, any_validator: Any) -> Dict[str, Any]:
+        """Convert Any validator to JSON Schema anyOf constraint."""
+        if not hasattr(any_validator, 'validators'):
+            return {}
+
+        schemas = []
+        for validator in any_validator.validators:
+            converted = self._convert_schema_element(validator)
+            if converted:
+                schemas.append(converted)
+
+        if len(schemas) == 1:
+            return schemas[0]
+        elif len(schemas) > 1:
+            return {"anyOf": schemas}
+        else:
+            return {}
+
+    def _convert_in(self, in_validator: Any) -> Dict[str, Any]:
+        """Convert In validator to JSON Schema enum constraint."""
+        if hasattr(in_validator, 'container'):
+            # Handle both Container and Iterable types
+            container = in_validator.container
+            if hasattr(container, '__iter__'):
+                return {"enum": list(container)}
+        return {}
+
+    def _convert_match(self, match_validator: Any) -> Dict[str, Any]:
+        """Convert Match validator to JSON Schema pattern constraint."""
+        if hasattr(match_validator, 'pattern'):
+            pattern = match_validator.pattern
+            if hasattr(pattern, 'pattern'):  # compiled regex
+                pattern = pattern.pattern
+            pattern_str = str(pattern)
+            # Voluptuous uses re.match (anchored at start) while JSON Schema pattern is unanchored
+            if pattern_str and not pattern_str.startswith("^"):
+                # Also treat \A as start anchor; keep as-is to avoid double anchoring
+                if not pattern_str.startswith(r"\A"):
+                    pattern_str = "^" + pattern_str
+            return {"type": "string", "pattern": pattern_str}
+        return {"type": "string"}
+
+    def _convert_email(self, email_validator: Any) -> Dict[str, Any]:
+        """Convert Email validator to JSON Schema email format."""
+        return {"type": "string", "format": "email"}
+
+    def _convert_url(self, url_validator: Any) -> Dict[str, Any]:
+        """Convert Url validator to JSON Schema uri format."""
+        return {"type": "string", "format": "uri"}
+
+    def _convert_date(self, date_validator: Any) -> Dict[str, Any]:
+        """Convert Date validator to JSON Schema date format."""
+        return {"type": "string", "format": "date"}
+
+    def _convert_datetime(self, datetime_validator: Any) -> Dict[str, Any]:
+        """Convert Datetime validator to JSON Schema date-time format."""
+        return {"type": "string", "format": "date-time"}
+
+    def _convert_coerce(self, coerce_validator: Any) -> Dict[str, Any]:
+        """Convert Coerce validator based on a target type."""
+        if hasattr(coerce_validator, 'type'):
+            coerce_type = coerce_validator.type
+            if isinstance(coerce_type, type):
+                return self._convert_primitive_type(coerce_type)
+        return {}
+
+    def _convert_clamp(self, clamp_validator: Any) -> Dict[str, Any]:
+        """Convert Clamp validator to Range-like constraints."""
+        schema: Dict[str, Any] = {"type": "number"}
+
+        if hasattr(clamp_validator, 'min') and clamp_validator.min is not None:
+            schema["minimum"] = clamp_validator.min
+
+        if hasattr(clamp_validator, 'max') and clamp_validator.max is not None:
+            schema["maximum"] = clamp_validator.max
+
+        return schema
+
+    def _convert_exactsequence(self, exact_validator: Any) -> Dict[str, Any]:
+        """Convert ExactSequence validator to JSON Schema with exact items."""
+        if hasattr(exact_validator, 'validators'):
+            items_schemas = [
+                self._convert_schema_element(validator)
+                for validator in exact_validator.validators
+            ]
+            return {
+                "type": "array",
+                "prefixItems": items_schemas,
+                "items": False,  # No additional items
+                "minItems": len(items_schemas),
+                "maxItems": len(items_schemas),
+            }
+        return {"type": "array"}
+
+
+def to_json_schema(schema: Union[Schema, Any]) -> Dict[str, Any]:
+    """Convert a voluptuous schema to JSON Schema format.
+
+    This is a convenience function that creates a JsonSchemaConverter
+    and performs the conversion.
+
+    Args:
+        schema: A voluptuous Schema instance or schema definition
+
+    Returns:
+        A dictionary representing the JSON Schema
+
+    Example:
+        >>> from voluptuous import Schema, Required, Range
+        >>> schema = Schema({Required('name'): str, 'age': Range(min=0, max=120)})
+        >>> json_schema = to_json_schema(schema)
+        >>> print(json_schema['properties']['name'])
+        {'type': 'string'}
+    """
+    if not isinstance(schema, Schema):
+        schema = Schema(schema)
+
+    converter = JsonSchemaConverter(schema)
+    return converter.convert()
