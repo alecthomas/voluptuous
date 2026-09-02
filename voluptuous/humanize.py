@@ -2,6 +2,7 @@
 import typing
 
 from voluptuous import Invalid, MultipleInvalid
+from voluptuous._i18n import gettext
 from voluptuous.error import Error
 from voluptuous.schema_builder import Schema
 
@@ -45,7 +46,7 @@ def humanize_error(
             offending_item_summary = (
                 offending_item_summary[: max_sub_error_length - 3] + '...'
             )
-        return '%s. Got %s' % (validation_error, offending_item_summary)
+        return gettext('%s. Got %s') % (validation_error, offending_item_summary)
 
 
 def validate_with_humanized_errors(

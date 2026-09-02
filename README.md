@@ -41,6 +41,56 @@ To file a bug, create a [new issue](https://github.com/alecthomas/voluptuous/iss
 
 The documentation is provided [here](http://alecthomas.github.io/voluptuous/).
 
+## Internationalization
+
+Voluptuous routes built-in validation message templates and the
+`Invalid.__str__` message/error-type format through its i18n hooks.
+
+Voluptuous does not ship production translation catalogs. Use
+`configure_i18n()` to load your own gettext translations and set the
+module-wide default translator:
+
+```pycon
+>>> from voluptuous import configure_i18n
+>>> configure_i18n(
+...     domain="myapp",
+...     localedir="/path/to/myapp/locale",
+...     languages=("de",),
+...     fallback=True,
+... )
+```
+
+`domain` is the gettext domain to load, such as `myapp` or `voluptuous`.
+`localedir` points at a locale directory containing paths like
+`de/LC_MESSAGES/myapp.mo` for `domain="myapp"`, or
+`de/LC_MESSAGES/voluptuous.mo` for `domain="voluptuous"`. `languages` selects
+one or more locale names. `fallback=True` keeps untranslated messages in
+English instead of raising when catalog files are missing.
+
+`configure_i18n()` updates the global default translator. Active context-local
+overrides are preserved, so a request, task, or test can temporarily use a
+different translator without changing other contexts:
+
+```pycon
+>>> from voluptuous import MultipleInvalid, Required, Schema, gettext_scope
+>>> schema = Schema({Required("name"): str})
+>>> with gettext_scope(lambda message: f"scoped: {message}"):
+...     try:
+...         schema({})
+...     except MultipleInvalid as error:
+...         result = str(error)
+>>> result
+"scoped: required key not provided @ data['name']"
+```
+
+Use `set_gettext()` when you want to replace the global default with a custom
+callable. Use `gettext_scope()` for temporary context-local overrides.
+
+When no translation is configured, messages stay in English.
+
+`Invalid.__str__` always renders the path fragment as `" @ data[...]"` (not
+translated) so tooling that parses error paths stays stable.
+
 ## Contribution to Documentation
 
 Documentation is built using `Sphinx`. You can install it by
@@ -843,4 +893,3 @@ using voluptuous validators in `assert`s.
 
 I greatly prefer the light-weight style promoted by these libraries to
 the complexity of libraries like FormEncode.
-

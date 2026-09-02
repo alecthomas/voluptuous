@@ -1,11 +1,21 @@
 # fmt: off
 import collections
+import contextvars
 import copy
 import os
+import shutil
+import subprocess
+import sys
+import tarfile
+import threading
+import typing
+import zipfile
 from enum import Enum
+from pathlib import Path
 
 import pytest
 
+import voluptuous._i18n as _i18n
 from voluptuous import (
     ALLOW_EXTRA,
     PREVENT_EXTRA,
@@ -32,6 +42,7 @@ from voluptuous import (
     Invalid,
     IsDir,
     IsFile,
+    IsTrue,
     Length,
     Literal,
     LiteralInvalid,
@@ -68,6 +79,21 @@ from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 # fmt: on
 
+I18N_LOCALE_DIR = Path(__file__).resolve().parent / "fixtures" / "locale"
+I18N_REQUIRED_DE = "erforderliches feld fehlt"
+
+
+def _reset_i18n_translator():
+    _i18n._translator.set(None)
+    _i18n._default_translator = _i18n._identity
+
+
+@pytest.fixture(autouse=True)
+def _restore_i18n_translator():
+    _reset_i18n_translator()
+    yield
+    _reset_i18n_translator()
+
 
 def test_new_required_test():
     schema = Schema(
@@ -77,6 +103,459 @@ def test_new_required_test():
         required=True,
     )
     assert schema.required
+
+
+def test_i18n_set_gettext():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        assert _i18n.gettext("value") == "localized:value"
+        assert _i18n._translator.get() is None
+    finally:
+        _reset_i18n_translator()
+
+
+def test_configure_i18n_fallback_keeps_identity(tmp_path):
+    translated = _i18n.configure_i18n(
+        localedir=str(tmp_path),
+        languages=("xx",),
+    )
+    assert translated("message") == "message"
+    assert _i18n.gettext("value") == "value"
+
+    _reset_i18n_translator()
+
+
+def test_unconfigured_i18n_ignores_process_gettext(monkeypatch):
+    previous_domain = _i18n._gettext.textdomain()
+    previous_localedir = _i18n._gettext.bindtextdomain("voluptuous")
+
+    try:
+        monkeypatch.setenv("LANGUAGE", "de")
+        _i18n._gettext.bindtextdomain("voluptuous", str(I18N_LOCALE_DIR))
+        _i18n._gettext.textdomain("voluptuous")
+
+        assert _i18n._gettext.gettext("required key not provided") == I18N_REQUIRED_DE
+        assert _i18n.gettext("required key not provided") == (
+            "required key not provided"
+        )
+    finally:
+        _i18n._gettext.textdomain(previous_domain)
+        _i18n._gettext.bindtextdomain("voluptuous", previous_localedir)
+
+
+def test_configure_i18n_without_localedir_does_not_probe_package_locale(monkeypatch):
+    call = {}
+
+    class FakeTranslations:
+        def gettext(self, message: str) -> str:
+            return f"localized({message})"
+
+    def fake_translation(
+        domain: str,
+        localedir: typing.Optional[str] = None,
+        languages: typing.Optional[list[str]] = None,
+        fallback: bool = True,
+    ) -> object:
+        call.update(
+            domain=domain,
+            localedir=localedir,
+            languages=languages,
+            fallback=fallback,
+        )
+        return FakeTranslations()
+
+    if hasattr(_i18n, "_resolve_localedir"):
+        monkeypatch.setattr(
+            _i18n,
+            "_resolve_localedir",
+            lambda localedir=None: "/unexpected/package/locale",
+        )
+    monkeypatch.setattr(_i18n._gettext, "translation", fake_translation)
+
+    translated = _i18n.configure_i18n(languages="de")
+
+    assert translated("hello") == "localized(hello)"
+    assert call["domain"] == "voluptuous"
+    assert call["localedir"] is None
+    assert call["languages"] == ["de"]
+    assert call["fallback"] is True
+
+
+def test_configure_i18n_passes_parameters(monkeypatch, tmp_path):
+    call = {}
+
+    class FakeTranslations:
+        def gettext(self, message: str) -> str:
+            return f"localized({message})"
+
+    def fake_translation(
+        domain: str,
+        localedir: typing.Optional[str] = None,
+        languages: typing.Optional[list[str]] = None,
+        fallback: bool = True,
+    ) -> object:
+        call.update(
+            domain=domain,
+            localedir=localedir,
+            languages=languages,
+            fallback=fallback,
+        )
+        return FakeTranslations()
+
+    monkeypatch.setattr(_i18n._gettext, "translation", fake_translation)
+
+    translated = _i18n.configure_i18n(
+        domain="voluptuous-test",
+        localedir=str(tmp_path),
+        languages=("de",),
+        fallback=False,
+    )
+
+    assert translated("hello") == "localized(hello)"
+    assert _i18n.gettext("value") == "localized(value)"
+    assert call["domain"] == "voluptuous-test"
+    assert call["localedir"] == str(tmp_path)
+    assert call["languages"] == ["de"]
+    assert call["fallback"] is False
+
+    _reset_i18n_translator()
+
+
+def test_gettext_scope_temporary_override():
+    _reset_i18n_translator()
+
+    with _i18n.gettext_scope(lambda message: f"scoped:{message}"):
+        assert _i18n.gettext("value") == "scoped:value"
+
+    assert _i18n.gettext("value") == "value"
+
+
+def test_gettext_scope_supports_nesting():
+    _reset_i18n_translator()
+
+    with _i18n.gettext_scope(lambda message: f"outer:{message}"):
+        with _i18n.gettext_scope(lambda message: f"inner:{message}"):
+            assert _i18n.gettext("value") == "inner:value"
+        assert _i18n.gettext("value") == "outer:value"
+
+
+def test_message_decorator_uses_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        with pytest.raises(
+            MultipleInvalid,
+            match="localized:value was not true",
+        ):
+            Schema(IsTrue())(False)
+    finally:
+        _reset_i18n_translator()
+
+
+def test_message_decorator_respects_explicit_message_override():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        with pytest.raises(
+            MultipleInvalid,
+            match="explicit message",
+        ):
+            Schema(IsTrue("explicit message"))(False)
+    finally:
+        _reset_i18n_translator()
+
+
+def test_someof_bounds_assertion_uses_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(AssertionError) as ctx:
+        SomeOf(validators=[])
+
+    expected = (
+        'localized:when using "SomeOf" you should specify at least one of '
+        'min_valid and max_valid'
+    )
+    assert str(ctx.value) == expected
+
+
+def test_schema_multiple_errors_use_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    try:
+        schema = Schema(
+            {
+                "a": IsTrue(),
+                "b": Url(),
+                "c": Email(),
+            }
+        )
+
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({"a": False, "b": "not-an-url", "c": "bad"})
+
+        error_texts = [str(error) for error in ctx.value.errors]
+        assert len(error_texts) == 3
+        assert any("localized:value was not true" in error for error in error_texts)
+        assert any("localized:expected a URL" in error for error in error_texts)
+        assert any(
+            "localized:expected an email address" in error for error in error_texts
+        )
+    finally:
+        _reset_i18n_translator()
+
+
+def test_configure_i18n_with_real_mo_file():
+    translated = _i18n.configure_i18n(
+        localedir=str(I18N_LOCALE_DIR),
+        languages=("de",),
+        domain="voluptuous",
+    )
+    assert translated("required key not provided") == I18N_REQUIRED_DE
+    assert translated("value was not true") == "wert war nicht wahr"
+
+    _reset_i18n_translator()
+
+
+def test_de_mo_file_contains_real_translations():
+    mo_path = I18N_LOCALE_DIR / "de" / "LC_MESSAGES" / "voluptuous.mo"
+
+    with mo_path.open("rb") as mo_file:
+        translation = _i18n._gettext.GNUTranslations(mo_file)
+
+    assert translation.gettext("required key not provided") == I18N_REQUIRED_DE
+    assert translation.gettext("value was not true") == "wert war nicht wahr"
+
+
+def test_fresh_context_and_thread_use_default_translator_after_set_gettext():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+    assert _i18n.gettext("value") == "localized:value"
+
+    assert contextvars.Context().run(_i18n.gettext, "value") == "localized:value"
+
+    thread_result: dict[str, str] = {}
+
+    def _collect_thread_value():
+        thread_result["value"] = _i18n.gettext("value")
+
+    thread = threading.Thread(target=_collect_thread_value)
+    thread.start()
+    thread.join()
+    assert thread_result["value"] == "localized:value"
+
+
+def test_configure_i18n_replaces_set_gettext_default():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    translated = _i18n.configure_i18n(
+        localedir=str(I18N_LOCALE_DIR),
+        languages=("de",),
+        domain="voluptuous",
+    )
+
+    assert _i18n.gettext("required key not provided") == translated(
+        "required key not provided"
+    )
+    assert contextvars.Context().run(
+        _i18n.gettext, "required key not provided"
+    ) == translated("required key not provided")
+
+    fresh_thread_result: dict[str, str] = {}
+
+    def _collect_fresh_thread_value():
+        fresh_thread_result["value"] = _i18n.gettext("required key not provided")
+
+    fresh_context = contextvars.Context()
+
+    def _collect_in_fresh_context():
+        fresh_context.run(_collect_fresh_thread_value)
+
+    fresh_thread = threading.Thread(target=_collect_in_fresh_context)
+    fresh_thread.start()
+    fresh_thread.join()
+    assert fresh_thread_result["value"] == translated("required key not provided")
+
+
+def test_configure_i18n_preserves_context_override_and_updates_default():
+    with _i18n.gettext_scope(lambda message: f"scoped:{message}"):
+        translated = _i18n.configure_i18n(
+            localedir=str(I18N_LOCALE_DIR),
+            languages=("de",),
+            domain="voluptuous",
+        )
+
+        assert _i18n.gettext("required key not provided") == (
+            "scoped:required key not provided"
+        )
+        assert contextvars.Context().run(
+            _i18n.gettext, "required key not provided"
+        ) == translated("required key not provided")
+
+        fresh_thread_result: dict[str, str] = {}
+        fresh_thread_context = contextvars.Context()
+
+        def _collect_fresh_thread_value():
+            fresh_thread_result["value"] = fresh_thread_context.run(
+                _i18n.gettext, "required key not provided"
+            )
+
+        fresh_thread = threading.Thread(target=_collect_fresh_thread_value)
+        fresh_thread.start()
+        fresh_thread.join()
+        assert fresh_thread_result["value"] == translated("required key not provided")
+
+    assert _i18n.gettext("required key not provided") == translated(
+        "required key not provided"
+    )
+
+
+def test_schema_created_before_locale_switch_still_translates_messages():
+    schema = Schema({Required("name"): str})
+    _i18n.configure_i18n(
+        localedir=str(I18N_LOCALE_DIR),
+        languages=("de",),
+        domain="voluptuous",
+    )
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({})
+
+    assert I18N_REQUIRED_DE in str(ctx.value)
+
+
+def test_mapping_error_type_and_format_use_runtime_localizer():
+    schema = Schema({"name": int})
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({"name": "not-an-int"})
+
+    assert str(ctx.value) == (
+        "localized:localized:expected int for localized:dictionary value"
+        " @ data['name']"
+    )
+
+
+def test_default_mapping_error_type_uses_runtime_localizer():
+    _i18n.set_gettext(lambda message: f"compile:{message}")
+    validate_mapping = Schema({})._compile_mapping({"name": int})
+    _i18n.set_gettext(lambda message: f"runtime:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        validate_mapping([], {"name": "not-an-int"}.items(), {})
+
+    assert (
+        str(ctx.value)
+        == "runtime:runtime:expected int for runtime:mapping value @ data['name']"
+    )
+
+
+def test_object_error_type_uses_runtime_localizer():
+    schema = Schema(Object({"value": int}, cls=MyValueClass))
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema(MyValueClass(value="not-an-int"))
+
+    assert (
+        str(ctx.value)
+        == "localized:localized:expected int for localized:object value @ data['value']"
+    )
+
+
+def test_invalid_str_error_type_format_defaults_to_existing_english():
+    schema = Schema({"age": int})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({"age": "old"})
+
+    assert str(ctx.value) == "expected int for dictionary value @ data['age']"
+
+
+def test_invalid_str_error_type_format_is_translatable_and_reorderable():
+    schema = Schema({"age": int})
+    translations = {
+        "expected %s": "%s expected",
+        "dictionary value": "dict value",
+        "%(message)s for %(error_type)s": "%(error_type)s: %(message)s",
+    }
+
+    with _i18n.gettext_scope(lambda message: translations.get(message, message)):
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({"age": "old"})
+        rendered = str(ctx.value)
+
+    assert rendered == "dict value: int expected @ data['age']"
+
+
+def test_invalid_str_path_fragment_is_not_translated():
+    _i18n.set_gettext(lambda message: f"localized:{message}")
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema({"name": int})({"name": "not-an-int"})
+
+    assert "localized:expected int" in str(ctx.value)
+    assert " @ data['name']" in str(ctx.value)
+
+
+def test_locale_fixture_does_not_ship_as_package_data(tmp_path):
+    dist_dir = tmp_path / "dist"
+    dist_dir.mkdir()
+    project_dir = Path(__file__).resolve().parents[2]
+    generated_metadata = (
+        project_dir / "build",
+        project_dir / "voluptuous.egg-info",
+    )
+    production_path = "voluptuous/locale/de/LC_MESSAGES/voluptuous.mo"
+    fixture_path = "voluptuous/tests/fixtures/locale/de/LC_MESSAGES/voluptuous.mo"
+
+    for path in generated_metadata:
+        shutil.rmtree(path, ignore_errors=True)
+
+    try:
+        sdist = subprocess.run(
+            [sys.executable, "setup.py", "sdist", "--dist-dir", str(dist_dir)],
+            cwd=str(project_dir),
+            capture_output=True,
+            text=True,
+        )
+        if sdist.returncode != 0:
+            pytest.fail(
+                f"sdist command failed with exit code {sdist.returncode}\n"
+                f"stdout:\n{sdist.stdout}\n"
+                f"stderr:\n{sdist.stderr}"
+            )
+
+        wheel = subprocess.run(
+            [sys.executable, "setup.py", "bdist_wheel", "--dist-dir", str(dist_dir)],
+            cwd=str(project_dir),
+            capture_output=True,
+            text=True,
+        )
+        if wheel.returncode != 0:
+            pytest.fail(
+                f"bdist_wheel command failed with exit code {wheel.returncode}\n"
+                f"stdout:\n{wheel.stdout}\n"
+                f"stderr:\n{wheel.stderr}"
+            )
+
+        sdist_files = sorted(dist_dir.glob("voluptuous-*.tar.gz"))
+        wheel_files = sorted(dist_dir.glob("voluptuous-*.whl"))
+        assert sdist_files, f"no sdist found in {dist_dir}"
+        assert wheel_files, f"no wheel found in {dist_dir}"
+
+        with tarfile.open(sdist_files[0], "r:gz") as archive:
+            archive_names = archive.getnames()
+            assert not any(name.endswith(production_path) for name in archive_names)
+            assert any(name.endswith(fixture_path) for name in archive_names)
+
+        with zipfile.ZipFile(wheel_files[0]) as archive:
+            archive_names = archive.namelist()
+            assert not any(name.endswith(production_path) for name in archive_names)
+            assert fixture_path not in archive_names
+    finally:
+        for path in generated_metadata:
+            shutil.rmtree(path, ignore_errors=True)
 
 
 def test_exact_sequence():
