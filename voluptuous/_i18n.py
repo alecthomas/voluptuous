@@ -10,6 +10,10 @@ from contextvars import ContextVar
 TranslateFunc = Callable[[str], str]
 
 
+def _identity(message: str) -> str:
+    return message
+
+
 def _normalize_languages(
     languages: typing.Optional[typing.Union[str, Iterable[str]]],
 ) -> typing.Optional[list[str]]:
@@ -20,7 +24,7 @@ def _normalize_languages(
     return list(languages)
 
 
-_default_translator: TranslateFunc = _gettext.gettext
+_default_translator: TranslateFunc = _identity
 _translator: ContextVar[typing.Optional[TranslateFunc]] = ContextVar(
     "voluptuous_gettext", default=None
 )
