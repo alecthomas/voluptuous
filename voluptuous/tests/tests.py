@@ -85,7 +85,7 @@ I18N_REQUIRED_DE = "erforderliches feld fehlt"
 
 def _reset_i18n_translator():
     _i18n._translator.set(None)
-    _i18n._default_translator = _i18n._gettext.gettext
+    _i18n._default_translator = _i18n._identity
 
 
 @pytest.fixture(autouse=True)
@@ -124,6 +124,24 @@ def test_configure_i18n_fallback_keeps_identity(tmp_path):
     assert _i18n.gettext("value") == "value"
 
     _reset_i18n_translator()
+
+
+def test_unconfigured_i18n_ignores_process_gettext(monkeypatch):
+    previous_domain = _i18n._gettext.textdomain()
+    previous_localedir = _i18n._gettext.bindtextdomain("voluptuous")
+
+    try:
+        monkeypatch.setenv("LANGUAGE", "de")
+        _i18n._gettext.bindtextdomain("voluptuous", str(I18N_LOCALE_DIR))
+        _i18n._gettext.textdomain("voluptuous")
+
+        assert _i18n._gettext.gettext("required key not provided") == I18N_REQUIRED_DE
+        assert _i18n.gettext("required key not provided") == (
+            "required key not provided"
+        )
+    finally:
+        _i18n._gettext.textdomain(previous_domain)
+        _i18n._gettext.bindtextdomain("voluptuous", previous_localedir)
 
 
 def test_configure_i18n_without_localedir_does_not_probe_package_locale(monkeypatch):
