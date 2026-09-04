@@ -2082,6 +2082,17 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
+def test_object_with_dict_data():
+    # Object has no cls set here, so it accepts any data, including a plain
+    # dict rather than a real instance with a __dict__ of its own. That used
+    # to make _iterate_object come up empty for it, so every key looked
+    # "missing" no matter what the dict actually held.
+    s = Schema({'test': (Object({'ok': 1}),)}, required=True)
+    assert s({'test': ({'ok': 1},)}) == {'test': ({'ok': 1},)}
+    pytest.raises(MultipleInvalid, s, {'test': ({},)})
+    pytest.raises(MultipleInvalid, s, {'test': ({'ok': 2},)})
+
+
 def test_exception():
     s = Schema(None)
     with pytest.raises(MultipleInvalid) as ctx:

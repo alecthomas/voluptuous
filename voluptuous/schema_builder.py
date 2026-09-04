@@ -914,7 +914,17 @@ def _iterate_object(obj):
     """Return iterator over object attributes. Respect objects with
     defined __slots__.
 
+    A plain mapping has no __dict__ of its own to introspect, so vars()
+    raises TypeError on it and it falls through to yielding nothing,
+    silently treating every one of its entries as absent. Reading its
+    items directly keeps Object's "same behavior as a dictionary
+    validator" promise instead of dropping every key it's given.
+
     """
+    if isinstance(obj, collections.abc.Mapping):
+        for item in obj.items():
+            yield item
+        return
     d = {}
     try:
         d = vars(obj)
