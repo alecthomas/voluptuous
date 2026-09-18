@@ -2375,3 +2375,20 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+def test_boolean_is_not_an_integer():
+    """bool is a subclass of int; Schema(int) must still reject True/False."""
+    schema = Schema(int)
+    with pytest.raises(MultipleInvalid):
+        schema(True)
+    with pytest.raises(MultipleInvalid):
+        schema(False)
+    assert schema(0) == 0
+    assert schema(1) == 1
+    with pytest.raises(MultipleInvalid):
+        Schema({'age': int})({'age': True})
+    with pytest.raises(MultipleInvalid):
+        Schema(ExactSequence([int, int]))([True, False])
+    assert Schema(bool)(True) is True
+    assert Schema(bool)(False) is False

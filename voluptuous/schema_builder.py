@@ -828,6 +828,10 @@ def _compile_scalar(schema):
     if inspect.isclass(schema):
 
         def validate_instance(path, data):
+            # bool is a subclass of int; reject so True/False are not valid ints
+            if schema is int and isinstance(data, bool):
+                msg = 'expected %s' % schema.__name__
+                raise er.TypeInvalid(msg, path)
             if isinstance(data, schema):
                 return data
             else:
