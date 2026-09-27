@@ -10,8 +10,10 @@ import tarfile
 import threading
 import typing
 import zipfile
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Optional as TypingOptional
 
 import pytest
 
@@ -95,6 +97,58 @@ def _restore_i18n_translator():
     _reset_i18n_translator()
     yield
     _reset_i18n_translator()
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_optional_field(schema_factory):
+    @dataclass
+    class Account:
+        nickname: TypingOptional[str]
+
+    schema = schema_factory(Account)
+    assert schema({'nickname': None}) == Account(None)
+    assert schema({'nickname': 'reader'}) == Account('reader')
+    with pytest.raises(MultipleInvalid, match='required key not provided'):
+        schema({})
+    with pytest.raises(MultipleInvalid, match='expected str'):
+        schema({'nickname': 12})
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_optional_default(schema_factory):
+    @dataclass
+    class Account:
+        nickname: TypingOptional[str] = None
+
+    schema = schema_factory(Account)
+    assert schema({}) == Account()
+    assert schema({'nickname': None}) == Account()
+    assert schema({'nickname': 'reader'}) == Account('reader')
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_optional_additional_constraint(schema_factory):
+    @dataclass
+    class Account:
+        nickname: TypingOptional[str] = None
+
+    schema = schema_factory(Account, {'nickname': Maybe(Length(min=2))})
+    assert schema({}) == Account()
+    assert schema({'nickname': 'reader'}) == Account('reader')
+    with pytest.raises(MultipleInvalid):
+        schema({'nickname': 'a'})
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_nonnullable_field(schema_factory):
+    @dataclass
+    class Account:
+        nickname: str
+
+    schema = schema_factory(Account)
+    assert schema({'nickname': 'reader'}) == Account('reader')
+    with pytest.raises(MultipleInvalid, match='expected str'):
+        schema({'nickname': None})
 
 
 def test_new_required_test():
