@@ -13,6 +13,7 @@ from voluptuous.schema_builder import Optional as OptionalMarker
 from voluptuous.schema_builder import Required as RequiredMarker
 from voluptuous.schema_builder import Schema
 from voluptuous.validators import All
+from voluptuous.validators import Any as AnyValidator
 
 
 def is_dataclass(obj: Any) -> bool:
@@ -69,7 +70,7 @@ def get_dataclass_fields(dataclass_type: Type) -> Dict[str, Any]:
                 non_none_type = next(
                     arg for arg in field_type.__args__ if arg is not type(None)
                 )
-                fields[field_name] = non_none_type
+                fields[field_name] = AnyValidator(non_none_type, None)
             else:
                 # For other generic types, use the origin
                 fields[field_name] = origin

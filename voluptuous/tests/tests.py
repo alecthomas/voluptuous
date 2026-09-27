@@ -2,7 +2,9 @@
 import collections
 import copy
 import os
+from dataclasses import dataclass
 from enum import Enum
+from typing import Optional as TypingOptional
 
 import pytest
 
@@ -17,6 +19,7 @@ from voluptuous import (
     Coerce,
     Contains,
     ContainsInvalid,
+    DataclassSchema,
     Date,
     Datetime,
     Email,
@@ -60,6 +63,7 @@ from voluptuous import (
     Unordered,
     Url,
     UrlInvalid,
+    create_dataclass_schema,
     raises,
     validate,
 )
@@ -67,6 +71,58 @@ from voluptuous.humanize import humanize_error
 from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 # fmt: on
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_optional_field(schema_factory):
+    @dataclass
+    class Account:
+        nickname: TypingOptional[str]
+
+    schema = schema_factory(Account)
+    assert schema({'nickname': None}) == Account(None)
+    assert schema({'nickname': 'reader'}) == Account('reader')
+    with pytest.raises(MultipleInvalid, match='required key not provided'):
+        schema({})
+    with pytest.raises(MultipleInvalid, match='expected str'):
+        schema({'nickname': 12})
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_optional_default(schema_factory):
+    @dataclass
+    class Account:
+        nickname: TypingOptional[str] = None
+
+    schema = schema_factory(Account)
+    assert schema({}) == Account()
+    assert schema({'nickname': None}) == Account()
+    assert schema({'nickname': 'reader'}) == Account('reader')
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_optional_additional_constraint(schema_factory):
+    @dataclass
+    class Account:
+        nickname: TypingOptional[str] = None
+
+    schema = schema_factory(Account, {'nickname': Maybe(Length(min=2))})
+    assert schema({}) == Account()
+    assert schema({'nickname': 'reader'}) == Account('reader')
+    with pytest.raises(MultipleInvalid):
+        schema({'nickname': 'a'})
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_nonnullable_field(schema_factory):
+    @dataclass
+    class Account:
+        nickname: str
+
+    schema = schema_factory(Account)
+    assert schema({'nickname': 'reader'}) == Account('reader')
+    with pytest.raises(MultipleInvalid, match='expected str'):
+        schema({'nickname': None})
 
 
 def test_new_required_test():
