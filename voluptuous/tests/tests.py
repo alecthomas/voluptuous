@@ -1887,6 +1887,33 @@ def test_any_with_discriminant():
         schema({'implementation': {'type': 'C', 'c-value': None}})
 
 
+def test_shared_any_unaffected_by_compiling_another_schema():
+    """Compiling a schema must not change other schemas sharing a validator.
+
+    Another thread may run the first schema while a second schema built
+    around the same Any() is being compiled.
+    """
+    schemas = []
+    results = []
+
+    class RunFirstSchemaWhileCompiling(object):
+        def __voluptuous_compile__(self, schema):
+            if schemas:
+                results.append(schemas[0]('x'))
+
+            def reject(path, value):
+                raise Invalid('rejected', path=path)
+
+            return reject
+
+    shared = Any(RunFirstSchemaWhileCompiling(), str)
+    schemas.append(Schema(shared))
+    Schema(shared)
+
+    assert results == ['x']
+    assert schemas[0]('y') == 'y'
+
+
 def test_key1():
     def as_int(a):
         return int(a)

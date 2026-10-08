@@ -250,23 +250,29 @@ class _WithSubValidators(object):
         self.discriminant = discriminant
 
     def __voluptuous_compile__(self, schema: Schema) -> typing.Callable:
-        self._compiled = []
+        # The same validator instance may be shared by several schemas (for
+        # example a module level Any() reused in schemas built per request)
+        # and those schemas may be compiled and run concurrently from
+        # different threads. Keep the compiled sub-validators in the returned
+        # closure instead of on the instance, so that compiling one schema
+        # never changes what another, already compiled, schema runs.
+        compiled = []
         old_required = schema.required
-        self.schema = schema
         for v in self.validators:
             schema.required = self.required
-            self._compiled.append(schema._compile(v))
+            compiled.append(schema._compile(v))
         schema.required = old_required
-        return self._run
 
-    def _run(self, path: typing.List[typing.Hashable], value):
-        if self.discriminant is not None:
-            self._compiled = [
-                self.schema._compile(v)
-                for v in self.discriminant(value, self.validators)
-            ]
+        def run(path: typing.List[typing.Hashable], value):
+            funcs = compiled
+            if self.discriminant is not None:
+                funcs = [
+                    schema._compile(v)
+                    for v in self.discriminant(value, self.validators)
+                ]
+            return self._exec(funcs, value, path)
 
-        return self._exec(self._compiled, value, path)
+        return run
 
     def __call__(self, v):
         return self._exec((Schema(val) for val in self.validators), v)
