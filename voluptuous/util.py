@@ -74,6 +74,7 @@ class DefaultTo(object):
     """
 
     def __init__(self, default_value, msg: typing.Optional[str] = None) -> None:
+        self._default_value = default_value
         self.default_value = default_factory(default_value)
         self.msg = msg
 
@@ -83,7 +84,7 @@ class DefaultTo(object):
         return v
 
     def __repr__(self):
-        return 'DefaultTo(%s)' % (self.default_value(),)
+        return 'DefaultTo(%s)' % (self._default_value,)
 
 
 class SetTo(object):
@@ -97,13 +98,14 @@ class SetTo(object):
     """
 
     def __init__(self, value) -> None:
+        self._value = value
         self.value = default_factory(value)
 
     def __call__(self, v):
         return self.value()
 
     def __repr__(self):
-        return 'SetTo(%s)' % (self.value(),)
+        return 'SetTo(%s)' % (self._value,)
 
 
 class Set(object):
