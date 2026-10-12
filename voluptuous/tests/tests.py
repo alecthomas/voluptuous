@@ -86,6 +86,31 @@ def test_exact_sequence():
     assert schema([1, 2]) == [1, 2]
 
 
+@pytest.mark.parametrize('fields', [[], ['value'], ['x', 'y']])
+def test_exact_sequence_namedtuple(fields):
+    Point = collections.namedtuple('Point', fields)
+    data = Point(*(str(i) for i in range(len(fields))))
+    schema = Schema(ExactSequence([Coerce(int)] * len(fields)))
+
+    result = schema(data)
+
+    assert type(result) is Point
+    assert result == tuple(range(len(fields)))
+    assert data == tuple(str(i) for i in range(len(fields)))
+
+
+@pytest.mark.parametrize('msg', [None, 'coordinates must be integers'])
+def test_exact_sequence_namedtuple_invalid_field(msg):
+    Point = collections.namedtuple('Point', ['x', 'y'])
+    schema = Schema({'point': ExactSequence([Coerce(int), Coerce(int)], msg=msg)})
+
+    with pytest.raises(Invalid) as exc:
+        schema({'point': Point('1', 'invalid')})
+
+    assert exc.value.path == ['point']
+    assert (msg or 'expected int') in str(exc.value)
+
+
 def test_required():
     """Verify that Required works."""
     schema = Schema({Required('q'): int})
