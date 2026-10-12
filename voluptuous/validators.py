@@ -38,7 +38,7 @@ from voluptuous.error import (
 )
 
 # F401: flake8 complains about 'raises' not being used, but it is used in doctests
-from voluptuous.schema_builder import Schema, Schemable, message, raises  # noqa: F401
+from voluptuous.schema_builder import Schema, Schemable, _isnamedtuple, message, raises  # noqa: F401
 
 if typing.TYPE_CHECKING:
     from _typeshed import SupportsAllComparisons
@@ -912,7 +912,7 @@ class Contains(object):
 
 class ExactSequence(object):
     """Matches each element in a sequence against the corresponding element in
-    the validators.
+    the validators. Named tuples retain their type and validated field values.
 
     :param msg: Message to deliver to user if validation fails.
     :param kwargs: All other keyword arguments are passed to the sub-schema
@@ -940,7 +940,11 @@ class ExactSequence(object):
         if not isinstance(v, (list, tuple)) or len(v) != len(self._schemas):
             raise ExactSequenceInvalid(self.msg)
         try:
-            v = type(v)(schema(x) for x, schema in zip(v, self._schemas))
+            values = (schema(x) for x, schema in zip(v, self._schemas))
+            if _isnamedtuple(v):
+                v = type(v)(*values)
+            else:
+                v = type(v)(values)
         except Invalid as e:
             raise e if self.msg is None else ExactSequenceInvalid(self.msg)
         return v
