@@ -361,18 +361,28 @@ def test_email_validation_with_bad_data(input_value: str):
     assert isinstance(ctx.value.errors[0], EmailInvalid)
 
 
-def test_fqdn_url_validation():
+@pytest.mark.parametrize(
+    'input_value',
+    [
+        "http://example.com/",
+        "https://user.name:pass.word@example.com:8443/path",
+    ],
+)
+def test_fqdn_url_validation(input_value):
     """Test with valid fully qualified domain name URL"""
     schema = Schema({"url": FqdnUrl()})
-    out_ = schema({"url": "http://example.com/"})
+    out_ = schema({"url": input_value})
 
-    assert 'http://example.com/', out_.get("url")
+    assert out_["url"] == input_value
 
 
 @pytest.mark.parametrize(
     'input_value',
     [
         pytest.param("http://localhost/", id="without domain name"),
+        pytest.param("http://user.name@localhost/", id="dot in username"),
+        pytest.param("http://user:pass.word@localhost/", id="dot in password"),
+        pytest.param("http://user.name@:8080/", id="userinfo without host"),
         pytest.param(None, id="None"),
         pytest.param("", id="empty string"),
         pytest.param("http://", id="empty host"),
