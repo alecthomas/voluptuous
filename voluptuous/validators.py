@@ -529,7 +529,7 @@ def FqdnUrl(v):
     """
     try:
         parsed_url = _url_validation(v)
-        if "." not in parsed_url.netloc:
+        if not parsed_url.hostname or "." not in parsed_url.hostname:
             raise UrlInvalid(gettext('must have a domain name in URL'))
         return v
     except:  # noqa: E722
