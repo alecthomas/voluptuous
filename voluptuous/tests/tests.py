@@ -2375,3 +2375,18 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+def test_dataclass_postponed_annotations():
+    """Resolve string annotations as produced by ``from __future__ import annotations``."""
+    from dataclasses import make_dataclass
+
+    from voluptuous import DataclassSchema, create_dataclass_schema
+
+    config_type = make_dataclass("FutureConfig", [("count", "int")])
+
+    for schema_factory in (DataclassSchema, create_dataclass_schema):
+        schema = schema_factory(config_type)
+        assert schema({"count": 3}) == config_type(3)
+        with pytest.raises(MultipleInvalid):
+            schema({"count": "3"})
