@@ -822,13 +822,21 @@ class Date(Datetime):
 
 
 class In(object):
-    """Validate that a value is in a collection."""
+    """Validate that a value is in a collection.
+
+    Iterators without a membership method are consumed at construction so
+    that the validator can be reused.
+    """
 
     def __init__(
         self,
         container: typing.Container | typing.Iterable,
         msg: typing.Optional[str] = None,
     ) -> None:
+        if isinstance(container, typing.Iterator) and not isinstance(
+            container, typing.Container
+        ):
+            container = tuple(container)
         self.container = container
         self.msg = msg
 
@@ -854,11 +862,19 @@ class In(object):
 
 
 class NotIn(object):
-    """Validate that a value is not in a collection."""
+    """Validate that a value is not in a collection.
+
+    Iterators without a membership method are consumed at construction so
+    that the validator can be reused.
+    """
 
     def __init__(
         self, container: typing.Iterable, msg: typing.Optional[str] = None
     ) -> None:
+        if isinstance(container, typing.Iterator) and not isinstance(
+            container, typing.Container
+        ):
+            container = tuple(container)
         self.container = container
         self.msg = msg
 
