@@ -174,6 +174,70 @@ def test_not_in_unsortable_container():
     assert isinstance(ctx.value.errors[0], NotInInvalid)
 
 
+@pytest.mark.parametrize('make_choices', [iter, lambda values: (v for v in values)])
+def test_in_iterator_is_reusable(make_choices):
+    schema = Schema([In(make_choices([1, 2]))])
+    assert schema([2, 1, 2]) == [2, 1, 2]
+    assert schema([1, 2]) == [1, 2]
+
+
+@pytest.mark.parametrize('make_choices', [iter, lambda values: (v for v in values)])
+def test_not_in_iterator_is_reusable(make_choices):
+    validator = NotIn(make_choices([1, 2]))
+    assert validator(3) == 3
+    for value in [2, 1, 2]:
+        with pytest.raises(NotInInvalid):
+            validator(value)
+
+
+@pytest.mark.parametrize('validator_type', [In, NotIn])
+@pytest.mark.parametrize('make_choices', [iter, lambda values: (v for v in values)])
+def test_membership_iterator_error_contains_all_choices(validator_type, make_choices):
+    validator = validator_type(make_choices([1, 2]))
+    value = 3 if validator_type is In else 1
+    for _ in range(2):
+        with pytest.raises(Invalid, match=r'one of \[1, 2\]$'):
+            validator(value)
+
+
+@pytest.mark.parametrize('validator_type', [In, NotIn])
+def test_membership_keeps_mutable_containers(validator_type):
+    choices = [1]
+    validator = validator_type(choices)
+    choices.append(2)
+    if validator_type is In:
+        assert validator(2) == 2
+    else:
+        with pytest.raises(NotInInvalid):
+            validator(2)
+
+
+@pytest.mark.parametrize('validator_type', [In, NotIn])
+@pytest.mark.parametrize('iterator', [False, True])
+def test_membership_keeps_custom_contains(validator_type, iterator):
+    class Choices:
+        def __contains__(self, value):
+            return value == 2
+
+    class ChoiceIterator(Choices):
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            raise AssertionError('membership should use __contains__')
+
+    choices = ChoiceIterator() if iterator else Choices()
+    validator = validator_type(choices, msg='invalid choice')
+    if validator_type is In:
+        assert validator(2) == 2
+        with pytest.raises(InInvalid, match='invalid choice'):
+            validator(1)
+    else:
+        assert validator(1) == 1
+        with pytest.raises(NotInInvalid, match='invalid choice'):
+            validator(2)
+
+
 def test_contains():
     """Verify contains validation method."""
     schema = Schema({'color': Contains('red')})
