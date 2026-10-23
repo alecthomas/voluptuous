@@ -6,7 +6,7 @@ from Python dataclasses, with support for additional validation constraints.
 
 import dataclasses
 from dataclasses import MISSING
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, get_type_hints
 
 from voluptuous.schema_builder import UNDEFINED
 from voluptuous.schema_builder import Optional as OptionalMarker
@@ -43,8 +43,14 @@ def get_dataclass_fields(dataclass_type: Type) -> Dict[str, Any]:
         raise ValueError(f"{dataclass_type} is not a dataclass")
 
     fields: Dict[str, Any] = {}
+    try:
+        resolved_types = get_type_hints(dataclass_type)
+    except (NameError, TypeError):
+        # Keep unresolved forward references on the existing fallback path.
+        resolved_types = {}
+
     for field_name, field_info in dataclass_type.__dataclass_fields__.items():
-        field_type = field_info.type
+        field_type = resolved_types.get(field_name, field_info.type)
 
         # Convert typing annotations to basic types for voluptuous
         # For complex types like List[str], Optional[str], etc., we'll use the base type
