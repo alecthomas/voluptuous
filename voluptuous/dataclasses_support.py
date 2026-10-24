@@ -44,6 +44,8 @@ def get_dataclass_fields(dataclass_type: Type) -> Dict[str, Any]:
 
     fields: Dict[str, Any] = {}
     for field_name, field_info in dataclass_type.__dataclass_fields__.items():
+        if not field_info.init:
+            continue
         field_type = field_info.type
 
         # Convert typing annotations to basic types for voluptuous
@@ -94,6 +96,8 @@ def get_dataclass_field_defaults(dataclass_type: Type) -> Dict[str, Any]:
 
     defaults = {}
     for field_name, field_info in dataclass_type.__dataclass_fields__.items():
+        if not field_info.init:
+            continue
         if field_info.default is not MISSING:
             defaults[field_name] = field_info.default
         elif field_info.default_factory is not MISSING:
@@ -227,7 +231,9 @@ def create_dataclass_schema(
         # Extract the actual values (removing marker wrappers)
         clean_data = {}
         for key, value in validated_data.items():
-            clean_data[key] = value
+            field_info = dataclass_type.__dataclass_fields__.get(key)
+            if field_info is None or field_info.init:
+                clean_data[key] = value
 
         # Create and return dataclass instance
         return dataclass_type(**clean_data)
