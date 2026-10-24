@@ -2082,6 +2082,24 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
+@pytest.mark.parametrize('slots', ['value', ('value',), ['value']])
+def test_object_with_single_slot(slots):
+    class Reading:
+        __slots__ = slots
+
+        def __init__(self, value):
+            self.value = value
+
+    schema = Schema(Object({'value': Coerce(int)}, cls=Reading), required=True)
+    reading = Reading('21')
+    result = schema(reading)
+    assert isinstance(result, Reading)
+    assert result.value == 21
+    assert reading.value == '21'
+    with pytest.raises(MultipleInvalid, match='expected int'):
+        schema(Reading('invalid'))
+
+
 def test_exception():
     s = Schema(None)
     with pytest.raises(MultipleInvalid) as ctx:

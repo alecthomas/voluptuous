@@ -929,6 +929,8 @@ def _iterate_object(obj):
     except AttributeError:
         pass
     else:
+        if isinstance(slots, str):
+            slots = (slots,)
         for key in slots:
             if key != '__dict__':
                 yield (key, getattr(obj, key))
