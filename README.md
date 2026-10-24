@@ -808,6 +808,7 @@ schema = create_dataclass_schema(Person, {
 
 - **Automatic type validation** from dataclass field annotations
 - **Default value support** including `default_factory` functions
+- Fields with `init=False` are not constructor inputs; their defaults, factories, and `__post_init__` initialization stay with the dataclass.
 - **Seamless integration** with existing voluptuous validators
 - **Type annotation handling** for `List[T]`, `Optional[T]`, etc.
 - **Full backward compatibility** with existing voluptuous schemas
