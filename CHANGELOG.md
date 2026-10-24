@@ -4,6 +4,7 @@
 
 **Fixes**:
 
+* Validate object attributes declared with a single-string `__slots__` value.
 * [#539](https://github.com/alecthomas/voluptuous/pull/539): Raise `Invalid` instead of leaking `TypeError`/`ValueError` for non-numeric input to the `Number` validator
 * [#542](https://github.com/alecthomas/voluptuous/pull/542): Raise `Invalid` instead of leaking a raw `TypeError` for `Infinity`/`NaN` input to the `Number` validator
 
