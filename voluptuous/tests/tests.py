@@ -17,6 +17,7 @@ from voluptuous import (
     Coerce,
     Contains,
     ContainsInvalid,
+    DataclassSchema,
     Date,
     Datetime,
     Email,
@@ -60,6 +61,7 @@ from voluptuous import (
     Unordered,
     Url,
     UrlInvalid,
+    create_dataclass_schema,
     raises,
     validate,
 )
@@ -2375,3 +2377,107 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+@pytest.mark.parametrize('field_kind', ['plain', 'default', 'factory'])
+def test_dataclass_non_init_fields(schema_factory, field_kind):
+    from dataclasses import dataclass, field
+
+    calls = []
+
+    def make_items():
+        calls.append(True)
+        return []
+
+    if field_kind == 'plain':
+        derived = field(init=False)
+    elif field_kind == 'default':
+        derived = field(init=False, default=12)
+    else:
+        derived = field(init=False, default_factory=make_items)
+
+    @dataclass
+    class Record:
+        value: int
+        computed: int = derived
+
+        def __post_init__(self):
+            if field_kind == 'plain':
+                self.computed = self.value * 2
+
+    validate = schema_factory(Record)
+    first = validate({'value': 6})
+    second = validate({'value': 7})
+    assert first.value == 6
+    if field_kind == 'factory':
+        assert first.computed == []
+        assert first.computed is not second.computed
+        assert len(calls) == 2
+    else:
+        assert first.computed == 12
+    with pytest.raises(MultipleInvalid):
+        validate({'value': 'invalid'})
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+@pytest.mark.parametrize('extra', [PREVENT_EXTRA, REMOVE_EXTRA, ALLOW_EXTRA])
+def test_dataclass_non_init_input_extra_policy(schema_factory, extra):
+    from dataclasses import dataclass, field
+
+    @dataclass(frozen=True)
+    class Record:
+        value: int
+        computed: int = field(init=False, default=12)
+
+    validate = schema_factory(Record, extra=extra)
+    data = {'value': 6, 'computed': 99}
+    if extra == PREVENT_EXTRA:
+        with pytest.raises(MultipleInvalid) as exc:
+            validate(data)
+        assert exc.value.path == ['computed']
+    else:
+        assert validate(data) == Record(6)
+    assert data == {'value': 6, 'computed': 99}
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_inherited_non_init_field(schema_factory):
+    from dataclasses import dataclass, field
+
+    @dataclass
+    class Base:
+        computed: int = field(init=False, default=12)
+
+    @dataclass
+    class Record(Base):
+        value: int
+
+    validate = schema_factory(Record, {'value': Range(min=1)})
+    assert validate({'value': 6}) == Record(6)
+    with pytest.raises(MultipleInvalid):
+        validate({'value': 0})
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory):
+    from dataclasses import dataclass, field
+
+    calls = []
+
+    def make_items():
+        calls.append(True)
+        return []
+
+    @dataclass
+    class Record:
+        value: int
+        items: list = field(init=False, default_factory=make_items)
+
+    validate = schema_factory(Record)
+    assert calls == []
+    with pytest.raises(MultipleInvalid):
+        validate({'value': 'invalid'})
+    assert calls == []
+    assert validate({'value': 1}).items == []
+    assert calls == [True]
