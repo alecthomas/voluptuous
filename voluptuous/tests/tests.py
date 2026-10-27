@@ -2375,3 +2375,23 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+def test_optional_mutable_default_is_not_shared_between_validations():
+    """A mutable default (list/dict) must not be the same object across calls."""
+    schema = Schema({Optional('items', default=[]): list})
+
+    result1 = schema({})
+    result1['items'].append('mutated')
+    result2 = schema({})
+
+    assert result2['items'] == []
+    assert result1['items'] is not result2['items']
+
+    dict_schema = Schema({Optional('data', default={}): dict})
+    d1 = dict_schema({})
+    d1['data']['key'] = 'value'
+    d2 = dict_schema({})
+
+    assert d2['data'] == {}
+    assert d1['data'] is not d2['data']

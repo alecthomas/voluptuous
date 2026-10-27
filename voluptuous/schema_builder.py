@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import collections
+import copy
 import enum
 import inspect
 import itertools
@@ -47,7 +48,7 @@ DefaultFactory = typing.Union[Undefined, typing.Callable[[], typing.Any]]
 def default_factory(value) -> DefaultFactory:
     if value is UNDEFINED or callable(value):
         return value
-    return lambda: value
+    return lambda: copy.deepcopy(value)
 
 
 @contextmanager
