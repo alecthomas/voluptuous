@@ -2,6 +2,7 @@
 import collections
 import copy
 import os
+from dataclasses import dataclass, field
 from enum import Enum
 
 import pytest
@@ -17,6 +18,7 @@ from voluptuous import (
     Coerce,
     Contains,
     ContainsInvalid,
+    DataclassSchema,
     Date,
     Datetime,
     Email,
@@ -60,6 +62,7 @@ from voluptuous import (
     Unordered,
     Url,
     UrlInvalid,
+    create_dataclass_schema,
     raises,
     validate,
 )
@@ -67,6 +70,55 @@ from voluptuous.humanize import humanize_error
 from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 # fmt: on
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_with_callable_defaults(schema_factory):
+    @dataclass
+    class Converters:
+        number: type = int
+        text: type = str
+
+    schema = schema_factory(Converters)
+
+    result = schema({})
+    assert result.number is int
+    assert result.text is str
+
+    result = schema({'number': float})
+    assert result.number is float
+    assert result.text is str
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_callable_default_is_not_called(schema_factory):
+    def callback():
+        raise AssertionError('A default value must not be called')
+
+    @dataclass
+    class Settings:
+        on_change: object = callback
+
+    schema = schema_factory(Settings)
+
+    assert schema({}).on_change is callback
+    replacement = object()
+    assert schema({'on_change': replacement}).on_change is replacement
+
+
+@pytest.mark.parametrize('schema_factory', [DataclassSchema, create_dataclass_schema])
+def test_dataclass_default_factory_produces_fresh_values(schema_factory):
+    @dataclass
+    class Settings:
+        tags: list = field(default_factory=list)
+
+    schema = schema_factory(Settings)
+
+    first = schema({})
+    second = schema({})
+    first.tags.append('example')
+    assert second.tags == []
+    assert schema({'tags': ['explicit']}).tags == ['explicit']
 
 
 def test_new_required_test():

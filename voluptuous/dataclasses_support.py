@@ -199,9 +199,11 @@ def create_dataclass_schema(
         field_info = dataclass_type.__dataclass_fields__.get(field_name)
 
         if field_info and field_info.default is not MISSING:
-            # Field has a default value - make it Optional
+            # Keep callable default values distinct from default factories.
             voluptuous_schema[
-                OptionalMarker(field_name, default=field_info.default)
+                OptionalMarker(
+                    field_name, default=lambda value=field_info.default: value
+                )
             ] = constraint
         elif field_info and field_info.default_factory is not MISSING:
             # Field has a default factory - make it Optional
