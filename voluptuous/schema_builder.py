@@ -914,7 +914,15 @@ def _iterate_object(obj):
     """Return iterator over object attributes. Respect objects with
     defined __slots__.
 
+    Plain mappings (e.g. dicts) are also supported: their items are yielded
+    directly instead of relying on ``vars()``, which raises ``TypeError`` for
+    dicts and would otherwise yield nothing (silently dropping the data).
+
     """
+    if isinstance(obj, collections.abc.Mapping):
+        for item in obj.items():
+            yield item
+        return
     d = {}
     try:
         d = vars(obj)
