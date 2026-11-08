@@ -524,8 +524,11 @@ class Schema(object):
         groups_of_inclusion = {}
         for node in schema:
             if isinstance(node, Exclusive):
-                g = groups_of_exclusion.setdefault(node.group_of_exclusion, [])
-                g.append(node)
+                while isinstance(node, Exclusive):
+                    g = groups_of_exclusion.setdefault(node.group_of_exclusion, [])
+                    if node not in g:
+                        g.append(node)
+                    node = node.schema
             elif isinstance(node, Inclusive):
                 g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
                 g.append(node)
