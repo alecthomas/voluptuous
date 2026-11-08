@@ -1425,6 +1425,37 @@ def test_PathExists():
     schema(os.path.abspath(__file__))
 
 
+@pytest.mark.parametrize('other, group', [('bar', 'inner'), ('baz', 'outer')])
+def test_nested_exclusive_groups(other, group):
+    schema = Schema(
+        {
+            Exclusive(Exclusive('foo', 'inner'), 'outer'): str,
+            Exclusive('bar', 'inner'): str,
+            Exclusive('baz', 'outer'): str,
+        }
+    )
+    with pytest.raises(MultipleInvalid) as exc:
+        schema({'foo': '', other: ''})
+    assert str(exc.value) == (
+        "two or more values in the same group of exclusion '%s' @ data[<%s>]"
+        % (group, group)
+    )
+    for data in ({}, {'foo': ''}, {'bar': ''}, {'baz': ''}, {'bar': '', 'baz': ''}):
+        assert schema(data) == data
+
+
+def test_nested_exclusive_same_group():
+    schema = Schema(
+        {
+            Exclusive(Exclusive('foo', 'group'), 'group'): str,
+            Exclusive('bar', 'group'): str,
+        }
+    )
+    assert schema({'foo': ''}) == {'foo': ''}
+    with pytest.raises(MultipleInvalid):
+        schema({'foo': '', 'bar': ''})
+
+
 def test_description():
     marker = Marker(Schema(str), description='Hello')
     assert marker.description == 'Hello'
