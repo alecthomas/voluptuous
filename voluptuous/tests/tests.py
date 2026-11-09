@@ -64,7 +64,7 @@ from voluptuous import (
     validate,
 )
 from voluptuous.humanize import humanize_error
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
+from voluptuous.util import Capitalize, DefaultTo, Lower, SetTo, Strip, Title, Upper
 
 # fmt: on
 
@@ -2375,3 +2375,28 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+@pytest.mark.parametrize('validator_class', [DefaultTo, SetTo])
+def test_default_transform_repr_does_not_call_factory(validator_class):
+    calls = []
+
+    def factory():
+        calls.append(None)
+        return len(calls)
+
+    validator = validator_class(factory)
+    repr(validator)
+    assert calls == []
+    assert validator(None) == 1
+    repr(validator)
+    assert calls == [None]
+
+
+@pytest.mark.parametrize('validator_class', [DefaultTo, SetTo])
+def test_default_transform_repr_with_failing_factory(validator_class):
+    def factory():
+        raise RuntimeError('factory is only valid during validation')
+
+    validator = validator_class(factory)
+    assert repr(validator).startswith(validator_class.__name__ + '(')
