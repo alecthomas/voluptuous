@@ -2375,3 +2375,20 @@ def test_complex_required_keys_with_specific_value_validation():
     error_msg = str(exc_info.value)
     assert "required" not in error_msg.lower()  # No "required field missing" error
     assert "value must be at most 100" in error_msg  # Range validation error
+
+
+def test_SomeOf_zero_max_valid():
+    validator = SomeOf(validators=[int, str], max_valid=0)
+    assert validator(1.5) == 1.5
+    with pytest.raises(TooManyValid):
+        validator(1)
+    with pytest.raises(MultipleInvalid) as exc:
+        Schema(validator)('text')
+    assert isinstance(exc.value.errors[0], TooManyValid)
+
+
+def test_SomeOf_zero_max_with_zero_min():
+    validator = SomeOf(validators=[int], min_valid=0, max_valid=0)
+    assert validator('text') == 'text'
+    with pytest.raises(TooManyValid):
+        validator(1)
