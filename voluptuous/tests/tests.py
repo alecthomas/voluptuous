@@ -2082,6 +2082,22 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
+def test_object_with_dict():
+    # A plain dict supplied to Object should be validated by its items, not
+    # silently dropped to {}.  See issue #445.
+    s = Schema(Object({'ok': 1}))
+    assert s({'ok': 1}) == {'ok': 1}
+
+    # The same holds when the enclosing schema is required=True: the key must
+    # be detected as present instead of raising "required key not provided".
+    s_req = Schema({'test': (Object({'ok': 1}),)}, required=True)
+    assert s_req({'test': ({'ok': 1},)}) == {'test': ({'ok': 1},)}
+
+    # Invalid values are still reported.
+    with pytest.raises(MultipleInvalid):
+        s({'ok': 2})
+
+
 def test_exception():
     s = Schema(None)
     with pytest.raises(MultipleInvalid) as ctx:
