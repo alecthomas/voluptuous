@@ -11,6 +11,7 @@ dist
 *.egg-info
 .coverage
 .tox
+.hermit
 MANIFEST
 .idea
 venv
