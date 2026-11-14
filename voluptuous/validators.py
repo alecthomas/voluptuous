@@ -9,6 +9,7 @@ import urllib.parse as urlparse
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
+from voluptuous._i18n import gettext
 from voluptuous.error import (
     AllInvalid,
     AnyInvalid,
@@ -144,16 +145,18 @@ class Coerce(object):
         try:
             return self.type(v)
         except (ValueError, TypeError, InvalidOperation):
-            msg = self.msg or ('expected %s' % self.type_name)
+            msg = self.msg or (gettext('expected %s') % self.type_name)
             if not self.msg and Enum and issubclass(self.type, Enum):
-                msg += " or one of %s" % str([e.value for e in self.type])[1:-1]
+                msg += (
+                    gettext(' or one of %s') % str([e.value for e in self.type])[1:-1]
+                )
             raise CoerceInvalid(msg)
 
     def __repr__(self):
         return 'Coerce(%s, msg=%r)' % (self.type_name, self.msg)
 
 
-@message('value was not true', cls=TrueInvalid)
+@message("value was not true", cls=TrueInvalid)
 @truth
 def IsTrue(v):
     """Assert that a value is true, in the Python sense.
@@ -180,7 +183,7 @@ def IsTrue(v):
     return v
 
 
-@message('value was not false', cls=FalseInvalid)
+@message("value was not false", cls=FalseInvalid)
 def IsFalse(v):
     """Assert that a value is false, in the Python sense.
 
@@ -202,7 +205,7 @@ def IsFalse(v):
     return v
 
 
-@message('expected boolean', cls=BooleanInvalid)
+@message("expected boolean", cls=BooleanInvalid)
 def Boolean(v):
     """Convert human-readable boolean values to a bool.
 
@@ -326,7 +329,7 @@ class Any(_WithSubValidators):
         else:
             if error:
                 raise error if self.msg is None else AnyInvalid(self.msg, path=path)
-            raise AnyInvalid(self.msg or 'no valid value found', path=path)
+            raise AnyInvalid(self.msg or gettext('no valid value found'), path=path)
 
 
 # Convenience alias
@@ -368,7 +371,7 @@ class Union(_WithSubValidators):
         else:
             if error:
                 raise error if self.msg is None else AnyInvalid(self.msg, path=path)
-            raise AnyInvalid(self.msg or 'no valid value found', path=path)
+            raise AnyInvalid(self.msg or gettext('no valid value found'), path=path)
 
 
 # Convenience alias
@@ -435,11 +438,13 @@ class Match(object):
         try:
             match = self.pattern.match(v)
         except TypeError:
-            raise MatchInvalid("expected string or buffer")
+            raise MatchInvalid(gettext("expected string or buffer"))
         if not match:
             raise MatchInvalid(
                 self.msg
-                or 'does not match regular expression {}'.format(self.pattern.pattern)
+                or gettext('does not match regular expression {}').format(
+                    self.pattern.pattern
+                )
             )
         return v
 
@@ -482,11 +487,11 @@ class Replace(object):
 def _url_validation(v: str) -> urlparse.ParseResult:
     parsed = urlparse.urlparse(v)
     if not parsed.scheme or not parsed.netloc:
-        raise UrlInvalid("must have a URL scheme and host")
+        raise UrlInvalid(gettext("must have a URL scheme and host"))
     return parsed
 
 
-@message('expected an email address', cls=EmailInvalid)
+@message("expected an email address", cls=EmailInvalid)
 def Email(v):
     """Verify that the value is an email address or not.
 
@@ -502,17 +507,17 @@ def Email(v):
     """
     try:
         if not v or "@" not in v:
-            raise EmailInvalid("Invalid email address")
+            raise EmailInvalid(gettext('invalid email address'))
         user_part, domain_part = v.rsplit('@', 1)
 
         if not (USER_REGEX.match(user_part) and DOMAIN_REGEX.match(domain_part)):
-            raise EmailInvalid("Invalid email address")
+            raise EmailInvalid(gettext('invalid email address'))
         return v
     except:  # noqa: E722
         raise ValueError
 
 
-@message('expected a fully qualified domain name URL', cls=UrlInvalid)
+@message("expected a fully qualified domain name URL", cls=UrlInvalid)
 def FqdnUrl(v):
     """Verify that the value is a fully qualified domain name URL.
 
@@ -525,13 +530,13 @@ def FqdnUrl(v):
     try:
         parsed_url = _url_validation(v)
         if "." not in parsed_url.netloc:
-            raise UrlInvalid("must have a domain name in URL")
+            raise UrlInvalid(gettext('must have a domain name in URL'))
         return v
     except:  # noqa: E722
         raise ValueError
 
 
-@message('expected a URL', cls=UrlInvalid)
+@message("expected a URL", cls=UrlInvalid)
 def Url(v):
     """Verify that the value is a URL.
 
@@ -548,7 +553,7 @@ def Url(v):
         raise ValueError
 
 
-@message('Not a file', cls=FileInvalid)
+@message("Not a file", cls=FileInvalid)
 @truth
 def IsFile(v):
     """Verify the file exists.
@@ -565,12 +570,12 @@ def IsFile(v):
             v = str(v)
             return os.path.isfile(v)
         else:
-            raise FileInvalid('Not a file')
+            raise FileInvalid(gettext('Not a file'))
     except TypeError:
-        raise FileInvalid('Not a file')
+        raise FileInvalid(gettext('Not a file'))
 
 
-@message('Not a directory', cls=DirInvalid)
+@message("Not a directory", cls=DirInvalid)
 @truth
 def IsDir(v):
     """Verify the directory exists.
@@ -585,12 +590,12 @@ def IsDir(v):
             v = str(v)
             return os.path.isdir(v)
         else:
-            raise DirInvalid("Not a directory")
+            raise DirInvalid(gettext('Not a directory'))
     except TypeError:
-        raise DirInvalid("Not a directory")
+        raise DirInvalid(gettext('Not a directory'))
 
 
-@message('path does not exist', cls=PathInvalid)
+@message("path does not exist", cls=PathInvalid)
 @truth
 def PathExists(v):
     """Verify the path exists, regardless of its type.
@@ -607,9 +612,9 @@ def PathExists(v):
             v = str(v)
             return os.path.exists(v)
         else:
-            raise PathInvalid("Not a Path")
+            raise PathInvalid(gettext('Not a Path'))
     except TypeError:
-        raise PathInvalid("Not a Path")
+        raise PathInvalid(gettext('Not a Path'))
 
 
 def Maybe(validator: Schemable, msg: typing.Optional[str] = None):
@@ -668,22 +673,22 @@ class Range(object):
             if self.min_included:
                 if self.min is not None and not v >= self.min:
                     raise RangeInvalid(
-                        self.msg or 'value must be at least %s' % self.min
+                        self.msg or gettext('value must be at least %s') % self.min
                     )
             else:
                 if self.min is not None and not v > self.min:
                     raise RangeInvalid(
-                        self.msg or 'value must be higher than %s' % self.min
+                        self.msg or gettext('value must be higher than %s') % self.min
                     )
             if self.max_included:
                 if self.max is not None and not v <= self.max:
                     raise RangeInvalid(
-                        self.msg or 'value must be at most %s' % self.max
+                        self.msg or gettext('value must be at most %s') % self.max
                     )
             else:
                 if self.max is not None and not v < self.max:
                     raise RangeInvalid(
-                        self.msg or 'value must be lower than %s' % self.max
+                        self.msg or gettext('value must be lower than %s') % self.max
                     )
 
             return v
@@ -691,7 +696,8 @@ class Range(object):
         # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
-                self.msg or 'invalid value or type (must have a partial ordering)'
+                self.msg
+                or gettext('invalid value or type (must have a partial ordering)')
             )
 
     def __repr__(self):
@@ -739,7 +745,8 @@ class Clamp(object):
         # Objects that lack a partial ordering, e.g. None or strings will raise TypeError
         except TypeError:
             raise RangeInvalid(
-                self.msg or 'invalid value or type (must have a partial ordering)'
+                self.msg
+                or gettext('invalid value or type (must have a partial ordering)')
             )
 
     def __repr__(self):
@@ -763,17 +770,18 @@ class Length(object):
         try:
             if self.min is not None and len(v) < self.min:
                 raise LengthInvalid(
-                    self.msg or 'length of value must be at least %s' % self.min
+                    self.msg
+                    or gettext('length of value must be at least %s') % self.min
                 )
             if self.max is not None and len(v) > self.max:
                 raise LengthInvalid(
-                    self.msg or 'length of value must be at most %s' % self.max
+                    self.msg or gettext('length of value must be at most %s') % self.max
                 )
             return v
 
         # Objects that have no length e.g. None or strings will raise TypeError
         except TypeError:
-            raise RangeInvalid(self.msg or 'invalid value or type')
+            raise RangeInvalid(self.msg or gettext('invalid value or type'))
 
     def __repr__(self):
         return 'Length(min=%s, max=%s)' % (self.min, self.max)
@@ -795,7 +803,8 @@ class Datetime(object):
             datetime.datetime.strptime(v, self.format)
         except (TypeError, ValueError):
             raise DatetimeInvalid(
-                self.msg or 'value does not match expected format %s' % self.format
+                self.msg
+                or gettext('value does not match expected format %s') % self.format
             )
         return v
 
@@ -813,7 +822,8 @@ class Date(Datetime):
             datetime.datetime.strptime(v, self.format)
         except (TypeError, ValueError):
             raise DateInvalid(
-                self.msg or 'value does not match expected format %s' % self.format
+                self.msg
+                or gettext('value does not match expected format %s') % self.format
             )
         return v
 
@@ -840,12 +850,14 @@ class In(object):
         if check:
             try:
                 raise InInvalid(
-                    self.msg or f'value must be one of {sorted(self.container)}'
+                    self.msg
+                    or gettext('value must be one of %s') % str(sorted(self.container))
                 )
             except TypeError:
                 raise InInvalid(
                     self.msg
-                    or f'value must be one of {sorted(self.container, key=str)}'
+                    or gettext('value must be one of %s')
+                    % str(sorted(self.container, key=str))
                 )
         return v
 
@@ -870,12 +882,15 @@ class NotIn(object):
         if check:
             try:
                 raise NotInInvalid(
-                    self.msg or f'value must not be one of {sorted(self.container)}'
+                    self.msg
+                    or gettext('value must not be one of %s')
+                    % str(sorted(self.container))
                 )
             except TypeError:
                 raise NotInInvalid(
                     self.msg
-                    or f'value must not be one of {sorted(self.container, key=str)}'
+                    or gettext('value must not be one of %s')
+                    % str(sorted(self.container, key=str))
                 )
         return v
 
@@ -903,7 +918,7 @@ class Contains(object):
         except TypeError:
             check = True
         if check:
-            raise ContainsInvalid(self.msg or 'value is not allowed')
+            raise ContainsInvalid(self.msg or gettext('value is not allowed'))
         return v
 
     def __repr__(self):
@@ -982,11 +997,15 @@ class Unique(object):
         try:
             set_v = set(v)
         except TypeError as e:
-            raise TypeInvalid(self.msg or 'contains unhashable elements: {0}'.format(e))
+            raise TypeInvalid(
+                self.msg or gettext('contains unhashable elements: {0}').format(e)
+            )
         if len(set_v) != len(v):
             seen = set()
             dupes = list(set(x for x in v if x in seen or seen.add(x)))
-            raise Invalid(self.msg or 'contains duplicate items: {0}'.format(dupes))
+            raise Invalid(
+                self.msg or gettext('contains duplicate items: {0}').format(dupes)
+            )
         return v
 
     def __repr__(self):
@@ -1017,7 +1036,9 @@ class Equal(object):
         if v != self.target:
             raise Invalid(
                 self.msg
-                or 'Values are not equal: value:{} != target:{}'.format(v, self.target)
+                or gettext(
+                    'Values are not equal: value:{value} != target:{target}'
+                ).format(value=v, target=self.target)
             )
         return v
 
@@ -1052,14 +1073,14 @@ class Unordered(object):
 
     def __call__(self, v):
         if not isinstance(v, (list, tuple)):
-            raise Invalid(self.msg or 'Value {} is not sequence!'.format(v))
+            raise Invalid(self.msg or gettext('Value {} is not sequence!').format(v))
 
         if len(v) != len(self._schemas):
             raise Invalid(
                 self.msg
-                or 'List lengths differ, value:{} != target:{}'.format(
-                    len(v), len(self._schemas)
-                )
+                or gettext(
+                    'List lengths differ, value:{value} != target:{target}'
+                ).format(value=len(v), target=len(self._schemas))
             )
 
         consumed = set()
@@ -1084,18 +1105,18 @@ class Unordered(object):
             el = missing[0]
             raise Invalid(
                 self.msg
-                or 'Element #{} ({}) is not valid against any validator'.format(
-                    el[0], el[1]
-                )
+                or gettext(
+                    'Element #{index} ({value}) is not valid against any validator'
+                ).format(index=el[0], value=el[1])
             )
         elif missing:
             raise MultipleInvalid(
                 [
                     Invalid(
                         self.msg
-                        or 'Element #{} ({}) is not valid against any validator'.format(
-                            el[0], el[1]
-                        )
+                        or gettext(
+                            'Element #{index} ({value}) is not valid against any validator'
+                        ).format(index=el[0], value=el[1])
                     )
                     for el in missing
                 ]
@@ -1148,17 +1169,22 @@ class Number(object):
         ):
             raise Invalid(
                 self.msg
-                or "Precision must be equal to %s, and Scale must be equal to %s"
+                or gettext(
+                    'Precision must be equal to %s, and Scale must be equal to %s'
+                )
                 % (self.precision, self.scale)
             )
         else:
             if self.precision is not None and precision != self.precision:
                 raise Invalid(
-                    self.msg or "Precision must be equal to %s" % self.precision
+                    self.msg
+                    or gettext('Precision must be equal to %s') % self.precision
                 )
 
             if self.scale is not None and scale != self.scale:
-                raise Invalid(self.msg or "Scale must be equal to %s" % self.scale)
+                raise Invalid(
+                    self.msg or gettext('Scale must be equal to %s') % self.scale
+                )
 
         if self.yield_decimal:
             return decimal_num
@@ -1180,14 +1206,18 @@ class Number(object):
         try:
             decimal_num = Decimal(number)
         except (InvalidOperation, TypeError, ValueError):
-            raise Invalid(self.msg or 'Value must be a number enclosed with string')
+            raise Invalid(
+                self.msg or gettext('Value must be a number enclosed with string')
+            )
 
         exp = decimal_num.as_tuple().exponent
         if isinstance(exp, int):
             return (len(decimal_num.as_tuple().digits), -exp, decimal_num)
         else:
             # Infinity/NaN have no precision; report as Invalid, not a raw TypeError.
-            raise Invalid(self.msg or 'Value must be a number enclosed with string')
+            raise Invalid(
+                self.msg or gettext('Value must be a number enclosed with string')
+            )
 
 
 class SomeOf(_WithSubValidators):
@@ -1221,10 +1251,9 @@ class SomeOf(_WithSubValidators):
         max_valid: typing.Optional[int] = None,
         **kwargs,
     ) -> None:
-        assert min_valid is not None or max_valid is not None, (
+        assert min_valid is not None or max_valid is not None, gettext(
             'when using "%s" you should specify at least one of min_valid and max_valid'
-            % (type(self).__name__,)
-        )
+        ) % (type(self).__name__,)
         self.min_valid = min_valid or 0
         self.max_valid = max_valid or len(validators)
         super(SomeOf, self).__init__(*validators, **kwargs)

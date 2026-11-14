@@ -1,0 +1,11 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Voluptuous\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "required key not provided"
+msgstr "erforderliches feld fehlt"
+
+msgid "value was not true"
+msgstr "wert war nicht wahr"
