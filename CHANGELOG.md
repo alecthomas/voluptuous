@@ -6,6 +6,7 @@
 
 * Exclude dataclass `init=False` fields from generated constructor-input schemas and let dataclasses initialize them.
 
+* Preserve named tuple types and validate their fields in `ExactSequence`.
 * [#539](https://github.com/alecthomas/voluptuous/pull/539): Raise `Invalid` instead of leaking `TypeError`/`ValueError` for non-numeric input to the `Number` validator
 * [#542](https://github.com/alecthomas/voluptuous/pull/542): Raise `Invalid` instead of leaking a raw `TypeError` for `Infinity`/`NaN` input to the `Number` validator
 * [#484](https://github.com/alecthomas/voluptuous/issues/484): Emit `required key not provided` errors in a stable schema-declaration order
