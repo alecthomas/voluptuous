@@ -2975,6 +2975,8 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
 def test_SomeOf_zero_max_valid():
     validator = SomeOf(validators=[int, str], max_valid=0)
     assert validator(1.5) == 1.5
