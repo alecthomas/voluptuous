@@ -3,6 +3,7 @@ import collections
 import contextvars
 import copy
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -2975,3 +2976,39 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
+def test_replace_non_string_input():
+    """Verify that Replace raises Invalid for non-string input."""
+    replace = Replace('hello', 'goodbye')
+    assert replace('hello world') == 'goodbye world'
+    for value in (42, None, ['hello']):
+        with pytest.raises(Invalid, match='expected string or buffer'):
+            replace(value)
+
+    replace2 = Replace('x', 'y', msg='must be a string')
+    with pytest.raises(Invalid, match='must be a string'):
+        replace2(123)
+
+
+def test_replace_accepts_bytes_like_input():
+    replace = Replace(re.compile(b'hello'), b'goodbye')
+    assert replace(b'hello world') == b'goodbye world'
+    assert replace(bytearray(b'hello world')) == b'goodbye world'
+    assert replace(memoryview(b'hello world')) == b'goodbye world'
+
+
+def test_replace_preserves_type_error_from_substitution():
+    def invalid_substitution(_match):
+        raise TypeError('substitution failed')
+
+    replace = Replace('hello', invalid_substitution)
+    with pytest.raises(TypeError, match='substitution failed'):
+        replace('hello world')
+
+
+def test_replace_uses_runtime_localizer_for_default_message():
+    _i18n.set_gettext(lambda message: f'localized:{message}')
+
+    with pytest.raises(MatchInvalid, match='localized:expected string or buffer'):
+        Replace('hello', 'goodbye')(42)
