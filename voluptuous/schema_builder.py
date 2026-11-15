@@ -48,7 +48,9 @@ DefaultFactory = typing.Union[Undefined, typing.Callable[[], typing.Any]]
 def default_factory(value) -> DefaultFactory:
     if value is UNDEFINED or callable(value):
         return value
-    return lambda: copy.deepcopy(value)
+    if isinstance(value, (list, dict, set, bytearray)):
+        return lambda: copy.deepcopy(value)
+    return lambda: value
 
 
 @contextmanager
