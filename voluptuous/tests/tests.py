@@ -2481,6 +2481,8 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
 def test_dataclass_postponed_annotations():
     """Resolve string annotations as produced by ``from __future__ import annotations``."""
     from dataclasses import make_dataclass
