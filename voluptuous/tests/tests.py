@@ -77,7 +77,7 @@ from voluptuous import (
     validate,
 )
 from voluptuous.humanize import humanize_error
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
+from voluptuous.util import Capitalize, DefaultTo, Lower, SetTo, Strip, Title, Upper
 
 # fmt: on
 
@@ -2975,3 +2975,28 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
+@pytest.mark.parametrize('validator_class', [DefaultTo, SetTo])
+def test_default_transform_repr_does_not_call_factory(validator_class):
+    calls = []
+
+    def factory():
+        calls.append(None)
+        return len(calls)
+
+    validator = validator_class(factory)
+    repr(validator)
+    assert calls == []
+    assert validator(None) == 1
+    repr(validator)
+    assert calls == [None]
+
+
+@pytest.mark.parametrize('validator_class', [DefaultTo, SetTo])
+def test_default_transform_repr_with_failing_factory(validator_class):
+    def factory():
+        raise RuntimeError('factory is only valid during validation')
+
+    validator = validator_class(factory)
+    assert repr(validator).startswith(validator_class.__name__ + '(')
