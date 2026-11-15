@@ -2975,3 +2975,20 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
+def test_boolean_is_not_an_integer():
+    """bool is a subclass of int; Schema(int) must still reject True/False."""
+    schema = Schema(int)
+    with pytest.raises(MultipleInvalid):
+        schema(True)
+    with pytest.raises(MultipleInvalid):
+        schema(False)
+    assert schema(0) == 0
+    assert schema(1) == 1
+    with pytest.raises(MultipleInvalid):
+        Schema({'age': int})({'age': True})
+    with pytest.raises(MultipleInvalid):
+        Schema(ExactSequence([int, int]))([True, False])
+    assert Schema(bool)(True) is True
+    assert Schema(bool)(False) is False
