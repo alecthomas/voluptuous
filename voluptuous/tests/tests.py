@@ -2481,6 +2481,8 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
 def test_boolean_is_not_an_integer():
     """bool is a subclass of int; Schema(int) must still reject True/False."""
     schema = Schema(int)
