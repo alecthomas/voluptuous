@@ -2481,6 +2481,8 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
 @pytest.mark.parametrize('validator_class', [DefaultTo, SetTo])
 def test_default_transform_repr_does_not_call_factory(validator_class):
     calls = []
