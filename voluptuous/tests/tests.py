@@ -77,7 +77,7 @@ from voluptuous import (
     validate,
 )
 from voluptuous.humanize import humanize_error
-from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
+from voluptuous.util import Capitalize, Lower, SetTo, Strip, Title, Upper
 
 # fmt: on
 
@@ -2975,3 +2975,43 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
+def test_optional_mutable_default_is_not_shared_between_validations():
+    """A mutable default (list/dict) must not be the same object across calls."""
+    schema = Schema({Optional('items', default=[]): list})
+
+    result1 = schema({})
+    result1['items'].append('mutated')
+    result2 = schema({})
+
+    assert result2['items'] == []
+    assert result1['items'] is not result2['items']
+
+    dict_schema = Schema({Optional('data', default={}): dict})
+    d1 = dict_schema({})
+    d1['data']['key'] = 'value'
+    d2 = dict_schema({})
+
+    assert d2['data'] == {}
+    assert d1['data'] is not d2['data']
+
+
+def test_optional_default_that_cannot_be_deep_copied_is_still_supported():
+    """A non-copyable literal default (e.g. a lock) must still work as a default."""
+    import threading
+
+    lock = threading.Lock()
+    schema = Schema({Optional('lock', default=lock): object})
+
+    result = schema({})
+
+    assert result['lock'] is lock
+
+
+def test_optional_default_sentinel_keeps_its_identity():
+    """An identity-valued default must stay the same object, not a deep copy."""
+    marker = object()
+    schema = Schema(All(SetTo(marker), Equal(marker)))
+
+    assert schema(None) is marker
