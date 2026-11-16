@@ -4,6 +4,8 @@
 
 **Fixes**:
 
+* Report overflowing numeric conversions in `Coerce` as validation errors.
+
 * Exclude dataclass `init=False` fields from generated constructor-input schemas and let dataclasses initialize them.
 
 * [#539](https://github.com/alecthomas/voluptuous/pull/539): Raise `Invalid` instead of leaking `TypeError`/`ValueError` for non-numeric input to the `Number` validator

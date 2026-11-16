@@ -114,8 +114,8 @@ def truth(f: typing.Callable) -> typing.Callable:
 class Coerce(object):
     """Coerce a value to a type.
 
-    If the type constructor throws a ValueError or TypeError, the value
-    will be marked as Invalid.
+    If the type constructor throws a ValueError, TypeError or OverflowError,
+    the value will be marked as Invalid.
 
     Default behavior:
 
@@ -144,7 +144,7 @@ class Coerce(object):
     def __call__(self, v):
         try:
             return self.type(v)
-        except (ValueError, TypeError, InvalidOperation):
+        except (ValueError, TypeError, OverflowError, InvalidOperation):
             msg = self.msg or (gettext('expected %s') % self.type_name)
             if not self.msg and Enum and issubclass(self.type, Enum):
                 msg += (

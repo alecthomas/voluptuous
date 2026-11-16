@@ -2515,6 +2515,30 @@ def test_any_with_extra_none():
     assert str(ctx.value.errors[0]) == "not a valid value @ data['additional_key']"
 
 
+@pytest.mark.parametrize(
+    ('target', 'value'),
+    [(int, float('inf')), (int, float('-inf')), (float, 10**400)],
+)
+@pytest.mark.parametrize('msg', [None, 'number is out of range'])
+def test_coerce_overflow(target, value, msg):
+    schema = Schema({'amount': Coerce(target, msg=msg)})
+
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({'amount': value})
+
+    assert len(exc_info.value.errors) == 1
+    error = exc_info.value.errors[0]
+    assert error.path == ['amount']
+    assert error.msg == (msg or 'expected %s' % target.__name__)
+
+
+def test_coerce_overflow_allows_another_validator():
+    schema = Schema(Any(Coerce(int), float))
+
+    assert schema(float('inf')) == float('inf')
+    assert schema('42') == 42
+
+
 def test_coerce_enum():
     """Test Coerce Enum"""
 
