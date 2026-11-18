@@ -23,6 +23,7 @@ from voluptuous import (
     All,
     AllInvalid,
     Any,
+    AnyInvalid,
     Clamp,
     Coerce,
     Contains,
@@ -45,6 +46,7 @@ from voluptuous import (
     IsFile,
     IsTrue,
     Length,
+    LengthInvalid,
     Literal,
     LiteralInvalid,
     Marker,
@@ -2025,6 +2027,149 @@ def test_all_error_has_path():
     assert (
         ctx.value.errors[0].path == ['q'] and ctx.value.errors[1].path == ['q2']
     ) or (ctx.value.errors[1].path == ['q'] and ctx.value.errors[0].path == ['q2'])
+
+
+def test_any_all_error_ordering():
+    """https://github.com/alecthomas/voluptuous/issues/413"""
+    s1 = Schema(Any(str, All([str], Length(min=2))))
+    s2 = Schema(Any(All([str], Length(min=2)), str))
+
+    for schema in (s1, s2):
+        assert schema('3') == '3'
+        assert schema(['3', '4']) == ['3', '4']
+
+        for invalid_list in (['3'], []):
+            with pytest.raises(MultipleInvalid) as ctx:
+                schema(invalid_list)
+            assert isinstance(ctx.value.errors[0], LengthInvalid)
+            assert str(ctx.value) == 'length of value must be at least 2'
+
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema([3])
+        assert isinstance(ctx.value.errors[0], TypeInvalid)
+        assert str(ctx.value) == 'expected str @ data[0]'
+
+    for direct in (
+        Any(str, All([str], Length(min=2))),
+        Any(All([str], Length(min=2)), str),
+    ):
+        with pytest.raises(MultipleInvalid) as ctx:
+            direct(['3'])
+        assert isinstance(ctx.value.errors[0], LengthInvalid)
+        assert str(ctx.value) == 'length of value must be at least 2'
+
+
+def test_any_all_nested_and_composite_error_ordering():
+    """Prefer branches that matched further across nested containers and All()."""
+    for branches in (
+        ([int], All([str], Length(min=2))),
+        (All([str], Length(min=2)), [int]),
+    ):
+        schema = Schema(Any(*branches))
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema(['3'])
+        assert isinstance(ctx.value.errors[0], LengthInvalid)
+        assert str(ctx.value) == 'length of value must be at least 2'
+
+    def passwords_must_match(data):
+        if data['password'] != data['password_again']:
+            raise Invalid('passwords must match')
+        return data
+
+    password_branch = All(
+        {'password': str, 'password_again': str, Extra: object},
+        passwords_must_match,
+    )
+    for branches in (
+        ({'token': str}, password_branch),
+        (password_branch, {'token': str}),
+    ):
+        schema = Schema(Any(*branches))
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({'password': '123', 'password_again': '456'})
+        assert str(ctx.value) == 'passwords must match'
+
+    for branches in (
+        (All(dict, {'a': int}), {'a': All(str, Length(min=5))}),
+        ({'a': All(str, Length(min=5))}, All(dict, {'a': int})),
+    ):
+        schema = Schema(Any(*branches))
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({'a': 'hi'})
+        assert (
+            str(ctx.value)
+            == "length of value must be at least 5 for dictionary value @ data['a']"
+        )
+
+    maybe_long_str = Schema(Maybe(All(str, Length(min=3))))
+    assert maybe_long_str(None) is None
+    assert maybe_long_str('abcd') == 'abcd'
+    with pytest.raises(MultipleInvalid) as ctx:
+        maybe_long_str('ab')
+    assert str(ctx.value) == 'length of value must be at least 3'
+    with pytest.raises(MultipleInvalid) as ctx:
+        maybe_long_str(123)
+    assert str(ctx.value) == 'not a valid value'
+
+    inner = Schema(All([str], Length(min=2)))
+    for branches in ((str, inner), (inner, str)):
+        schema = Schema({'items': Any(*branches)})
+        with pytest.raises(MultipleInvalid) as ctx:
+            schema({'items': ['3']})
+        assert (
+            str(ctx.value)
+            == "length of value must be at least 2 for dictionary value @ data['items']"
+        )
+
+    custom_all = All([str], Length(min=2), msg='need >= 2 strings')
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema(Any(str, custom_all))(['3'])
+    assert isinstance(ctx.value.errors[0], AllInvalid)
+    assert str(ctx.value) == 'need >= 2 strings'
+
+    custom_any = Any(str, All([str], Length(min=2)), msg='bad string or list')
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema(Any(int, custom_any))(['3'])
+    assert isinstance(ctx.value.errors[0], AnyInvalid)
+    assert str(ctx.value) == 'bad string or list'
+
+    exact_branch = All(
+        ExactSequence([str, str]),
+        lambda pair: (
+            pair
+            if pair[0] != pair[1]
+            else (_ for _ in ()).throw(Invalid('pair must differ'))
+        ),
+    )
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema(Any([int], exact_branch))(['same', 'same'])
+    assert str(ctx.value) == 'pair must differ'
+
+    obj_branch = All(
+        Object({'value': int}),
+        lambda obj: (
+            obj
+            if obj.value > 0
+            else (_ for _ in ()).throw(Invalid('value must be positive'))
+        ),
+    )
+    with pytest.raises(MultipleInvalid) as ctx:
+        Schema(Any(str, obj_branch))(MyValueClass(value=-1))
+    assert str(ctx.value) == 'value must be positive'
+
+    union_schema = Schema(
+        Union(
+            {'kind': 'x', 'items': str},
+            All(
+                {'kind': 'x', 'items': [str]},
+                lambda d: (_ for _ in ()).throw(Invalid('bad batch')),
+            ),
+            discriminant=lambda val, alts: alts,
+        )
+    )
+    with pytest.raises(MultipleInvalid) as ctx:
+        union_schema({'kind': 'x', 'items': ['a']})
+    assert str(ctx.value) == 'bad batch'
 
 
 def test_match_error_has_path():
