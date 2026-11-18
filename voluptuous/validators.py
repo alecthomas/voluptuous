@@ -1,6 +1,7 @@
 # fmt: off
 from __future__ import annotations
 
+import collections.abc
 import datetime
 import os
 import re
@@ -39,7 +40,17 @@ from voluptuous.error import (
 )
 
 # F401: flake8 complains about 'raises' not being used, but it is used in doctests
-from voluptuous.schema_builder import Schema, Schemable, message, raises  # noqa: F401
+from voluptuous.schema_builder import (  # noqa: F401
+    Extra,
+    Marker,
+    Object,
+    Schema,
+    Schemable,
+    _iterate_object,
+    message,
+    primitive_types,
+    raises,
+)
 
 if typing.TYPE_CHECKING:
     from _typeshed import SupportsAllComparisons
@@ -290,6 +301,105 @@ class _WithSubValidators(object):
         raise NotImplementedError()
 
 
+def _error_progress(error: Invalid) -> typing.Tuple[int, int]:
+    base = (
+        error.errors[0]
+        if isinstance(error, MultipleInvalid) and error.errors
+        else error
+    )
+    return (len(base.path) + base._match_extra_depth, base._match_steps)
+
+
+def _set_error_progress(error: Invalid, total_depth: int, steps: int) -> None:
+    target = (
+        error.errors[0]
+        if isinstance(error, MultipleInvalid) and error.errors
+        else error
+    )
+    target._match_extra_depth = max(0, total_depth - len(target.path))
+    target._match_steps = steps
+
+
+def _matched_schema_depth(
+    spec: typing.Any,
+    value: typing.Any,
+    base_depth: int,
+    _seen: typing.Optional[typing.Set[int]] = None,
+) -> int:
+    seen_specs: typing.Set[int] = set()
+    while isinstance(spec, (Schema, Marker)):
+        spec_id = id(spec)
+        if spec_id in seen_specs:
+            return base_depth
+        seen_specs.add(spec_id)
+        spec = spec.schema
+
+    if isinstance(spec, All):
+        if not spec.validators:
+            return base_depth
+        return max(
+            _matched_schema_depth(sub, value, base_depth, _seen)
+            for sub in spec.validators
+        )
+
+    if isinstance(spec, ExactSequence):
+        if isinstance(value, (list, tuple)) and value and spec.validators:
+            seen = set() if _seen is None else _seen
+            val_id = id(value)
+            if val_id in seen:
+                return base_depth
+            next_seen = seen | {val_id}
+            return max(
+                _matched_schema_depth(sub, elem, base_depth + 1, next_seen)
+                for elem, sub in zip(value, spec.validators)
+            )
+        return base_depth
+
+    if isinstance(spec, (list, tuple)):
+        if spec and isinstance(value, type(spec)) and value:
+            if len(spec) == 1:
+                seen = set() if _seen is None else _seen
+                val_id = id(value)
+                if val_id in seen:
+                    return base_depth
+                next_seen = seen | {val_id}
+                return max(
+                    _matched_schema_depth(spec[0], elem, base_depth + 1, next_seen)
+                    for elem in value
+                )
+            return base_depth + 1
+        return base_depth
+
+    if isinstance(spec, Object):
+        if spec and any(item[1] is not None for item in _iterate_object(value)):
+            return base_depth + 1
+        return base_depth
+
+    if isinstance(spec, collections.abc.Mapping):
+        if spec and isinstance(value, collections.abc.Mapping) and value:
+            seen = set() if _seen is None else _seen
+            val_id = id(value)
+            if val_id in seen:
+                return base_depth
+            next_seen = seen | {val_id}
+            best = base_depth + 1
+            for skey, svalue in spec.items():
+                if skey is Extra:
+                    continue
+                raw_key = skey.schema if isinstance(skey, Marker) else skey
+                if type(raw_key) in primitive_types and raw_key in value:
+                    best = max(
+                        best,
+                        _matched_schema_depth(
+                            svalue, value[raw_key], base_depth + 1, next_seen
+                        ),
+                    )
+            return best
+        return base_depth
+
+    return base_depth
+
+
 class Any(_WithSubValidators):
     """Use the first validated value.
 
@@ -324,11 +434,15 @@ class Any(_WithSubValidators):
                 else:
                     return func(path, v)
             except Invalid as e:
-                if error is None or len(e.path) > len(error.path):
+                if error is None or _error_progress(e) > _error_progress(error):
                     error = e
         else:
             if error:
-                raise error if self.msg is None else AnyInvalid(self.msg, path=path)
+                if self.msg is None:
+                    raise error
+                out = AnyInvalid(self.msg, path=path)
+                _set_error_progress(out, *_error_progress(error))
+                raise out
             raise AnyInvalid(self.msg or gettext('no valid value found'), path=path)
 
 
@@ -366,11 +480,15 @@ class Union(_WithSubValidators):
                 else:
                     return func(path, v)
             except Invalid as e:
-                if error is None or len(e.path) > len(error.path):
+                if error is None or _error_progress(e) > _error_progress(error):
                     error = e
         else:
             if error:
-                raise error if self.msg is None else AnyInvalid(self.msg, path=path)
+                if self.msg is None:
+                    raise error
+                out = AnyInvalid(self.msg, path=path)
+                _set_error_progress(out, *_error_progress(error))
+                raise out
             raise AnyInvalid(self.msg or gettext('no valid value found'), path=path)
 
 
@@ -392,14 +510,33 @@ class All(_WithSubValidators):
     """
 
     def _exec(self, funcs, v, path=None):
+        base_depth = len(path) if path is not None else 0
+        step_depths: typing.List[int] = []
         try:
-            for func in funcs:
+            for idx, func in enumerate(funcs):
+                prev_v = v
                 if path is None:
                     v = func(v)
                 else:
                     v = func(path, v)
+                validator = (
+                    self.validators[idx]
+                    if self.discriminant is None and idx < len(self.validators)
+                    else None
+                )
+                step_depths.append(
+                    _matched_schema_depth(validator, v if v else prev_v, base_depth)
+                )
         except Invalid as e:
-            raise e if self.msg is None else AllInvalid(self.msg, path=path)
+            out = e if self.msg is None else AllInvalid(self.msg, path=path)
+            if step_depths or out is not e:
+                err_depth, err_steps = _error_progress(e)
+                total_depth = max([err_depth, *step_depths])
+                steps_at_depth = sum(1 for d in step_depths if d == total_depth)
+                if err_depth == total_depth:
+                    steps_at_depth += err_steps
+                _set_error_progress(out, total_depth, steps_at_depth)
+            raise out
         return v
 
 

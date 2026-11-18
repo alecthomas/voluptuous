@@ -24,6 +24,9 @@ class Invalid(Error):
 
     """
 
+    _match_extra_depth: int = 0
+    _match_steps: int = 0
+
     def __init__(
         self,
         message: str,
@@ -35,6 +38,8 @@ class Invalid(Error):
         self._path = path or []
         self._error_message = error_message or message
         self.error_type = error_type
+        self._match_extra_depth = 0
+        self._match_steps = 0
 
     @property
     def msg(self) -> str:
