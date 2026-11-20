@@ -2578,6 +2578,33 @@ def test_object():
     pytest.raises(MultipleInvalid, s, 345)
 
 
+@pytest.mark.parametrize(
+    'mapping_type', [dict, collections.OrderedDict, collections.UserDict]
+)
+def test_object_mapping(mapping_type):
+    s = Schema({'test': (Object({'ok': Coerce(int)}),)}, required=True)
+    original = mapping_type(ok='1')
+    result = s({'test': (original,)})['test'][0]
+    assert type(result) is mapping_type
+    assert result == {'ok': 1}
+    assert original == {'ok': '1'}
+
+
+@pytest.mark.parametrize(
+    'value, message',
+    [
+        ({}, 'required key not provided'),
+        ({'ok': 2}, 'not a valid value for object value'),
+    ],
+)
+def test_object_mapping_errors(value, message):
+    s = Schema(Object({'ok': 1}), required=True)
+    with pytest.raises(MultipleInvalid) as exc:
+        s(value)
+    assert str(exc.value) == "%s @ data['ok']" % message
+    assert exc.value.path == ['ok']
+
+
 def test_exception():
     s = Schema(None)
     with pytest.raises(MultipleInvalid) as ctx:
