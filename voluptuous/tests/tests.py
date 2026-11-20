@@ -2399,8 +2399,12 @@ def test_key1():
         )
 
     assert len(ctx.value.errors) == 2
-    assert str(ctx.value.errors[0]) == "not a valid value @ data['two']"
-    assert str(ctx.value.errors[1]) == "not a valid value @ data['four']"
+    assert str(ctx.value.errors[0]) == (
+        "not a valid value: invalid literal for int() with base 10: 'two' @ data['two']"
+    )
+    assert str(ctx.value.errors[1]) == (
+        "not a valid value: invalid literal for int() with base 10: 'four' @ data['four']"
+    )
 
 
 def test_key2():
