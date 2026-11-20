@@ -536,12 +536,16 @@ class Schema(object):
         groups_of_exclusion = {}
         groups_of_inclusion = {}
         for node in schema:
-            if isinstance(node, Exclusive):
-                g = groups_of_exclusion.setdefault(node.group_of_exclusion, [])
-                g.append(node)
-            elif isinstance(node, Inclusive):
-                g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
-                g.append(node)
+            while isinstance(node, Marker):
+                if isinstance(node, Exclusive):
+                    g = groups_of_exclusion.setdefault(node.group_of_exclusion, [])
+                    if node not in g:
+                        g.append(node)
+                elif isinstance(node, Inclusive):
+                    g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
+                    if node not in g:
+                        g.append(node)
+                node = node.schema
 
         def validate_dict(path, data):
             if not isinstance(data, dict):

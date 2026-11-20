@@ -2333,6 +2333,39 @@ def test_inclusive_defaults():
         r = schema({'x': 1})
 
 
+@pytest.mark.parametrize('other, group', [('bar', 'first'), ('baz', 'second')])
+def test_nested_exclusive(other, group):
+    s = Schema(
+        {
+            Exclusive(Exclusive('foo', 'first'), 'second'): str,
+            Exclusive('bar', 'first'): str,
+            Exclusive('baz', 'second'): str,
+        }
+    )
+    assert s({'foo': ''}) == {'foo': ''}
+    assert s({'bar': '', 'baz': ''}) == {'bar': '', 'baz': ''}
+    with pytest.raises(MultipleInvalid) as exc:
+        s({'foo': '', other: ''})
+    assert exc.value.path == [group]
+
+
+def test_nested_exclusive_same_group():
+    s = Schema({Exclusive(Exclusive('foo', 'group'), 'group'): str})
+    assert s({'foo': ''}) == {'foo': ''}
+
+
+def test_optional_exclusive():
+    s = Schema(
+        {
+            Optional(Exclusive('foo', 'group')): str,
+            Exclusive('bar', 'group'): str,
+        }
+    )
+    assert s({}) == {}
+    with pytest.raises(MultipleInvalid):
+        s({'foo': '', 'bar': ''})
+
+
 def test_exclusive():
     schema = Schema(
         {
