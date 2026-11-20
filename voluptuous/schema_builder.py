@@ -942,6 +942,9 @@ def _iterate_object(obj):
     defined __slots__.
 
     """
+    if isinstance(obj, collections.abc.Mapping):
+        yield from obj.items()
+        return
     d = {}
     try:
         d = vars(obj)
