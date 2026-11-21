@@ -2,6 +2,7 @@
 import collections
 import contextvars
 import copy
+import datetime
 import os
 import shutil
 import subprocess
@@ -2399,8 +2400,12 @@ def test_key1():
         )
 
     assert len(ctx.value.errors) == 2
-    assert str(ctx.value.errors[0]) == "not a valid value @ data['two']"
-    assert str(ctx.value.errors[1]) == "not a valid value @ data['four']"
+    assert str(ctx.value.errors[0]) == (
+        "not a valid value: invalid literal for int() with base 10: 'two' @ data['two']"
+    )
+    assert str(ctx.value.errors[1]) == (
+        "not a valid value: invalid literal for int() with base 10: 'four' @ data['four']"
+    )
 
 
 def test_key2():
@@ -2975,3 +2980,31 @@ def test_dataclass_non_init_factory_not_called_for_invalid_input(schema_factory)
     assert calls == []
     assert validate({'value': 1}).items == []
     assert calls == [True]
+
+
+def test_callable_value_error_message_is_preserved():
+    """A ValueError raised by a plain validator function keeps its message.
+
+    https://github.com/alecthomas/voluptuous/issues/417
+    """
+
+    def parse_aware_dt(value):
+        dt = datetime.datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            raise ValueError("datetime doesn't contain timezone info")
+        return dt
+
+    schema = Schema({'started_at': parse_aware_dt})
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({'started_at': '2019-12-21T12:00:13.075029'})
+    assert str(ctx.value.errors[0]) == (
+        "not a valid value: datetime doesn't contain timezone info"
+        " for dictionary value @ data['started_at']"
+    )
+
+    with pytest.raises(MultipleInvalid) as ctx:
+        schema({'started_at': 'not a datetime at all'})
+    assert str(ctx.value.errors[0]).startswith(
+        "not a valid value: Invalid isoformat string"
+    )
