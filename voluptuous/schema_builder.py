@@ -566,6 +566,20 @@ class Schema(object):
                             break
                         exists = True
 
+                if not exists:
+                    for exclusive in group:
+                        if exclusive.required:
+                            msg = (
+                                exclusive.msg
+                                or gettext(
+                                    "one of the values in the group of exclusion '%s' is required"
+                                )
+                                % label
+                            )
+                            next_path = path + [VirtualPathComponent(label)]
+                            errors.append(er.RequiredFieldInvalid(msg, next_path))
+                            break
+
             if errors:
                 raise er.MultipleInvalid(errors)
 
@@ -1149,6 +1163,23 @@ class Exclusive(Optional):
     >>> with raises(er.MultipleInvalid, "Please, use only one type of authentication at the same time. @ data[<auth>]"):
     ...     schema({'classic': {'email': 'foo@example.com', 'password': 'bar'},
     ...             'social': {'social_network': 'barfoo', 'token': 'tEMp'}})
+
+    Set ``required=True`` on any key in a group to require exactly one of the
+    group's keys. It does not require that particular key:
+
+    >>> from voluptuous import Coerce
+    >>> schema = Schema({
+    ...     Exclusive('project_id', 'project', required=True): Coerce(int),
+    ...     Exclusive('project_name', 'project'): str,
+    ... })
+    >>> schema({'project_id': '42'})
+    {'project_id': 42}
+    >>> schema({'project_name': 'example'})
+    {'project_name': 'example'}
+    >>> with raises(er.MultipleInvalid, "one of the values in the group of exclusion 'project' is required @ data[<project>]"):
+    ...     schema({})
+
+    Groups remain optional by default, including in a ``Schema(required=True)``.
     """
 
     def __init__(
@@ -1157,9 +1188,11 @@ class Exclusive(Optional):
         group_of_exclusion: str,
         msg: typing.Optional[str] = None,
         description: typing.Any | None = None,
+        required: bool = False,
     ) -> None:
         super(Exclusive, self).__init__(schema, msg=msg, description=description)
         self.group_of_exclusion = group_of_exclusion
+        self.required = required
 
 
 class Inclusive(Optional):
