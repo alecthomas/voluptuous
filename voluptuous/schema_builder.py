@@ -1202,6 +1202,25 @@ class Inclusive(Optional):
     >>> data = {'height': 100, 'width': 100}
     >>> data == schema(data)
     True
+
+    Defaults apply when no keys from the group are supplied. The all-or-none
+    check runs against the input before defaults are inserted, so a default
+    does not make a partially specified group valid:
+
+    >>> dimensions = Schema({
+    ...     Inclusive('width', 'dimensions', default=1024): int,
+    ...     Inclusive('height', 'dimensions', default=576): int,
+    ... })
+    >>> dimensions({}) == {'width': 1024, 'height': 576}
+    True
+    >>> dimensions({'width': 640, 'height': 480}) == {'width': 640, 'height': 480}
+    True
+    >>> with raises(er.MultipleInvalid):
+    ...     dimensions({'width': 640})
+
+    Give each key a default if the absent group should produce a complete set
+    of values. Defaults are validated by their corresponding value schemas,
+    just like defaults on Optional keys.
     """
 
     def __init__(
