@@ -76,6 +76,7 @@ from voluptuous import (
     raises,
     validate,
 )
+from voluptuous.error import RequiredFieldInvalid
 from voluptuous.humanize import humanize_error
 from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
@@ -2352,6 +2353,84 @@ def test_exclusive():
         "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]",
     ):
         r = schema({'x': 1, 'y': 2})
+
+
+@pytest.mark.parametrize('required_key', ['x', 'y'])
+@pytest.mark.parametrize('schema_required', [False, True])
+def test_exclusive_required(required_key, schema_required):
+    schema = Schema(
+        {
+            Exclusive('x', 'stuff', required=required_key == 'x'): Coerce(int),
+            Exclusive('y', 'stuff', required=required_key == 'y'): Coerce(int),
+        },
+        required=schema_required,
+    )
+
+    assert schema({'x': '0'}) == {'x': 0}
+    assert schema({'y': '2'}) == {'y': 2}
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({})
+    assert isinstance(exc_info.value.errors[0], RequiredFieldInvalid)
+    assert str(exc_info.value) == (
+        "one of the values in the group of exclusion 'stuff' is required @ data[<stuff>]"
+    )
+    with raises(
+        MultipleInvalid,
+        "two or more values in the same group of exclusion 'stuff' @ data[<stuff>]",
+    ):
+        schema({'x': 1, 'y': 2})
+    with raises(MultipleInvalid, "expected int for dictionary value @ data['x']"):
+        schema({'x': 'invalid'})
+
+
+def test_exclusive_required_custom_message_and_path():
+    schema = Schema(
+        {
+            'project': {
+                Exclusive(
+                    'id', 'identity', required=True, msg='Choose an identity'
+                ): int,
+                Exclusive('name', 'identity'): str,
+                Optional('description'): str,
+            }
+        }
+    )
+    with raises(MultipleInvalid, "Choose an identity @ data['project'][<identity>]"):
+        schema({'project': {'description': 'No identity'}})
+
+
+def test_exclusive_required_independent_groups():
+    schema = Schema(
+        {
+            Exclusive('x', 'first', required=True): int,
+            Exclusive('y', 'first'): int,
+            Exclusive('a', 'second'): int,
+            Exclusive('b', 'second', required=True): int,
+        }
+    )
+    assert schema({'y': 1, 'a': 2}) == {'y': 1, 'a': 2}
+    with pytest.raises(MultipleInvalid) as exc_info:
+        schema({})
+    assert {str(error.path[0]) for error in exc_info.value.errors} == {
+        '<first>',
+        '<second>',
+    }
+    with raises(
+        MultipleInvalid,
+        "one of the values in the group of exclusion 'second' is required @ data[<second>]",
+    ):
+        schema({'x': 1})
+
+
+def test_exclusive_remains_optional_in_required_schema():
+    schema = Schema(
+        {
+            Exclusive('x', 'stuff'): int,
+            Exclusive('y', 'stuff'): int,
+        },
+        required=True,
+    )
+    assert schema({}) == {}
 
 
 def test_any_with_discriminant():
