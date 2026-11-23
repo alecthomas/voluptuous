@@ -5,14 +5,20 @@ from Python dataclasses, with support for additional validation constraints.
 """
 
 import dataclasses
+import types
+import typing
+from copy import copy
 from dataclasses import MISSING
 from typing import Any, Dict, Optional, Type
 
+from voluptuous import error as er
+from voluptuous._i18n import gettext
 from voluptuous.schema_builder import UNDEFINED
 from voluptuous.schema_builder import Optional as OptionalMarker
 from voluptuous.schema_builder import Required as RequiredMarker
 from voluptuous.schema_builder import Schema
 from voluptuous.validators import All
+from voluptuous.validators import Any as AnyValidator
 
 
 def is_dataclass(obj: Any) -> bool:
@@ -27,6 +33,83 @@ def is_dataclass(obj: Any) -> bool:
     return dataclasses.is_dataclass(obj)
 
 
+def _field_annotations(dataclass_type):
+    if not isinstance(dataclass_type, type) or not is_dataclass(dataclass_type):
+        raise ValueError(f"{dataclass_type} is not a dataclass type")
+    try:
+        return typing.get_type_hints(
+            dataclass_type,
+            localns={dataclass_type.__name__: dataclass_type},
+            include_extras=True,
+        )
+    except (NameError, TypeError) as exc:
+        raise er.SchemaError(
+            f"Cannot resolve annotations for {dataclass_type.__name__}: {exc}"
+        ) from exc
+
+
+def _annotation_schema(annotation, nested):
+    """Translate supported annotations without silently dropping type arguments."""
+    if annotation is Any:
+        return object
+    origin, args = typing.get_origin(annotation), typing.get_args(annotation)
+    if origin is typing.Annotated:
+        return _annotation_schema(args[0], nested)
+    if origin in (typing.Union, types.UnionType):
+        return AnyValidator(*(_annotation_schema(arg, nested) for arg in args))
+    if origin is typing.Literal:
+
+        def validate_literal(value):
+            if any(type(value) is type(arg) and value == arg for arg in args):
+                return value
+            raise er.Invalid(gettext('value is not an allowed literal'))
+
+        return validate_literal
+    if isinstance(annotation, dataclasses.InitVar):
+        return _annotation_schema(annotation.type, nested)
+    if isinstance(annotation, type) and is_dataclass(annotation):
+        return nested(annotation)
+    if origin in (list, dict, set, frozenset, tuple):
+        if not args and annotation not in (typing.Tuple[()], tuple[()]):
+            return origin
+        if origin is list:
+            return [_annotation_schema(args[0], nested)]
+        if origin is dict:
+            return {
+                _annotation_schema(args[0], nested): _annotation_schema(args[1], nested)
+            }
+        if origin in (set, frozenset):
+            return origin([_annotation_schema(args[0], nested)])
+        variadic = len(args) == 2 and args[1] is Ellipsis
+        schemas = [
+            Schema(_annotation_schema(arg, nested))
+            for arg in (args[:1] if variadic else args)
+        ]
+
+        def validate_tuple(value):
+            if not isinstance(value, tuple):
+                raise er.TypeInvalid(gettext('expected tuple'))
+            if not variadic and len(value) != len(schemas):
+                raise er.LengthInvalid(gettext('invalid tuple length'))
+            result = []
+            for index, item in enumerate(value):
+                try:
+                    result.append(schemas[0 if variadic else index](item))
+                except er.Invalid as exc:
+                    exc.prepend([index])
+                    raise
+            return tuple(result)
+
+        return validate_tuple
+    if (
+        origin is not None
+        or not isinstance(annotation, type)
+        or typing.is_typeddict(annotation)
+    ):
+        raise er.SchemaError(f"Unsupported dataclass annotation: {annotation!r}")
+    return annotation
+
+
 def get_dataclass_fields(dataclass_type: Type) -> Dict[str, Any]:
     """Extract field information from a dataclass.
 
@@ -34,51 +117,20 @@ def get_dataclass_fields(dataclass_type: Type) -> Dict[str, Any]:
         dataclass_type: The dataclass type to extract fields from
 
     Returns:
-        Dictionary mapping field names to their basic types
+        Dictionary mapping constructor field names to their resolved annotations
 
     Raises:
         ValueError: If the type is not a dataclass
     """
-    if not is_dataclass(dataclass_type):
-        raise ValueError(f"{dataclass_type} is not a dataclass")
-
+    annotations = _field_annotations(dataclass_type)
+    stored = {field.name for field in dataclasses.fields(dataclass_type)}
     fields: Dict[str, Any] = {}
     for field_name, field_info in dataclass_type.__dataclass_fields__.items():
-        if not field_info.init:
-            continue
-        field_type = field_info.type
-
-        # Convert typing annotations to basic types for voluptuous
-        # For complex types like List[str], Optional[str], etc., we'll use the base type
-        # and let additional constraints handle the specifics
-        if hasattr(field_type, '__origin__'):
-            # Handle generic types like List[str], Optional[str], etc.
-            origin = field_type.__origin__
-            if origin is list:
-                fields[field_name] = list
-            elif origin is dict:
-                fields[field_name] = dict
-            elif origin is set:
-                fields[field_name] = set
-            elif origin is tuple:
-                fields[field_name] = tuple
-            elif (
-                hasattr(field_type, '__args__')
-                and len(field_type.__args__) == 2
-                and type(None) in field_type.__args__
-            ):
-                # Optional[T] is Union[T, None]
-                non_none_type = next(
-                    arg for arg in field_type.__args__ if arg is not type(None)
-                )
-                fields[field_name] = non_none_type
-            else:
-                # For other generic types, use the origin
-                fields[field_name] = origin
-        else:
-            # Simple type, use as-is
-            fields[field_name] = field_type
-
+        annotation = annotations[field_name]
+        if field_info.init and (
+            field_name in stored or isinstance(annotation, dataclasses.InitVar)
+        ):
+            fields[field_name] = annotation
     return fields
 
 
@@ -95,9 +147,8 @@ def get_dataclass_field_defaults(dataclass_type: Type) -> Dict[str, Any]:
         return {}
 
     defaults = {}
-    for field_name, field_info in dataclass_type.__dataclass_fields__.items():
-        if not field_info.init:
-            continue
+    for field_name in get_dataclass_fields(dataclass_type):
+        field_info = dataclass_type.__dataclass_fields__[field_name]
         if field_info.default is not MISSING:
             defaults[field_name] = field_info.default
         elif field_info.default_factory is not MISSING:
@@ -184,62 +235,83 @@ def create_dataclass_schema(
         )
         result = schema({'name': 'John', 'age': 30})
     """
-    if not is_dataclass(dataclass_type):
-        raise ValueError(f"{dataclass_type} is not a dataclass")
+    schemas = {}
 
-    # Extract field types from dataclass
-    base_schema = get_dataclass_fields(dataclass_type)
+    def nested(cls):
+        # Delay compilation to permit self-referential dataclass annotations.
+        def validate(value):
+            if cls not in schemas:
+                schemas[cls] = build(cls, {})
+            return schemas[cls](value)
 
-    # Merge with additional constraints if provided
-    if additional_constraints:
-        schema_dict = merge_schema_constraints(base_schema, additional_constraints)
-    else:
-        schema_dict = base_schema.copy()
+        return validate
 
-    # Convert to proper voluptuous schema with markers
-    voluptuous_schema: Dict[Any, Any] = {}
-
-    for field_name, constraint in schema_dict.items():
-        field_info = dataclass_type.__dataclass_fields__.get(field_name)
-
-        if field_info and field_info.default is not MISSING:
-            # Field has a default value - make it Optional
-            voluptuous_schema[
-                OptionalMarker(field_name, default=field_info.default)
-            ] = constraint
-        elif field_info and field_info.default_factory is not MISSING:
-            # Field has a default factory - make it Optional
-            voluptuous_schema[
-                OptionalMarker(field_name, default=field_info.default_factory)
-            ] = constraint
-        elif field_name in base_schema:
-            # Field is from dataclass but has no default - make it Required
-            voluptuous_schema[RequiredMarker(field_name)] = constraint
-        else:
-            # Additional field not in dataclass - use as-is
-            voluptuous_schema[field_name] = constraint
-
-    # Create a custom validator that validates dict and creates dataclass instance
-    def dataclass_validator(data):
-        # First validate the dictionary structure
+    def build(cls, constraints):
+        annotations = _field_annotations(cls)
+        constructor = get_dataclass_fields(cls)
+        stored = {field.name: field for field in dataclasses.fields(cls)}
+        compiled_fields = {
+            name: _annotation_schema(annotations[name], nested)
+            for name in dict.fromkeys([*constructor, *stored])
+        }
+        constructor_schema = merge_schema_constraints(
+            {name: compiled_fields[name] for name in constructor}, constraints
+        )
+        mapping = {}
+        for name, constraint in constructor_schema.items():
+            field_info = cls.__dataclass_fields__.get(name)
+            if name not in constructor:
+                marker = name
+            elif field_info.default is not MISSING:
+                # A callable default is a value; only default_factory is invoked.
+                marker = OptionalMarker(
+                    name, default=lambda value=field_info.default: value
+                )
+            elif field_info.default_factory is not MISSING:
+                marker = OptionalMarker(name, default=field_info.default_factory)
+            else:
+                marker = RequiredMarker(name)
+            mapping[marker] = constraint
+        options = {'required': required}
         if extra is not UNDEFINED:
-            dict_schema = Schema(voluptuous_schema, required=required, extra=extra)
-        else:
-            dict_schema = Schema(voluptuous_schema, required=required)
-        validated_data = dict_schema(data)
+            options['extra'] = extra
+        dict_schema = Schema(mapping, **options)
+        instance_schema = Schema(
+            {
+                RequiredMarker(name): (
+                    All(compiled_fields[name], constraints[name])
+                    if name in constraints
+                    else compiled_fields[name]
+                )
+                for name in stored
+            }
+        )
 
-        # Extract the actual values (removing marker wrappers)
-        clean_data = {}
-        for key, value in validated_data.items():
-            field_info = dataclass_type.__dataclass_fields__.get(key)
-            if field_info is None or field_info.init:
-                clean_data[key] = value
+        def validate(data):
+            if isinstance(data, cls):
+                values = instance_schema(
+                    {
+                        name: getattr(data, name)
+                        for name in stored
+                        if hasattr(data, name)
+                    }
+                )
+                result = copy(data)
+                for name, value in values.items():
+                    object.__setattr__(result, name, value)
+                return result
+            if is_dataclass(data):
+                raise er.ObjectInvalid(gettext('expected a {0!r}').format(cls))
+            values = dict_schema(data)
+            return cls(
+                **{name: value for name, value in values.items() if name in constructor}
+            )
 
-        # Create and return dataclass instance
-        return dataclass_type(**clean_data)
+        return Schema(validate)
 
-    # Return a schema with the custom validator
-    return Schema(dataclass_validator)
+    result = build(dataclass_type, additional_constraints or {})
+    schemas[dataclass_type] = result
+    return result
 
 
 class DataclassSchema(Schema):
