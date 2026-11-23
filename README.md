@@ -781,6 +781,28 @@ result = schema({'name': 'John Doe', 'age': 30, 'active': False})
 # Returns: Person(name='John Doe', age=30, active=False)
 ```
 
+The same schema validates an existing instance and returns a separate instance:
+
+```python
+person = Person('John Doe', 30)
+validated = schema(person)
+assert validated == person
+assert validated is not person
+```
+
+Instance validation includes stored `init=False` fields and preserves the actual
+subclass, including frozen and slotted dataclasses. It copies the instance and
+applies validated field values without calling `__init__` or `__post_init__`
+again. Derived fields are validated as stored; they are not recomputed when
+another field is transformed. Ordinary field validators should not mutate their
+input, just as with dictionary schemas.
+
+Dictionary input still constructs a new dataclass through its normal initializer.
+`InitVar` fields are validated only for dictionary input; `ClassVar` attributes
+are never instance fields. Defaults and default factories retain their dataclass
+semantics. Extra keys accepted by `extra=ALLOW_EXTRA` or by additional constraints
+are validated but are not passed to the dataclass constructor.
+
 ### Dataclass with Additional Constraints
 
 You can add validation constraints on top of the basic type checking:
@@ -823,12 +845,9 @@ class Address:
 @dataclass
 class Person:
     name: str
-    address: dict  # Will be validated as Address
+    address: Address
 
-address_schema = DataclassSchema(Address)
-person_schema = DataclassSchema(Person, {
-    'address': address_schema
-})
+person_schema = DataclassSchema(Person)
 
 result = person_schema({
     'name': 'Alice',
@@ -862,6 +881,16 @@ schema = create_dataclass_schema(Person, {
 - **Seamless integration** with existing voluptuous validators
 - **Type annotation handling** for `List[T]`, `Optional[T]`, etc.
 - **Full backward compatibility** with existing voluptuous schemas
+
+Annotations are resolved using `typing.get_type_hints`, including postponed
+annotations and self references. Supported annotations include `Any`, ordinary
+classes, nested dataclasses, `Optional`, unions (`T | U`), `Literal`, and typed
+lists, dictionaries, sets, frozensets and tuples. Container items are validated
+recursively and errors retain their field/index paths. `Annotated[T, ...]` uses
+`T`; add validation constraints through the schema's second argument. Other
+parameterized annotations and unresolved forward references raise `SchemaError`
+when that dataclass schema is compiled. Referenced types must be visible in the
+class's module namespace (the class itself is also available for self references).
 
 For more examples, see `examples/dataclasses_example.py`.
 

@@ -4,6 +4,10 @@
 
 **Fixes**:
 
+* Validate existing dataclass instances, including frozen/slotted instances,
+  without rerunning initialization. Resolve annotations and validate nested
+  dataclasses, optional values and typed container elements (#409).
+
 * Exclude dataclass `init=False` fields from generated constructor-input schemas and let dataclasses initialize them.
 
 * [#539](https://github.com/alecthomas/voluptuous/pull/539): Raise `Invalid` instead of leaking `TypeError`/`ValueError` for non-numeric input to the `Number` validator
