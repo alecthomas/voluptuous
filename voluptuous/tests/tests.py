@@ -81,6 +81,107 @@ from voluptuous.util import Capitalize, Lower, Strip, Title, Upper
 
 # fmt: on
 
+
+@pytest.mark.parametrize(
+    'data, expected',
+    [
+        ({}, {'foo': 42}),
+        ({'foo': 23}, {'foo': 23}),
+        ({'bar': 23}, {'bar': 23}),
+        ({'baz': 1}, {'foo': 42, 'baz': 1}),
+        ({'bar': 23, 'baz': 1}, {'bar': 23, 'baz': 1}),
+    ],
+)
+def test_exclusive_default_only_when_group_is_absent(data, expected):
+    schema = Schema(
+        {
+            Exclusive('foo', 'choice', default=42): int,
+            Exclusive('bar', 'choice'): int,
+            Optional('baz'): int,
+        },
+        required=True,
+    )
+    original = data.copy()
+    assert schema(data) == expected
+    assert data == original
+
+
+def test_exclusive_default_does_not_hide_conflicting_input():
+    schema = Schema(
+        {
+            Exclusive('foo', 'choice', default=42): int,
+            Exclusive('bar', 'choice'): int,
+        }
+    )
+    with pytest.raises(MultipleInvalid, match='group of exclusion'):
+        schema({'foo': 1, 'bar': 2})
+
+
+def test_exclusive_default_factory_is_lazy_and_fresh():
+    calls = []
+
+    def factory():
+        calls.append(True)
+        return []
+
+    schema = Schema(
+        {
+            Exclusive('foo', 'choice', default=factory): list,
+            Exclusive('bar', 'choice'): list,
+        }
+    )
+    assert schema({'bar': []}) == {'bar': []}
+    assert calls == []
+    first = schema({})
+    second = schema({})
+    assert first == second == {'foo': []}
+    assert first['foo'] is not second['foo']
+    assert len(calls) == 2
+
+
+def test_exclusive_default_is_validated_at_its_nested_path():
+    schema = Schema(
+        {
+            'outer': {
+                Exclusive('foo', 'choice', default='invalid'): int,
+                Exclusive('bar', 'choice'): int,
+            }
+        }
+    )
+    with pytest.raises(MultipleInvalid) as caught:
+        schema({'outer': {}})
+    assert caught.value.errors[0].path == ['outer', 'foo']
+
+
+def test_exclusive_default_groups_are_independent():
+    schema = Schema(
+        {
+            Exclusive('foo', 'first', default=1): int,
+            Exclusive('bar', 'first'): int,
+            Exclusive('red', 'second', default=2): int,
+            Exclusive('blue', 'second'): int,
+        }
+    )
+    assert schema({}) == {'foo': 1, 'red': 2}
+    assert schema({'bar': 3}) == {'bar': 3, 'red': 2}
+
+
+def test_exclusive_rejects_ambiguous_group_defaults():
+    with pytest.raises(SchemaError, match='default'):
+        Schema(
+            {
+                Exclusive('foo', 'choice', default=1): int,
+                Exclusive('bar', 'choice', default=2): int,
+            }
+        )
+
+
+def test_exclusive_default_preserves_positional_description():
+    marker = Exclusive('foo', 'choice', None, 'a choice', default=42)
+    assert marker.description == 'a choice'
+    assert Schema({marker: int})({}) == {'foo': 42}
+
+
 I18N_LOCALE_DIR = Path(__file__).resolve().parent / "fixtures" / "locale"
 I18N_REQUIRED_DE = "erforderliches feld fehlt"
 

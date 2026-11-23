@@ -259,12 +259,13 @@ class Schema(object):
             if isinstance(key, Required) and key.is_complex_key
         }
 
-        # Keys that may have defaults
+        # Exclusive defaults are applied per group by _compile_dict.
         all_default_keys = tuple(
             {
                 key: None
                 for key in schema
-                if isinstance(key, Required) or isinstance(key, Optional)
+                if isinstance(key, (Required, Optional))
+                and not isinstance(key, Exclusive)
             }.keys()
         )
 
@@ -543,11 +544,27 @@ class Schema(object):
                 g = groups_of_inclusion.setdefault(node.group_of_inclusion, [])
                 g.append(node)
 
+        defaults_of_exclusion = {}
+        for label, group in groups_of_exclusion.items():
+            defaults = [
+                node for node in group if not isinstance(node.default, Undefined)
+            ]
+            if len(defaults) > 1:
+                raise er.SchemaError(
+                    gettext(
+                        "multiple default values in the same group of exclusion '%s'"
+                    )
+                    % label
+                )
+            if defaults:
+                defaults_of_exclusion[label] = defaults[0]
+
         def validate_dict(path, data):
             if not isinstance(data, dict):
                 raise er.DictInvalid(gettext('expected a dictionary'), path)
 
             errors = []
+            pending_defaults = []
             for label, group in groups_of_exclusion.items():
                 exists = False
                 for exclusive in group:
@@ -565,6 +582,8 @@ class Schema(object):
                             errors.append(er.ExclusiveInvalid(msg, next_path))
                             break
                         exists = True
+                if not exists and label in defaults_of_exclusion:
+                    pending_defaults.append(defaults_of_exclusion[label])
 
             if errors:
                 raise er.MultipleInvalid(errors)
@@ -590,6 +609,10 @@ class Schema(object):
                 raise er.MultipleInvalid(errors)
 
             out = data.__class__()
+            if pending_defaults:
+                items = list(data.items())
+                items.extend((node.schema, node.default()) for node in pending_defaults)
+                return base_validate(path, items, out)
             return base_validate(path, data.items(), out)
 
         return validate_dict
@@ -1129,6 +1152,18 @@ class Exclusive(Optional):
     >>> with raises(er.MultipleInvalid, "two or more values in the same group of exclusion 'angles' @ data[<angles>]"):
     ...   schema({'alpha': 30, 'beta': 45})
 
+    A group may have one default, used only when no member is supplied. Like
+    Optional defaults, it may be a factory and its result is validated:
+
+    >>> schema = Schema({Exclusive('alpha', 'angles', default=30): int,
+    ...                  Exclusive('beta', 'angles'): int})
+    >>> schema({})
+    {'alpha': 30}
+    >>> schema({'beta': 45})
+    {'beta': 45}
+
+    Multiple defaults in one group raise SchemaError when compiling the schema.
+
     For example, API can provides multiple types of authentication, but only one works in the same time:
 
     >>> msg = 'Please, use only one type of authentication at the same time.'
@@ -1157,8 +1192,11 @@ class Exclusive(Optional):
         group_of_exclusion: str,
         msg: typing.Optional[str] = None,
         description: typing.Any | None = None,
+        default: typing.Any = UNDEFINED,
     ) -> None:
-        super(Exclusive, self).__init__(schema, msg=msg, description=description)
+        super(Exclusive, self).__init__(
+            schema, msg=msg, default=default, description=description
+        )
         self.group_of_exclusion = group_of_exclusion
 
 
